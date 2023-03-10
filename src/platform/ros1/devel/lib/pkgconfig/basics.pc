@@ -1,0 +1,8 @@
+prefix=/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/devel
+
+Name: basics
+Description: Description of basics
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

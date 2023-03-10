@@ -17,8 +17,8 @@ rate = rospy.Rate(10) # Send a data 10 times in 1s
 counter = 0
 while not rospy.is_shutdown():
     #4. Node - publish
+    print("counter:",counter)
     pub.publish(counter)
     counter += 1
-
     #5. Rating
     rate.sleep() # Not sleep as C/C++, repeat as the rate value

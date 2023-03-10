@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/bman/work/autonomous_driving_service_dev/src/platform/ros1/devel/setup.sh

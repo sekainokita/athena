@@ -1,0 +1,2 @@
+basics
+-DCATKIN_DEVEL_PREFIX=/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/devel -DCMAKE_INSTALL_PREFIX=/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/install -G Unix Makefiles
