@@ -18,6 +18,27 @@ mask_w = cv2.inRange(img_hsv, lower_w, upper_w)
 masked_y = cv2.bitwise_and(img_bgr, img_bgr, mask=mask_y)
 bitwise_img = cv2.bitwise_or(mask_y, mask_w)
 masked_all = cv2.bitwise_and(img_bgr, img_bgr, mask=bitwise_img)
+print(masked_all.shape)
+
+img_y,img_x,_ = masked_all.shape # _ means (it will be disapeared)
+
+ref_x = round(img_x * 0.140625) # (960-825)/960
+center_ref_x = round(img_x * 0.401041667) # 400 (left yellow) - center - 590 (right white)
+                                        # 960-590=>385/960=0.40, 370+400/20=38.5
+center_ref_y = round(img_y * 0.666666667)
+                                        # 360/540 = 0.666666667
+src_point1 = [ref_x, img_y]
+src_point2 = [center_ref_x, center_ref_y]
+src_point3 = [img_x - center_ref_x, center_ref_y]
+src_point4 = [img_x-ref_x, img_y]
+
+cv2.line(masked_all, src_point1, src_point1, [255,0,0], 10)
+cv2.line(masked_all, src_point2, src_point2, [0,255,0], 10)
+cv2.line(masked_all, src_point3, src_point3, [0,0,255], 10)
+cv2.line(masked_all, src_point4, src_point4, [0,255,255], 10)
+
+# left_x 160
+# right_x 960-870 = 110
 
 cv2.imshow("img_bgr", img_bgr)
 cv2.imshow("mask_w", mask_w)
