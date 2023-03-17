@@ -32,6 +32,34 @@ src_point2 = [center_ref_x, center_ref_y]
 src_point3 = [img_x - center_ref_x, center_ref_y]
 src_point4 = [img_x-ref_x, img_y]
 
+src_points = np.float32(
+    [
+        [src_point1],
+        [src_point2],
+        [src_point3],
+        [src_point4],
+    ]
+)
+
+size = 1000
+dst_ref_x = 100
+dst_point1 = [dst_ref_x, size]
+dst_point2 = [dst_ref_x,0]
+dst_point3 = [size - dst_ref_x, 0]
+dst_point4 = [size - dst_ref_x, size]
+
+dst_points = np.float32(
+    [
+        [dst_point1],
+        [dst_point2],
+        [dst_point3],
+        [dst_point4],
+    ]
+)
+
+matrix = cv2.getPerspectiveTransform(src_points, dst_points)
+warp_img = cv2.warpPerspective(masked_all, matrix, [size, size])
+
 cv2.line(masked_all, src_point1, src_point1, [255,0,0], 10)
 cv2.line(masked_all, src_point2, src_point2, [0,255,0], 10)
 cv2.line(masked_all, src_point3, src_point3, [0,0,255], 10)
@@ -46,6 +74,7 @@ cv2.imshow("mask_y", mask_y)
 cv2.imshow("img_bitwise", masked_y)
 cv2.imshow("bitwise_img", bitwise_img)
 cv2.imshow("masked_all", masked_all)
+cv2.imshow("warp_img", warp_img)
 
 cv2.waitKey()
 cv2.destroyAllWindows()
