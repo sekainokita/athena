@@ -10,7 +10,7 @@ fi
 
 # Package
 apt-get update
-apt-get -y install make build-essential vim openssh-server ssh
+apt-get -y install make cmake build-essential vim openssh-server ssh
 apt-get -y install nfs-kernel-server nfs-common xinetd
 apt-get -y install subversion git
 apt-get -y install libwww-perl gawk samba tftp tftpd expat zlib1g-dev gcc
@@ -21,9 +21,14 @@ apt-get install -y cmake ninja-build gperf
 apt-get install -y ccache dfu-util device-tree-compiler wget
 apt-get install -y python3-dev python3-pip python3-setuptools python3-tk python3-wheel
 apt-get install -y make libsdl2-dev libmagic1
-apt-get install python3-venv
-apt-get install net-tools
-apt-get install minicom
+apt-get install -y python3-venv
+apt-get install -y net-tools
+apt-get install -y minicom
+apt-get install -y libjpeg-dev libtiff5-dev libpng-dev
+apt-get install -y libavcodec-dev libavformat-dev libswscale-dev libxvidcore-dev libx264-dev libxine2-dev
+
+pip3 install onnx-graphsurgeon
+pip3 install opencv-contrib-python
 
 # add folders
 mkdir /tftpboot
