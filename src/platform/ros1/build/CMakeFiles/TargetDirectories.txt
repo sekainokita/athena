@@ -47,3 +47,10 @@
 /home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/basics/CMakeFiles/list_install_components.dir
 /home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/basics/CMakeFiles/rebuild_cache.dir
 /home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/basics/CMakeFiles/std_msgs_generate_messages_cpp.dir
+/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/opencv_edu/CMakeFiles/install/strip.dir
+/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/opencv_edu/CMakeFiles/install/local.dir
+/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/opencv_edu/CMakeFiles/install.dir
+/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/opencv_edu/CMakeFiles/list_install_components.dir
+/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/opencv_edu/CMakeFiles/rebuild_cache.dir
+/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/opencv_edu/CMakeFiles/edit_cache.dir
+/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/opencv_edu/CMakeFiles/test.dir

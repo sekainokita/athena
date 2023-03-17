@@ -15,9 +15,13 @@ set(CMAKE_MAKEFILE_DEPENDS
   "catkin/catkin_generated/version/package.cmake"
   "catkin_generated/installspace/_setup_util.py"
   "catkin_generated/order_packages.cmake"
+  "opencv_edu/catkin_generated/ordered_paths.cmake"
+  "opencv_edu/catkin_generated/package.cmake"
   "/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/src/CMakeLists.txt"
   "/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/src/basics/CMakeLists.txt"
   "/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/src/basics/package.xml"
+  "/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/src/opencv_edu/CMakeLists.txt"
+  "/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/src/opencv_edu/package.xml"
   "/opt/ros/noetic/share/catkin/cmake/all.cmake"
   "/opt/ros/noetic/share/catkin/cmake/assert.cmake"
   "/opt/ros/noetic/share/catkin/cmake/atomic_configure_file.cmake"
@@ -168,6 +172,7 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "gtest/googlemock/CMakeFiles/CMakeDirectoryInformation.cmake"
   "gtest/googletest/CMakeFiles/CMakeDirectoryInformation.cmake"
   "basics/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "opencv_edu/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
