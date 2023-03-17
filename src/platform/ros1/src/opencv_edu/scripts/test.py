@@ -7,14 +7,16 @@ blue    = [ 255,    0,      0   ]
 green   = [ 0,      255,    0   ]
 red     = [ 0,      0,      255 ]
 white   = [ 255,    255,    0   ]
-black   = [ 0,      0,      0   ]
+black   = [ 0,      0,      0   ] # 3CH, BGR
 gray    = [ 127,    127,    127 ]
 cyan    = [ 255,    255,    0   ]
 magenta = [ 255,    0,      255 ]
 yellow  = [ 0,      255,    255 ]
+black = 0 # 1CH
+color = black
 
-color = yellow
-
+# e.g. uint8 (256 -> 255+1 -
+# > 1)
 
 img = np.uint8(
             [  
