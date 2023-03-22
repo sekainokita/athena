@@ -31,32 +31,31 @@
 #
 #******************************************************************************
 
-TARGET = app
-
-APP_BIN = app-v2x
-
+TARGET = lib-db
+LIB_DB = libdb.a
 SRCS = $(wildcard *.c)
+TARGET_AR = ar
 OBJS = ${SRCS:.c=.o}
 
-OUT_BIN_DIR = ../build/output/bin
+OUT_LIB_DIR = ../../build/output/lib
 
 %.o:%.c
 	@echo "Compiling..."
-	$(CC) $(CFLAGS) -c $^
+	$(CC) $(CFLAGS) -c $^ -pthread
 
 $(TARGET):$(OBJS)
 	@echo "Linking..."
-	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS) -lm
-	mv $(TARGET) $(APP_BIN)
-	cp -f $(APP_BIN) $(OUT_BIN_DIR)/$(APP_BIN)
+	@$(TARGET_AR) rcs $(LIB_DB) $(OBJS)
+	@echo "Make and copy the common library..."
+	@mv $(LIB_DB) $(OUT_LIB_DIR)
 
 all: $(TARGET)
 
 clean:
-	@$(RM) -f $(OBJS) $(OUT_BIN_DIR)/$(APP_BIN)
+	@$(RM) -f $(OBJS) $(OUT_LIB_DIR)/$(LIB_DB)
 
 distclean:
-	@$(RM) -f $(OBJS) $(OUT_BIN_DIR)/$(APP_BIN)
+	@$(RM) -f $(OBJS) $(OUT_LIB_DIR)/$(LIB_DB)
 
 .PHONY: clean distclean
 

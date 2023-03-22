@@ -1,39 +1,82 @@
-#============================================================================
-# Name        : Top Makefile
-# Author      : Byoungman An
-# Version     :
-# Copyright   : Your copyright notice
-# Description : Hello World in C, Ansi-style
-#============================================================================
+#******************************************************************************
+#
+# Copyright (C) 2023 - 2028 KETI, All rights reserved.
+#                           (Korea Electronics Technology Institute)
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# Use of the Software is limited solely to applications:
+# (a) running for Korean Government Project, or
+# (b) that interact with KETI project/platform.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# KETI BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
+# OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+# Except as contained in this notice, the name of the KETI shall not be used
+# in advertising or otherwise to promote the sale, use or other dealings in
+# this Software without prior written authorization from KETI.
+#
+#******************************************************************************
 
-# Project path
+# PATH
 CUR_DIR = $(shell pwd)
+
 TOP_DIR = $(CUR_DIR)/..
-TOP_MAKE_DIR = $(TOP_DIR)/make
+APP_DIR = $(TOP_DIR)/apps
+BUILD_DIR = $(TOP_DIR)/build
+DRIVER_DIR = $(TOP_DIR)/drivers
+FRAMEWORK_DIR = $(TOP_DIR)/framework
+INCLUDE_DIR = $(TOP_DIR)/include
+PACKAGE_DIR = $(TOP_DIR)/packages
+PLATFORM_DIR = $(TOP_DIR)/platform
+TOOL_DIR = $(TOP_DIR)/tools
+
+OUT_DIR = $(BUILD_DIR)/output
+OUT_BIN_DIR = $(OUT_DIR)/bin
+OUT_LIB_DIR = $(OUT_DIR)/lib
 
 # Source path
-CLIB_PATH = ../src/clib
-MAIN_PATH = ../src/main
+LIB_DB_PATH = $(FRAMEWORK_DIR)/db
+APP_PATH = $(APP_DIR)
 
 # Include path
 INC_PATH = $(TOP_DIR)/include
 LIB_PATH = $(TOP_MAKE_DIR)/lib
 
+LIB_DB = db
+
 # CFLAGS / LDFLAGS
 TARGET_CFLAGS = -I$(INC_PATH)
 TARGET_CFLAGS += -D_GNU_SOURCE=1
 TARGET_CFLAGS += -std=gnu99
-TARGET_LDFLAGS ?= -L$(LIB_PATH) -lclib -lpthread
+
+#TARGET_LDFLAGS = -lpthread
+TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_DB)
 
 #
-# Compiler
+# Compile Flags
 #
 
+# Cross Compiler
 #CROSS_COMPILER = powerpc-linux-gnu-
-CROSS_COMPILER = /opt/Xilinx/Vitis/2020.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-
+#CROSS_COMPILER = /opt/Xilinx/Vitis/2020.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-
+#TARGET_CC=$(CROSS_COMPILER)gcc
 
-#TARGET_CC=gcc
-TARGET_CC=$(CROSS_COMPILER)gcc
+# GCC (x86)
+TARGET_CC=gcc
 TARGET_LD=ld
 TARGET_AR=ar
 TARGET_RANLIB=ranlib
@@ -46,49 +89,38 @@ TARGET_CONFIGS = \
 	CFLAGS="$(TARGET_CFLAGS)" \
 	LDFLAGS="$(TARGET_LDFLAGS)"
 #
-# Common Library
+# Library
 #
+lib-db:
+	@$(MAKE) -C $(LIB_DB_PATH) $(TARGET_CONFIGS) all
 
-clib:
-	@$(MAKE) -C $(CLIB_PATH) $(TARGET_CONFIGS) all
+lib-db-clean:
+	$(MAKE) -C $(LIB_DB_PATH) clean
 
-clib-clean:
-	$(MAKE) -C $(CLIB_PATH) clean
+lib-db-distclean:
+	$(MAKE) -C $(LIB_DB_PATH) distclean
 
-clib-distclean:
-	$(MAKE) -C $(CLIB_PATH) distclean
-	rm -f ./lib/*.a
-
-.PHONY: clib clib-clean clib-distclean
+.PHONY: lib-db lib-db-clean lib-db-distclean
 
 #
-# Main
+# Application
 #
+app:
+	@$(MAKE) -C $(APP_PATH) $(TARGET_CONFIGS) all
 
-main:
-	@$(MAKE) -C $(MAIN_PATH) $(TARGET_CONFIGS) all
+app-clean:
+	$(MAKE) -C $(APP_PATH) clean
 
-main-clean:
-	$(MAKE) -C $(MAIN_PATH) clean
+app-distclean:
+	$(MAKE) -C $(APP_PATH) distclean
 
-main-distclean:
-	$(MAKE) -C $(MAIN_PATH) distclean
-	rm -f ./main ./keti-nrip-app
-
-.PHONY: main main-clean main-distclean
+.PHONY: app app-clean app-distclean
 
 #
 # Build All
 #
 
-all: clib main
-
-#
-# Build and Run
-#
-
-keti-run: distclean clib main
-	./keti-nrip-app
+all: lib-db app
 
 #
 # Clean
@@ -96,5 +128,5 @@ keti-run: distclean clib main
 
 clean: distclean
 
-distclean: clib-distclean main-distclean
-
+distclean: lib-db-distclean app-distclean
+	@$(RM) -f $(OUT_BIN_DIR)/* $(OUT_LIB_DIR)/*

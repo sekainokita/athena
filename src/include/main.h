@@ -1,62 +1,68 @@
-/*
- * Academic License - for use in teaching, academic research, and meeting
- * course requirements at degree granting institutions only.  Not for
- * government, commercial, or other organizational use.
- * File: main.h
- *
- * MATLAB Coder version            : 5.5
- * C/C++ source code generated on  : 10-Nov-2022 01:04:32
- */
+#ifndef	_MAIN_H_
+#define	_MAIN_H_
 
-/*************************************************************************/
-/* This automatically generated example C main file shows how to call    */
-/* entry-point functions that MATLAB Coder generated. You must customize */
-/* this file for your application. Do not modify this file directly.     */
-/* Instead, make a copy of this file, modify it, and integrate it into   */
-/* your development environment.                                         */
-/*                                                                       */
-/* This file initializes entry-point function arguments to a default     */
-/* size and value before calling the entry-point functions. It does      */
-/* not store or use any values returned from the entry-point functions.  */
-/* If necessary, it does pre-allocate memory for returned values.        */
-/* You can use this file as a starting point for a main function that    */
-/* you can deploy in your application.                                   */
-/*                                                                       */
-/* After you copy the file, and before you deploy it, you must make the  */
-/* following changes:                                                    */
-/* * For variable-size function arguments, change the example sizes to   */
-/* the sizes that your application requires.                             */
-/* * Change the example values of function arguments to the values that  */
-/* your application requires.                                            */
-/* * If the entry-point functions return values, store these values or   */
-/* otherwise use them as required by your application.                   */
-/*                                                                       */
-/*************************************************************************/
+/******************************************************************************
+*
+* Copyright (C) 2023 - 2028 KETI, All rights reserved.
+*                           (Korea Electronics Technology Institute)
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* Use of the Software is limited solely to applications:
+* (a) running for Korean Government Project, or
+* (b) that interact with KETI project/platform.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+* KETI BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
+* OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*
+* Except as contained in this notice, the name of the KETI shall not be used
+* in advertising or otherwise to promote the sale, use or other dealings in
+* this Software without prior written authorization from KETI.
+*
+******************************************************************************/
+/******************************************************************************/
+/**
+*
+* @file main.h
+*
+* This file contains a data format design
+*
+* @note
+*
+* V2X Data Format Header
+*
+* MODIFICATION HISTORY:
+* Ver   Who  Date     Changes
+* ----- ---- -------- ----------------------------------------------------
+* 1.00  bman  23.03.22 First release
+*
+******************************************************************************/
 
-#ifndef MAIN_H
-#define MAIN_H
 
-/* Include Files */
-#include "rtwtypes.h"
-#include <stddef.h>
-#include <stdlib.h>
+/***************************** Include ***************************************/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-/* Function Declarations */
-extern int main(int argc, char **argv);
+/***************************** Definition ************************************/
 
-extern void InitAlgorithms(void);
 
-#ifdef __cplusplus
-}
-#endif
+/***************************** Enum and Structure ****************************/
 
-#endif
-/*
- * File trailer for main.h
- *
- * [EOF]
- */
+
+/***************************** Function Protype ******************************/
+
+
+#endif	/* _MAIN_H_ */
+
