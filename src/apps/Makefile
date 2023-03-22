@@ -53,10 +53,10 @@ $(TARGET):$(OBJS)
 all: $(TARGET)
 
 clean:
-	@$(RM) -f $(OBJS) $(OUT_BIN_DIR)/$(APP_BIN)
+	@$(RM) -f $(OBJS) $(APP_BIN) $(OUT_BIN_DIR)/$(APP_BIN)
 
 distclean:
-	@$(RM) -f $(OBJS) $(OUT_BIN_DIR)/$(APP_BIN)
+	@$(RM) -f $(OBJS) $(APP_BIN) $(OUT_BIN_DIR)/$(APP_BIN)
 
 .PHONY: clean distclean
 
