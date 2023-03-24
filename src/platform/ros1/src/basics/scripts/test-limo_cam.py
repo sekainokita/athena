@@ -7,7 +7,6 @@ from math import *
 import cv2
 from cv_bridge import CvBridge
 import numpy as np
-from time import *
 
 class Limo_camera:
     def __init__(self):
@@ -16,10 +15,10 @@ class Limo_camera:
         self.pub = rospy.Publisher("cmd_vel", Twist, queue_size=3)        
         self.cmd_vel_msg = Twist()
         self.cvbridge = CvBridge()
-        self.first_time = time()
+        self.first_time = rospy.get_time()
 
     def camera_CB(self, msg):
-        self.second_time = time()
+        self.second_time = rospy.get_time()
         num = 0        
         img = self.cvbridge.compressed_imgmsg_to_cv2(msg)
         img_hsv = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
@@ -34,13 +33,13 @@ class Limo_camera:
         img_out = cv2.bitwise_and(img, img, mask=yellow_mask)
 
         if len(yellow_mask.nonzero()[0]) < 5000:
-            self.cmd_vel_msg.linear.x = 1 # speed
+            self.cmd_vel_msg.linear.x = 0.5 # speed
             print(f"START")
         else:
             self.cmd_vel_msg.linear.x = 0
             print(f"STOP")
 
-        if self.second_time - self.first_time > 1000:
+        if self.second_time - self.first_time > 0.07:
             self.first_time = self.second_time
 
         self.pub.publish(self.cmd_vel_msg)
