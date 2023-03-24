@@ -38,16 +38,9 @@
 *
 * @file main.h
 *
-* This file contains a data format design
-*
 * @note
 *
-* V2X Data Format Header
-*
-* MODIFICATION HISTORY:
-* Ver   Who  Date     Changes
-* ----- ---- -------- ----------------------------------------------------
-* 1.00  bman  23.03.22 First release
+* Main Header
 *
 ******************************************************************************/
 
