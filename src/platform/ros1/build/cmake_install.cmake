@@ -131,8 +131,14 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/gtest/cmake_install.cmake")
+  include("/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/velodyne/velodyne/cmake_install.cmake")
+  include("/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/velodyne/velodyne_msgs/cmake_install.cmake")
   include("/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/basics/cmake_install.cmake")
   include("/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/opencv_edu/cmake_install.cmake")
+  include("/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/velodyne/velodyne_driver/cmake_install.cmake")
+  include("/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/velodyne/velodyne_laserscan/cmake_install.cmake")
+  include("/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/velodyne/velodyne_pcl/cmake_install.cmake")
+  include("/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/build/velodyne/velodyne_pointcloud/cmake_install.cmake")
 
 endif()
 

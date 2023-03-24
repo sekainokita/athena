@@ -1,0 +1,8 @@
+prefix=/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/install
+
+Name: velodyne_pcl
+Description: Description of velodyne_pcl
+Version: 1.7.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: pcl_ros
