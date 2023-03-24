@@ -18,11 +18,11 @@ class Limo_Combine:
         
         # Lidar
         rospy.Subscriber("/scan", LaserScan, callback=self.laser_CB)
-        self.pub = rospy.Publisher("cmd_vel", Twist, queue_size=3)
         self.deg = 10
 
         # ros
-        self.pub = rospy.Publisher("cmd_vel", Twist, queue_size=3)        
+        self.pub_vel = rospy.Publisher("cmd_vel", Twist, queue_size=3)
+        self.pub_img = rospy.Publisher("image/compressed", CompressedImage, queue_size=10)
         self.cmd_vel_msg = Twist()
         self.cvbridge = CvBridge()
         self.first_time = rospy.get_time()
@@ -45,7 +45,7 @@ class Limo_Combine:
             self.lidar_stop_flag = False
         else:
             self.lidar_stop_flag = True
-            
+
     def camera_CB(self, msg):
         num = 0        
         img = self.cvbridge.compressed_imgmsg_to_cv2(msg)
@@ -62,8 +62,10 @@ class Limo_Combine:
         else:
             self.camera_stop_flag = True
 
-        cv2.imshow("img_out", img_out)        
-        cv2.waitKey(1)
+        img_msg = self.cvbridge.cv2_to_compressed_imgmsg(img_out)
+        self.pub_img.publish(img_msg)
+        #cv2.imshow("img_out", img_out)        
+        #cv2.waitKey(1)
 
     def main(self):
         self.second_time = rospy.get_time()
@@ -75,7 +77,9 @@ class Limo_Combine:
                 self.cmd_vel_msg.linear.x = 0.5
                 print(f"START")
 
-            self.pub.publish(self.cmd_vel_msg)
+            print(f"lidar{self.lidar_stop_flag}, camera{self.camera_stop_flag}")
+
+            self.pub_vel.publish(self.cmd_vel_msg)
             self.rate.sleep()
 
 if __name__ == "__main__":
