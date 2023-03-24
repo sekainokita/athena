@@ -17,8 +17,6 @@ class Limo_camera:
         self.cmd_vel_msg = Twist()
         self.cvbridge = CvBridge()
         self.first_time = time()
-   # def img_binary(self, blend_line):
-        #bin = 
 
     def camera_CB(self, msg):
         self.second_time = time()
