@@ -27,3 +27,9 @@ rosdep install --from-paths src --ignore-src --rosdistro YOURDISTRO -y
 rosdep update
 cd ~/catkin_ws/ && catkin_make
 sudo apt-get install -y ros-noetic-velodyne
+
+# Run
+roslaunch velodyne_pointcloud VLP16_points.launch
+rosnode list
+rostopic echo /velodyne_points
+rosrun rviz rviz -f velodyne
