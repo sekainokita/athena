@@ -35,12 +35,13 @@ class Limo_lidar:
                 num+=1
 
         if num < 10:
-            self.cmd_vel_msg.linear.x = 1
+            self.cmd_vel_msg.linear.x = 1 # speed
             print("START")
         else:
             self.cmd_vel_msg.linear.x = 0
-            print("STOP")
+            print(f"STOP : {num}")
 
+        print(f"num : {num}")
         if self.second_time - self.first_time > 0.5:
             self.pub.publish(self.cmd_vel_msg)
 #        print(f'degrees:{degrees}')
