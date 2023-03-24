@@ -26,3 +26,4 @@ git clone https://github.com/ros-drivers/velodyne.git
 rosdep install --from-paths src --ignore-src --rosdistro YOURDISTRO -y
 rosdep update
 cd ~/catkin_ws/ && catkin_make
+sudo apt-get install -y ros-noetic-velodyne
