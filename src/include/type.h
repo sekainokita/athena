@@ -64,37 +64,37 @@
 #define COLOR_CYAN    "\x1b[36m"
 #define COLOR_RESET   "\x1b[0m"
 
-#define PrintError(fmt , args...) \
+#define PrintError(fmt, args...) \
     do { \
         printf(COLOR_RED "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
     } while (0)
 
-#define PrintNotice(fmt , args...) \
+#define PrintNotice(fmt, args...) \
     do { \
         printf(COLOR_MAGENTA "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
     } while (0)
 
-#define PrintWarn(fmt , args...) \
+#define PrintWarn(fmt, args...) \
     do { \
         printf(COLOR_YELLOW "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
     } while (0)
 
-#define PrintTrace(fmt , args...) \
+#define PrintTrace(fmt, args...) \
     do { \
         printf(COLOR_BLUE "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
     } while (0)
 
-#define PrintEnter(fmt , args...) \
+#define PrintEnter(fmt, args...) \
     do { \
         printf(COLOR_GREEN "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
     } while (0)
 
-#define PrintExit(fmt , args...) \
+#define PrintExit(fmt, args...) \
     do { \
         printf(COLOR_CYAN "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
     } while (0)
 
-#define PrintDebug(fmt , args...) \
+#define PrintDebug(fmt, args...) \
     do { \
         printf(COLOR_RESET "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
     } while (0)
@@ -104,4 +104,3 @@
 
 /***************************** Function Protype ******************************/
 #endif	/* _TYPE_H_ */
-

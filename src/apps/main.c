@@ -61,8 +61,8 @@
 
 /***************************** Function  *************************************/
 
-int main()
+int main(int argc, char *argv[])
 {
-
+    PrintDebug("Start the main");
 }
 
