@@ -26,16 +26,16 @@ class Limo_Combine:
         self.cmd_vel_msg = Twist()
         self.cvbridge = CvBridge()
         self.first_time = rospy.get_time()
-
+        self.lidar_flag = False
         self.lidar_stop_flag = False
         self.camera_stop_flag = False
         self.rate = rospy.Rate(10)
 
     def laser_CB(self, msg):
         num = 0
-        if self.lidar_stop_flag == False:
+        if self.lidar_flag == False:
             self.degrees = [(msg.angle_min+(i*msg.angle_increment))*180/pi for i, data in enumerate(msg.ranges)]
-            self.lidar_stop_flag = True
+            self.lidar_flag = True
 
         for i, data in enumerate(msg.ranges):
             if -self.deg < self.degrees[i] < self.deg and 0 < msg.ranges[i] < 0.5:
