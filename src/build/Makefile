@@ -62,6 +62,7 @@ LIB_DB = db
 TARGET_CFLAGS = -I$(INC_PATH)
 TARGET_CFLAGS += -D_GNU_SOURCE=1
 TARGET_CFLAGS += -std=gnu99
+TARGET_CFLAGS += -Wall -Wstrict-prototypes -O3 -fomit-frame-pointer -pipe
 
 #TARGET_LDFLAGS = -lpthread
 TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_DB)
