@@ -74,12 +74,18 @@ apt-get update
 apt install ros-noetic-desktop-full
 apt search ros-noetic
 
+ROS_PATH=$HOME/work/autonomous_driving_service_dev/src/platform/ros1/devel/setup.bash
+ROS_IP=$(hostname -I | awk '{ print $1 }')
+
 echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
+echo "ROS_PATH=${ROS_PATH}" >>~/.bashrc
+echo "echo ROS_PATH=${ROS_PATH}" >> ~/.bashrc
 echo "echo change own ROS path" >> ~/.bashrc
-echo "export ROS_IP=$(hostname -I | awk '{ print $1 }')" >> ~/.bashrc
+echo "echo mind update $ . ~/.bashrc" >> ~/.bashrc
+echo "export ROS_IP=${ROS_IP}" >> ~/.bashrc
 echo "export ROS_MASTER_URI=http://localhost:11311" >> ~/.bashrc
-echo "export ROS_HOSTNAME=$ROS_IP" >> ~/.bashrc
-echo "source work/autonomous_driving_service_dev/src/platform/ros1/devel/setup.bash" >> ~/.bashrc
+echo "export ROS_HOSTNAME=${ROS_IP}" >> ~/.bashrc
+echo "source ${ROS_PATH}" >> ~/.bashrc
 . ~/.bashrc
 
 apt-get install -y python3-rosdep
