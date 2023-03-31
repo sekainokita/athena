@@ -19,3 +19,6 @@ $ depthnet v4l2:///dev/video0 --depth-scale=0.5 --input-width=1280 --input-heigh
 
 # Pose
 $ posenet v4l2:///dev/video0
+
+# Objection Detection
+$ detectnet-camera --camera=v4l2:///dev/video0
