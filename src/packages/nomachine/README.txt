@@ -1,3 +1,0 @@
-- site link : https://downloads.nomachine.com/download/?id=114&distro=ARM
-- download link : https://download.nomachine.com/download/8.4/Arm/nomachine_8.4.2_1_arm64.deb
-- install : sudo dpkg -i nomachine_8.4.2_1_arm64.deb
