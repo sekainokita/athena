@@ -11,6 +11,9 @@ make -j$(nproc)
 sudo make install
 sudo ldconfig
 
+Gstreamer e.g.
+https://gist.github.com/jj1bdx/f3500685a6fca82f1cbea5164ba898a3
+
 # RTSP Server Setting
 $ video-viewer /dev/video0 rtsp://192.168.100.20:8554/my_stream
 
