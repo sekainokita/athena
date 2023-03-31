@@ -22,3 +22,14 @@ $ posenet v4l2:///dev/video0
 
 # Objection Detection
 $ detectnet-camera --camera=v4l2:///dev/video0
+
+2 objects detected
+
+detected obj 0  class #1 (person)  confidence=0.513672
+bounding box 0  (77.34, 364.57)  (334.38, 666.21)  w=257.03  h=301.64
+
+detected obj 1  class #1 (person)  confidence=0.890137
+bounding box 1  (530.00, 384.96)  (721.88, 598.01)  w=191.88  h=213.05
+=====
+
+
