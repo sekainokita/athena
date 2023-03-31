@@ -75,6 +75,8 @@ apt install ros-noetic-desktop-full
 apt search ros-noetic
 
 echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
+echo "change own ROS path" >> ~/.bashrc
+echo "source work/autonomous_driving_service_dev/src/platform/ros1/devel/setup.bash" >> ~/.bashrc
 source ~/.bashrc
 
 apt-get install -y python3-rosdep
