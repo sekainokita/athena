@@ -16,3 +16,6 @@ $ video-viewer /dev/video0 rtsp://192.168.100.20:8554/my_stream
 
 # Depthmap
 $ depthnet v4l2:///dev/video0 --depth-scale=0.5 --input-width=1280 --input-height=720
+
+# Pose
+$ posenet v4l2:///dev/video0
