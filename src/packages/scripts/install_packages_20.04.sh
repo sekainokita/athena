@@ -71,7 +71,7 @@ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main
 apt-get install -y curl
 curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
 apt-get update
-apt install ros-noetic-desktop-full
+apt install -y ros-noetic-desktop-full
 apt search ros-noetic
 
 ROS_PATH=$HOME/work/autonomous_driving_service_dev/src/platform/ros1/devel/setup.bash
