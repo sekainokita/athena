@@ -50,6 +50,7 @@ OUT_LIB_DIR = $(OUT_DIR)/lib
 
 # Source path
 LIB_DB_PATH = $(FRAMEWORK_DIR)/db
+LIB_MSG_PATH = $(FRAMEWORK_DIR)/msg
 APP_PATH = $(APP_DIR)
 
 # Include path
@@ -57,6 +58,7 @@ INC_PATH = $(TOP_DIR)/include
 LIB_PATH = $(TOP_MAKE_DIR)/lib
 
 LIB_DB = db
+LIB_MSG = msg
 
 # CFLAGS / LDFLAGS
 TARGET_CFLAGS = -I$(INC_PATH)
@@ -65,7 +67,7 @@ TARGET_CFLAGS += -std=gnu99
 TARGET_CFLAGS += -Wall -Wstrict-prototypes -O3 -fomit-frame-pointer -pipe
 
 #TARGET_LDFLAGS = -lpthread
-TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_DB)
+TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_DB) -l$(LIB_MSG)
 
 #
 # Compile Flags
@@ -103,6 +105,18 @@ lib-db-distclean:
 
 .PHONY: lib-db lib-db-clean lib-db-distclean
 
+lib-msg:
+	@$(MAKE) -C $(LIB_MSG_PATH) $(TARGET_CONFIGS) all
+
+lib-msg-clean:
+	$(MAKE) -C $(LIB_MSG_PATH) clean
+
+lib-msg-distclean:
+	$(MAKE) -C $(LIB_MSG_PATH) distclean
+
+.PHONY: lib-msg lib-msg-clean lib-msg-distclean
+
+
 #
 # Application
 #
@@ -121,7 +135,7 @@ app-distclean:
 # Build All
 #
 
-all: lib-db app
+all: lib-db lib-msg app
 
 #
 # Clean
@@ -129,5 +143,5 @@ all: lib-db app
 
 clean: distclean
 
-distclean: lib-db-distclean app-distclean
+distclean: lib-db-distclean lib-msg-distclean app-distclean
 	@$(RM) -f $(OUT_BIN_DIR)/* $(OUT_LIB_DIR)/*
