@@ -55,6 +55,7 @@ APP_PATH = $(APP_DIR)
 
 # Include path
 INC_PATH = $(TOP_DIR)/include
+APP_INC_PATH = $(APP_DIR)/include
 LIB_PATH = $(TOP_MAKE_DIR)/lib
 
 LIB_DB = db
@@ -62,6 +63,7 @@ LIB_MSG = msg
 
 # CFLAGS / LDFLAGS
 TARGET_CFLAGS = -I$(INC_PATH)
+TARGET_CFLAGS += -I$(APP_INC_PATH)
 TARGET_CFLAGS += -D_GNU_SOURCE=1
 TARGET_CFLAGS += -std=gnu99
 TARGET_CFLAGS += -Wall -Wstrict-prototypes -O3 -fomit-frame-pointer -pipe
