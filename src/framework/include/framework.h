@@ -46,16 +46,21 @@
 
 
 /***************************** Include ***************************************/
-
+#include "type.h"
+#include "msg_manager.h"
+#include "db_manager.h"
 
 /***************************** Definition ************************************/
 
 
 /***************************** Enum and Structure ****************************/
+typedef struct FRAMEWORK {
+    uint32_t unReserved;
+} FRAMEWORK_T;
 
 
 /***************************** Function Protype ******************************/
-
+uint32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework);
 
 #endif	/* _FRAMEWORK_H_ */
 

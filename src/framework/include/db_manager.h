@@ -1,5 +1,5 @@
-#ifndef	_MAIN_H_
-#define	_MAIN_H_
+#ifndef	_DB_MANAGER_H_
+#define	_DB_MANAGER_H_
 
 /******************************************************************************
 *
@@ -46,7 +46,8 @@
 
 
 /***************************** Include ***************************************/
-# include "db_v2x.h"
+#include "type.h"
+#include "db_v2x.h"
 
 /***************************** Definition ************************************/
 
@@ -66,18 +67,18 @@ typedef struct DB_MANAGER {
 
 /***************************** Function Protype ******************************/
 
-uint32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T stDbManagerWrite, DB_V2X_T stDbV2x, void* pPayload);
-uint32_t DB_MANAGER_Read(DB_MANAGER_READ_T stDbManagerRead, DB_V2X_T stDbV2x, void* pPayload);
-uint32_t DB_MANAGER_Converter(DB_MANAGER_READ_T stDbManagerRead, DB_MANAGER_WRITE_T stDbManagerWrite, DB_V2X_T stDbV2x, void* pPayload);
+uint32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload);
+uint32_t DB_MANAGER_Read(DB_MANAGER_READ_T *pstDbManagerRead, DB_V2X_T *pstDbV2x, void* pPayload);
+uint32_t DB_MANAGER_Converter(DB_MANAGER_READ_T *pstDbManagerRead, DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload);
 
-uint32_t DB_MANAGER_Open(DB_MANAGER_T stDbManager);
-uint32_t DB_MANAGER_Close(DB_MANAGER_T stDbManager);
-uint32_t DB_MANAGER_Start(DB_MANAGER_T stDbManager);
-uint32_t DB_MANAGER_Stop(DB_MANAGER_T stDbManager);
-uint32_t DB_MANAGER_Status(DB_MANAGER_T stDbManager);
+uint32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager);
+uint32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager);
+uint32_t DB_MANAGER_Start(DB_MANAGER_T *pstDbManager);
+uint32_t DB_MANAGER_Stop(DB_MANAGER_T *pstDbManager);
+uint32_t DB_MANAGER_Status(DB_MANAGER_T *pstDbManager);
 
-uint32_t DB_MANAGER_Init(DB_MANAGER_T stDbManager);
-uint32_t DB_MANAGER_DeInit(DB_MANAGER_T stDbManager);
+uint32_t DB_MANAGER_Init(DB_MANAGER_T *pstDbManager);
+uint32_t DB_MANAGER_DeInit(DB_MANAGER_T *pstDbManager);
 
-#endif	/* _MAIN_H_ */
+#endif	/* _DB_MANAGER_H_ */
 

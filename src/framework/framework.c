@@ -59,4 +59,21 @@
 
 /***************************** Function  *************************************/
 
+uint32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
+{
+    MSG_MANAGER_T stMsgManager;
+    DB_MANAGER_T stDbManager;
+
+    (void*)memset(&stMsgManager, 0x00, sizeof(MSG_MANAGER_T));
+    (void*)memset(&stDbManager, 0x00, sizeof(DB_MANAGER_T));
+
+    PrintWarn("Init");
+
+#if 0 // TODO
+    MSG_MANAGER_Init(&stMsgManager);
+    DB_MANAGER_Init(&stDbManager);
+#endif
+
+    return V2X_ERR_OK;
+}
 

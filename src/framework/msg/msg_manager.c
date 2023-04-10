@@ -49,7 +49,7 @@
 ******************************************************************************/
 
 /***************************** Include ***************************************/
-
+#include "msg_manager.h"
 
 /***************************** Definition ************************************/
 
@@ -58,5 +58,74 @@
 
 
 /***************************** Function  *************************************/
+uint32_t MSG_MANAGER_Write(MSG_MANAGER_WRITE_T *pstMsgManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t MSG_MANAGER_Read(MSG_MANAGER_READ_T *pstMsgManagerRead, DB_V2X_T *pstDbV2x, void* pPayload)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t MSG_MANAGER_Converter(MSG_MANAGER_READ_T *pstMsgManagerRead, MSG_MANAGER_WRITE_T *pstMsgManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t MSG_MANAGER_Close(MSG_MANAGER_T *pstMsgManager)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t MSG_MANAGER_Start(MSG_MANAGER_T *pstMsgManager)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t MSG_MANAGER_Stop(MSG_MANAGER_T *pstMsgManager)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t MSG_MANAGER_Status(MSG_MANAGER_T *pstMsgManager)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t MSG_MANAGER_Init(MSG_MANAGER_T *pstMsgManager)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t MSG_MANAGER_DeInit(MSG_MANAGER_T *pstMsgManager)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
 
 

@@ -1,5 +1,5 @@
-#ifndef	_MAIN_H_
-#define	_MAIN_H_
+#ifndef	_MSG_MANAGER_H_
+#define	_MSG_MANAGER_H_
 
 /******************************************************************************
 *
@@ -46,16 +46,39 @@
 
 
 /***************************** Include ***************************************/
-
+#include "type.h"
+#include "db_v2x.h"
 
 /***************************** Definition ************************************/
 
 
 /***************************** Enum and Structure ****************************/
+typedef struct MSG_MANAGER_WRITE {
+    uint32_t unReserved;
+} MSG_MANAGER_WRITE_T;
 
+typedef struct MSG_MANAGER_READ {
+    uint32_t unReserved;
+} MSG_MANAGER_READ_T;
+
+typedef struct MSG_MANAGER {
+    uint32_t unReserved;
+} MSG_MANAGER_T;
 
 /***************************** Function Protype ******************************/
 
+uint32_t MSG_MANAGER_Write(MSG_MANAGER_WRITE_T *pstMsgManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload);
+uint32_t MSG_MANAGER_Read(MSG_MANAGER_READ_T *pstMsgManagerRead, DB_V2X_T *pstDbV2x, void* pPayload);
+uint32_t MSG_MANAGER_Converter(MSG_MANAGER_READ_T *pstMsgManagerRead, MSG_MANAGER_WRITE_T *pstMsgManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload);
 
-#endif	/* _MAIN_H_ */
+uint32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager);
+uint32_t MSG_MANAGER_Close(MSG_MANAGER_T *pstMsgManager);
+uint32_t MSG_MANAGER_Start(MSG_MANAGER_T *pstMsgManager);
+uint32_t MSG_MANAGER_Stop(MSG_MANAGER_T *pstMsgManager);
+uint32_t MSG_MANAGER_Status(MSG_MANAGER_T *pstMsgManager);
+
+uint32_t MSG_MANAGER_Init(MSG_MANAGER_T *pstMsgManager);
+uint32_t MSG_MANAGER_DeInit(MSG_MANAGER_T *pstMsgManager);
+
+#endif	/* _MSG_MANAGER_H_ */
 
