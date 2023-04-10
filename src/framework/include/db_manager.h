@@ -46,16 +46,38 @@
 
 
 /***************************** Include ***************************************/
-
+# include "db_v2x.h"
 
 /***************************** Definition ************************************/
 
 
 /***************************** Enum and Structure ****************************/
+typedef struct DB_MANAGER_WRITE {
+    uint32_t unReserved;
+} DB_MANAGER_WRITE_T;
 
+typedef struct DB_MANAGER_READ {
+    uint32_t unReserved;
+} DB_MANAGER_READ_T;
+
+typedef struct DB_MANAGER {
+    uint32_t unReserved;
+} DB_MANAGER_T;
 
 /***************************** Function Protype ******************************/
 
+uint32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T stDbManagerWrite, DB_V2X_T stDbV2x, void* pPayload);
+uint32_t DB_MANAGER_Read(DB_MANAGER_READ_T stDbManagerRead, DB_V2X_T stDbV2x, void* pPayload);
+uint32_t DB_MANAGER_Converter(DB_MANAGER_READ_T stDbManagerRead, DB_MANAGER_WRITE_T stDbManagerWrite, DB_V2X_T stDbV2x, void* pPayload);
+
+uint32_t DB_MANAGER_Open(DB_MANAGER_T stDbManager);
+uint32_t DB_MANAGER_Close(DB_MANAGER_T stDbManager);
+uint32_t DB_MANAGER_Start(DB_MANAGER_T stDbManager);
+uint32_t DB_MANAGER_Stop(DB_MANAGER_T stDbManager);
+uint32_t DB_MANAGER_Status(DB_MANAGER_T stDbManager);
+
+uint32_t DB_MANAGER_Init(DB_MANAGER_T stDbManager);
+uint32_t DB_MANAGER_DeInit(DB_MANAGER_T stDbManager);
 
 #endif	/* _MAIN_H_ */
 

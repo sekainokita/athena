@@ -56,6 +56,9 @@
 #define COLOR_CYAN    "\x1b[36m"
 #define COLOR_RESET   "\x1b[0m"
 
+#define V2X_ERR_OK    0
+#define V2X_ERR_ERROR 1
+
 #define PrintError(fmt, args...) \
     do { \
         printf(COLOR_RED "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \

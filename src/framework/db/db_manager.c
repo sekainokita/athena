@@ -49,7 +49,8 @@
 ******************************************************************************/
 
 /***************************** Include ***************************************/
-
+#include "db_manager.h"
+#include "type.h"
 
 /***************************** Definition ************************************/
 
@@ -58,5 +59,73 @@
 
 
 /***************************** Function  *************************************/
+uint32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T stDbManagerWrite, DB_V2X_T stDbV2x, void* pPayload)
+{
+    PrintWarn("TODO");
 
+    return V2X_ERR_OK;
+}
+
+uint32_t DB_MANAGER_Read(DB_MANAGER_READ_T stDbManagerRead, DB_V2X_T stDbV2x, void* pPayload)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t DB_MANAGER_Converter(DB_MANAGER_READ_T stDbManagerRead, DB_MANAGER_WRITE_T stDbManagerWrite, DB_V2X_T stDbV2x, void* pPayload)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t DB_MANAGER_Open(DB_MANAGER_T stDbManager)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t DB_MANAGER_Close(DB_MANAGER_T stDbManager)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t DB_MANAGER_Start(DB_MANAGER_T stDbManager)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t DB_MANAGER_Stop(DB_MANAGER_T stDbManager)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t DB_MANAGER_Status(DB_MANAGER_T stDbManager)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t DB_MANAGER_Init(DB_MANAGER_T stDbManager)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
+
+uint32_t DB_MANAGER_DeInit(DB_MANAGER_T stDbManager)
+{
+    PrintWarn("TODO");
+
+    return V2X_ERR_OK;
+}
 
