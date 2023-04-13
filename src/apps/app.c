@@ -1,6 +1,3 @@
-#ifndef	_APP_H_
-#define	_APP_H_
-
 /******************************************************************************
 *
 * Copyright (C) 2023 - 2028 KETI, All rights reserved.
@@ -36,30 +33,36 @@
 /******************************************************************************/
 /**
 *
-* @file app.h
+* @file db_manager.c
+*
+* This file contains a data format design
 *
 * @note
 *
-* App Header
+* V2X Data Format Source File
+*
+* MODIFICATION HISTORY:
+* Ver   Who  Date     Changes
+* ----- ---- -------- ----------------------------------------------------
+* 1.00  bman  23.03.22 First release
 *
 ******************************************************************************/
 
-
 /***************************** Include ***************************************/
-#include "type.h"
+#include "app.h"
 
 /***************************** Definition ************************************/
 
 
-/***************************** Enum and Structure ****************************/
-typedef struct APP {
-    uint32_t unReserved;
-} APP_T;
+/***************************** Static Variable *******************************/
 
 
-/***************************** Function Protype ******************************/
-uint32_t APP_Init(APP_T *pstApp);
+/***************************** Function  *************************************/
 
-#endif	/* _APP_H_ */
+uint32_t APP_Init(APP_T *pstApp)
+{
+    PrintNotice("Init");
 
+    return V2X_ERR_OK;
+}
 

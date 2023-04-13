@@ -53,6 +53,7 @@
 #include "main.h"
 #include "type.h"
 #include "framework.h"
+#include "app.h"
 
 /***************************** Definition ************************************/
 
@@ -65,11 +66,14 @@
 int main(int argc, char *argv[])
 {
     FRAMEWORK_T stFramework;
+    APP_T stApp;
 
     PrintDebug("Start the main");
 
     (void*)memset(&stFramework, 0x00, sizeof(FRAMEWORK_T));
+    (void*)memset(&stApp, 0x00, sizeof(APP_T));
 
     FRAMEWORK_Init(&stFramework);
+    APP_Init(&stApp);
 }
 

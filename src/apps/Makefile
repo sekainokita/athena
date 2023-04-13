@@ -30,12 +30,15 @@
 # this Software without prior written authorization from KETI.
 #
 #******************************************************************************
+include ../build/path.mk
 
 TARGET = app
 
 APP_BIN = app-v2x
 
 SRCS = $(wildcard *.c)
+SRCS += $(wildcard $(APP_CLI_PATH)/*.c)
+
 OBJS = ${SRCS:.c=.o}
 
 OUT_BIN_DIR = ../build/output/bin
@@ -43,10 +46,13 @@ OUT_BIN_DIR = ../build/output/bin
 %.o:%.c
 	@echo "Compiling..."
 	$(CC) $(CFLAGS) -c $^
+	mkdir -p $(APP_OBJS_DIR)
+	mv *.o $(APP_OBJS_DIR)
 
 $(TARGET):$(OBJS)
 	@echo "Linking..."
-	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS) -lm
+	@echo "Check SRCS:$(SRCS), OBJS:$(OBJS)"
+	$(CC) -o $@ $(APP_OBJS) $(CFLAGS) $(LDFLAGS) -lm
 	mv $(TARGET) $(APP_BIN)
 	cp -f $(APP_BIN) $(OUT_BIN_DIR)/$(APP_BIN)
 
@@ -54,9 +60,9 @@ all: $(TARGET)
 
 clean:
 	@$(RM) -f $(OBJS) $(APP_BIN) $(OUT_BIN_DIR)/$(APP_BIN)
+	@$(RM) -rf $(APP_OBJS_DIR)
 
-distclean:
-	@$(RM) -f $(OBJS) $(APP_BIN) $(OUT_BIN_DIR)/$(APP_BIN)
+distclean: clean
 
 .PHONY: clean distclean
 
