@@ -69,7 +69,7 @@ uint32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
 
     PrintWarn("Init");
 
-#if 0 // TODO
+#if 1 // TODO
     MSG_MANAGER_Init(&stMsgManager);
     DB_MANAGER_Init(&stDbManager);
 #endif

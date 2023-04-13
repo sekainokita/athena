@@ -31,34 +31,7 @@
 #
 #******************************************************************************
 
-# PATH
-CUR_DIR = $(shell pwd)
-
-TOP_DIR = $(CUR_DIR)/..
-APP_DIR = $(TOP_DIR)/apps
-BUILD_DIR = $(TOP_DIR)/build
-DRIVER_DIR = $(TOP_DIR)/drivers
-FRAMEWORK_DIR = $(TOP_DIR)/framework
-INCLUDE_DIR = $(TOP_DIR)/include
-PACKAGE_DIR = $(TOP_DIR)/packages
-PLATFORM_DIR = $(TOP_DIR)/platform
-TOOL_DIR = $(TOP_DIR)/tools
-
-OUT_DIR = $(BUILD_DIR)/output
-OUT_BIN_DIR = $(OUT_DIR)/bin
-OUT_LIB_DIR = $(OUT_DIR)/lib
-
-# Source path
-LIB_DB_PATH = $(FRAMEWORK_DIR)/db
-LIB_MSG_PATH = $(FRAMEWORK_DIR)/msg
-LIB_FRAMEWORK_PATH = $(FRAMEWORK_DIR)
-APP_PATH = $(APP_DIR)
-
-# Include path
-INC_PATH = $(TOP_DIR)/include
-APP_INC_PATH = $(APP_DIR)/include
-FRAMEWORK_INC_PATH = $(FRAMEWORK_DIR)/include
-LIB_PATH = $(TOP_MAKE_DIR)/lib
+include path.mk
 
 LIB_DB = db
 LIB_MSG = msg
@@ -72,19 +45,9 @@ TARGET_CFLAGS += -D_GNU_SOURCE=1
 TARGET_CFLAGS += -std=gnu99
 TARGET_CFLAGS += -Wall -Wstrict-prototypes -O3 -fomit-frame-pointer -pipe
 
-#TARGET_LDFLAGS = -lpthread
-TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_DB) -l$(LIB_MSG) -l$(LIB_FRAMEWORK)
+TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_FRAMEWORK)
+# To add Library : -l$(LIB_DB) -l$(LIB_MSG)
 
-#
-# Compile Flags
-#
-
-# Cross Compiler
-#CROSS_COMPILER = powerpc-linux-gnu-
-#CROSS_COMPILER = /opt/Xilinx/Vitis/2020.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-
-#TARGET_CC=$(CROSS_COMPILER)gcc
-
-# GCC (x86)
 TARGET_CC=gcc
 TARGET_LD=ld
 TARGET_AR=ar
@@ -153,7 +116,8 @@ app-distclean:
 # Build All
 #
 
-all: lib-db lib-msg lib-framework app
+lib-all:lib-db lib-msg
+all: lib-framework app lib-all
 
 #
 # Clean
