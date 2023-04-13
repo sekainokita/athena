@@ -47,7 +47,8 @@
 * MODIFICATION HISTORY:
 * Ver   Who  Date     Changes
 * ----- ---- -------- ----------------------------------------------------
-* 1  bman  23.03.22 First release
+* 2  bman  23.04.11 First release (version 1)
+* 1  bman  23.03.22 First draft
 *
 ******************************************************************************/
 
@@ -56,7 +57,8 @@
 #include <stdint.h>
 
 /***************************** Definition ************************************/
-# define DB_V2X_VERSION                 = 1
+# define DB_V2X_VERSION_MAJOR                   = 1
+# define DB_V2X_VERSION_MINOR                   = 0
 
 /***************************** Enum and Structure ****************************/
 typedef enum {
@@ -109,6 +111,8 @@ typedef enum {
     DB_V2X_REGION_ID_INCHEON            = 0x0005,
     DB_V2X_REGION_ID_DAEGU              = 0x0006,
     DB_V2X_REGION_ID_DAEGU_KIAPI_PG     = 0x0007,
+    DB_V2X_REGION_ID_CHEONGJU                   = 0x0008,
+    DB_V2X_REGION_ID_SEONGNAM                   = 0x0009,
     DB_V2X_REGION_ID_UNDEFINED_0,
     DB_V2X_REGION_ID_UNDEFINED_1,
     DB_V2X_REGION_ID_UNDEFINED_2,
@@ -176,7 +180,6 @@ typedef struct DB_V2X {
 } DB_V2X_T;
 
 /***************************** Function Protype ******************************/
-
 
 #endif	/* _DB_V2X_H_ */
 
