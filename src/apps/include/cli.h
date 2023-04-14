@@ -50,6 +50,8 @@
 /***************************** Include ***************************************/
 #include "type.h"
 #include "cli_util.h"
+#include "cli_msg.h"
+#include "cli_db.h"
 
 /***************************** Definition ************************************/
 //#define CONFIG_CLI_DEBUG (1)
@@ -117,6 +119,8 @@ void CLI_CMD_BuildList(CLI_UTIL_QUEUE_T *qb, char *buf);
 void CLI_CMD_SetList(CLI_UTIL_QUEUE_T *qb);
 void CLI_CMD_FreeTokens(CLI_UTIL_QUEUE_T *list);
 void CLI_CMD_BuildCmdline(CLI_UTIL_QUEUE_T *head, CLI_CMDLINE_T *cmd);
+char *CLI_CMD_GetArg(CLI_CMDLINE_T *pstCmd, int nArgNum);
+int CLI_CMD_Showusage(CLI_CMDLINE_T *pstCmd);
 
 uint32_t CLI_Init(void);
 

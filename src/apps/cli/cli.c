@@ -280,6 +280,12 @@ static uint32_t P_CLI_InitCmd(void)
         PrintError("CLI_Init() is failed! [unRet:%d]", unRet);
     }
 
+    unRet = CLI_MSG_InitCmds();
+    if (unRet != APP_OK)
+    {
+        PrintError("CLI_MSG_InitCmds() is failed! [unRet:%d]", unRet);
+    }
+
     return unRet;
 }
 

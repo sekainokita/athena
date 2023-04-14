@@ -43,7 +43,7 @@
 
 
 /***************************** Include ***************************************/
-
+#include "cli.h"
 
 /***************************** Definition ************************************/
 
@@ -52,5 +52,163 @@
 
 
 /***************************** Function Protype ******************************/
+static int P_CLI_MSG_TcpRlogin(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
+{
+    uint32_t unRet = APP_OK;
 
+    PrintWarn("TODO");
+    char *host;
+
+    host = CLI_CMD_GetArg(pstCmd, 0);
+    if (!host)
+    {
+        return CLI_CMD_Showusage(pstCmd);
+    }
+
+    return unRet;
+}
+
+static int P_CLI_MSG_TcpConnect(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
+{
+    uint32_t unRet = APP_OK;
+
+    PrintWarn("TODO");
+
+    return unRet;
+}
+
+static int P_CLI_MSG_TcpListen(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
+{
+    uint32_t unRet = APP_OK;
+
+    PrintWarn("TODO");
+
+    return unRet;
+}
+
+static int P_CLI_MSG_TcpConsTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
+{
+    uint32_t unRet = APP_OK;
+
+    PrintWarn("TODO");
+
+    return unRet;
+}
+
+static int P_CLI_MSG_TcpTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
+{
+    uint32_t unRet = APP_OK;
+
+    PrintWarn("TODO");
+
+    return unRet;
+}
+
+static int P_CLI_MSG_Help(CLI_CMDLINE_T *cmd, int argc, char *argv[])
+{
+	if (argc == 0)
+	{
+		PrintInfo("Available commands:\n");
+		PrintInfo("For more information about a command, enter 'msg command-name'");
+	}
+	else
+	{
+        PrintInfo("Available commands:\n");
+        PrintInfo("For more information about a command, enter 'msg command-name'");
+	}
+
+	return 0;
+}
+
+uint32_t CLI_MSG_InitCmds(void)
+{
+    uint32_t unRet = APP_ERROR;
+
+    unRet = CLI_CMD_AddCmd("msg",
+               P_CLI_MSG_Help,
+               NULL,
+               "help for MSG commands",
+               "msg [enter command]\n\n"
+               "Without any parameters, the 'msg' show a description\n"
+               "of available commands. For more details on a command, type and enter 'msg'\n"
+               "and the command name.",
+               "");
+    if(unRet != APP_OK)
+    {
+        PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
+    }
+
+    unRet = CLI_CMD_AddCmd("tcp-rlogin",
+	       P_CLI_MSG_TcpRlogin,
+	       NULL,
+	       "mini rlogin client.",
+	       "rlogin hostname [username]\n\n"
+	       "Connects to a remote system using the RLOGIN protocol.\n"
+	       "The remote system must have appropriate permissions in place\n"
+	       "(usually via the file '.rhosts') for CFE to connect.\n"
+	       "To terminate the session, type\n"
+	       "a tilde (~) character followed by a period (.)",
+	       "");
+    if(unRet != APP_OK)
+    {
+        PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
+    }
+
+    unRet = CLI_CMD_AddCmd("tcp-connect",
+	       P_CLI_MSG_TcpConnect,
+	       NULL,
+	       "TCP connection test.",
+	       "tcp connect hostname [portnum]",
+	       "-q;sink output, don't display on terminal|"
+	       "-d;Send junk data to discard|"
+	       "-nodelay;set nodelay option on socket|"
+	       "-srcport=*;Specify the source port");
+    if(unRet != APP_OK)
+    {
+        PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
+    }
+
+    unRet = CLI_CMD_AddCmd("tcp-listen",
+	       P_CLI_MSG_TcpListen,
+	       NULL,
+	       "port listener.",
+	       "tcp listen portnum",
+	       "-q;sink output, don't display on terminal|"
+	       "-d;Send junk data to discard|"
+	       "-nodelay;set nodelay option on socket");
+    if(unRet != APP_OK)
+    {
+        PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
+    }
+
+    unRet = CLI_CMD_AddCmd("tcp-constest",
+	       P_CLI_MSG_TcpConsTest,
+	       NULL,
+	       "tcp console test.",
+	       "tcp constest device",
+	       "");
+    if(unRet != APP_OK)
+    {
+        PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
+    }
+
+    unRet = CLI_CMD_AddCmd("tcp-test",
+	       P_CLI_MSG_TcpTest,
+	       NULL,
+	       "TCP test command.",
+	       "ttcp -t [-options] host\n"
+	       "ttcp -r [-options]\n\n",
+	       "-t;Source a pattern to the network|"
+	       "-r;Sink (discard) data from the network|"
+	       "-D;Don't buffer TCP writes (TCP_NODELAY)|"
+	       "-n=*;Number of buffers to send (-t only) (default 2048)|"
+	       "-l=*;Size of buffer to send/receive (default 2048)|"
+	       "-p=*;Port number to use (default 5001)");
+    if(unRet != APP_OK)
+    {
+        PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
+    }
+
+    return unRet;
+}
 

@@ -314,6 +314,11 @@ uint32_t CLI_CMD_AddCmd(char *command, int (*func)(CLI_CMDLINE_T *, int argc, ch
         unRet = APP_ERROR;
 		return unRet;
     }
+    else
+    {
+        PrintDebug("[%s] is added.", cmd->cmdword);
+        unRet = APP_OK;
+    }
 
 	cmd->func = func;
 	cmd->usage = usage;
@@ -464,23 +469,25 @@ static void P_CLI_CMD_ShowPossibleCmd(CLI_CMDLINE_T *cline, CLI_CMD_T *cmd)
 
 	if (cline->argidx == 0)
 	{
-		PrintInfo("Available commands: ");
+		printf("Available commands: ");
 	}
 	else
 	{
-		PrintInfo("Available \"");
+		printf("Available \"");
 		for (i = 0; i < cline->argidx; i++)
 		{
-			PrintInfo("%s%s", (i == 0) ? "" : " ", cline->argv[i]);
+			printf("%s%s", (i == 0) ? "" : " ", cline->argv[i]);
 		}
-		PrintInfo("\" commands: ");
+		printf("\" commands: ");
 	}
 
 	while (cmd)
 	{
 		printf("%s", cmd->cmdword);
 		if (cmd->sibling)
+        {
 			printf(", ");
+        }
 		cmd = cmd->sibling;
 	}
 
@@ -584,6 +591,7 @@ uint32_t CLI_CMD_Init(void)
 			   "of available commands. For more details on a command, type and enter 'help'\n"
 			   "and the command name.",
 			   "");
+    if(unRet != APP_OK)
     {
 #if defined(CONFIG_CLI_DEBUG)
         PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
@@ -599,6 +607,7 @@ uint32_t CLI_CMD_Init(void)
 			   "Test [command 3]\n"
 			   "Test [command 4]",
 			   "");
+    if(unRet != APP_OK)
     {
 #if defined(CONFIG_CLI_DEBUG)
         PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
@@ -972,6 +981,30 @@ void CLI_CMD_FreeTokens(CLI_UTIL_QUEUE_T *list)
 	while ((q = CLI_UTIL_DequeueNext(list)))
 	{
 		free(q);
+	}
+}
+
+char *CLI_CMD_GetArg(CLI_CMDLINE_T *pstCmd, int nArgNum)
+{
+    nArgNum += pstCmd->argidx;
+
+    if ((nArgNum < 0) || (nArgNum >= pstCmd->argc))
+    {
+        return NULL;
+    }
+
+    return pstCmd->argv[nArgNum];
+}
+
+int CLI_CMD_Showusage(CLI_CMDLINE_T *pstCmd)
+{
+    PrintInfo();
+    P_CLI_CMD_DumpIndent(pstCmd->usage, 5);
+    PrintInfo();
+    if (pstCmd->switches[0])
+    {
+    	P_CLI_CMD_DumpSwitch(pstCmd->switches);
+        PrintInfo();
 	}
 }
 
