@@ -1006,5 +1006,7 @@ int CLI_CMD_Showusage(CLI_CMDLINE_T *pstCmd)
     	P_CLI_CMD_DumpSwitch(pstCmd->switches);
         PrintInfo();
 	}
+
+    return APP_OK;
 }
 
