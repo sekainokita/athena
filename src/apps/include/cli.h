@@ -60,6 +60,18 @@
 #define CLI_MAX_SWITCHES        (16)
 #define CLI_MAX_TOKENS          (64)
 
+#define CMD_0   0
+#define CMD_1   1
+#define CMD_2   2
+#define CMD_3   3
+#define CMD_4   4
+#define CMD_5   5
+#define CMD_6   6
+#define CMD_7   7
+#define CMD_8   8
+#define CMD_9   9
+#define CMD_MAX 10
+
 /***************************** Enum and Structure ****************************/
 typedef struct CLI_CMD_SW_t
 {

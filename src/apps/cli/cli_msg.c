@@ -56,11 +56,10 @@ static int P_CLI_MSG_TcpRlogin(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
     uint32_t unRet = APP_OK;
 
-    PrintWarn("TODO");
-    char *host;
+    char *pcCmd;
 
-    host = CLI_CMD_GetArg(pstCmd, 0);
-    if (!host)
+    pcCmd = CLI_CMD_GetArg(pstCmd, 0);
+    if (pcCmd == NULL)
     {
         return CLI_CMD_Showusage(pstCmd);
     }
@@ -72,7 +71,14 @@ static int P_CLI_MSG_TcpConnect(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
     uint32_t unRet = APP_OK;
 
-    PrintWarn("TODO");
+    char *pcCmd;
+
+    pcCmd = CLI_CMD_GetArg(pstCmd, 0);
+    if (pcCmd == NULL)
+    {
+        return CLI_CMD_Showusage(pstCmd);
+    }
+
 
     return unRet;
 }
@@ -81,7 +87,13 @@ static int P_CLI_MSG_TcpListen(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
     uint32_t unRet = APP_OK;
 
-    PrintWarn("TODO");
+    char *pcCmd;
+
+    pcCmd = CLI_CMD_GetArg(pstCmd, 0);
+    if (pcCmd == NULL)
+    {
+        return CLI_CMD_Showusage(pstCmd);
+    }
 
     return unRet;
 }
@@ -90,7 +102,13 @@ static int P_CLI_MSG_TcpConsTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
     uint32_t unRet = APP_OK;
 
-    PrintWarn("TODO");
+    char *pcCmd;
+
+    pcCmd = CLI_CMD_GetArg(pstCmd, 0);
+    if (pcCmd == NULL)
+    {
+        return CLI_CMD_Showusage(pstCmd);
+    }
 
     return unRet;
 }
@@ -99,25 +117,38 @@ static int P_CLI_MSG_TcpTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
     uint32_t unRet = APP_OK;
 
-    PrintWarn("TODO");
+    char *pcCmd;
+
+    pcCmd = CLI_CMD_GetArg(pstCmd, 0);
+    if (pcCmd == NULL)
+    {
+        return CLI_CMD_Showusage(pstCmd);
+    }
 
     return unRet;
 }
 
-static int P_CLI_MSG_Help(CLI_CMDLINE_T *cmd, int argc, char *argv[])
+static int P_CLI_MSG_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
-	if (argc == 0)
-	{
-		PrintInfo("Available commands:\n");
-		PrintInfo("For more information about a command, enter 'msg command-name'");
-	}
-	else
-	{
-        PrintInfo("Available commands:\n");
-        PrintInfo("For more information about a command, enter 'msg command-name'");
-	}
+    uint32_t unRet = APP_OK;
 
-	return 0;
+    char *pcCmd;
+
+    pcCmd = CLI_CMD_GetArg(pstCmd, 0);
+    if (pcCmd == NULL)
+    {
+        return CLI_CMD_Showusage(pstCmd);
+    }
+    else
+    {
+        for(int i = 0; i < CMD_MAX; i++)
+        {
+            pcCmd = CLI_CMD_GetArg(pstCmd, i);
+            PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
+        }
+    }
+
+	return unRet;
 }
 
 uint32_t CLI_MSG_InitCmds(void)
