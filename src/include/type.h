@@ -48,6 +48,9 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <stdbool.h>
 
 /***************************** Definition ************************************/
 #define COLOR_RED     "\x1b[31m"
@@ -58,8 +61,19 @@
 #define COLOR_CYAN    "\x1b[36m"
 #define COLOR_RESET   "\x1b[0m"
 
-#define V2X_ERR_OK    0
-#define V2X_ERR_ERROR 1
+#define FRAMEWORK_OK        0
+#define FRAMEWORK_ERROR     1
+
+#define APP_OK              0
+#define APP_ERROR           1
+#define APP_ERR_INVALID     2
+#define APP_ERR_AMBIGUOUS   3
+#define APP_ERR_BLANK       4
+
+#define APP_CLI_CMD_EOL     0
+#define APP_CLI_CMD_SEMI    1
+#define APP_CLI_CMD_AND     2
+#define APP_CLI_CMD_OR      3
 
 #define PrintError(fmt, args...) \
     do { \
@@ -94,6 +108,11 @@
 #define PrintDebug(fmt, args...) \
     do { \
         printf(COLOR_RESET "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
+    } while (0)
+
+#define PrintInfo(fmt, args...) \
+    do { \
+        printf(COLOR_RESET ""fmt"\n" COLOR_RESET , ##args); \
     } while (0)
 
 /***************************** Enum and Structure ****************************/

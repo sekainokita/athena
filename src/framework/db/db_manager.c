@@ -62,69 +62,69 @@ uint32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDb
 {
     PrintWarn("TODO");
 
-    return V2X_ERR_OK;
+    return FRAMEWORK_OK;
 }
 
 uint32_t DB_MANAGER_Read(DB_MANAGER_READ_T *pstDbManagerRead, DB_V2X_T *pstDbV2x, void* pPayload)
 {
     PrintWarn("TODO");
 
-    return V2X_ERR_OK;
+    return FRAMEWORK_OK;
 }
 
 uint32_t DB_MANAGER_Converter(DB_MANAGER_READ_T *pstDbManagerRead, DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload)
 {
     PrintWarn("TODO");
 
-    return V2X_ERR_OK;
+    return FRAMEWORK_OK;
 }
 
 uint32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager)
 {
     PrintWarn("TODO");
 
-    return V2X_ERR_OK;
+    return FRAMEWORK_OK;
 }
 
 uint32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager)
 {
     PrintWarn("TODO");
 
-    return V2X_ERR_OK;
+    return FRAMEWORK_OK;
 }
 
 uint32_t DB_MANAGER_Start(DB_MANAGER_T *pstDbManager)
 {
     PrintWarn("TODO");
 
-    return V2X_ERR_OK;
+    return FRAMEWORK_OK;
 }
 
 uint32_t DB_MANAGER_Stop(DB_MANAGER_T *pstDbManager)
 {
     PrintWarn("TODO");
 
-    return V2X_ERR_OK;
+    return FRAMEWORK_OK;
 }
 
 uint32_t DB_MANAGER_Status(DB_MANAGER_T *pstDbManager)
 {
     PrintWarn("TODO");
 
-    return V2X_ERR_OK;
+    return FRAMEWORK_OK;
 }
 
 uint32_t DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
 {
     PrintWarn("TODO");
 
-    return V2X_ERR_OK;
+    return FRAMEWORK_OK;
 }
 
 uint32_t DB_MANAGER_DeInit(DB_MANAGER_T *pstDbManager)
 {
     PrintWarn("TODO");
 
-    return V2X_ERR_OK;
+    return FRAMEWORK_OK;
 }
 

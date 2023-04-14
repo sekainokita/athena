@@ -1,3 +1,6 @@
+#ifndef	_CLI_UTIL_H_
+#define	_CLI_UTIL_H_
+
 /******************************************************************************
 *
 * Copyright (C) 2023 - 2028 KETI, All rights reserved.
@@ -33,45 +36,41 @@
 /******************************************************************************/
 /**
 *
-* @file db_manager.c
+* @file cli_util.h
 *
-* This file contains a data format design
+* This file contains a CLI design
 *
 * @note
 *
-* V2X Data Format Source File
+* CLI Source File
 *
-* MODIFICATION HISTORY:
-* Ver   Who  Date     Changes
-* ----- ---- -------- ----------------------------------------------------
-* 1.00  bman  23.03.22 First release
 *
 ******************************************************************************/
 
 /***************************** Include ***************************************/
-#include "framework.h"
+#include "type.h"
 
 /***************************** Definition ************************************/
+#define CLI_UTIL_InitQueue(q) (q)->q_prev = (q), (q)->q_next = (q)
+#define CLI_UTIL_IsEmpTyQueue(q) ((q)->q_next == (q))
+#define CLI_UTIL_GetFirstQueue(q) ((q)->q_next)
+#define CLI_UTIL_GetLastQueue(q) ((q)->q_prev)
 
-
-/***************************** Static Variable *******************************/
-
+/***************************** Enum and Structure ****************************/
+typedef struct CLI_UTIL_QUEUE_t
+{
+    struct CLI_UTIL_QUEUE_t *q_next;
+    struct CLI_UTIL_QUEUE_t *q_prev;
+} CLI_UTIL_QUEUE_T;
 
 /***************************** Function  *************************************/
 
-uint32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
-{
-    MSG_MANAGER_T stMsgManager;
-    DB_MANAGER_T stDbManager;
+void CLI_UTIL_Enqueue(CLI_UTIL_QUEUE_T *, CLI_UTIL_QUEUE_T *);
+void CLI_UTIL_Dequeue(CLI_UTIL_QUEUE_T *);
+CLI_UTIL_QUEUE_T *CLI_UTIL_DequeueNext(CLI_UTIL_QUEUE_T *);
+int CLI_UTIL_QueueMap(CLI_UTIL_QUEUE_T *qb, int (*func)(CLI_UTIL_QUEUE_T *, unsigned int, unsigned int), unsigned int a, unsigned int b);
+int CLI_UTIL_CountQueue(CLI_UTIL_QUEUE_T *);
+int CLI_UTIL_FindQueue(CLI_UTIL_QUEUE_T *, CLI_UTIL_QUEUE_T *);
 
-    (void*)memset(&stMsgManager, 0x00, sizeof(MSG_MANAGER_T));
-    (void*)memset(&stDbManager, 0x00, sizeof(DB_MANAGER_T));
-
-    PrintWarn("Init");
-
-    MSG_MANAGER_Init(&stMsgManager);
-    DB_MANAGER_Init(&stDbManager);
-
-    return FRAMEWORK_OK;
-}
+#endif
 

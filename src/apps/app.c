@@ -50,7 +50,7 @@
 
 /***************************** Include ***************************************/
 #include "app.h"
-
+#include "cli.h"
 /***************************** Definition ************************************/
 
 
@@ -61,8 +61,16 @@
 
 uint32_t APP_Init(APP_T *pstApp)
 {
+    uint32_t unRet = APP_ERROR;
+
     PrintNotice("Init");
 
-    return V2X_ERR_OK;
+    unRet = CLI_Init();
+    if (unRet != APP_OK)
+    {
+        PrintError("CLI_Init() is failed! [unRet:%d]", unRet);
+    }
+
+    return unRet;
 }
 

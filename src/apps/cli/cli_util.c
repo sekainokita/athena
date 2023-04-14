@@ -33,23 +33,19 @@
 /******************************************************************************/
 /**
 *
-* @file db_manager.c
+* @file cli_util.c
 *
-* This file contains a data format design
+* This file contains a CLI design
 *
 * @note
 *
-* V2X Data Format Source File
+* CLI Source File
 *
-* MODIFICATION HISTORY:
-* Ver   Who  Date     Changes
-* ----- ---- -------- ----------------------------------------------------
-* 1.00  bman  23.03.22 First release
 *
 ******************************************************************************/
 
 /***************************** Include ***************************************/
-#include "framework.h"
+#include "cli.h"
 
 /***************************** Definition ************************************/
 
@@ -59,19 +55,92 @@
 
 /***************************** Function  *************************************/
 
-uint32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
+void CLI_UTIL_Enqueue(CLI_UTIL_QUEUE_T *qb, CLI_UTIL_QUEUE_T *item)
 {
-    MSG_MANAGER_T stMsgManager;
-    DB_MANAGER_T stDbManager;
+    qb->q_prev->q_next = item;
+    item->q_next = qb;
+    item->q_prev = qb->q_prev;
+    qb->q_prev = item;
+}
 
-    (void*)memset(&stMsgManager, 0x00, sizeof(MSG_MANAGER_T));
-    (void*)memset(&stDbManager, 0x00, sizeof(DB_MANAGER_T));
+void CLI_UTIL_Dequeue(CLI_UTIL_QUEUE_T *item)
+{
+    item->q_prev->q_next = item->q_next;
+    item->q_next->q_prev = item->q_prev;
+}
 
-    PrintWarn("Init");
+CLI_UTIL_QUEUE_T *CLI_UTIL_DequeueNext(CLI_UTIL_QUEUE_T *qb)
+{
+    if (qb->q_next == qb)
+    {
+        return NULL;
+    }
 
-    MSG_MANAGER_Init(&stMsgManager);
-    DB_MANAGER_Init(&stDbManager);
+    qb = qb->q_next;
 
-    return FRAMEWORK_OK;
+    qb->q_prev->q_next = qb->q_next;
+    qb->q_next->q_prev = qb->q_prev;
+
+    return qb;
+}
+
+int CLI_UTIL_QueueMap(CLI_UTIL_QUEUE_T *qb, int (*func)(CLI_UTIL_QUEUE_T *, unsigned int, unsigned int), unsigned int a, unsigned int b)
+{
+    CLI_UTIL_QUEUE_T *qe;
+    CLI_UTIL_QUEUE_T *nextq;
+    int res;
+
+    qe = qb;
+
+    qe = qb->q_next;
+
+    while (qe != qb)
+    {
+        nextq = qe->q_next;
+        if ((res = (*func)(qe, a, b)))
+        {
+            return res;
+        }
+        qe = nextq;
+    }
+
+    return 0;
+}
+
+int CLI_UTIL_CountQueue(CLI_UTIL_QUEUE_T *qb)
+{
+    CLI_UTIL_QUEUE_T *qe;
+    int res = 0;
+
+    qe = qb;
+
+    while (qe->q_next != qb)
+    {
+        qe = qe->q_next;
+        res++;
+    }
+
+    return res;
+}
+
+int CLI_UTIL_FindQueue(CLI_UTIL_QUEUE_T *qb, CLI_UTIL_QUEUE_T *item)
+{
+    CLI_UTIL_QUEUE_T *q;
+    int res = 1;
+
+    q = qb->q_next;
+
+    while (q != item)
+    {
+        if (q == qb)
+        {
+            return 0;
+        }
+
+        q = q->q_next;
+        res++;
+    }
+
+    return res;
 }
 
