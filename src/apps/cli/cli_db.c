@@ -1,6 +1,3 @@
-#ifndef	_CLI_H_
-#define	_CLI_H_
-
 /******************************************************************************
 *
 * Copyright (C) 2023 - 2028 KETI, All rights reserved.
@@ -36,89 +33,24 @@
 /******************************************************************************/
 /**
 *
-* @file cli.h
-*
-* This file contains a CLI design
+* @file cli_db.c
 *
 * @note
 *
-* CLI Source File
-*
+* CLI DB Source
 *
 ******************************************************************************/
 
+
 /***************************** Include ***************************************/
-#include "type.h"
-#include "cli_util.h"
+
 
 /***************************** Definition ************************************/
-//#define CONFIG_CLI_DEBUG (1)
 
-#define isQuote(x) (((x) == '\'') || ((x) == '"'))
-#define CLI_MAX_SWITCHES        (16)
-#define CLI_MAX_TOKENS          (64)
 
-/***************************** Enum and Structure ****************************/
-typedef struct CLI_CMD_SW_t
-{
-    int swidx;
-    char *swname;
-    char *swvalue;
-} CLI_CMD_SW_T;
+/***************************** Static Variable *******************************/
 
-typedef struct CLI_CMDLINE_t
-{
-    int argc;
-    char *argv[CLI_MAX_TOKENS];
-    int swc;
-    CLI_CMD_SW_T swv[CLI_MAX_SWITCHES];
-    int (*func)(struct CLI_CMDLINE_t *, int argc, char *argv[]);
-    int argidx;
-    char *ref;
-    char *usage;
-    char *switches;
-} CLI_CMDLINE_T;
 
-typedef struct CLI_LIST_t
-{
-    CLI_UTIL_QUEUE_T list;
-    int term;
-    char *ptr;
-    CLI_UTIL_QUEUE_T head;
-} CLI_LIST_T;
+/***************************** Function Protype ******************************/
 
-typedef struct CLI_CMD_TOKEN_t
-{
-    CLI_UTIL_QUEUE_T qb;
-    char token;
-} CLI_CMD_TOKEN_T;
-
-typedef struct CLI_CMD_t
-{
-	struct CLI_CMD_t *sibling;
-	struct CLI_CMD_t *child;
-	char *cmdword;
-	int (*func)(CLI_CMDLINE_T *, int argc, char *argv[]);
-	void *ref;
-	char *help;
-	char *usage;
-	char *switches;
-} CLI_CMD_T;
-
-/***************************** Function  *************************************/
-char *CLI_CMD_CheckName(CLI_CMDLINE_T *cmd, int swidx);
-void CLI_CMD_Free(CLI_CMDLINE_T *cmd);
-int CLI_CMD_CheckValid(CLI_CMDLINE_T *cmd, char *validstr);
-uint32_t CLI_CMD_AddCmd(char *command,     int (*func)(CLI_CMDLINE_T *, int argc, char *argv[]), void *ref, char *help, char *usage, char *switches);
-int CLI_CMD_CheckLookUp(CLI_UTIL_QUEUE_T *head, CLI_CMDLINE_T *cmd);
-uint32_t CLI_CMD_Init(void);
-CLI_LIST_T *CLI_CMD_Read(CLI_UTIL_QUEUE_T *head);
-void CLI_CMD_BuildList(CLI_UTIL_QUEUE_T *qb, char *buf);
-void CLI_CMD_SetList(CLI_UTIL_QUEUE_T *qb);
-void CLI_CMD_FreeTokens(CLI_UTIL_QUEUE_T *list);
-void CLI_CMD_BuildCmdline(CLI_UTIL_QUEUE_T *head, CLI_CMDLINE_T *cmd);
-
-uint32_t CLI_Init(void);
-
-#endif /* _CLI_H_ */
 
