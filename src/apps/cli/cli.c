@@ -291,9 +291,18 @@ static uint32_t P_CLI_InitCmd(void)
 
 uint32_t CLI_Init(void)
 {
-    P_CLI_InitCmd();
+    uint32_t unRet = APP_ERROR;
 
-    P_CLI_StartLoop();
+    PrintNotice("Init");
+
+    unRet = P_CLI_InitCmd();
+    if (unRet != APP_OK)
+    {
+        PrintError("P_CLI_InitCmd() is failed! [unRet:%d]", unRet);
+        return unRet;
+    }
+
+    (void)P_CLI_StartLoop();
 
     return APP_OK;
 }

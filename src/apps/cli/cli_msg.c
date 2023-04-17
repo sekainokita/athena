@@ -55,8 +55,15 @@
 static int P_CLI_MSG_TcpRlogin(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
     uint32_t unRet = APP_OK;
-
     char *pcCmd;
+
+    UNUSED(argc);
+
+    if(argv == NULL)
+    {
+        PrintError("argv == NULL!!");
+        return unRet;
+    }
 
     pcCmd = CLI_CMD_GetArg(pstCmd, 0);
     if (pcCmd == NULL)
@@ -70,8 +77,15 @@ static int P_CLI_MSG_TcpRlogin(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 static int P_CLI_MSG_TcpConnect(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
     uint32_t unRet = APP_OK;
-
     char *pcCmd;
+
+    UNUSED(argc);
+
+    if(argv == NULL)
+    {
+        PrintError("argv == NULL!!");
+        return unRet;
+    }
 
     pcCmd = CLI_CMD_GetArg(pstCmd, 0);
     if (pcCmd == NULL)
@@ -86,8 +100,15 @@ static int P_CLI_MSG_TcpConnect(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 static int P_CLI_MSG_TcpListen(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
     uint32_t unRet = APP_OK;
-
     char *pcCmd;
+
+    UNUSED(argc);
+
+    if(argv == NULL)
+    {
+        PrintError("argv == NULL!!");
+        return unRet;
+    }
 
     pcCmd = CLI_CMD_GetArg(pstCmd, 0);
     if (pcCmd == NULL)
@@ -101,8 +122,15 @@ static int P_CLI_MSG_TcpListen(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 static int P_CLI_MSG_TcpConsTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
     uint32_t unRet = APP_OK;
-
     char *pcCmd;
+
+    UNUSED(argc);
+
+    if(argv == NULL)
+    {
+        PrintError("argv == NULL!!");
+        return unRet;
+    }
 
     pcCmd = CLI_CMD_GetArg(pstCmd, 0);
     if (pcCmd == NULL)
@@ -116,8 +144,15 @@ static int P_CLI_MSG_TcpConsTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 static int P_CLI_MSG_TcpTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
     uint32_t unRet = APP_OK;
-
     char *pcCmd;
+
+    UNUSED(argc);
+
+    if(argv == NULL)
+    {
+        PrintError("argv == NULL!!");
+        return unRet;
+    }
 
     pcCmd = CLI_CMD_GetArg(pstCmd, 0);
     if (pcCmd == NULL)
@@ -131,8 +166,15 @@ static int P_CLI_MSG_TcpTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 static int P_CLI_MSG_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
     uint32_t unRet = APP_OK;
-
     char *pcCmd;
+
+    UNUSED(argc);
+
+    if(argv == NULL)
+    {
+        PrintError("argv == NULL!!");
+        return unRet;
+    }
 
     pcCmd = CLI_CMD_GetArg(pstCmd, 0);
     if (pcCmd == NULL)

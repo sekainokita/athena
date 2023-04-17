@@ -43,7 +43,7 @@ TARGET_CFLAGS += -I$(APP_INC_PATH)
 TARGET_CFLAGS += -I$(FRAMEWORK_INC_PATH)
 TARGET_CFLAGS += -D_GNU_SOURCE=1
 TARGET_CFLAGS += -std=gnu99
-TARGET_CFLAGS += -Wall -Wstrict-prototypes -O3 -fomit-frame-pointer -pipe
+TARGET_CFLAGS += -Wall -Wextra -Wstrict-prototypes -O3 -fomit-frame-pointer -pipe
 
 TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_FRAMEWORK)
 # To add Library : -l$(LIB_DB) -l$(LIB_MSG)

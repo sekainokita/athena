@@ -60,71 +60,195 @@
 /***************************** Function  *************************************/
 uint32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload)
 {
+    uint32_t unRet = FRAMEWORK_ERROR;
+
     PrintWarn("TODO");
 
-    return FRAMEWORK_OK;
+    if(pstDbManagerWrite == NULL)
+    {
+        PrintError("pstDbManagerWrite == NULL!!");
+        return unRet;
+    }
+
+    if(pstDbV2x == NULL)
+    {
+        PrintError("pstDbV2x == NULL!!");
+        return unRet;
+    }
+
+    if(pPayload == NULL)
+    {
+        PrintError("pPayload == NULL!!");
+        return unRet;
+    }
+
+    return unRet;
 }
 
 uint32_t DB_MANAGER_Read(DB_MANAGER_READ_T *pstDbManagerRead, DB_V2X_T *pstDbV2x, void* pPayload)
 {
+    uint32_t unRet = FRAMEWORK_ERROR;
+
     PrintWarn("TODO");
 
-    return FRAMEWORK_OK;
+    if(pstDbManagerRead == NULL)
+    {
+        PrintError("pstDbManagerRead == NULL!!");
+        return unRet;
+    }
+
+    if(pstDbV2x == NULL)
+    {
+        PrintError("pstDbV2x == NULL!!");
+        return unRet;
+    }
+
+    if(pPayload == NULL)
+    {
+        PrintError("pPayload == NULL!!");
+        return unRet;
+    }
+
+    return unRet;
 }
 
 uint32_t DB_MANAGER_Converter(DB_MANAGER_READ_T *pstDbManagerRead, DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload)
 {
+    uint32_t unRet = FRAMEWORK_ERROR;
+
     PrintWarn("TODO");
 
-    return FRAMEWORK_OK;
+    if(pstDbManagerRead == NULL)
+    {
+        PrintError("pstDbManagerRead == NULL!!");
+        return unRet;
+    }
+
+    if(pstDbManagerWrite == NULL)
+    {
+        PrintError("pstDbManagerWrite == NULL!!");
+        return unRet;
+    }
+
+    if(pstDbV2x == NULL)
+    {
+        PrintError("pstDbV2x == NULL!!");
+        return unRet;
+    }
+
+    if(pPayload == NULL)
+    {
+        PrintError("pPayload == NULL!!");
+        return unRet;
+    }
+
+    return unRet;
 }
 
 uint32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager)
 {
+    uint32_t unRet = FRAMEWORK_ERROR;
+
     PrintWarn("TODO");
 
-    return FRAMEWORK_OK;
+    if(pstDbManager == NULL)
+    {
+        PrintError("pstDbManager == NULL!!");
+        return unRet;
+    }
+
+    return unRet;
 }
 
 uint32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager)
 {
+    uint32_t unRet = FRAMEWORK_ERROR;
+
     PrintWarn("TODO");
 
-    return FRAMEWORK_OK;
+    if(pstDbManager == NULL)
+    {
+        PrintError("pstDbManager == NULL!!");
+        return unRet;
+    }
+
+    return unRet;
 }
 
 uint32_t DB_MANAGER_Start(DB_MANAGER_T *pstDbManager)
 {
+    uint32_t unRet = FRAMEWORK_ERROR;
+
     PrintWarn("TODO");
 
-    return FRAMEWORK_OK;
+    if(pstDbManager == NULL)
+    {
+        PrintError("pstDbManager == NULL!!");
+        return unRet;
+    }
+
+    return unRet;
 }
 
 uint32_t DB_MANAGER_Stop(DB_MANAGER_T *pstDbManager)
 {
+    uint32_t unRet = FRAMEWORK_ERROR;
+
     PrintWarn("TODO");
 
-    return FRAMEWORK_OK;
+    if(pstDbManager == NULL)
+    {
+        PrintError("pstDbManager == NULL!!");
+        return unRet;
+    }
+
+    return unRet;
 }
 
 uint32_t DB_MANAGER_Status(DB_MANAGER_T *pstDbManager)
 {
+    uint32_t unRet = FRAMEWORK_ERROR;
+
     PrintWarn("TODO");
 
-    return FRAMEWORK_OK;
+    if(pstDbManager == NULL)
+    {
+        PrintError("pstDbManager == NULL!!");
+        return unRet;
+    }
+
+    return unRet;
 }
 
 uint32_t DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
 {
+    uint32_t unRet = FRAMEWORK_ERROR;
+
     PrintWarn("TODO");
 
-    return FRAMEWORK_OK;
+    if(pstDbManager == NULL)
+    {
+        PrintError("pstDbManager == NULL!!");
+        return unRet;
+    }
+
+    unRet = FRAMEWORK_OK;
+
+    return unRet;
 }
 
 uint32_t DB_MANAGER_DeInit(DB_MANAGER_T *pstDbManager)
 {
+    uint32_t unRet = FRAMEWORK_ERROR;
+
     PrintWarn("TODO");
 
-    return FRAMEWORK_OK;
+    if(pstDbManager == NULL)
+    {
+        PrintError("pstDbManager == NULL!!");
+        return unRet;
+    }
+
+    return unRet;
 }
 

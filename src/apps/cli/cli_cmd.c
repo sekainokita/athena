@@ -496,9 +496,23 @@ static void P_CLI_CMD_ShowPossibleCmd(CLI_CMDLINE_T *cline, CLI_CMD_T *cmd)
 
 static int P_CLI_CMD_Help(CLI_CMDLINE_T *cmd, int argc, char *argv[])
 {
+    int nRet = APP_ERROR;
+
 	CLI_CMD_T **tab;
 	CLI_CMD_T *cword;
 	int idx;
+
+    if(cmd == NULL)
+    {
+        PrintError("cmd == NULL!!");
+        return nRet;
+    }
+
+    if(argv == NULL)
+    {
+        PrintError("argv == NULL!!");
+        return nRet;
+    }
 
 	if (argc == 0)
 	{
@@ -506,6 +520,8 @@ static int P_CLI_CMD_Help(CLI_CMDLINE_T *cmd, int argc, char *argv[])
 		P_CLI_CMD_DumpCmds(0);
 		PrintInfo();
 		PrintInfo("For more information about a command, enter 'help command-name'");
+
+        nRet = APP_OK;
 	}
 	else
 	{
@@ -559,21 +575,39 @@ static int P_CLI_CMD_Help(CLI_CMDLINE_T *cmd, int argc, char *argv[])
 			PrintInfo("\n  OPTIONS");
 			P_CLI_CMD_DumpSwitch(cword->switches);
 		}
+
 		PrintInfo();
+
+        nRet = APP_OK;
 	}
 
-	return 0;
+	return nRet;
 }
 
 static int P_CLI_CMD_Test(CLI_CMDLINE_T *cmd, int argc, char *argv[])
 {
+    int nRet = APP_ERROR;
+
+    if(cmd == NULL)
+    {
+        PrintError("cmd == NULL!!");
+        return nRet;
+    }
+
+    if(argv == NULL)
+    {
+        PrintError("argv == NULL!!");
+        return nRet;
+    }
+
 	if (argc == 0)
 	{
 		PrintInfo("Test commands cmd_test:\n");
 		PrintInfo("Test Commands");
+        nRet = APP_OK;
 	}
 
-	return 0;
+	return nRet;
 }
 
 uint32_t CLI_CMD_Init(void)

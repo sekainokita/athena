@@ -75,6 +75,8 @@
 #define APP_CLI_CMD_AND     2
 #define APP_CLI_CMD_OR      3
 
+#define UNUSED(x)           (void)(x)
+
 #define PrintError(fmt, args...) \
     do { \
         printf(COLOR_RED "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \

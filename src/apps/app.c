@@ -63,12 +63,19 @@ uint32_t APP_Init(APP_T *pstApp)
 {
     uint32_t unRet = APP_ERROR;
 
+    if(pstApp == NULL)
+    {
+        PrintError("pstApp == NULL!!");
+        return unRet;
+    }
+
     PrintNotice("Init");
 
     unRet = CLI_Init();
     if (unRet != APP_OK)
     {
         PrintError("CLI_Init() is failed! [unRet:%d]", unRet);
+        return unRet;
     }
 
     return unRet;
