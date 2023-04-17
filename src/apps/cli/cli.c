@@ -286,6 +286,12 @@ static uint32_t P_CLI_InitCmd(void)
         PrintError("CLI_MSG_InitCmds() is failed! [unRet:%d]", unRet);
     }
 
+    unRet = CLI_DB_InitCmds();
+    if (unRet != APP_OK)
+    {
+        PrintError("CLI_DB_InitCmds() is failed! [unRet:%d]", unRet);
+    }
+
     return unRet;
 }
 

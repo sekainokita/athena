@@ -55,7 +55,7 @@
 
 
 /***************************** Function Protype ******************************/
-
+uint32_t CLI_DB_InitCmds(void);
 
 #endif	/* _CLI_DB_H_ */
 

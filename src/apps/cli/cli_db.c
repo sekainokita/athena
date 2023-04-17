@@ -43,7 +43,7 @@
 
 
 /***************************** Include ***************************************/
-
+#include "cli.h"
 
 /***************************** Definition ************************************/
 
@@ -53,4 +53,54 @@
 
 /***************************** Function Protype ******************************/
 
+static int P_CLI_DB_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
+{
+    uint32_t unRet = APP_OK;
+    char *pcCmd;
+
+    UNUSED(argc);
+
+    if(argv == NULL)
+    {
+        PrintError("argv == NULL!!");
+        return unRet;
+    }
+
+    pcCmd = CLI_CMD_GetArg(pstCmd, 0);
+    if (pcCmd == NULL)
+    {
+        return CLI_CMD_Showusage(pstCmd);
+    }
+    else
+    {
+        for(int i = 0; i < CMD_MAX; i++)
+        {
+            pcCmd = CLI_CMD_GetArg(pstCmd, i);
+            PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
+        }
+    }
+
+	return unRet;
+}
+
+uint32_t CLI_DB_InitCmds(void)
+{
+    uint32_t unRet = APP_ERROR;
+
+    unRet = CLI_CMD_AddCmd("db",
+               P_CLI_DB_Help,
+               NULL,
+               "help for DB commands",
+               "db [enter command]\n\n"
+               "Without any parameters, the 'db' show a description\n"
+               "of available commands. For more details on a command, type and enter 'db'\n"
+               "and the command name.",
+               "");
+    if(unRet != APP_OK)
+    {
+        PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
+    }
+
+    return unRet;
+}
 
