@@ -46,6 +46,7 @@ TARGET_CFLAGS += -std=gnu99
 TARGET_CFLAGS += -Wall -Wextra -Wstrict-prototypes -O3 -fomit-frame-pointer -pipe
 
 TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_FRAMEWORK)
+TARGET_LDFLAGS += -lrt -pthread
 # To add Library : -l$(LIB_DB) -l$(LIB_MSG)
 
 TARGET_CC=gcc

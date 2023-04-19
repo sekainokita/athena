@@ -77,18 +77,61 @@ Include dependency graph for db_manager.c:</div>
 <div class="dyncontent">
 <div class="center"><img src="db__manager_8c__incl.png" border="0" usemap="#src_2framework_2db_2db__manager_8c" alt=""/></div>
 <map name="src_2framework_2db_2db__manager_8c" id="src_2framework_2db_2db__manager_8c">
-<area shape="rect" title=" " alt="" coords="101,5,257,47"/>
-<area shape="rect" href="db__manager_8h.html" title=" " alt="" coords="121,95,236,121"/>
-<area shape="rect" href="type_8h.html" title=" " alt="" coords="99,169,162,196"/>
-<area shape="rect" href="db__v2x_8h.html" title=" " alt="" coords="186,169,267,196"/>
-<area shape="rect" title=" " alt="" coords="5,244,72,271"/>
-<area shape="rect" title=" " alt="" coords="191,244,262,271"/>
-<area shape="rect" title=" " alt="" coords="97,244,167,271"/>
+<area shape="rect" title=" " alt="" coords="153,5,309,47"/>
+<area shape="rect" href="db__manager_8h.html" title=" " alt="" coords="174,95,289,121"/>
+<area shape="rect" href="type_8h.html" title=" " alt="" coords="391,169,453,196"/>
+<area shape="rect" href="db__v2x_8h.html" title=" " alt="" coords="143,169,224,196"/>
+<area shape="rect" title=" " alt="" coords="101,244,167,271"/>
+<area shape="rect" title=" " alt="" coords="5,244,76,271"/>
+<area shape="rect" title=" " alt="" coords="192,244,263,271"/>
+<area shape="rect" title=" " alt="" coords="287,244,362,271"/>
+<area shape="rect" title=" " alt="" coords="387,244,457,271"/>
+<area shape="rect" title=" " alt="" coords="482,244,565,271"/>
+<area shape="rect" title=" " alt="" coords="589,244,663,271"/>
+<area shape="rect" title=" " alt="" coords="688,244,775,271"/>
+<area shape="rect" title=" " alt="" coords="799,244,883,271"/>
+<area shape="rect" title=" " alt="" coords="907,244,982,271"/>
 </map>
 </div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a0a32b86f0eb3f5b5b3841778adbc23b1"><td class="memItemLeft" align="right" valign="top"><a id="a0a32b86f0eb3f5b5b3841778adbc23b1"></a>
+<a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_T</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_MsgNew</b> (int id, const char *text)</td></tr>
+<tr class="separator:a0a32b86f0eb3f5b5b3841778adbc23b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08a207dcad6a70d18d4c6bb198c66b39"><td class="memItemLeft" align="right" valign="top"><a id="a08a207dcad6a70d18d4c6bb198c66b39"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_MsgId</b> (<a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_T</a> *pstMsg)</td></tr>
+<tr class="separator:a08a207dcad6a70d18d4c6bb198c66b39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8061d1967b5a6c0ceeb0add825edd3f2"><td class="memItemLeft" align="right" valign="top"><a id="a8061d1967b5a6c0ceeb0add825edd3f2"></a>
+char *&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_MsgText</b> (<a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_T</a> *pstMsg)</td></tr>
+<tr class="separator:a8061d1967b5a6c0ceeb0add825edd3f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a784cd4d260af53df392c8e11ddc72d0c"><td class="memItemLeft" align="right" valign="top"><a id="a784cd4d260af53df392c8e11ddc72d0c"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_MsgFree</b> (<a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_T</a> *pstMsg)</td></tr>
+<tr class="separator:a784cd4d260af53df392c8e11ddc72d0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50edab75c4d999794104228a95545513"><td class="memItemLeft" align="right" valign="top"><a id="a50edab75c4d999794104228a95545513"></a>
+<a class="el" href="structDB__MANAGER__ARCHIVE__t.html">DB_MANAGER_ARCHIVE_T</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_ArchiveNew</b> (size_t size, const char *data)</td></tr>
+<tr class="separator:a50edab75c4d999794104228a95545513"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84ad171d2c4b8552f1aa84de6bb2fc68"><td class="memItemLeft" align="right" valign="top"><a id="a84ad171d2c4b8552f1aa84de6bb2fc68"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_ArchiveSize</b> (<a class="el" href="structDB__MANAGER__ARCHIVE__t.html">DB_MANAGER_ARCHIVE_T</a> *pstAr)</td></tr>
+<tr class="separator:a84ad171d2c4b8552f1aa84de6bb2fc68"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:accf48667befe9d7afb2ac07034356b51"><td class="memItemLeft" align="right" valign="top"><a id="accf48667befe9d7afb2ac07034356b51"></a>
+char *&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_ArchiveData</b> (<a class="el" href="structDB__MANAGER__ARCHIVE__t.html">DB_MANAGER_ARCHIVE_T</a> *pstAr)</td></tr>
+<tr class="separator:accf48667befe9d7afb2ac07034356b51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a66767c530ed81d71ca3e6693ac9b96"><td class="memItemLeft" align="right" valign="top"><a id="a2a66767c530ed81d71ca3e6693ac9b96"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_ArchiveFree</b> (<a class="el" href="structDB__MANAGER__ARCHIVE__t.html">DB_MANAGER_ARCHIVE_T</a> *pstAr)</td></tr>
+<tr class="separator:a2a66767c530ed81d71ca3e6693ac9b96"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90da296b7be8db55427ac64d0c049b63"><td class="memItemLeft" align="right" valign="top"><a id="a90da296b7be8db55427ac64d0c049b63"></a>
+<a class="el" href="structDB__MANAGER__ARCHIVE__t.html">DB_MANAGER_ARCHIVE_T</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_MsgSerialize</b> (const <a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_T</a> *pstMsg)</td></tr>
+<tr class="separator:a90da296b7be8db55427ac64d0c049b63"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6a302a64675df7234f40947ca49fa04"><td class="memItemLeft" align="right" valign="top"><a id="ac6a302a64675df7234f40947ca49fa04"></a>
+<a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_T</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_MsgUnSerialize</b> (const char *buffer)</td></tr>
+<tr class="separator:ac6a302a64675df7234f40947ca49fa04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add03f690ede130d9a7049f7791f05a14"><td class="memItemLeft" align="right" valign="top"><a id="add03f690ede130d9a7049f7791f05a14"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_MsgSend</b> (mqd_t mqdes, const <a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_T</a> *pstMsg, unsigned int msg_prio)</td></tr>
+<tr class="separator:add03f690ede130d9a7049f7791f05a14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa48f4ae96fce9036b810298f83b714ec"><td class="memItemLeft" align="right" valign="top"><a id="aa48f4ae96fce9036b810298f83b714ec"></a>
+<a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_T</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_MsgReceive</b> (mqd_t mqdes, char *buffer, size_t size)</td></tr>
+<tr class="separator:aa48f4ae96fce9036b810298f83b714ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f057e53ae8ee9249aa4b86a0da3c32f"><td class="memItemLeft" align="right" valign="top"><a id="a2f057e53ae8ee9249aa4b86a0da3c32f"></a>
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Write</b> (<a class="el" href="structDB__MANAGER__WRITE.html">DB_MANAGER_WRITE_T</a> *pstDbManagerWrite, <a class="el" href="structDB__V2X.html">DB_V2X_T</a> *pstDbV2x, void *pPayload)</td></tr>
 <tr class="separator:a2f057e53ae8ee9249aa4b86a0da3c32f"><td class="memSeparator" colspan="2">&#160;</td></tr>

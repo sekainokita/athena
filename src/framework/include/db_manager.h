@@ -53,6 +53,21 @@
 
 
 /***************************** Enum and Structure ****************************/
+typedef struct DB_MANAGER_MSG_t {
+    int id;
+    char *text;
+} DB_MANAGER_MSG_T;
+
+typedef struct DB_MANAGER_ARCHIVE_t {
+    size_t size;
+    char *data;
+} DB_MANAGER_ARCHIVE_T;
+
+typedef struct DB_MANAGER_TASK_t {
+    int tid;
+    mqd_t *pmqdes;
+} DB_MANAGER_TASK_T;
+
 typedef struct DB_MANAGER_WRITE {
     uint32_t unReserved;
 } DB_MANAGER_WRITE_T;

@@ -74,15 +74,29 @@ $(function() {
 <div class="textblock"><code>#include &lt;stdio.h&gt;</code><br />
 <code>#include &lt;stdint.h&gt;</code><br />
 <code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;stdarg.h&gt;</code><br />
+<code>#include &lt;stdlib.h&gt;</code><br />
+<code>#include &lt;stdbool.h&gt;</code><br />
+<code>#include &lt;assert.h&gt;</code><br />
+<code>#include &lt;mqueue.h&gt;</code><br />
+<code>#include &lt;pthread.h&gt;</code><br />
+<code>#include &lt;unistd.h&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for type.h:</div>
 <div class="dyncontent">
 <div class="center"><img src="type_8h__incl.png" border="0" usemap="#src_2include_2type_8h" alt=""/></div>
 <map name="src_2include_2type_8h" id="src_2include_2type_8h">
-<area shape="rect" title=" " alt="" coords="63,5,201,32"/>
+<area shape="rect" title=" " alt="" coords="403,5,541,32"/>
 <area shape="rect" title=" " alt="" coords="5,80,72,107"/>
 <area shape="rect" title=" " alt="" coords="97,80,167,107"/>
 <area shape="rect" title=" " alt="" coords="191,80,262,107"/>
+<area shape="rect" title=" " alt="" coords="287,80,361,107"/>
+<area shape="rect" title=" " alt="" coords="386,80,457,107"/>
+<area shape="rect" title=" " alt="" coords="481,80,564,107"/>
+<area shape="rect" title=" " alt="" coords="588,80,663,107"/>
+<area shape="rect" title=" " alt="" coords="687,80,774,107"/>
+<area shape="rect" title=" " alt="" coords="798,80,882,107"/>
+<area shape="rect" title=" " alt="" coords="907,80,981,107"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -90,13 +104,21 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="type_8h__dep__incl.png" border="0" usemap="#src_2include_2type_8hdep" alt=""/></div>
 <map name="src_2include_2type_8hdep" id="src_2include_2type_8hdep">
-<area shape="rect" title=" " alt="" coords="127,5,265,32"/>
-<area shape="rect" href="main_8c.html" title=" " alt="" coords="74,259,198,285"/>
-<area shape="rect" href="db__manager_8h.html" title=" " alt="" coords="53,80,219,121"/>
-<area shape="rect" href="framework_8h.html" title=" " alt="" coords="203,169,370,211"/>
-<area shape="rect" href="msg__manager_8h.html" title=" " alt="" coords="295,80,462,121"/>
-<area shape="rect" href="db__manager_8c.html" title=" " alt="" coords="23,169,179,211"/>
-<area shape="rect" href="msg__manager_8c.html" title=" " alt="" coords="394,169,574,211"/>
+<area shape="rect" title=" " alt="" coords="341,5,478,32"/>
+<area shape="rect" href="app_8h.html" title=" " alt="" coords="517,87,683,114"/>
+<area shape="rect" href="main_8c.html" title=" " alt="" coords="226,259,350,285"/>
+<area shape="rect" href="cli_8h.html" title=" " alt="" coords="773,177,931,203"/>
+<area shape="rect" href="cli__util_8h.html" title=" " alt="" coords="708,80,855,121"/>
+<area shape="rect" href="db__manager_8h.html" title=" " alt="" coords="83,80,250,121"/>
+<area shape="rect" href="framework_8h.html" title=" " alt="" coords="205,169,371,211"/>
+<area shape="rect" href="msg__manager_8h.html" title=" " alt="" coords="326,80,493,121"/>
+<area shape="rect" href="cli_8c.html" title=" " alt="" coords="1135,259,1260,285"/>
+<area shape="rect" href="cli__cmd_8c.html" title=" " alt="" coords="415,259,575,285"/>
+<area shape="rect" href="cli__db_8c.html" title=" " alt="" coords="599,259,747,285"/>
+<area shape="rect" href="cli__msg_8c.html" title=" " alt="" coords="772,259,932,285"/>
+<area shape="rect" href="cli__util_8c.html" title=" " alt="" coords="957,259,1110,285"/>
+<area shape="rect" href="db__manager_8c.html" title=" " alt="" coords="25,169,181,211"/>
+<area shape="rect" href="msg__manager_8c.html" title=" " alt="" coords="395,169,575,211"/>
 </map>
 </div>
 </div>
@@ -125,12 +147,42 @@ Macros</h2></td></tr>
 <tr class="memitem:a17f760256046df23dd0ab46602f04d02"><td class="memItemLeft" align="right" valign="top"><a id="a17f760256046df23dd0ab46602f04d02"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>COLOR_RESET</b>&#160;&#160;&#160;&quot;\x1b[0m&quot;</td></tr>
 <tr class="separator:a17f760256046df23dd0ab46602f04d02"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2c93c640b697ac495d9a81c1c6a8a8e6"><td class="memItemLeft" align="right" valign="top"><a id="a2c93c640b697ac495d9a81c1c6a8a8e6"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>V2X_ERR_OK</b>&#160;&#160;&#160;0</td></tr>
-<tr class="separator:a2c93c640b697ac495d9a81c1c6a8a8e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3841e283b1d15e13bcbe6407d25ab99f"><td class="memItemLeft" align="right" valign="top"><a id="a3841e283b1d15e13bcbe6407d25ab99f"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>V2X_ERR_ERROR</b>&#160;&#160;&#160;1</td></tr>
-<tr class="separator:a3841e283b1d15e13bcbe6407d25ab99f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89dd25ed1b497c15e642a7be2152d39f"><td class="memItemLeft" align="right" valign="top"><a id="a89dd25ed1b497c15e642a7be2152d39f"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>FRAMEWORK_OK</b>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:a89dd25ed1b497c15e642a7be2152d39f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2fd52ef2b6f2f742c0fffb0119638d6"><td class="memItemLeft" align="right" valign="top"><a id="ae2fd52ef2b6f2f742c0fffb0119638d6"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>FRAMEWORK_ERROR</b>&#160;&#160;&#160;1</td></tr>
+<tr class="separator:ae2fd52ef2b6f2f742c0fffb0119638d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59bf2009b268e9fb48f53a5b94ddac06"><td class="memItemLeft" align="right" valign="top"><a id="a59bf2009b268e9fb48f53a5b94ddac06"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>APP_OK</b>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:a59bf2009b268e9fb48f53a5b94ddac06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e2e4a8db1580e6a554c9105d1a421d9"><td class="memItemLeft" align="right" valign="top"><a id="a0e2e4a8db1580e6a554c9105d1a421d9"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>APP_ERROR</b>&#160;&#160;&#160;1</td></tr>
+<tr class="separator:a0e2e4a8db1580e6a554c9105d1a421d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af10eaa082d680d893f93ebbda137bd16"><td class="memItemLeft" align="right" valign="top"><a id="af10eaa082d680d893f93ebbda137bd16"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>APP_ERR_INVALID</b>&#160;&#160;&#160;2</td></tr>
+<tr class="separator:af10eaa082d680d893f93ebbda137bd16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91570f90c2a432d3964b65545646060d"><td class="memItemLeft" align="right" valign="top"><a id="a91570f90c2a432d3964b65545646060d"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>APP_ERR_AMBIGUOUS</b>&#160;&#160;&#160;3</td></tr>
+<tr class="separator:a91570f90c2a432d3964b65545646060d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee042936c77e336b62a05224ff2e3ef4"><td class="memItemLeft" align="right" valign="top"><a id="aee042936c77e336b62a05224ff2e3ef4"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>APP_ERR_BLANK</b>&#160;&#160;&#160;4</td></tr>
+<tr class="separator:aee042936c77e336b62a05224ff2e3ef4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c80c05569fa5a964af8e4e9abd98302"><td class="memItemLeft" align="right" valign="top"><a id="a8c80c05569fa5a964af8e4e9abd98302"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>APP_CLI_CMD_EOL</b>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:a8c80c05569fa5a964af8e4e9abd98302"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2512e6c2a45cf20cf3c26bfe166dadfc"><td class="memItemLeft" align="right" valign="top"><a id="a2512e6c2a45cf20cf3c26bfe166dadfc"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>APP_CLI_CMD_SEMI</b>&#160;&#160;&#160;1</td></tr>
+<tr class="separator:a2512e6c2a45cf20cf3c26bfe166dadfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41ea7a94c35e1f9a3f43a12368635314"><td class="memItemLeft" align="right" valign="top"><a id="a41ea7a94c35e1f9a3f43a12368635314"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>APP_CLI_CMD_AND</b>&#160;&#160;&#160;2</td></tr>
+<tr class="separator:a41ea7a94c35e1f9a3f43a12368635314"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f5e7141839f6c5c697f7a25ddc4f805"><td class="memItemLeft" align="right" valign="top"><a id="a5f5e7141839f6c5c697f7a25ddc4f805"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>APP_CLI_CMD_OR</b>&#160;&#160;&#160;3</td></tr>
+<tr class="separator:a5f5e7141839f6c5c697f7a25ddc4f805"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86d500a34c624c2cae56bc25a31b12f3"><td class="memItemLeft" align="right" valign="top"><a id="a86d500a34c624c2cae56bc25a31b12f3"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>UNUSED</b>(x)&#160;&#160;&#160;(void)(x)</td></tr>
+<tr class="separator:a86d500a34c624c2cae56bc25a31b12f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a8ca07ad0f20efd32d4abecdfa9366f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><b>PrintError</b>(fmt,  args...)</td></tr>
 <tr class="separator:a3a8ca07ad0f20efd32d4abecdfa9366f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a148ae81b3285f5a64c61013042c996f1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><b>PrintNotice</b>(fmt,  args...)</td></tr>
@@ -145,6 +197,8 @@ Macros</h2></td></tr>
 <tr class="separator:ac1d95eeb3147d78142014af528dd7361"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa289a957e7f62f2b6eb20e230d9388b3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><b>PrintDebug</b>(fmt,  args...)</td></tr>
 <tr class="separator:aa289a957e7f62f2b6eb20e230d9388b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8926a889a304fb544dd88615c5ba863d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><b>PrintInfo</b>(fmt,  args...)</td></tr>
+<tr class="separator:a8926a889a304fb544dd88615c5ba863d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><dl class="section note"><dt>Note</dt><dd></dd></dl>
@@ -270,6 +324,37 @@ Macros</h2></td></tr>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> { \</div>
 <div class="line">        printf(COLOR_CYAN <span class="stringliteral">&quot;[%s][%d] &quot;</span><span class="stringliteral">&quot;&quot;</span>fmt<span class="stringliteral">&quot;\n&quot;</span> COLOR_RESET , __FUNCTION__, __LINE__, ##args); \</div>
+<div class="line">    } <span class="keywordflow">while</span> (0)</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a8926a889a304fb544dd88615c5ba863d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8926a889a304fb544dd88615c5ba863d">&#9670;&nbsp;</a></span>PrintInfo</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PrintInfo</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">fmt, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">args...&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> { \</div>
+<div class="line">        printf(COLOR_RESET <span class="stringliteral">&quot;&quot;</span>fmt<span class="stringliteral">&quot;\n&quot;</span> COLOR_RESET , ##args); \</div>
 <div class="line">    } <span class="keywordflow">while</span> (0)</div>
 </div><!-- fragment -->
 </div>

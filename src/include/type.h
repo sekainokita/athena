@@ -51,6 +51,12 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
+
+/* POSIX C library */
+#include <mqueue.h>
+#include <pthread.h>
+#include <unistd.h>
 
 /***************************** Definition ************************************/
 #define COLOR_RED     "\x1b[31m"
