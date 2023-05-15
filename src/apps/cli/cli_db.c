@@ -44,8 +44,15 @@
 
 /***************************** Include ***************************************/
 #include "cli.h"
+#include "app.h"
+#include "db_v2x.h"
 #include "db_manager.h"
+
 /***************************** Definition ************************************/
+#define CLI_DB_V2X_DEFAULT_DEVICE_ID    0x12345678
+#define CLI_DB_V2X_DEFAULT_TIMESTAMP    2023032314344766828
+#define CLI_DB_V2X_DEFAULT_HW_VER       0x1234
+#define CLI_DB_V2X_DEFAULT_PAYLOAD_LEN  1024
 
 
 /***************************** Static Variable *******************************/
@@ -60,10 +67,11 @@ static int P_CLI_DB_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
     char *pcCmd;
     DB_MANAGER_WRITE_T stDbManagerWrite;
     DB_V2X_T stDbV2x;
-    char cPayload[100];
+    char cPayload[CLI_DB_V2X_DEFAULT_PAYLOAD_LEN];
 
     (void*)memset(&stDbManagerWrite, 0x00, sizeof(DB_MANAGER_WRITE_T));
     (void*)memset(&stDbV2x, 0x00, sizeof(DB_V2X_T));
+    (void*)memset(&cPayload, 0x00, sizeof(cPayload));
 
     UNUSED(argc);
 
@@ -91,6 +99,38 @@ static int P_CLI_DB_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         }
         else if(IS_CMD(pcCmd, "v2x"))
         {
+            stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
+            stDbV2x.eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5_BROADCAST;
+            stDbV2x.unDeviceId = CLI_DB_V2X_DEFAULT_DEVICE_ID;
+            stDbV2x.ulTimeStamp = CLI_DB_V2X_DEFAULT_TIMESTAMP;
+            stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
+            stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
+            stDbV2x.eRegionId = DB_V2X_REGION_ID_SEONGNAM;
+            stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_PLATOONING;
+            stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
+            stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
+            stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
+            stDbV2x.usSwVer = APP_VER;
+            stDbV2x.ulPayloadLength = sizeof(cPayload);
+            stDbV2x.ulPacketCrc32 = 0;
+
+            PrintTrace("========================================================");
+            PrintDebug("eDeviceType[%d]", stDbV2x.eDeviceType);
+            PrintDebug("eTeleCommType[%d]", stDbV2x.eTeleCommType);
+            PrintDebug("unDeviceId[0x%x]", stDbV2x.unDeviceId);
+            PrintDebug("ulTimeStamp[%ld]", stDbV2x.ulTimeStamp);
+            PrintDebug("eServiceId[%d]", stDbV2x.eServiceId);
+            PrintDebug("eActionType[%d]", stDbV2x.eActionType);
+            PrintDebug("eRegionId[%d]", stDbV2x.eRegionId);
+            PrintDebug("ePayloadType[%d]", stDbV2x.ePayloadType);
+            PrintDebug("eCommId[%d]", stDbV2x.eCommId);
+            PrintDebug("usDbVer[%d.%d]", stDbV2x.usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, stDbV2x.usDbVer & CLI_DB_V2X_MINOR_MASK);
+            PrintDebug("usHwVer[0x%x]", stDbV2x.usHwVer);
+            PrintDebug("usSwVer[0x%x]", stDbV2x.usSwVer);
+            PrintDebug("ulPayloadLength[%d]", stDbV2x.ulPayloadLength);
+            PrintDebug("ulPayloadCrc32[0x%x]", stDbV2x.ulPacketCrc32);
+            PrintTrace("========================================================");
+
             nFrameWorkRet = DB_MANAGER_Write(&stDbManagerWrite, &stDbV2x, &cPayload);
             if(nFrameWorkRet != FRAMEWORK_OK)
             {

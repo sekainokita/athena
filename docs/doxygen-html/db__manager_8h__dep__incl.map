@@ -1,6 +1,7 @@
 <map id="src/framework/include/db_manager.h" name="src/framework/include/db_manager.h">
-<area shape="rect" id="node1" title=" " alt="" coords="92,5,259,47"/>
-<area shape="rect" id="node2" href="$db__manager_8c.html" title=" " alt="" coords="5,95,161,136"/>
-<area shape="rect" id="node3" href="$framework_8h.html" title=" " alt="" coords="185,95,352,136"/>
-<area shape="rect" id="node4" href="$main_8c.html" title=" " alt="" coords="207,184,331,211"/>
+<area shape="rect" id="node1" title=" " alt="" coords="172,5,339,47"/>
+<area shape="rect" id="node2" href="$cli__db_8c.html" title=" " alt="" coords="5,102,153,129"/>
+<area shape="rect" id="node3" href="$db__manager_8c.html" title=" " alt="" coords="177,95,333,136"/>
+<area shape="rect" id="node4" href="$framework_8h.html" title=" " alt="" coords="357,95,524,136"/>
+<area shape="rect" id="node5" href="$main_8c.html" title=" " alt="" coords="379,184,503,211"/>
 </map>

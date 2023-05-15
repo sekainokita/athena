@@ -173,6 +173,9 @@ Macros</h2></td></tr>
 <tr class="memitem:aab1a0d6f90722c03ed6c8a9460d6e792"><td class="memItemLeft" align="right" valign="top"><a id="aab1a0d6f90722c03ed6c8a9460d6e792"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>CMD_MAX</b>&#160;&#160;&#160;10</td></tr>
 <tr class="separator:aab1a0d6f90722c03ed6c8a9460d6e792"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c09faccfc9e7ce668acf7f2ae663c74"><td class="memItemLeft" align="right" valign="top"><a id="a0c09faccfc9e7ce668acf7f2ae663c74"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>IS_CMD</b>(str1,  str2)&#160;&#160;&#160;(strcmp((str1), (str2)) == 0)</td></tr>
+<tr class="separator:a0c09faccfc9e7ce668acf7f2ae663c74"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -203,15 +206,15 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_CMD_Free</b> (<a 
 <tr class="memitem:a4501bd6229cc89e2e3a9440cfe88fa1a"><td class="memItemLeft" align="right" valign="top"><a id="a4501bd6229cc89e2e3a9440cfe88fa1a"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_CMD_CheckValid</b> (<a class="el" href="structCLI__CMDLINE__t.html">CLI_CMDLINE_T</a> *cmd, char *validstr)</td></tr>
 <tr class="separator:a4501bd6229cc89e2e3a9440cfe88fa1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad91fc469a871998f98f3443be1cff4ca"><td class="memItemLeft" align="right" valign="top"><a id="ad91fc469a871998f98f3443be1cff4ca"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_CMD_AddCmd</b> (char *command, int(*func)(<a class="el" href="structCLI__CMDLINE__t.html">CLI_CMDLINE_T</a> *, int argc, char *argv[]), void *ref, char *help, char *usage, char *switches)</td></tr>
-<tr class="separator:ad91fc469a871998f98f3443be1cff4ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff9b621cb86c59de823d64f4dd894148"><td class="memItemLeft" align="right" valign="top"><a id="aff9b621cb86c59de823d64f4dd894148"></a>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_CMD_AddCmd</b> (char *command, int(*func)(<a class="el" href="structCLI__CMDLINE__t.html">CLI_CMDLINE_T</a> *, int argc, char *argv[]), void *ref, char *help, char *usage, char *switches)</td></tr>
+<tr class="separator:aff9b621cb86c59de823d64f4dd894148"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf628cddf6cc9de421c9066e0704be61"><td class="memItemLeft" align="right" valign="top"><a id="adf628cddf6cc9de421c9066e0704be61"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_CMD_CheckLookUp</b> (<a class="el" href="structCLI__UTIL__QUEUE__t.html">CLI_UTIL_QUEUE_T</a> *head, <a class="el" href="structCLI__CMDLINE__t.html">CLI_CMDLINE_T</a> *cmd)</td></tr>
 <tr class="separator:adf628cddf6cc9de421c9066e0704be61"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe98afbbbbcce79cab33f1f1808b8ce9"><td class="memItemLeft" align="right" valign="top"><a id="afe98afbbbbcce79cab33f1f1808b8ce9"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_CMD_Init</b> (void)</td></tr>
-<tr class="separator:afe98afbbbbcce79cab33f1f1808b8ce9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ffdaf3c3be9e90a8f76822cc422fbf7"><td class="memItemLeft" align="right" valign="top"><a id="a1ffdaf3c3be9e90a8f76822cc422fbf7"></a>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_CMD_Init</b> (void)</td></tr>
+<tr class="separator:a1ffdaf3c3be9e90a8f76822cc422fbf7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af5f67b6429f4eace97855e01bc4c0bb7"><td class="memItemLeft" align="right" valign="top"><a id="af5f67b6429f4eace97855e01bc4c0bb7"></a>
 <a class="el" href="structCLI__LIST__t.html">CLI_LIST_T</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_CMD_Read</b> (<a class="el" href="structCLI__UTIL__QUEUE__t.html">CLI_UTIL_QUEUE_T</a> *head)</td></tr>
 <tr class="separator:af5f67b6429f4eace97855e01bc4c0bb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -233,9 +236,9 @@ char *&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_CMD_GetArg</b> 
 <tr class="memitem:a8ed88c50d705ea4a175d0961d5f8e22f"><td class="memItemLeft" align="right" valign="top"><a id="a8ed88c50d705ea4a175d0961d5f8e22f"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_CMD_Showusage</b> (<a class="el" href="structCLI__CMDLINE__t.html">CLI_CMDLINE_T</a> *pstCmd)</td></tr>
 <tr class="separator:a8ed88c50d705ea4a175d0961d5f8e22f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acb405cd5067a3dd792671ed28087e42c"><td class="memItemLeft" align="right" valign="top"><a id="acb405cd5067a3dd792671ed28087e42c"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_Init</b> (void)</td></tr>
-<tr class="separator:acb405cd5067a3dd792671ed28087e42c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec6d0bc68fe80479c856057c6426e56a"><td class="memItemLeft" align="right" valign="top"><a id="aec6d0bc68fe80479c856057c6426e56a"></a>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_Init</b> (void)</td></tr>
+<tr class="separator:aec6d0bc68fe80479c856057c6426e56a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This file contains a CLI design</p>

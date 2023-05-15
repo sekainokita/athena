@@ -9,5 +9,15 @@ var searchData=
   ['db_5fmanager_5ftask_5ft_23',['DB_MANAGER_TASK_t',['../structDB__MANAGER__TASK__t.html',1,'']]],
   ['db_5fmanager_5fwrite_24',['DB_MANAGER_WRITE',['../structDB__MANAGER__WRITE.html',1,'']]],
   ['db_5fv2x_25',['DB_V2X',['../structDB__V2X.html',1,'']]],
-  ['db_5fv2x_2eh_26',['db_v2x.h',['../db__v2x_8h.html',1,'']]]
+  ['db_5fv2x_2eh_26',['db_v2x.h',['../db__v2x_8h.html',1,'']]],
+  ['db_5fv2x_5faction_5ftype_5fe_27',['DB_V2X_ACTION_TYPE_E',['../db__v2x_8h.html#a08241281c1c6a07c8bc8d35eb2cb29bf',1,'db_v2x.h']]],
+  ['db_5fv2x_5fcommuncation_5fid_5fe_28',['DB_V2X_COMMUNCATION_ID_E',['../db__v2x_8h.html#a80f188024ea4b65517dd02d0b264f20e',1,'db_v2x.h']]],
+  ['db_5fv2x_5fdevice_5ftype_5fe_29',['DB_V2X_DEVICE_TYPE_E',['../db__v2x_8h.html#a6b8cfdafa75d5e4094fb7331b0a0e273',1,'db_v2x.h']]],
+  ['db_5fv2x_5fpayload_5ftype_5fe_30',['DB_V2X_PAYLOAD_TYPE_E',['../db__v2x_8h.html#a1bc569f60439c829eff8325eadeb80c9',1,'db_v2x.h']]],
+  ['db_5fv2x_5fregion_5fid_5fe_31',['DB_V2X_REGION_ID_E',['../db__v2x_8h.html#afd7bbead08edfed69a9ba26dacb2199f',1,'db_v2x.h']]],
+  ['db_5fv2x_5fservice_5fid_5fe_32',['DB_V2X_SERVICE_ID_E',['../db__v2x_8h.html#ada3214503ddeddd1d6c2cd53d3b1d36a',1,'db_v2x.h']]],
+  ['db_5fv2x_5ft_33',['DB_V2X_T',['../db__v2x_8h.html#a29f3cc9a2608a375609b7c7f6e1473be',1,'db_v2x.h']]],
+  ['db_5fv2x_5ftelecommunication_5ftype_5fe_34',['DB_V2X_TELECOMMUNICATION_TYPE_E',['../db__v2x_8h.html#a8e4def0a68074483ed22dd1c40f084f6',1,'db_v2x.h']]],
+  ['db_5fv2x_5fversion_5fmajor_35',['DB_V2X_VERSION_MAJOR',['../db__v2x_8h.html#ad709477e3060544cc74d482281b83135',1,'db_v2x.h']]],
+  ['db_5fv2x_5fversion_5fminor_36',['DB_V2X_VERSION_MINOR',['../db__v2x_8h.html#a4ad3343038d3abfd1fdad7d3da3278e0',1,'db_v2x.h']]]
 ];

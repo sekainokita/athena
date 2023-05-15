@@ -57,10 +57,35 @@
 #include <stdint.h>
 
 /***************************** Definition ************************************/
-# define DB_V2X_VERSION_MAJOR                   = 1
-# define DB_V2X_VERSION_MINOR                   = 0
+
+/**
+* @details DB V2X VERSION MAJOR
+* @note express as DB_V2X_VERSION_MAJOR.DB_V2X_VERSION_MINOR (x.y)\n
+*       set : stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR\n
+*       get : PrintDebug("usDbVer[%d.%d]", stDbV2x.usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, stDbV2x.usDbVer & CLI_DB_V2X_MINOR_MASK)
+* @param DB_V2X_VERSION_MAJOR range(0 ~ 1024)
+* @param DB_V2X_VERSION_MINOR range(0 ~ 15, 0x0 ~ 0xF)
+*/
+#define DB_V2X_VERSION_MAJOR                    (1)
+
+/**
+* @details DB V2X VERSION MINOR
+* @note express as DB_V2X_VERSION_MAJOR.DB_V2X_VERSION_MINOR (x.y)\n
+*       set : stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR\n
+*       get : PrintDebug("usDbVer[%d.%d]", stDbV2x.usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, stDbV2x.usDbVer & CLI_DB_V2X_MINOR_MASK)
+* @param DB_V2X_VERSION_MAJOR range(0 ~ 1024)
+* @param DB_V2X_VERSION_MINOR range(0 ~ 15, 0x0 ~ 0xF)
+*/
+#define DB_V2X_VERSION_MINOR                    (5)
+
+#define CLI_DB_V2X_MAJOR_SHIFT                  (4)
+#define CLI_DB_V2X_MINOR_MASK                   (0x0F)
 
 /***************************** Enum and Structure ****************************/
+/**
+* @details DB V2X Device Type
+* @param DB_V2X_DEVICE_TYPE_E
+*/
 typedef enum {
     DB_V2X_DEVICE_TYPE_UNKNOWN                  = 0x0000,
     DB_V2X_DEVICE_TYPE_OBU                      = 0x0001,
@@ -72,6 +97,10 @@ typedef enum {
     DB_V2X_DEVICE_TYPE_MAX                      = 0xFFFF
 } DB_V2X_DEVICE_TYPE_E;
 
+/**
+* @details DB V2X Telecommunication Type
+* @param DB_V2X_TELECOMMUNICATION_TYPE_E
+*/
 typedef enum {
     DB_V2X_TELECOMM_TYPE_UNKNOWN                = 0x0000,
     /* 4G (1 ~ 10) */
@@ -92,6 +121,10 @@ typedef enum {
     DB_V2X_TELECOMM_TYPE_MAX                    = 0xFFFF
 } DB_V2X_TELECOMMUNICATION_TYPE_E;
 
+/**
+* @details DB V2X Service ID
+* @param DB_V2X_SERVICE_ID_E
+*/
 typedef enum {
     DB_V2X_SERVICE_ID_UNKNOWN                   = 0x0000,
     DB_V2X_SERVICE_ID_PLATOONING                = 0x0001,
@@ -103,6 +136,10 @@ typedef enum {
     DB_V2X_SERVICE_ID_MAX                       = 0xFFFF
 } DB_V2X_SERVICE_ID_E;
 
+/**
+* @details DB V2X Action Type
+* @param DB_V2X_ACTION_TYPE_E
+*/
 typedef enum {
     DB_V2X_ACTION_TYPE_UNKNOWN                  = 0x0000,
     DB_V2X_ACTION_TYPE_REQUEST                  = 0x0001,
@@ -110,6 +147,10 @@ typedef enum {
     DB_V2X_ACTION_TYPE_MAX                      = 0xFFFF
 } DB_V2X_ACTION_TYPE_E;
 
+/**
+* @details DB V2X Region ID
+* @param DB_V2X_REGION_ID_E
+*/
 typedef enum {
     DB_V2X_REGION_ID_UNKNOWN                    = 0x0000,
     DB_V2X_REGION_ID_SEOUL                      = 0x0001,
@@ -127,6 +168,10 @@ typedef enum {
     DB_V2X_REGION_ID_MAX                        = 0xFFFF
 } DB_V2X_REGION_ID_E;
 
+/**
+* @details DB V2X Payload Type
+* @param DB_V2X_PAYLOAD_TYPE_E
+*/
 typedef enum {
     DB_V2X_PAYLOAD_TYPE_UNKNOWN                 = 0x0000,
     /* SAE J2735 (0 ~ 10) */
@@ -161,6 +206,10 @@ typedef enum {
     DB_V2X_PAYLOAD_TYPE_MAX                     = 0xFFFF
 } DB_V2X_PAYLOAD_TYPE_E;
 
+/**
+* @details DB V2X Communication ID
+* @param DB_V2X_COMMUNCATION_ID_E
+*/
 typedef enum {
     DB_V2X_COMM_ID_UNKNOWN                      = 0x0000,
     DB_V2X_COMM_ID_V2V                          = 0x0001,
@@ -180,6 +229,23 @@ typedef enum {
     DB_V2X_COMM_ID_MAX                          = 0xFFFF
 } DB_V2X_COMMUNCATION_ID_E;
 
+/**
+* @details DB V2X Struct
+* @param eDeviceType        device type
+* @param eTeleCommType      telecommunication type
+* @param unDeviceId         device ID
+* @param ulTimeStamp        timestamp
+* @param eServiceId         service ID
+* @param eActionType        action type
+* @param eRegionId          region ID
+* @param ePayloadType       payload type
+* @param eCommId            communication ID
+* @param usDbVer            DB version
+* @param usHwVer            HW version
+* @param usSwVer            SW version
+* @param ulPayloadLength    payload length
+* @param ulPacketCrc32      header + payload crc32
+*/
 typedef struct DB_V2X {
     DB_V2X_DEVICE_TYPE_E                        eDeviceType;
     DB_V2X_TELECOMMUNICATION_TYPE_E             eTeleCommType;
@@ -194,7 +260,7 @@ typedef struct DB_V2X {
     uint16_t                                    usHwVer;
     uint16_t                                    usSwVer;
     uint32_t                                    ulPayloadLength;
-    uint32_t                                    ulPayloadCrc32;
+    uint32_t                                    ulPacketCrc32;
 } DB_V2X_T;
 
 /***************************** Function Protype ******************************/

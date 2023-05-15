@@ -49,6 +49,7 @@
 #include "type.h"
 
 /***************************** Definition ************************************/
+#define APP_VER     0x1
 
 /***************************** Enum and Structure ****************************/
 typedef struct APP {

@@ -3,7 +3,10 @@ var indexSectionsWithContent =
   0: "acdfkmt",
   1: "acdfm",
   2: "acdfmt",
-  3: "k"
+  3: "d",
+  4: "d",
+  5: "d",
+  6: "k"
 };
 
 var indexSectionNames =
@@ -11,7 +14,10 @@ var indexSectionNames =
   0: "all",
   1: "classes",
   2: "files",
-  3: "pages"
+  3: "typedefs",
+  4: "enums",
+  5: "defines",
+  6: "pages"
 };
 
 var indexSectionLabels =
@@ -19,6 +25,9 @@ var indexSectionLabels =
   0: "All",
   1: "Classes",
   2: "Files",
-  3: "Pages"
+  3: "Typedefs",
+  4: "Enumerations",
+  5: "Macros",
+  6: "Pages"
 };
 
