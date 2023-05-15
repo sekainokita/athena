@@ -379,6 +379,7 @@ int32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV
         fprintf(s_pDbManagerFd, "], ");
 
         fprintf(s_pDbManagerFd, "ulPayloadCrc32[0x%x]", pstDbV2x->ulPacketCrc32);
+        fprintf(s_pDbManagerFd, "\r\n");
 
         nRet = fflush(s_pDbManagerFd);
         if (nRet < 0)
