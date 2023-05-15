@@ -52,11 +52,11 @@
 #include "db_manager.h"
 
 /***************************** Definition ************************************/
-
+#define DB_MANAGER_DEFAULT_FILE_NAME "db_manager.log"
 
 /***************************** Static Variable *******************************/
 static mqd_t s_stMqdes;
-
+FILE* s_pDbManagerFd;
 
 /***************************** Function  *************************************/
 
@@ -245,7 +245,6 @@ static int32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
         return nRet;
     }
 
-//    s_stMqdes = mq_open(s_cQueueName, O_CREAT | O_RDWR | O_NONBLOCK, 0644, NULL);
     s_stMqdes = mq_open(s_cQueueName, O_CREAT | O_RDWR, 0644, NULL);
     if (s_stMqdes == (mqd_t)-1)
     {
@@ -279,6 +278,7 @@ static int32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
 static int32_t P_DB_MANAGER_DeInit(DB_MANAGER_T *pstDbManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
+    struct mq_attr attr;
 
     if(pstDbManager == NULL)
     {
@@ -289,8 +289,6 @@ static int32_t P_DB_MANAGER_DeInit(DB_MANAGER_T *pstDbManager)
     free(s_pThread);
     free(s_pThreadInfo);
 
-    // Make sure there are no messages left in the queue
-    struct mq_attr attr;
     mq_getattr(s_stMqdes, &attr);
     assert(attr.mq_curmsgs == 0);
 
@@ -341,6 +339,68 @@ int32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV
         }
 
         P_DB_MANAGER_MsgFree(pstMsg);
+    }
+
+    {
+        char *pcPayload = (char*)malloc(sizeof(char)*pstDbV2x->ulPayloadLength);
+        memcpy(pcPayload, (char *)pPayload, pstDbV2x->ulPayloadLength);
+        if(s_pDbManagerFd == NULL)
+        {
+            s_pDbManagerFd = fopen(DB_MANAGER_DEFAULT_FILE_NAME, "a+");
+            if(s_pDbManagerFd == NULL)
+            {
+                PrintError("fopen() is failed!!");
+            }
+            else
+            {
+                PrintTrace("DB_MANAGER_DEFAULT_FILE_NAME[%s] is opened.", DB_MANAGER_DEFAULT_FILE_NAME);
+            }
+        }
+
+        fprintf(s_pDbManagerFd, "eDeviceType[%d], ", pstDbV2x->eDeviceType);
+        fprintf(s_pDbManagerFd, "eTeleCommType[%d], ", pstDbV2x->eTeleCommType);
+        fprintf(s_pDbManagerFd, "unDeviceId[0x%x], ", pstDbV2x->unDeviceId);
+        fprintf(s_pDbManagerFd, "ulTimeStamp[%ld], ", pstDbV2x->ulTimeStamp);
+        fprintf(s_pDbManagerFd, "eServiceId[%d], ", pstDbV2x->eServiceId);
+        fprintf(s_pDbManagerFd, "eActionType[%d], ", pstDbV2x->eActionType);
+        fprintf(s_pDbManagerFd, "eRegionId[%d], ", pstDbV2x->eRegionId);
+        fprintf(s_pDbManagerFd, "ePayloadType[%d], ", pstDbV2x->ePayloadType);
+        fprintf(s_pDbManagerFd, "eCommId[%d], ", pstDbV2x->eCommId);
+        fprintf(s_pDbManagerFd, "usDbVer[%d.%d], ", pstDbV2x->usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, pstDbV2x->usDbVer & CLI_DB_V2X_MINOR_MASK);
+        fprintf(s_pDbManagerFd, "usHwVer[0x%x], ", pstDbV2x->usHwVer);
+        fprintf(s_pDbManagerFd, "usSwVer[0x%x], ", pstDbV2x->usSwVer);
+        fprintf(s_pDbManagerFd, "ulPayloadLength[%d], ", pstDbV2x->ulPayloadLength);
+
+        fprintf(s_pDbManagerFd, "cPayload[");
+        for(int i = 0; i < pstDbV2x->ulPayloadLength; i++)
+        {
+              fprintf(s_pDbManagerFd, "%d ", pcPayload[i]);
+        }
+        fprintf(s_pDbManagerFd, "], ");
+
+        fprintf(s_pDbManagerFd, "ulPayloadCrc32[0x%x]", pstDbV2x->ulPacketCrc32);
+
+        nRet = fflush(s_pDbManagerFd);
+        if (nRet < 0)
+        {
+            PrintError("fflush() is failed! [unRet:%d]", nRet);
+        }
+
+        if(s_pDbManagerFd != NULL)
+        {
+            nRet = fclose(s_pDbManagerFd);
+            if (nRet < 0)
+            {
+                PrintError("fclose() is failed! [unRet:%d]", nRet);
+            }
+            else
+            {
+                PrintTrace("DB_MANAGER_DEFAULT_FILE_NAME[%s] is closed.", DB_MANAGER_DEFAULT_FILE_NAME);
+                s_pDbManagerFd = NULL;
+            }
+        }
+
+        free(pcPayload);
     }
 
 #if 0

@@ -128,10 +128,18 @@ static int P_CLI_DB_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             PrintDebug("usHwVer[0x%x]", stDbV2x.usHwVer);
             PrintDebug("usSwVer[0x%x]", stDbV2x.usSwVer);
             PrintDebug("ulPayloadLength[%d]", stDbV2x.ulPayloadLength);
+            PrintDebug("cPayload");
+            for(int i=0; i < CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; i++)
+            {
+                cPayload[i] = rand();
+                printf("%d ", cPayload[i]);
+            }
+            printf("\r\n");
+
             PrintDebug("ulPayloadCrc32[0x%x]", stDbV2x.ulPacketCrc32);
             PrintTrace("========================================================");
 
-            nFrameWorkRet = DB_MANAGER_Write(&stDbManagerWrite, &stDbV2x, &cPayload);
+            nFrameWorkRet = DB_MANAGER_Write(&stDbManagerWrite, &stDbV2x, (char*)&cPayload);
             if(nFrameWorkRet != FRAMEWORK_OK)
             {
                 PrintError("DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
