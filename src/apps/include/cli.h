@@ -72,6 +72,8 @@
 #define CMD_9   9
 #define CMD_MAX 10
 
+#define IS_CMD(str1, str2) (strcmp((str1), (str2)) == 0)
+
 /***************************** Enum and Structure ****************************/
 typedef struct CLI_CMD_SW_t
 {

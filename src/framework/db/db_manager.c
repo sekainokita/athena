@@ -334,9 +334,10 @@ int32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV
         DB_MANAGER_MSG_T *pstMsg = P_DB_MANAGER_MsgNew(10 - i, text);
         free(text);
 
-        if (P_DB_MANAGER_MsgSend(s_stMqdes, pstMsg, 1) != 0)
+        nRet = P_DB_MANAGER_MsgSend(s_stMqdes, pstMsg, 1);
+        if (nRet != FRAMEWORK_OK)
         {
-            PrintError("mq_send message");
+            PrintError("P_DB_MANAGER_MsgSend() is failed! [unRet:%d]", nRet);
         }
 
         P_DB_MANAGER_MsgFree(pstMsg);

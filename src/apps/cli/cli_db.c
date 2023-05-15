@@ -73,23 +73,33 @@ static int P_CLI_DB_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         return nRet;
     }
 
-    pcCmd = CLI_CMD_GetArg(pstCmd, 0);
+    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_0);
     if (pcCmd == NULL)
     {
         return CLI_CMD_Showusage(pstCmd);
     }
     else
     {
-        for(int i = 0; i < CMD_MAX; i++)
+        pcCmd = CLI_CMD_GetArg(pstCmd, CMD_0);
+        if(IS_CMD(pcCmd, "test"))
         {
-            pcCmd = CLI_CMD_GetArg(pstCmd, i);
-            PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
+            for(int i = 0; i < CMD_MAX; i++)
+            {
+                pcCmd = CLI_CMD_GetArg(pstCmd, i);
+                PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
+            }
         }
-
-        nFrameWorkRet = DB_MANAGER_Write(&stDbManagerWrite, &stDbV2x, &cPayload);
-        if(nFrameWorkRet != FRAMEWORK_OK)
+        else if(IS_CMD(pcCmd, "v2x"))
         {
-            PrintError("DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
+            nFrameWorkRet = DB_MANAGER_Write(&stDbManagerWrite, &stDbV2x, &cPayload);
+            if(nFrameWorkRet != FRAMEWORK_OK)
+            {
+                PrintError("DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
+            }
+        }
+        else
+        {
+            return CLI_CMD_Showusage(pstCmd);
         }
     }
 
@@ -107,7 +117,9 @@ int32_t CLI_DB_InitCmds(void)
                "db [enter command]\n\n"
                "Without any parameters, the 'db' show a description\n"
                "of available commands. For more details on a command, type and enter 'db'\n"
-               "and the command name.",
+               "and the command name.\n\n"
+               "db test    test db command\n"
+               "db v2x     test db v2x sample command",
                "");
     if(nRet != APP_OK)
     {
