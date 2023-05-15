@@ -59,9 +59,9 @@
 
 /***************************** Function  *************************************/
 
-uint32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
+int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     MSG_MANAGER_T stMsgManager;
     DB_MANAGER_T stDbManager;
@@ -69,7 +69,7 @@ uint32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
     if(pstFramework == NULL)
     {
         PrintError("pstFramework == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     (void*)memset(&stMsgManager, 0x00, sizeof(MSG_MANAGER_T));
@@ -77,20 +77,20 @@ uint32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
 
     PrintWarn("is successfully initialized.");
 
-    unRet = MSG_MANAGER_Init(&stMsgManager);
-    if (unRet != FRAMEWORK_OK)
+    nRet = MSG_MANAGER_Init(&stMsgManager);
+    if (nRet != FRAMEWORK_OK)
     {
-        PrintError("MSG_MANAGER_Init() is failed! [unRet:%d]", unRet);
-        return unRet;
+        PrintError("MSG_MANAGER_Init() is failed! [nRet:%d]", nRet);
+        return nRet;
     }
 
-    unRet = DB_MANAGER_Init(&stDbManager);
-    if (unRet != FRAMEWORK_OK)
+    nRet = DB_MANAGER_Init(&stDbManager);
+    if (nRet != FRAMEWORK_OK)
     {
-        PrintError("DB_MANAGER_Init() is failed! [unRet:%d]", unRet);
-        return unRet;
+        PrintError("DB_MANAGER_Init() is failed! [nRet:%d]", nRet);
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 

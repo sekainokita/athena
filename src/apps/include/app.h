@@ -57,7 +57,7 @@ typedef struct APP {
 
 
 /***************************** Function Protype ******************************/
-uint32_t APP_Init(APP_T *pstApp);
+int32_t APP_Init(APP_T *pstApp);
 
 #endif	/* _APP_H_ */
 

@@ -169,6 +169,7 @@ DB_MANAGER_MSG_T *P_DB_MANAGER_MsgReceive(mqd_t mqdes, char *buffer, size_t size
     }
 
     DB_MANAGER_MSG_T *pstMsg = NULL;
+
     switch (mq_receive(mqdes, buffer, size, NULL))
     {
         case 0:
@@ -207,15 +208,18 @@ static void *P_DB_MANAGER_Task(void *arg)
         pstMsg = P_DB_MANAGER_MsgReceive(mqdes, buffer, mqstat.mq_msgsize);
         if(pstMsg != NULL)
         {
-            PrintDebug("%d [%ld] %d, %s", tinfo->tid, strlen(P_DB_MANAGER_MsgText(pstMsg)), P_DB_MANAGER_MsgId(pstMsg), P_DB_MANAGER_MsgText(pstMsg));
+            PrintDebug("tid[%d] len[%ld] id[%d], str[%s]", tinfo->tid, strlen(P_DB_MANAGER_MsgText(pstMsg)), P_DB_MANAGER_MsgId(pstMsg), P_DB_MANAGER_MsgText(pstMsg));
             usleep(10000); // Placeholder for long work
             P_DB_MANAGER_MsgFree(pstMsg);
         }
+#if 0
         else
         {
             PrintWarn("Finish!");
             break;
         }
+#endif
+        continue;
     }
 
     free(buffer);
@@ -223,50 +227,105 @@ static void *P_DB_MANAGER_Task(void *arg)
     return NULL;
 }
 
-// Main loop
-static uint32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
-{
-    uint32_t unRet = FRAMEWORK_ERROR;
-    int nRet = FRAMEWORK_OK;
+static DB_MANAGER_TASK_T *s_pThreadInfo = NULL;
+static pthread_t *s_pThread = NULL;
+static const char s_cQueueName[] = "/db_manager_queue";
 
-    // Get number of system threads
-    const int nthreads = sysconf(_SC_NPROCESSORS_ONLN);
-    // Open a new message queue
-    const char queue_name[] = "/db_manager_queue";
+// Main loop
+static int32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    int nthreads = sysconf(_SC_NPROCESSORS_ONLN);
 
     PrintDebug("nthreads[%d]", nthreads);
 
     if(pstDbManager == NULL)
     {
         PrintError("pstDbManager == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    s_stMqdes = mq_open(queue_name, O_CREAT | O_RDWR, 0644, NULL);
+//    s_stMqdes = mq_open(s_cQueueName, O_CREAT | O_RDWR | O_NONBLOCK, 0644, NULL);
+    s_stMqdes = mq_open(s_cQueueName, O_CREAT | O_RDWR, 0644, NULL);
     if (s_stMqdes == (mqd_t)-1)
     {
         perror("mq_open");
     }
 
-    // Start threads
-    pthread_t *thread = (pthread_t *)malloc(nthreads * sizeof(pthread_t));
-    DB_MANAGER_TASK_T *tinfo = (DB_MANAGER_TASK_T *)malloc(nthreads * sizeof(DB_MANAGER_TASK_T));
+    pthread_t *s_pThread = (pthread_t *)malloc(nthreads * sizeof(pthread_t));
+    DB_MANAGER_TASK_T *s_pThreadInfo = (DB_MANAGER_TASK_T *)malloc(nthreads * sizeof(DB_MANAGER_TASK_T));
 
     for (int i = 0; i < nthreads; ++i)
     {
-        tinfo[i].tid = i;
-        tinfo[i].pmqdes = &s_stMqdes;
-        if (pthread_create(&thread[i], NULL, &P_DB_MANAGER_Task, &tinfo[i]) != 0)
+        s_pThreadInfo[i].nthreads = nthreads;
+        s_pThreadInfo[i].tid = i;
+        s_pThreadInfo[i].pmqdes = &s_stMqdes;
+        if (pthread_create(&s_pThread[i], NULL, &P_DB_MANAGER_Task, &s_pThreadInfo[i]) != 0)
         {
             PrintError("pthread_create() is failed!!");
         }
     }
 
-    // Send messages to all threads via the queue
+#if defined(CONFIG_MULTI_THREAD)
+    // Join all the threads
+    for (int i = 0; i < nthreads; ++i)
+    {
+        pthread_join(s_pThreadInfo[i], NULL);
+    }
+#endif
+
+    return FRAMEWORK_OK;
+}
+static int32_t P_DB_MANAGER_DeInit(DB_MANAGER_T *pstDbManager)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    if(pstDbManager == NULL)
+    {
+        PrintError("pstDbManager == NULL!!");
+        return nRet;
+    }
+
+    free(s_pThread);
+    free(s_pThreadInfo);
+
+    // Make sure there are no messages left in the queue
+    struct mq_attr attr;
+    mq_getattr(s_stMqdes, &attr);
+    assert(attr.mq_curmsgs == 0);
+
+    mq_close(s_stMqdes);
+    mq_unlink(s_cQueueName);
+
+    return nRet;
+}
+
+int32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    if(pstDbManagerWrite == NULL)
+    {
+        PrintError("pstDbManagerWrite == NULL!!");
+        return nRet;
+    }
+
+    if(pstDbV2x == NULL)
+    {
+        PrintError("pstDbV2x == NULL!!");
+        return nRet;
+    }
+
+    if(pPayload == NULL)
+    {
+        PrintError("pPayload == NULL!!");
+        return nRet;
+    }
+
     for (int i = 0; i < 10; ++i)
     {
         char *text = NULL;
-        nRet = asprintf(&text, "Hello mqdes %d\n", i);
+        nRet = asprintf(&text, "Hello mqdes %d", i);
         if (nRet < 0)
         {
             PrintError("asprintf() is failed!!");
@@ -283,6 +342,7 @@ static uint32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
         P_DB_MANAGER_MsgFree(pstMsg);
     }
 
+#if 0
     // Send empty message to all threads to signal termination
     for (int i = 0; i < nthreads; ++i)
     {
@@ -295,218 +355,190 @@ static uint32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
             PrintWarn("mq_sed() mq_send terminate, [i:%d]", i); // mq_send sets errno
         }
     }
-
-    // Join all the threads
-    for (int i = 0; i < nthreads; ++i)
-    {
-        pthread_join(thread[i], NULL);
-    }
-
-    free(thread);
-    free(tinfo);
-
-    // Make sure there are no messages left in the queue
-    struct mq_attr attr;
-    mq_getattr(s_stMqdes, &attr);
-    assert(attr.mq_curmsgs == 0);
-
-    mq_close(s_stMqdes);
-    mq_unlink(queue_name);
-
-    return FRAMEWORK_OK;
+#endif
+    return nRet;
 }
 
-uint32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload)
+int32_t DB_MANAGER_Read(DB_MANAGER_READ_T *pstDbManagerRead, DB_V2X_T *pstDbV2x, void* pPayload)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
-
-    PrintWarn("TODO");
-
-    if(pstDbManagerWrite == NULL)
-    {
-        PrintError("pstDbManagerWrite == NULL!!");
-        return unRet;
-    }
-
-    if(pstDbV2x == NULL)
-    {
-        PrintError("pstDbV2x == NULL!!");
-        return unRet;
-    }
-
-    if(pPayload == NULL)
-    {
-        PrintError("pPayload == NULL!!");
-        return unRet;
-    }
-
-    return unRet;
-}
-
-uint32_t DB_MANAGER_Read(DB_MANAGER_READ_T *pstDbManagerRead, DB_V2X_T *pstDbV2x, void* pPayload)
-{
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
     if(pstDbManagerRead == NULL)
     {
         PrintError("pstDbManagerRead == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     if(pstDbV2x == NULL)
     {
         PrintError("pstDbV2x == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     if(pPayload == NULL)
     {
         PrintError("pPayload == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t DB_MANAGER_Converter(DB_MANAGER_READ_T *pstDbManagerRead, DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload)
+int32_t DB_MANAGER_Converter(DB_MANAGER_READ_T *pstDbManagerRead, DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
     if(pstDbManagerRead == NULL)
     {
         PrintError("pstDbManagerRead == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     if(pstDbManagerWrite == NULL)
     {
         PrintError("pstDbManagerWrite == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     if(pstDbV2x == NULL)
     {
         PrintError("pstDbV2x == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     if(pPayload == NULL)
     {
         PrintError("pPayload == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager)
+int32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
     if(pstDbManager == NULL)
     {
         PrintError("pstDbManager == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager)
+int32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
     if(pstDbManager == NULL)
     {
         PrintError("pstDbManager == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t DB_MANAGER_Start(DB_MANAGER_T *pstDbManager)
+int32_t DB_MANAGER_Start(DB_MANAGER_T *pstDbManager)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
     if(pstDbManager == NULL)
     {
         PrintError("pstDbManager == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t DB_MANAGER_Stop(DB_MANAGER_T *pstDbManager)
+int32_t DB_MANAGER_Stop(DB_MANAGER_T *pstDbManager)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
     if(pstDbManager == NULL)
     {
         PrintError("pstDbManager == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t DB_MANAGER_Status(DB_MANAGER_T *pstDbManager)
+int32_t DB_MANAGER_Status(DB_MANAGER_T *pstDbManager)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
     if(pstDbManager == NULL)
     {
         PrintError("pstDbManager == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
+int32_t DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
-
-    PrintWarn("is successfully initialized.");
-
-    P_DB_MANAGER_Init(pstDbManager);
+    int32_t nRet = FRAMEWORK_ERROR;
 
     if(pstDbManager == NULL)
     {
         PrintError("pstDbManager == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    unRet = FRAMEWORK_OK;
+    nRet = P_DB_MANAGER_Init(pstDbManager);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_Init() is failed! [unRet:%d]", nRet);
+        return nRet;
+    }
+    else
+    {
+        PrintWarn("is successfully initialized.");
+    }
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t DB_MANAGER_DeInit(DB_MANAGER_T *pstDbManager)
+int32_t DB_MANAGER_DeInit(DB_MANAGER_T *pstDbManager)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     if(pstDbManager == NULL)
     {
         PrintError("pstDbManager == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    return unRet;
+    nRet = P_DB_MANAGER_DeInit(pstDbManager);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_DeInit() is failed! [unRet:%d]", nRet);
+        return nRet;
+    }
+    else
+    {
+        PrintWarn("is successfully initialized.");
+    }
+
+    return nRet;
 }
 

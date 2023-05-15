@@ -60,7 +60,7 @@ typedef struct FRAMEWORK {
 
 
 /***************************** Function Protype ******************************/
-uint32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework);
+int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework);
 
 #endif	/* _FRAMEWORK_H_ */
 

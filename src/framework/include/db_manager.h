@@ -64,6 +64,7 @@ typedef struct DB_MANAGER_ARCHIVE_t {
 } DB_MANAGER_ARCHIVE_T;
 
 typedef struct DB_MANAGER_TASK_t {
+    int nthreads;
     int tid;
     mqd_t *pmqdes;
 } DB_MANAGER_TASK_T;
@@ -82,18 +83,18 @@ typedef struct DB_MANAGER {
 
 /***************************** Function Protype ******************************/
 
-uint32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload);
-uint32_t DB_MANAGER_Read(DB_MANAGER_READ_T *pstDbManagerRead, DB_V2X_T *pstDbV2x, void* pPayload);
-uint32_t DB_MANAGER_Converter(DB_MANAGER_READ_T *pstDbManagerRead, DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload);
+int32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload);
+int32_t DB_MANAGER_Read(DB_MANAGER_READ_T *pstDbManagerRead, DB_V2X_T *pstDbV2x, void* pPayload);
+int32_t DB_MANAGER_Converter(DB_MANAGER_READ_T *pstDbManagerRead, DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload);
 
-uint32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager);
-uint32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager);
-uint32_t DB_MANAGER_Start(DB_MANAGER_T *pstDbManager);
-uint32_t DB_MANAGER_Stop(DB_MANAGER_T *pstDbManager);
-uint32_t DB_MANAGER_Status(DB_MANAGER_T *pstDbManager);
+int32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager);
+int32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager);
+int32_t DB_MANAGER_Start(DB_MANAGER_T *pstDbManager);
+int32_t DB_MANAGER_Stop(DB_MANAGER_T *pstDbManager);
+int32_t DB_MANAGER_Status(DB_MANAGER_T *pstDbManager);
 
-uint32_t DB_MANAGER_Init(DB_MANAGER_T *pstDbManager);
-uint32_t DB_MANAGER_DeInit(DB_MANAGER_T *pstDbManager);
+int32_t DB_MANAGER_Init(DB_MANAGER_T *pstDbManager);
+int32_t DB_MANAGER_DeInit(DB_MANAGER_T *pstDbManager);
 
 #endif	/* _DB_MANAGER_H_ */
 

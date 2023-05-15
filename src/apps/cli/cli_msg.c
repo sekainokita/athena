@@ -54,7 +54,7 @@
 /***************************** Function Protype ******************************/
 static int P_CLI_MSG_TcpRlogin(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
-    uint32_t unRet = APP_OK;
+    int32_t nRet = APP_OK;
     char *pcCmd;
 
     UNUSED(argc);
@@ -62,7 +62,7 @@ static int P_CLI_MSG_TcpRlogin(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
     if(argv == NULL)
     {
         PrintError("argv == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     pcCmd = CLI_CMD_GetArg(pstCmd, 0);
@@ -71,12 +71,12 @@ static int P_CLI_MSG_TcpRlogin(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         return CLI_CMD_Showusage(pstCmd);
     }
 
-    return unRet;
+    return nRet;
 }
 
 static int P_CLI_MSG_TcpConnect(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
-    uint32_t unRet = APP_OK;
+    int32_t nRet = APP_OK;
     char *pcCmd;
 
     UNUSED(argc);
@@ -84,7 +84,7 @@ static int P_CLI_MSG_TcpConnect(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
     if(argv == NULL)
     {
         PrintError("argv == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     pcCmd = CLI_CMD_GetArg(pstCmd, 0);
@@ -94,12 +94,12 @@ static int P_CLI_MSG_TcpConnect(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
     }
 
 
-    return unRet;
+    return nRet;
 }
 
 static int P_CLI_MSG_TcpListen(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
-    uint32_t unRet = APP_OK;
+    int32_t nRet = APP_OK;
     char *pcCmd;
 
     UNUSED(argc);
@@ -107,7 +107,7 @@ static int P_CLI_MSG_TcpListen(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
     if(argv == NULL)
     {
         PrintError("argv == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     pcCmd = CLI_CMD_GetArg(pstCmd, 0);
@@ -116,12 +116,12 @@ static int P_CLI_MSG_TcpListen(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         return CLI_CMD_Showusage(pstCmd);
     }
 
-    return unRet;
+    return nRet;
 }
 
 static int P_CLI_MSG_TcpConsTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
-    uint32_t unRet = APP_OK;
+    int32_t nRet = APP_OK;
     char *pcCmd;
 
     UNUSED(argc);
@@ -129,7 +129,7 @@ static int P_CLI_MSG_TcpConsTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
     if(argv == NULL)
     {
         PrintError("argv == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     pcCmd = CLI_CMD_GetArg(pstCmd, 0);
@@ -138,12 +138,12 @@ static int P_CLI_MSG_TcpConsTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         return CLI_CMD_Showusage(pstCmd);
     }
 
-    return unRet;
+    return nRet;
 }
 
 static int P_CLI_MSG_TcpTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
-    uint32_t unRet = APP_OK;
+    int32_t nRet = APP_OK;
     char *pcCmd;
 
     UNUSED(argc);
@@ -151,7 +151,7 @@ static int P_CLI_MSG_TcpTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
     if(argv == NULL)
     {
         PrintError("argv == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     pcCmd = CLI_CMD_GetArg(pstCmd, 0);
@@ -160,12 +160,12 @@ static int P_CLI_MSG_TcpTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         return CLI_CMD_Showusage(pstCmd);
     }
 
-    return unRet;
+    return nRet;
 }
 
 static int P_CLI_MSG_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
-    uint32_t unRet = APP_OK;
+    int32_t nRet = APP_OK;
     char *pcCmd;
 
     UNUSED(argc);
@@ -173,7 +173,7 @@ static int P_CLI_MSG_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
     if(argv == NULL)
     {
         PrintError("argv == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     pcCmd = CLI_CMD_GetArg(pstCmd, 0);
@@ -190,14 +190,14 @@ static int P_CLI_MSG_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         }
     }
 
-	return unRet;
+	return nRet;
 }
 
-uint32_t CLI_MSG_InitCmds(void)
+int32_t CLI_MSG_InitCmds(void)
 {
-    uint32_t unRet = APP_ERROR;
+    int32_t nRet = APP_ERROR;
 
-    unRet = CLI_CMD_AddCmd("msg",
+    nRet = CLI_CMD_AddCmd("msg",
                P_CLI_MSG_Help,
                NULL,
                "help for MSG commands",
@@ -206,12 +206,12 @@ uint32_t CLI_MSG_InitCmds(void)
                "of available commands. For more details on a command, type and enter 'msg'\n"
                "and the command name.",
                "");
-    if(unRet != APP_OK)
+    if(nRet != APP_OK)
     {
-        PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
+        PrintError("CLI_CMD_AddCmd() is failed! [nRet:%d]", nRet);
     }
 
-    unRet = CLI_CMD_AddCmd("tcp-rlogin",
+    nRet = CLI_CMD_AddCmd("tcp-rlogin",
 	       P_CLI_MSG_TcpRlogin,
 	       NULL,
 	       "mini rlogin client.",
@@ -222,12 +222,12 @@ uint32_t CLI_MSG_InitCmds(void)
 	       "To terminate the session, type\n"
 	       "a tilde (~) character followed by a period (.)",
 	       "");
-    if(unRet != APP_OK)
+    if(nRet != APP_OK)
     {
-        PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
+        PrintError("CLI_CMD_AddCmd() is failed! [nRet:%d]", nRet);
     }
 
-    unRet = CLI_CMD_AddCmd("tcp-connect",
+    nRet = CLI_CMD_AddCmd("tcp-connect",
 	       P_CLI_MSG_TcpConnect,
 	       NULL,
 	       "TCP connection test.",
@@ -236,12 +236,12 @@ uint32_t CLI_MSG_InitCmds(void)
 	       "-d;Send junk data to discard|"
 	       "-nodelay;set nodelay option on socket|"
 	       "-srcport=*;Specify the source port");
-    if(unRet != APP_OK)
+    if(nRet != APP_OK)
     {
-        PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
+        PrintError("CLI_CMD_AddCmd() is failed! [nRet:%d]", nRet);
     }
 
-    unRet = CLI_CMD_AddCmd("tcp-listen",
+    nRet = CLI_CMD_AddCmd("tcp-listen",
 	       P_CLI_MSG_TcpListen,
 	       NULL,
 	       "port listener.",
@@ -249,23 +249,23 @@ uint32_t CLI_MSG_InitCmds(void)
 	       "-q;sink output, don't display on terminal|"
 	       "-d;Send junk data to discard|"
 	       "-nodelay;set nodelay option on socket");
-    if(unRet != APP_OK)
+    if(nRet != APP_OK)
     {
-        PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
+        PrintError("CLI_CMD_AddCmd() is failed! [nRet:%d]", nRet);
     }
 
-    unRet = CLI_CMD_AddCmd("tcp-constest",
+    nRet = CLI_CMD_AddCmd("tcp-constest",
 	       P_CLI_MSG_TcpConsTest,
 	       NULL,
 	       "tcp console test.",
 	       "tcp constest device",
 	       "");
-    if(unRet != APP_OK)
+    if(nRet != APP_OK)
     {
-        PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
+        PrintError("CLI_CMD_AddCmd() is failed! [nRet:%d]", nRet);
     }
 
-    unRet = CLI_CMD_AddCmd("tcp-test",
+    nRet = CLI_CMD_AddCmd("tcp-test",
 	       P_CLI_MSG_TcpTest,
 	       NULL,
 	       "TCP test command.",
@@ -277,11 +277,11 @@ uint32_t CLI_MSG_InitCmds(void)
 	       "-n=*;Number of buffers to send (-t only) (default 2048)|"
 	       "-l=*;Size of buffer to send/receive (default 2048)|"
 	       "-p=*;Port number to use (default 5001)");
-    if(unRet != APP_OK)
+    if(nRet != APP_OK)
     {
-        PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
+        PrintError("CLI_CMD_AddCmd() is failed! [nRet:%d]", nRet);
     }
 
-    return unRet;
+    return nRet;
 }
 

@@ -67,17 +67,17 @@ typedef struct MSG_MANAGER {
 
 /***************************** Function Protype ******************************/
 
-uint32_t MSG_MANAGER_Write(MSG_MANAGER_TX_T *pstMsgManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload);
-uint32_t MSG_MANAGER_Read(MSG_MANAGER_RX_T *pstMsgManagerRead, DB_V2X_T *pstDbV2x, void* pPayload);
+int32_t MSG_MANAGER_Write(MSG_MANAGER_TX_T *pstMsgManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload);
+int32_t MSG_MANAGER_Read(MSG_MANAGER_RX_T *pstMsgManagerRead, DB_V2X_T *pstDbV2x, void* pPayload);
 
-uint32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager);
-uint32_t MSG_MANAGER_Close(MSG_MANAGER_T *pstMsgManager);
-uint32_t MSG_MANAGER_Start(MSG_MANAGER_T *pstMsgManager);
-uint32_t MSG_MANAGER_Stop(MSG_MANAGER_T *pstMsgManager);
-uint32_t MSG_MANAGER_Status(MSG_MANAGER_T *pstMsgManager);
+int32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager);
+int32_t MSG_MANAGER_Close(MSG_MANAGER_T *pstMsgManager);
+int32_t MSG_MANAGER_Start(MSG_MANAGER_T *pstMsgManager);
+int32_t MSG_MANAGER_Stop(MSG_MANAGER_T *pstMsgManager);
+int32_t MSG_MANAGER_Status(MSG_MANAGER_T *pstMsgManager);
 
-uint32_t MSG_MANAGER_Init(MSG_MANAGER_T *pstMsgManager);
-uint32_t MSG_MANAGER_DeInit(MSG_MANAGER_T *pstMsgManager);
+int32_t MSG_MANAGER_Init(MSG_MANAGER_T *pstMsgManager);
+int32_t MSG_MANAGER_DeInit(MSG_MANAGER_T *pstMsgManager);
 
 #endif	/* _MSG_MANAGER_H_ */
 

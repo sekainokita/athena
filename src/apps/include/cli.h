@@ -123,9 +123,9 @@ typedef struct CLI_CMD_t
 char *CLI_CMD_CheckName(CLI_CMDLINE_T *cmd, int swidx);
 void CLI_CMD_Free(CLI_CMDLINE_T *cmd);
 int CLI_CMD_CheckValid(CLI_CMDLINE_T *cmd, char *validstr);
-uint32_t CLI_CMD_AddCmd(char *command,     int (*func)(CLI_CMDLINE_T *, int argc, char *argv[]), void *ref, char *help, char *usage, char *switches);
+int32_t CLI_CMD_AddCmd(char *command,     int (*func)(CLI_CMDLINE_T *, int argc, char *argv[]), void *ref, char *help, char *usage, char *switches);
 int CLI_CMD_CheckLookUp(CLI_UTIL_QUEUE_T *head, CLI_CMDLINE_T *cmd);
-uint32_t CLI_CMD_Init(void);
+int32_t CLI_CMD_Init(void);
 CLI_LIST_T *CLI_CMD_Read(CLI_UTIL_QUEUE_T *head);
 void CLI_CMD_BuildList(CLI_UTIL_QUEUE_T *qb, char *buf);
 void CLI_CMD_SetList(CLI_UTIL_QUEUE_T *qb);
@@ -134,7 +134,7 @@ void CLI_CMD_BuildCmdline(CLI_UTIL_QUEUE_T *head, CLI_CMDLINE_T *cmd);
 char *CLI_CMD_GetArg(CLI_CMDLINE_T *pstCmd, int nArgNum);
 int CLI_CMD_Showusage(CLI_CMDLINE_T *pstCmd);
 
-uint32_t CLI_Init(void);
+int32_t CLI_Init(void);
 
 #endif /* _CLI_H_ */
 

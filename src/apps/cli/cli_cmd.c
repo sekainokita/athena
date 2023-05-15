@@ -275,9 +275,9 @@ void CLI_CMD_BuildCmdline(CLI_UTIL_QUEUE_T *head, CLI_CMDLINE_T *cmd)
 	}
 }
 
-uint32_t CLI_CMD_AddCmd(char *command, int (*func)(CLI_CMDLINE_T *, int argc, char *argv[]), void *ref, char *help, char *usage, char *switches)
+int32_t CLI_CMD_AddCmd(char *command, int (*func)(CLI_CMDLINE_T *, int argc, char *argv[]), void *ref, char *help, char *usage, char *switches)
 {
-    uint32_t unRet = APP_ERROR;
+    int32_t nRet = APP_ERROR;
 	CLI_CMD_T **list = &sh_pstCliCmd;
 	CLI_CMD_T *cmd = NULL;
 	CLI_UTIL_QUEUE_T tokens;
@@ -311,13 +311,13 @@ uint32_t CLI_CMD_AddCmd(char *command, int (*func)(CLI_CMDLINE_T *, int argc, ch
 
 	if (!cmd)
     {
-        unRet = APP_ERROR;
-		return unRet;
+        nRet = APP_ERROR;
+		return nRet;
     }
     else
     {
         PrintDebug("[%s] is added.", cmd->cmdword);
-        unRet = APP_OK;
+        nRet = APP_OK;
     }
 
 	cmd->func = func;
@@ -326,7 +326,7 @@ uint32_t CLI_CMD_AddCmd(char *command, int (*func)(CLI_CMDLINE_T *, int argc, ch
 	cmd->help = help;
 	cmd->switches = switches;
 
-	return unRet;
+	return nRet;
 }
 
 static void P_CLI_CMD_DumpIndent(char *str, int amt)
@@ -610,13 +610,13 @@ static int P_CLI_CMD_Test(CLI_CMDLINE_T *cmd, int argc, char *argv[])
 	return nRet;
 }
 
-uint32_t CLI_CMD_Init(void)
+int32_t CLI_CMD_Init(void)
 {
-    uint32_t unRet = APP_ERROR;
+    int32_t nRet = APP_ERROR;
 
 	sh_pstCliCmd = malloc(sizeof(CLI_CMD_T)); /* Todo add handle free */
 
-	unRet = CLI_CMD_AddCmd("help",
+	nRet = CLI_CMD_AddCmd("help",
 			   P_CLI_CMD_Help,
 			   NULL,
 			   "help for CLI commands",
@@ -625,14 +625,14 @@ uint32_t CLI_CMD_Init(void)
 			   "of available commands. For more details on a command, type and enter 'help'\n"
 			   "and the command name.",
 			   "");
-    if(unRet != APP_OK)
+    if(nRet != APP_OK)
     {
 #if defined(CONFIG_CLI_DEBUG)
-        PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
+        PrintError("CLI_CMD_AddCmd() is failed! [nRet:%d]", nRet);
 #endif
     }
 
-	unRet = CLI_CMD_AddCmd("test",
+	nRet = CLI_CMD_AddCmd("test",
 			   P_CLI_CMD_Test,
 			   NULL,
 			   "Test commands",
@@ -641,17 +641,17 @@ uint32_t CLI_CMD_Init(void)
 			   "Test [command 3]\n"
 			   "Test [command 4]",
 			   "");
-    if(unRet != APP_OK)
+    if(nRet != APP_OK)
     {
 #if defined(CONFIG_CLI_DEBUG)
-        PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
+        PrintError("CLI_CMD_AddCmd() is failed! [nRet:%d]", nRet);
 #endif
     }
 #if defined(CONFIG_CLI_DEBUG)
 #else
-    unRet = APP_OK;
+    nRet = APP_OK;
 #endif
-    return unRet;
+    return nRet;
 }
 
 int CLI_CMD_CheckLookUp(CLI_UTIL_QUEUE_T *head, CLI_CMDLINE_T *cmd)

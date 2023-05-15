@@ -59,25 +59,25 @@
 
 /***************************** Function  *************************************/
 
-uint32_t APP_Init(APP_T *pstApp)
+int32_t APP_Init(APP_T *pstApp)
 {
-    uint32_t unRet = APP_ERROR;
+    int32_t nRet = APP_ERROR;
 
     if(pstApp == NULL)
     {
         PrintError("pstApp == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     PrintNotice("Init");
 
-    unRet = CLI_Init();
-    if (unRet != APP_OK)
+    nRet = CLI_Init();
+    if (nRet != APP_OK)
     {
-        PrintError("CLI_Init() is failed! [unRet:%d]", unRet);
-        return unRet;
+        PrintError("CLI_Init() is failed! [unRet:%d]", nRet);
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 

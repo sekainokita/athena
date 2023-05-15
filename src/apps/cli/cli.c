@@ -63,7 +63,7 @@ static int P_CLI_StartCmd(char *str);
 static int P_CLI_ParseInputString(char *prompt, char *str, int len);
 static int P_CLI_ReadInputString(char *prompt, char *str, int maxlen);
 static int P_CLI_ReadInputString(char *prompt, char *str, int maxlen);
-static uint32_t P_CLI_InitCmd(void);
+static int32_t P_CLI_InitCmd(void);
 
 static int P_CLI_ExecuteCmd(CLI_UTIL_QUEUE_T *head)
 {
@@ -271,41 +271,41 @@ static void P_CLI_StartLoop(void)
     }
 }
 
-static uint32_t P_CLI_InitCmd(void)
+static int32_t P_CLI_InitCmd(void)
 {
-    uint32_t unRet = APP_ERROR;
-    unRet = CLI_CMD_Init();
-    if (unRet != APP_OK)
+    int32_t nRet = APP_ERROR;
+    nRet = CLI_CMD_Init();
+    if (nRet != APP_OK)
     {
-        PrintError("CLI_Init() is failed! [unRet:%d]", unRet);
+        PrintError("CLI_Init() is failed! [nRet:%d]", nRet);
     }
 
-    unRet = CLI_MSG_InitCmds();
-    if (unRet != APP_OK)
+    nRet = CLI_MSG_InitCmds();
+    if (nRet != APP_OK)
     {
-        PrintError("CLI_MSG_InitCmds() is failed! [unRet:%d]", unRet);
+        PrintError("CLI_MSG_InitCmds() is failed! [nRet:%d]", nRet);
     }
 
-    unRet = CLI_DB_InitCmds();
-    if (unRet != APP_OK)
+    nRet = CLI_DB_InitCmds();
+    if (nRet != APP_OK)
     {
-        PrintError("CLI_DB_InitCmds() is failed! [unRet:%d]", unRet);
+        PrintError("CLI_DB_InitCmds() is failed! [nRet:%d]", nRet);
     }
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t CLI_Init(void)
+int32_t CLI_Init(void)
 {
-    uint32_t unRet = APP_ERROR;
+    int32_t nRet = APP_ERROR;
 
     PrintNotice("Init");
 
-    unRet = P_CLI_InitCmd();
-    if (unRet != APP_OK)
+    nRet = P_CLI_InitCmd();
+    if (nRet != APP_OK)
     {
-        PrintError("P_CLI_InitCmd() is failed! [unRet:%d]", unRet);
-        return unRet;
+        PrintError("P_CLI_InitCmd() is failed! [nRet:%d]", nRet);
+        return nRet;
     }
 
     (void)P_CLI_StartLoop();

@@ -67,14 +67,14 @@ int main(int argc, char *argv[])
 {
     FRAMEWORK_T stFramework;
     APP_T stApp;
-    uint32_t unRet = APP_ERROR;
+    int32_t nRet = APP_ERROR;
 
     UNUSED(argc);
 
     if(argv == NULL)
     {
         PrintError("argv == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     PrintDebug("Start the main");
@@ -82,20 +82,20 @@ int main(int argc, char *argv[])
     (void*)memset(&stFramework, 0x00, sizeof(FRAMEWORK_T));
     (void*)memset(&stApp, 0x00, sizeof(APP_T));
 
-    unRet = FRAMEWORK_Init(&stFramework);
-    if (unRet != FRAMEWORK_OK)
+    nRet = FRAMEWORK_Init(&stFramework);
+    if (nRet != FRAMEWORK_OK)
     {
-        PrintError("FRAMEWORK_Init() is failed! [unRet:%d]", unRet);
-        return unRet;
+        PrintError("FRAMEWORK_Init() is failed! [nRet:%d]", nRet);
+        return nRet;
     }
 
-    unRet = APP_Init(&stApp);
-    if (unRet != APP_OK)
+    nRet = APP_Init(&stApp);
+    if (nRet != APP_OK)
     {
-        PrintError("APP_Init() is failed! [unRet:%d]", unRet);
-        return unRet;
+        PrintError("APP_Init() is failed! [nRet:%d]", nRet);
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 

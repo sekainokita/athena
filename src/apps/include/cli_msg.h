@@ -54,7 +54,7 @@
 
 
 /***************************** Function Protype ******************************/
-uint32_t CLI_MSG_InitCmds(void);
+int32_t CLI_MSG_InitCmds(void);
 
 #endif	/* _CLI_MSG_H_ */
 

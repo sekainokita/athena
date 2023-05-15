@@ -44,7 +44,7 @@
 
 /***************************** Include ***************************************/
 #include "cli.h"
-
+#include "db_manager.h"
 /***************************** Definition ************************************/
 
 
@@ -55,15 +55,22 @@
 
 static int P_CLI_DB_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
-    uint32_t unRet = APP_OK;
+    int32_t nRet = APP_OK;
+    int nFrameWorkRet = FRAMEWORK_ERROR;
     char *pcCmd;
+    DB_MANAGER_WRITE_T stDbManagerWrite;
+    DB_V2X_T stDbV2x;
+    char cPayload[100];
+
+    (void*)memset(&stDbManagerWrite, 0x00, sizeof(DB_MANAGER_WRITE_T));
+    (void*)memset(&stDbV2x, 0x00, sizeof(DB_V2X_T));
 
     UNUSED(argc);
 
     if(argv == NULL)
     {
         PrintError("argv == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     pcCmd = CLI_CMD_GetArg(pstCmd, 0);
@@ -78,16 +85,22 @@ static int P_CLI_DB_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             pcCmd = CLI_CMD_GetArg(pstCmd, i);
             PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
         }
+
+        nFrameWorkRet = DB_MANAGER_Write(&stDbManagerWrite, &stDbV2x, &cPayload);
+        if(nFrameWorkRet != FRAMEWORK_OK)
+        {
+            PrintError("DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
+        }
     }
 
-	return unRet;
+	return nRet;
 }
 
-uint32_t CLI_DB_InitCmds(void)
+int32_t CLI_DB_InitCmds(void)
 {
-    uint32_t unRet = APP_ERROR;
+    int32_t nRet = APP_ERROR;
 
-    unRet = CLI_CMD_AddCmd("db",
+    nRet = CLI_CMD_AddCmd("db",
                P_CLI_DB_Help,
                NULL,
                "help for DB commands",
@@ -96,11 +109,11 @@ uint32_t CLI_DB_InitCmds(void)
                "of available commands. For more details on a command, type and enter 'db'\n"
                "and the command name.",
                "");
-    if(unRet != APP_OK)
+    if(nRet != APP_OK)
     {
-        PrintError("CLI_CMD_AddCmd() is failed! [unRet:%d]", unRet);
+        PrintError("CLI_CMD_AddCmd() is failed! [nRet:%d]", nRet);
     }
 
-    return unRet;
+    return nRet;
 }
 

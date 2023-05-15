@@ -58,165 +58,165 @@
 
 
 /***************************** Function  *************************************/
-uint32_t MSG_MANAGER_Write(MSG_MANAGER_TX_T *pstMsgManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload)
+int32_t MSG_MANAGER_Write(MSG_MANAGER_TX_T *pstMsgManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
     if(pstMsgManagerWrite == NULL)
     {
         PrintError("pstMsgManagerWrite == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     if(pstDbV2x == NULL)
     {
         PrintError("pstDbV2x == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     if(pPayload == NULL)
     {
         PrintError("pPayload == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t MSG_MANAGER_Read(MSG_MANAGER_RX_T *pstMsgManagerRead, DB_V2X_T *pstDbV2x, void* pPayload)
+int32_t MSG_MANAGER_Read(MSG_MANAGER_RX_T *pstMsgManagerRead, DB_V2X_T *pstDbV2x, void* pPayload)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
     if(pstMsgManagerRead == NULL)
     {
         PrintError("pstMsgManagerRead == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     if(pstDbV2x == NULL)
     {
         PrintError("pstDbV2x == NULL!!");
-        return unRet;
+        return nRet;
     }
 
     if(pPayload == NULL)
     {
         PrintError("pPayload == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager)
+int32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
     if(pstMsgManager == NULL)
     {
         PrintError("pstMsgManager == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t MSG_MANAGER_Close(MSG_MANAGER_T *pstMsgManager)
+int32_t MSG_MANAGER_Close(MSG_MANAGER_T *pstMsgManager)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
     if(pstMsgManager == NULL)
     {
         PrintError("pstMsgManager == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t MSG_MANAGER_Start(MSG_MANAGER_T *pstMsgManager)
+int32_t MSG_MANAGER_Start(MSG_MANAGER_T *pstMsgManager)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
     if(pstMsgManager == NULL)
     {
         PrintError("pstMsgManager == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t MSG_MANAGER_Stop(MSG_MANAGER_T *pstMsgManager)
+int32_t MSG_MANAGER_Stop(MSG_MANAGER_T *pstMsgManager)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
     if(pstMsgManager == NULL)
     {
         PrintError("pstMsgManager == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t MSG_MANAGER_Status(MSG_MANAGER_T *pstMsgManager)
+int32_t MSG_MANAGER_Status(MSG_MANAGER_T *pstMsgManager)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
     if(pstMsgManager == NULL)
     {
         PrintError("pstMsgManager == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t MSG_MANAGER_Init(MSG_MANAGER_T *pstMsgManager)
+int32_t MSG_MANAGER_Init(MSG_MANAGER_T *pstMsgManager)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
     if(pstMsgManager == NULL)
     {
         PrintError("pstMsgManager == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    unRet = FRAMEWORK_OK;
+    nRet = FRAMEWORK_OK;
 
-    return unRet;
+    return nRet;
 }
 
-uint32_t MSG_MANAGER_DeInit(MSG_MANAGER_T *pstMsgManager)
+int32_t MSG_MANAGER_DeInit(MSG_MANAGER_T *pstMsgManager)
 {
-    uint32_t unRet = FRAMEWORK_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
     if(pstMsgManager == NULL)
     {
         PrintError("pstMsgManager == NULL!!");
-        return unRet;
+        return nRet;
     }
 
-    return unRet;
+    return nRet;
 }
 
 
