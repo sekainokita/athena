@@ -372,7 +372,7 @@ int32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV
         fprintf(s_pDbManagerFd, "ulPayloadLength[%d], ", pstDbV2x->ulPayloadLength);
 
         fprintf(s_pDbManagerFd, "cPayload[");
-        for(int i = 0; i < pstDbV2x->ulPayloadLength; i++)
+        for(int i = 0; i < (int)pstDbV2x->ulPayloadLength; i++)
         {
               fprintf(s_pDbManagerFd, "%d ", pcPayload[i]);
         }
