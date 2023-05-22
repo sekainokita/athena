@@ -76,6 +76,48 @@ static pthread_t *s_pThread = NULL;
 
 /***************************** Function  *************************************/
 
+static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    char *pcPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
+    memcpy(pcPayload, (char *)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
+
+    fprintf(s_pDbManagerFd, "eDeviceType[%d], ", pstEventMsg->pstDbV2x->eDeviceType);
+    fprintf(s_pDbManagerFd, "eTeleCommType[%d], ", pstEventMsg->pstDbV2x->eTeleCommType);
+    fprintf(s_pDbManagerFd, "unDeviceId[0x%x], ", pstEventMsg->pstDbV2x->unDeviceId);
+    fprintf(s_pDbManagerFd, "ulTimeStamp[%ld], ", pstEventMsg->pstDbV2x->ulTimeStamp);
+    fprintf(s_pDbManagerFd, "eServiceId[%d], ", pstEventMsg->pstDbV2x->eServiceId);
+    fprintf(s_pDbManagerFd, "eActionType[%d], ", pstEventMsg->pstDbV2x->eActionType);
+    fprintf(s_pDbManagerFd, "eRegionId[%d], ", pstEventMsg->pstDbV2x->eRegionId);
+    fprintf(s_pDbManagerFd, "ePayloadType[%d], ", pstEventMsg->pstDbV2x->ePayloadType);
+    fprintf(s_pDbManagerFd, "eCommId[%d], ", pstEventMsg->pstDbV2x->eCommId);
+    fprintf(s_pDbManagerFd, "usDbVer[%d.%d], ", pstEventMsg->pstDbV2x->usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, pstEventMsg->pstDbV2x->usDbVer & CLI_DB_V2X_MINOR_MASK);
+    fprintf(s_pDbManagerFd, "usHwVer[0x%x], ", pstEventMsg->pstDbV2x->usHwVer);
+    fprintf(s_pDbManagerFd, "usSwVer[0x%x], ", pstEventMsg->pstDbV2x->usSwVer);
+    fprintf(s_pDbManagerFd, "ulPayloadLength[%d], ", pstEventMsg->pstDbV2x->ulPayloadLength);
+
+    fprintf(s_pDbManagerFd, "cPayload[");
+    for(int i = 0; i < (int)pstEventMsg->pstDbV2x->ulPayloadLength; i++)
+    {
+          fprintf(s_pDbManagerFd, "%d ", pcPayload[i]);
+    }
+    fprintf(s_pDbManagerFd, "], ");
+
+    fprintf(s_pDbManagerFd, "ulPayloadCrc32[0x%x]", pstEventMsg->pstDbV2x->ulPacketCrc32);
+    fprintf(s_pDbManagerFd, "\r\n");
+
+    nRet = fflush(s_pDbManagerFd);
+    if (nRet < 0)
+    {
+        PrintError("fflush() is failed! [unRet:%d]", nRet);
+    }
+
+    free(pcPayload);
+
+    return nRet;
+}
+
 static void *P_DB_MANAGER_Task(void *arg)
 {
     DB_MANAGER_TASK_T const *const stThreadInfo = (DB_MANAGER_TASK_T *)arg;
@@ -99,41 +141,53 @@ static void *P_DB_MANAGER_Task(void *arg)
         }
         else
         {
+            if(stEventMsg.pstDbManagerWrite->eProc == DB_MANAGER_PROC_WRITE)
             {
-                char *pcPayload = (char*)malloc(sizeof(char)*stEventMsg.pstDbV2x->ulPayloadLength);
-                memcpy(pcPayload, (char *)stEventMsg.pPayload, stEventMsg.pstDbV2x->ulPayloadLength);
+                PrintDebug("DB_MANAGER_PROC_WRITE [%d]", stEventMsg.pstDbManagerWrite->eProc);
 
-                fprintf(s_pDbManagerFd, "eDeviceType[%d], ", stEventMsg.pstDbV2x->eDeviceType);
-                fprintf(s_pDbManagerFd, "eTeleCommType[%d], ", stEventMsg.pstDbV2x->eTeleCommType);
-                fprintf(s_pDbManagerFd, "unDeviceId[0x%x], ", stEventMsg.pstDbV2x->unDeviceId);
-                fprintf(s_pDbManagerFd, "ulTimeStamp[%ld], ", stEventMsg.pstDbV2x->ulTimeStamp);
-                fprintf(s_pDbManagerFd, "eServiceId[%d], ", stEventMsg.pstDbV2x->eServiceId);
-                fprintf(s_pDbManagerFd, "eActionType[%d], ", stEventMsg.pstDbV2x->eActionType);
-                fprintf(s_pDbManagerFd, "eRegionId[%d], ", stEventMsg.pstDbV2x->eRegionId);
-                fprintf(s_pDbManagerFd, "ePayloadType[%d], ", stEventMsg.pstDbV2x->ePayloadType);
-                fprintf(s_pDbManagerFd, "eCommId[%d], ", stEventMsg.pstDbV2x->eCommId);
-                fprintf(s_pDbManagerFd, "usDbVer[%d.%d], ", stEventMsg.pstDbV2x->usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, stEventMsg.pstDbV2x->usDbVer & CLI_DB_V2X_MINOR_MASK);
-                fprintf(s_pDbManagerFd, "usHwVer[0x%x], ", stEventMsg.pstDbV2x->usHwVer);
-                fprintf(s_pDbManagerFd, "usSwVer[0x%x], ", stEventMsg.pstDbV2x->usSwVer);
-                fprintf(s_pDbManagerFd, "ulPayloadLength[%d], ", stEventMsg.pstDbV2x->ulPayloadLength);
-
-                fprintf(s_pDbManagerFd, "cPayload[");
-                for(int i = 0; i < (int)stEventMsg.pstDbV2x->ulPayloadLength; i++)
+                switch(stEventMsg.pstDbManagerWrite->eFileType)
                 {
-                      fprintf(s_pDbManagerFd, "%d ", pcPayload[i]);
+                    case DB_MANAGER_FILE_TYPE_TXT:
+                    {
+                        PrintDebug("DB_MANAGER_FILE_TYPE_TXT [%d]", stEventMsg.pstDbManagerWrite->eFileType);
+                        nRet = P_DB_MANAGER_Write(&stEventMsg);
+                        if(nRet != FRAMEWORK_OK)
+                        {
+                            PrintError("P_DB_MANAGER_Write() is failed! [unRet:%d]", nRet);
+                        }
+                        break;
+                    }
+                    case DB_MANAGER_FILE_TYPE_CSV:
+                    {
+                        PrintDebug("DB_MANAGER_FILE_TYPE_CSV [%d]", stEventMsg.pstDbManagerWrite->eFileType);
+                        PrintWarn("TODO");
+                        break;
+                    }
+                    case DB_MANAGER_FILE_TYPE_SQLITE:
+                    {
+                        PrintDebug("DB_MANAGER_FILE_TYPE_SQLITE [%d]", stEventMsg.pstDbManagerWrite->eFileType);
+                        PrintWarn("TODO");
+                        break;
+                    }
+                    default:
+                        PrintWarn("unknown file type [%d]", stEventMsg.pstDbManagerWrite->eFileType);
+                        break;
                 }
-                fprintf(s_pDbManagerFd, "], ");
+            }
+            else if(stEventMsg.pstDbManagerWrite->eProc == DB_MANAGER_PROC_READ)
+            {
+                PrintDebug("DB_MANAGER_PROC_READ [%d]", stEventMsg.pstDbManagerWrite->eProc);
+                PrintWarn("TODO");
 
-                fprintf(s_pDbManagerFd, "ulPayloadCrc32[0x%x]", stEventMsg.pstDbV2x->ulPacketCrc32);
-                fprintf(s_pDbManagerFd, "\r\n");
-
-                nRet = fflush(s_pDbManagerFd);
-                if (nRet < 0)
-                {
-                    PrintError("fflush() is failed! [unRet:%d]", nRet);
-                }
-
-                free(pcPayload);
+            }
+            else if(stEventMsg.pstDbManagerWrite->eProc == DB_MANAGER_PROC_CONVERT)
+            {
+                PrintDebug("DB_MANAGER_PROC_CONVERT [%d]", stEventMsg.pstDbManagerWrite->eProc);
+                PrintWarn("TODO");
+            }
+            else
+            {
+                PrintWarn("unknown processing type [%d]", stEventMsg.pstDbManagerWrite->eProc);
             }
         }
     }
@@ -188,7 +242,7 @@ static int32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
     {
         s_pThreadInfo[i].nThreads = nThreads;
         s_pThreadInfo[i].nThreadId = DB_MANAGER_THREAD_ID + i;
-        s_pThreadInfo[i].pmqdes = &s_nMsgId;
+        s_pThreadInfo[i].nMsgId = s_nMsgId;
         if (pthread_create(&s_pThread[i], NULL, &P_DB_MANAGER_Task, &s_pThreadInfo[i]) != FRAMEWORK_OK)
         {
             PrintError("pthread_create() is failed!!");
@@ -343,18 +397,41 @@ int32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager)
         return nRet;
     }
 
-    if(s_pDbManagerFd == NULL)
+    switch(pstDbManager->eFileType)
     {
-        s_pDbManagerFd = fopen(DB_MANAGER_DEFAULT_FILE_NAME, "a+");
-        if(s_pDbManagerFd == NULL)
-        {
-            PrintError("fopen() is failed!!");
-        }
-        else
-        {
-            PrintTrace("DB_MANAGER_DEFAULT_FILE_NAME[%s] is opened.", DB_MANAGER_DEFAULT_FILE_NAME);
-            nRet = FRAMEWORK_OK;
-        }
+        case DB_MANAGER_FILE_TYPE_TXT:
+            PrintDebug("DB_MANAGER_FILE_TYPE_TXT [%d]", pstDbManager->eFileType);
+
+            if(s_pDbManagerFd == NULL)
+            {
+                s_pDbManagerFd = fopen(DB_MANAGER_DEFAULT_FILE_NAME, "a+");
+                if(s_pDbManagerFd == NULL)
+                {
+                    PrintError("fopen() is failed!!");
+                }
+                else
+                {
+                    PrintTrace("DB_MANAGER_DEFAULT_FILE_NAME[%s] is opened.", DB_MANAGER_DEFAULT_FILE_NAME);
+                    nRet = FRAMEWORK_OK;
+                }
+            }
+
+            break;
+
+        case DB_MANAGER_FILE_TYPE_CSV:
+            PrintDebug("DB_MANAGER_FILE_TYPE_CSV [%d]", pstDbManager->eFileType);
+            PrintWarn("TODO");
+            break;
+
+        case DB_MANAGER_FILE_TYPE_SQLITE:
+            PrintDebug("DB_MANAGER_FILE_TYPE_SQLITE [%d]", pstDbManager->eFileType);
+            PrintWarn("TODO");
+            break;
+
+        default:
+            PrintWarn("unknown file type [%d]", pstDbManager->eFileType);
+            break;
+
     }
 
     return nRet;
@@ -370,26 +447,50 @@ int32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager)
         return nRet;
     }
 
-    nRet = fflush(s_pDbManagerFd);
-    if (nRet < 0)
+    switch(pstDbManager->eFileType)
     {
-        PrintError("fflush() is failed! [unRet:%d]", nRet);
+        case DB_MANAGER_FILE_TYPE_TXT:
+            PrintDebug("DB_MANAGER_FILE_TYPE_TXT [%d]", pstDbManager->eFileType);
+
+            nRet = fflush(s_pDbManagerFd);
+            if (nRet < 0)
+            {
+                PrintError("fflush() is failed! [unRet:%d]", nRet);
+            }
+
+            if(s_pDbManagerFd != NULL)
+            {
+                nRet = fclose(s_pDbManagerFd);
+                if (nRet < 0)
+                {
+                    PrintError("fclose() is failed! [unRet:%d]", nRet);
+                }
+                else
+                {
+                    PrintTrace("DB_MANAGER_DEFAULT_FILE_NAME[%s] is closed.", DB_MANAGER_DEFAULT_FILE_NAME);
+                    s_pDbManagerFd = NULL;
+                    nRet = FRAMEWORK_OK;
+                }
+            }
+            break;
+
+        case DB_MANAGER_FILE_TYPE_CSV:
+            PrintDebug("DB_MANAGER_FILE_TYPE_CSV [%d]", pstDbManager->eFileType);
+            PrintWarn("TODO");
+            break;
+
+        case DB_MANAGER_FILE_TYPE_SQLITE:
+            PrintDebug("DB_MANAGER_FILE_TYPE_SQLITE [%d]", pstDbManager->eFileType);
+            PrintWarn("TODO");
+            break;
+
+        default:
+            PrintWarn("unknown file type [%d]", pstDbManager->eFileType);
+            break;
+
     }
 
-    if(s_pDbManagerFd != NULL)
-    {
-        nRet = fclose(s_pDbManagerFd);
-        if (nRet < 0)
-        {
-            PrintError("fclose() is failed! [unRet:%d]", nRet);
-        }
-        else
-        {
-            PrintTrace("DB_MANAGER_DEFAULT_FILE_NAME[%s] is closed.", DB_MANAGER_DEFAULT_FILE_NAME);
-            s_pDbManagerFd = NULL;
-            nRet = FRAMEWORK_OK;
-        }
-    }
+
 
     return nRet;
 }

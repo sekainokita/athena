@@ -100,6 +100,9 @@ static int P_CLI_DB_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         }
         else if(IS_CMD(pcCmd, "v2x"))
         {
+            stDbManagerWrite.eFileType = DB_MANAGER_FILE_TYPE_TXT;
+            stDbManagerWrite.eProc = DB_MANAGER_PROC_WRITE;
+
             stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
             stDbV2x.eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5_BROADCAST;
             stDbV2x.unDeviceId = CLI_DB_V2X_DEFAULT_DEVICE_ID;
@@ -116,6 +119,9 @@ static int P_CLI_DB_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             stDbV2x.ulPacketCrc32 = 0;
 
             PrintTrace("========================================================");
+            PrintDebug("eFileType[%d]", stDbManagerWrite.eFileType);
+            PrintDebug("eProc[%d]", stDbManagerWrite.eProc);
+
             PrintDebug("eDeviceType[%d]", stDbV2x.eDeviceType);
             PrintDebug("eTeleCommType[%d]", stDbV2x.eTeleCommType);
             PrintDebug("unDeviceId[0x%x]", stDbV2x.unDeviceId);
@@ -152,6 +158,8 @@ static int P_CLI_DB_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
             pstDbManager = FRAMEWORK_GetDbManagerInstance();
             PrintDebug("pstDbManager[0x%p]", pstDbManager);
+
+            pstDbManager->eFileType = DB_MANAGER_FILE_TYPE_TXT;
 
             nFrameWorkRet = DB_MANAGER_Open(pstDbManager);
             if(nFrameWorkRet != FRAMEWORK_OK)

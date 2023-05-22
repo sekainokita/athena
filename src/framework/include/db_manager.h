@@ -53,31 +53,54 @@
 
 
 /***************************** Enum and Structure ****************************/
-typedef struct DB_MANAGER_MSG_t {
-    int id;
-    DB_V2X_T *pstDbV2x;
-} DB_MANAGER_MSG_T;
 
-typedef struct DB_MANAGER_ARCHIVE_t {
-    size_t size;
-    char *data;
-} DB_MANAGER_ARCHIVE_T;
+/**
+* @details DB Manager File Type
+* @param DB_MANAGER_FILE_TYPE_E
+*/
+typedef enum {
+    DB_MANAGER_FILE_TYPE_UNKNOWN                  = 0x0000,
+    DB_MANAGER_FILE_TYPE_TXT                      = 0x0001,
+    DB_MANAGER_FILE_TYPE_CSV                      = 0x0002,
+    DB_MANAGER_FILE_TYPE_SQLITE                   = 0x0003,
+    DB_MANAGER_FILE_TYPE_UNDEFINED_1,
+    DB_MANAGER_FILE_TYPE_UNDEFINED_2,
+    DB_MANAGER_FILE_TYPE_UNDEFINED_3,
+    DB_MANAGER_FILE_TYPE_MAX                      = 0xFFFF
+} DB_MANAGER_FILE_TYPE_E;
+
+/**
+* @details DB Manager Processing Type
+* @param DB_MANAGER_PROC_E
+*/
+typedef enum {
+    DB_MANAGER_PROC_UNKNOWN                        = 0x0000,
+    DB_MANAGER_PROC_WRITE                          = 0x0001,
+    DB_MANAGER_PROC_READ                           = 0x0002,
+    DB_MANAGER_PROC_CONVERT                        = 0x0003,
+    DB_MANAGER_PROC_MAX                            = 0xFFFF
+} DB_MANAGER_PROC_E;
 
 typedef struct DB_MANAGER_TASK_t {
     int nThreads;
     int nThreadId;
-    mqd_t *pmqdes;
+    int nMsgId;
 } DB_MANAGER_TASK_T;
 
 typedef struct DB_MANAGER_WRITE {
-    uint32_t unReserved;
+    DB_MANAGER_FILE_TYPE_E  eFileType;
+    DB_MANAGER_PROC_E       eProc;
+    uint32_t                unReserved;
 } DB_MANAGER_WRITE_T;
 
 typedef struct DB_MANAGER_READ {
+    DB_MANAGER_FILE_TYPE_E  eFileType;
+    DB_MANAGER_PROC_E       eProc;
     uint32_t unReserved;
 } DB_MANAGER_READ_T;
 
 typedef struct DB_MANAGER {
+    DB_MANAGER_FILE_TYPE_E  eFileType;
     uint32_t unReserved;
 } DB_MANAGER_T;
 
