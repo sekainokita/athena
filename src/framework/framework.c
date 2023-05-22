@@ -55,7 +55,8 @@
 
 
 /***************************** Static Variable *******************************/
-
+static MSG_MANAGER_T s_stMsgManager;
+static DB_MANAGER_T s_stDbManager;
 
 /***************************** Function  *************************************/
 
@@ -63,34 +64,45 @@ int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
-    MSG_MANAGER_T stMsgManager;
-    DB_MANAGER_T stDbManager;
-
     if(pstFramework == NULL)
     {
         PrintError("pstFramework == NULL!!");
         return nRet;
     }
 
-    (void*)memset(&stMsgManager, 0x00, sizeof(MSG_MANAGER_T));
-    (void*)memset(&stDbManager, 0x00, sizeof(DB_MANAGER_T));
+    (void*)memset(&s_stMsgManager, 0x00, sizeof(MSG_MANAGER_T));
+    (void*)memset(&s_stDbManager, 0x00, sizeof(DB_MANAGER_T));
 
     PrintWarn("is successfully initialized.");
 
-    nRet = MSG_MANAGER_Init(&stMsgManager);
+    nRet = MSG_MANAGER_Init(&s_stMsgManager);
     if (nRet != FRAMEWORK_OK)
     {
         PrintError("MSG_MANAGER_Init() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
-    nRet = DB_MANAGER_Init(&stDbManager);
+    PrintDebug("s_stMsgManager[0x%p]", &s_stMsgManager);
+
+    nRet = DB_MANAGER_Init(&s_stDbManager);
     if (nRet != FRAMEWORK_OK)
     {
         PrintError("DB_MANAGER_Init() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
+    PrintDebug("s_stDbManager[0x%p]", &s_stDbManager);
+
     return nRet;
+}
+
+MSG_MANAGER_T* FRAMEWORK_GetMsgManagerInstance(void)
+{
+    return &s_stMsgManager;
+}
+
+DB_MANAGER_T* FRAMEWORK_GetDbManagerInstance(void)
+{
+    return &s_stDbManager;
 }
 

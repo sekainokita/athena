@@ -55,7 +55,7 @@
 /***************************** Enum and Structure ****************************/
 typedef struct DB_MANAGER_MSG_t {
     int id;
-    char *text;
+    DB_V2X_T *pstDbV2x;
 } DB_MANAGER_MSG_T;
 
 typedef struct DB_MANAGER_ARCHIVE_t {
@@ -64,8 +64,8 @@ typedef struct DB_MANAGER_ARCHIVE_t {
 } DB_MANAGER_ARCHIVE_T;
 
 typedef struct DB_MANAGER_TASK_t {
-    int nthreads;
-    int tid;
+    int nThreads;
+    int nThreadId;
     mqd_t *pmqdes;
 } DB_MANAGER_TASK_T;
 
@@ -83,9 +83,9 @@ typedef struct DB_MANAGER {
 
 /***************************** Function Protype ******************************/
 
-int32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload);
-int32_t DB_MANAGER_Read(DB_MANAGER_READ_T *pstDbManagerRead, DB_V2X_T *pstDbV2x, void* pPayload);
-int32_t DB_MANAGER_Converter(DB_MANAGER_READ_T *pstDbManagerRead, DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload);
+int32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void *pPayload);
+int32_t DB_MANAGER_Read(DB_MANAGER_READ_T *pstDbManagerRead, DB_V2X_T *pstDbV2x, void *pPayload);
+int32_t DB_MANAGER_Converter(DB_MANAGER_READ_T *pstDbManagerRead, DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void *pPayload);
 
 int32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager);
 int32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager);

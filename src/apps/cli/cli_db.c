@@ -47,6 +47,7 @@
 #include "app.h"
 #include "db_v2x.h"
 #include "db_manager.h"
+#include "framework.h"
 
 /***************************** Definition ************************************/
 #define CLI_DB_V2X_DEFAULT_DEVICE_ID    0x12345678
@@ -145,6 +146,33 @@ static int P_CLI_DB_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintError("DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
             }
         }
+        else if(IS_CMD(pcCmd, "open"))
+        {
+            DB_MANAGER_T *pstDbManager;
+
+            pstDbManager = FRAMEWORK_GetDbManagerInstance();
+            PrintDebug("pstDbManager[0x%p]", pstDbManager);
+
+            nFrameWorkRet = DB_MANAGER_Open(pstDbManager);
+            if(nFrameWorkRet != FRAMEWORK_OK)
+            {
+                PrintError("DB_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
+            }
+        }
+        else if(IS_CMD(pcCmd, "close"))
+        {
+            DB_MANAGER_T *pstDbManager;
+
+            pstDbManager = FRAMEWORK_GetDbManagerInstance();
+            PrintDebug("pstDbManager[0x%p]", pstDbManager);
+
+            nFrameWorkRet = DB_MANAGER_Close(pstDbManager);
+            if(nFrameWorkRet != FRAMEWORK_OK)
+            {
+                PrintError("DB_MANAGER_Close() is failed! [nRet:%d]", nFrameWorkRet);
+            }
+        }
+
         else
         {
             return CLI_CMD_Showusage(pstCmd);

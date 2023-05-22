@@ -61,6 +61,8 @@ typedef struct FRAMEWORK {
 
 /***************************** Function Protype ******************************/
 int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework);
+MSG_MANAGER_T* FRAMEWORK_GetMsgManagerInstance(void);
+DB_MANAGER_T* FRAMEWORK_GetDbManagerInstance(void);
 
 #endif	/* _FRAMEWORK_H_ */
 

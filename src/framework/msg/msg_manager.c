@@ -58,7 +58,7 @@
 
 
 /***************************** Function  *************************************/
-int32_t MSG_MANAGER_Write(MSG_MANAGER_TX_T *pstMsgManagerWrite, DB_V2X_T *pstDbV2x, void* pPayload)
+int32_t MSG_MANAGER_Write(MSG_MANAGER_TX_T *pstMsgManagerWrite, DB_V2X_T *pstDbV2x, void *pPayload)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
@@ -85,7 +85,7 @@ int32_t MSG_MANAGER_Write(MSG_MANAGER_TX_T *pstMsgManagerWrite, DB_V2X_T *pstDbV
     return nRet;
 }
 
-int32_t MSG_MANAGER_Read(MSG_MANAGER_RX_T *pstMsgManagerRead, DB_V2X_T *pstDbV2x, void* pPayload)
+int32_t MSG_MANAGER_Read(MSG_MANAGER_RX_T *pstMsgManagerRead, DB_V2X_T *pstDbV2x, void *pPayload)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
