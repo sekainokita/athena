@@ -1,3 +1,6 @@
+#ifndef	_PLATFORM_H_
+#define	_PLATFORM_H_
+
 /******************************************************************************
 *
 * Copyright (C) 2023 - 2028 KETI, All rights reserved.
@@ -33,76 +36,29 @@
 /******************************************************************************/
 /**
 *
-* @file framework.c
-*
-* This file contains a data format design
+* @file platform.h
 *
 * @note
 *
-* V2X Data Format Source File
-*
-* MODIFICATION HISTORY:
-* Ver   Who  Date     Changes
-* ----- ---- -------- ----------------------------------------------------
-* 1.00  bman  23.03.22 First release
+* Platform Header
 *
 ******************************************************************************/
 
+
 /***************************** Include ***************************************/
-#include "framework.h"
+#include "type.h"
 
 /***************************** Definition ************************************/
 
 
-/***************************** Static Variable *******************************/
-static MSG_MANAGER_T s_stMsgManager;
-static DB_MANAGER_T s_stDbManager;
+/***************************** Enum and Structure ****************************/
+typedef struct FRAMEWORK {
+    uint32_t unReserved;
+} PLATFORM_T;
 
-/***************************** Function  *************************************/
 
-int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
-{
-    int32_t nRet = FRAMEWORK_ERROR;
+/***************************** Function Protype ******************************/
+int32_t PLATFORM_Init(PLATFORM_T *pstPlatform);
 
-    if(pstFramework == NULL)
-    {
-        PrintError("pstFramework == NULL!!");
-        return nRet;
-    }
-
-    (void*)memset(&s_stMsgManager, 0x00, sizeof(MSG_MANAGER_T));
-    (void*)memset(&s_stDbManager, 0x00, sizeof(DB_MANAGER_T));
-
-    PrintWarn("is successfully initialized.");
-
-    nRet = MSG_MANAGER_Init(&s_stMsgManager);
-    if (nRet != FRAMEWORK_OK)
-    {
-        PrintError("MSG_MANAGER_Init() is failed! [nRet:%d]", nRet);
-        return nRet;
-    }
-
-    PrintDebug("s_stMsgManager[0x%p]", &s_stMsgManager);
-
-    nRet = DB_MANAGER_Init(&s_stDbManager);
-    if (nRet != FRAMEWORK_OK)
-    {
-        PrintError("DB_MANAGER_Init() is failed! [nRet:%d]", nRet);
-        return nRet;
-    }
-
-    PrintDebug("s_stDbManager[0x%p]", &s_stDbManager);
-
-    return nRet;
-}
-
-MSG_MANAGER_T* FRAMEWORK_GetMsgManagerInstance(void)
-{
-    return &s_stMsgManager;
-}
-
-DB_MANAGER_T* FRAMEWORK_GetDbManagerInstance(void)
-{
-    return &s_stDbManager;
-}
+#endif	/* _PLATFORM_H_ */
 

@@ -36,16 +36,19 @@ include path.mk
 LIB_DB = db
 LIB_MSG = msg
 LIB_FRAMEWORK = framework
+LIB_PLATFORM = platform
 
 # CFLAGS / LDFLAGS
 TARGET_CFLAGS = -I$(INC_PATH)
 TARGET_CFLAGS += -I$(APP_INC_PATH)
 TARGET_CFLAGS += -I$(FRAMEWORK_INC_PATH)
+TARGET_CFLAGS += -I$(PLATFORM_INC_PATH)
+TARGET_CFLAGS += -I$(LIB_PLAT_CHEM_OBU_INC_PATH)
 TARGET_CFLAGS += -D_GNU_SOURCE=1
 TARGET_CFLAGS += -std=gnu99
 TARGET_CFLAGS += -Wall -Wextra -Wstrict-prototypes -O3 -fomit-frame-pointer -pipe
 
-TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_FRAMEWORK)
+TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_FRAMEWORK) -l$(LIB_PLATFORM)
 TARGET_LDFLAGS += -lrt -pthread
 # To add Library : -l$(LIB_DB) -l$(LIB_MSG)
 
@@ -97,6 +100,16 @@ lib-framework-distclean:
 
 .PHONY: lib-framework lib-framework-clean lib-framework-distclean
 
+lib-platform:
+	@$(MAKE) -C $(LIB_PLATFORM_PATH) $(TARGET_CONFIGS) all
+
+lib-platform-clean:
+	$(MAKE) -C $(LIB_PLATFORM_PATH) clean
+
+lib-platform-distclean:
+	$(MAKE) -C $(LIB_PLATFORM_PATH) distclean
+
+.PHONY: lib-platform lib-platform-clean lib-platform-distclean
 
 #
 # Application
@@ -112,13 +125,24 @@ app-distclean:
 
 .PHONY: app app-clean app-distclean
 
+# Platform
+plat-chem-obu:
+	@$(MAKE) -C $(LIB_PLAT_CHEM_OBU_PATH) $(TARGET_CONFIGS) all
+
+plat-chem-obu-clean:
+	$(MAKE) -C $(LIB_PLAT_CHEM_OBU_PATH) clean
+
+plat-chem-obu-distclean:
+	$(MAKE) -C $(LIB_PLAT_CHEM_OBU_PATH) distclean
+
+.PHONY: plat-chem-obu plat-chem-obu-clean plat-chem-obu-distclean
 
 #
 # Build All
 #
 
 lib-all:lib-db lib-msg
-all: lib-framework app lib-all
+all: lib-platform lib-framework app lib-all
 
 #
 # Clean
@@ -126,5 +150,5 @@ all: lib-framework app lib-all
 
 clean: distclean
 
-distclean: lib-db-distclean lib-msg-distclean lib-framework-distclean app-distclean
+distclean: lib-db-distclean lib-msg-distclean lib-platform-distclean lib-framework-distclean app-distclean
 	@$(RM) -f $(OUT_BIN_DIR)/* $(OUT_LIB_DIR)/*
