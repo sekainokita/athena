@@ -57,8 +57,13 @@
 #include <fcntl.h>
 #include <time.h>
 #include <pthread.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
 
+#include "framework.h"
 #include "msg_manager.h"
+#include "db_manager.h"
+
 #include "v2x_defs.h"
 #include "v2x_ext_type.h"
 
@@ -70,6 +75,8 @@
 
 /***************************** Static Variable *******************************/
 static int32_t s_nSocketHandle = -1;
+static int s_nMsgId;
+static key_t s_msgKey = FRAMEWORK_MSG_KEY;
 
 /***************************** Function  *************************************/
 
@@ -92,6 +99,26 @@ uint32_t transmitter_profile_id_g = 100;
 uint32_t peer_l2id_g = 0;
 
 uint32_t delay_time_sec_g = 10;
+
+
+static void P_MSG_NABAGER_PrintMsgInfo(int msqid)
+{
+
+    struct msqid_ds m_stat;
+
+    PrintDebug("========== Messege Queue Infomation =============");
+
+    if(msgctl(msqid, IPC_STAT, &m_stat) == FRAMEWORK_MSG_ERR)
+    {
+        PrintError("msgctl() is failed!!");
+    }
+
+    PrintDebug("msg_lspid : %d", m_stat.msg_lspid);
+    PrintDebug("msg_qnum : %ld", m_stat.msg_qnum);
+    PrintDebug("msg_stime : %ld", m_stat.msg_stime);
+
+    PrintDebug("=================================================");
+}
 
 static int32_t P_MSG_MANAGER_ConnectV2XDevice(MSG_MANAGER_T *pstMsgManager)
 {
@@ -260,128 +287,187 @@ int32_t P_MSG_MANAGER_SetV2xWsrSetting(void)
 	return nRet;
 }
 
+static int32_t P_MSG_MANAGER_SendMsgToDbMgr(MSG_MANAGER_TX_T *pstMsgMgrTx)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    DB_MANAGER_WRITE_T stDbManagerWrite;
+    DB_MANAGER_EVENT_MSG_T stEventMsg;
+    DB_V2X_T stDbV2x;
+    char cPayload[CLI_DB_V2X_DEFAULT_PAYLOAD_LEN];
+
+    (void*)memset(&stDbManagerWrite, 0x00, sizeof(DB_MANAGER_WRITE_T));
+    (void*)memset(&stDbV2x, 0x00, sizeof(DB_V2X_T));
+    (void*)memset(&cPayload, 0x00, sizeof(cPayload));
+
+    UNUSED(pstMsgMgrTx);
+
+    stDbManagerWrite.eFileType = DB_MANAGER_FILE_TYPE_TXT;
+    stDbManagerWrite.eProc = DB_MANAGER_PROC_WRITE;
+
+    stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
+    stDbV2x.eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5_BROADCAST;
+    stDbV2x.unDeviceId = CLI_DB_V2X_DEFAULT_DEVICE_ID;
+    stDbV2x.ulTimeStamp = CLI_DB_V2X_DEFAULT_TIMESTAMP;
+    stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
+    stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
+    stDbV2x.eRegionId = DB_V2X_REGION_ID_SEONGNAM;
+    stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_PLATOONING;
+    stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
+    stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
+    stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
+    stDbV2x.usSwVer = 0;
+    stDbV2x.ulPayloadLength = sizeof(cPayload);
+    stDbV2x.ulPacketCrc32 = 0;
+    for(int i=0; i < CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; i++)
+    {
+        cPayload[i] = rand();
+        printf("%d ", cPayload[i]);
+    }
+
+    stEventMsg.pstDbManagerWrite = &stDbManagerWrite;
+    stEventMsg.pstDbV2x = &stDbV2x;
+    stEventMsg.pPayload = (char*)&cPayload;
+
+    if(msgsnd(s_nMsgId, &stEventMsg, sizeof(DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
+    {
+        PrintError("msgsnd() is failed!!");
+        return nRet;
+    }
+    else
+    {
+        nRet = FRAMEWORK_OK;
+    }
+
+	return nRet;
+}
+
 void *MSG_MANAGER_TxTask(void *arg)
 {
-	(void)arg;
+    (void)arg;
 
-	// Prepare the Ext_WSReq_t structure
-	int db_v2x_tmp_size = sizeof(DB_V2X_T) + SAMPLE_V2X_MSG_LEN;
-	int v2x_tx_pdu_size = sizeof(Ext_V2X_TxPDU_t) + db_v2x_tmp_size;
+    // Prepare the Ext_WSReq_t structure
+    int db_v2x_tmp_size = sizeof(DB_V2X_T) + SAMPLE_V2X_MSG_LEN;
+    int v2x_tx_pdu_size = sizeof(Ext_V2X_TxPDU_t) + db_v2x_tmp_size;
 
-	Ext_V2X_TxPDU_t *v2x_tx_pdu_p = NULL;
-	DB_V2X_T *db_v2x_tmp_p = NULL;
+    Ext_V2X_TxPDU_t *v2x_tx_pdu_p = NULL;
+    DB_V2X_T *db_v2x_tmp_p = NULL;
+    MSG_MANAGER_TX_T stMsgMgrTx;
 
-	v2x_tx_pdu_p = malloc(v2x_tx_pdu_size);
-	memset(v2x_tx_pdu_p, 0, sizeof(Ext_V2X_TxPDU_t));
+    v2x_tx_pdu_p = malloc(v2x_tx_pdu_size);
 
-	v2x_tx_pdu_p->ver = htons(SAMPLE_V2X_API_VER);
-	v2x_tx_pdu_p->e_payload_type = e_payload_type_g;
-	v2x_tx_pdu_p->psid = htonl(psid_g);
-	v2x_tx_pdu_p->tx_power = tx_power_g;
-	v2x_tx_pdu_p->e_signer_id = e_signer_id_g;
-	v2x_tx_pdu_p->e_priority = e_priority_g;
+    memset(&stMsgMgrTx, 0, sizeof(MSG_MANAGER_TX_T));
+    memset(v2x_tx_pdu_p, 0, sizeof(Ext_V2X_TxPDU_t));
 
-	if (e_comm_type_g == eV2XCommType_LTEV2X || e_comm_type_g == eV2XCommType_5GNRV2X)
-	{
-		v2x_tx_pdu_p->magic_num = htons(MAGIC_CV2X_TX_PDU);
-		v2x_tx_pdu_p->u.config_cv2x.transmitter_profile_id = htonl(transmitter_profile_id_g);
-		v2x_tx_pdu_p->u.config_cv2x.peer_l2id = htonl(peer_l2id_g);
-	}
-	else if (e_comm_type_g == eV2XCommType_DSRC)
-	{
-		v2x_tx_pdu_p->magic_num = htons(MAGIC_DSRC_TX_PDU);
-		v2x_tx_pdu_p->u.config_wave.freq = htons(freq_g);
-		v2x_tx_pdu_p->u.config_wave.e_data_rate = htons(e_data_rate_g);
-		v2x_tx_pdu_p->u.config_wave.e_time_slot = e_time_slot_g;
-		memcpy(v2x_tx_pdu_p->u.config_wave.peer_mac_addr, peer_mac_addr_g, MAC_EUI48_LEN);
-	}
+    v2x_tx_pdu_p->ver = htons(SAMPLE_V2X_API_VER);
+    v2x_tx_pdu_p->e_payload_type = e_payload_type_g;
+    v2x_tx_pdu_p->psid = htonl(psid_g);
+    v2x_tx_pdu_p->tx_power = tx_power_g;
+    v2x_tx_pdu_p->e_signer_id = e_signer_id_g;
+    v2x_tx_pdu_p->e_priority = e_priority_g;
 
-	// Payload = KETI Format
-	v2x_tx_pdu_p->v2x_msg.length = htons(db_v2x_tmp_size);
+    if (e_comm_type_g == eV2XCommType_LTEV2X || e_comm_type_g == eV2XCommType_5GNRV2X)
+    {
+        v2x_tx_pdu_p->magic_num = htons(MAGIC_CV2X_TX_PDU);
+        v2x_tx_pdu_p->u.config_cv2x.transmitter_profile_id = htonl(transmitter_profile_id_g);
+        v2x_tx_pdu_p->u.config_cv2x.peer_l2id = htonl(peer_l2id_g);
+    }
+    else if (e_comm_type_g == eV2XCommType_DSRC)
+    {
+        v2x_tx_pdu_p->magic_num = htons(MAGIC_DSRC_TX_PDU);
+        v2x_tx_pdu_p->u.config_wave.freq = htons(freq_g);
+        v2x_tx_pdu_p->u.config_wave.e_data_rate = htons(e_data_rate_g);
+        v2x_tx_pdu_p->u.config_wave.e_time_slot = e_time_slot_g;
+        memcpy(v2x_tx_pdu_p->u.config_wave.peer_mac_addr, peer_mac_addr_g, MAC_EUI48_LEN);
+    }
 
-	db_v2x_tmp_p = malloc(db_v2x_tmp_size);
-	memset(db_v2x_tmp_p, 0, db_v2x_tmp_size);
+    // Payload = KETI Format
+    v2x_tx_pdu_p->v2x_msg.length = htons(db_v2x_tmp_size);
 
-	db_v2x_tmp_p->eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
-	db_v2x_tmp_p->eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5;
-	db_v2x_tmp_p->unDeviceId = 0;
-	db_v2x_tmp_p->ulTimeStamp = 0ULL;
-	db_v2x_tmp_p->eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
-	db_v2x_tmp_p->eActionType = DB_V2X_ACTION_TYPE_REQUEST;
-	db_v2x_tmp_p->eRegionId = DB_V2X_REGION_ID_SEOUL;
-	db_v2x_tmp_p->ePayloadType = DB_V2X_PAYLOAD_TYPE_SAE_J2735_BSM;
-	db_v2x_tmp_p->eCommId = DB_V2X_COMM_ID_V2V;
-	db_v2x_tmp_p->usDbVer = 0;
-	db_v2x_tmp_p->usHwVer = 0;
-	db_v2x_tmp_p->usSwVer = 0;
-	db_v2x_tmp_p->ulPayloadLength = SAMPLE_V2X_MSG_LEN;
-	db_v2x_tmp_p->ulPacketCrc32 = 0;
+    db_v2x_tmp_p = malloc(db_v2x_tmp_size);
+    memset(db_v2x_tmp_p, 0, db_v2x_tmp_size);
 
-	memcpy(v2x_tx_pdu_p->v2x_msg.data, db_v2x_tmp_p, db_v2x_tmp_size);
+    db_v2x_tmp_p->eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
+    db_v2x_tmp_p->eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5;
+    db_v2x_tmp_p->unDeviceId = 0;
+    db_v2x_tmp_p->ulTimeStamp = 0ULL;
+    db_v2x_tmp_p->eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
+    db_v2x_tmp_p->eActionType = DB_V2X_ACTION_TYPE_REQUEST;
+    db_v2x_tmp_p->eRegionId = DB_V2X_REGION_ID_SEOUL;
+    db_v2x_tmp_p->ePayloadType = DB_V2X_PAYLOAD_TYPE_SAE_J2735_BSM;
+    db_v2x_tmp_p->eCommId = DB_V2X_COMM_ID_V2V;
+    db_v2x_tmp_p->usDbVer = 0;
+    db_v2x_tmp_p->usHwVer = 0;
+    db_v2x_tmp_p->usSwVer = 0;
+    db_v2x_tmp_p->ulPayloadLength = SAMPLE_V2X_MSG_LEN;
+    db_v2x_tmp_p->ulPacketCrc32 = 0;
 
-	printf("\nV2X TX PDU>>\n"
-		   "  magic_num        : 0x%04X\n"
-		   "  ver              : 0x%04X\n"
-		   "  e_payload_type   : %d\n"
-		   "  psid             : %u\n"
-		   "  tx_power         : %d\n"
-		   "  e_signer_id      : %d\n"
-		   "  e_priority       : %d\n",
-		   ntohs(v2x_tx_pdu_p->magic_num),
-		   ntohs(v2x_tx_pdu_p->ver),
-		   v2x_tx_pdu_p->e_payload_type,
-		   ntohl(v2x_tx_pdu_p->psid),
-		   v2x_tx_pdu_p->tx_power,
-		   v2x_tx_pdu_p->e_signer_id,
-		   v2x_tx_pdu_p->e_priority);
+    memcpy(v2x_tx_pdu_p->v2x_msg.data, db_v2x_tmp_p, db_v2x_tmp_size);
 
-	if (e_comm_type_g == eV2XCommType_LTEV2X || e_comm_type_g == eV2XCommType_5GNRV2X)
-	{
-		printf("  u.config_cv2x.transmitter_profile_id : %u\n"
-			   "  u.config_cv2x.peer_l2id              : %u\n",
-			   ntohl(v2x_tx_pdu_p->u.config_cv2x.transmitter_profile_id),
-			   ntohl(v2x_tx_pdu_p->u.config_cv2x.peer_l2id));
-	}
-	else if (e_comm_type_g == eV2XCommType_DSRC)
-	{
-		printf("  u.config_wave.freq                  : %d\n"
-			   "  u.config_wave.e_data_rate           : %d\n"
-			   "  u.config_wave.e_time_slot           : %d\n"
-			   "  u.config_wave.peer_mac_addr         : %s\n",
-			   ntohs(v2x_tx_pdu_p->u.config_wave.freq),
-			   ntohs(v2x_tx_pdu_p->u.config_wave.e_data_rate),
-			   v2x_tx_pdu_p->u.config_wave.e_time_slot,
-			   v2x_tx_pdu_p->u.config_wave.peer_mac_addr);
-	}
+    printf("\nV2X TX PDU>>\n"
+    "  magic_num        : 0x%04X\n"
+    "  ver              : 0x%04X\n"
+    "  e_payload_type   : %d\n"
+    "  psid             : %u\n"
+    "  tx_power         : %d\n"
+    "  e_signer_id      : %d\n"
+    "  e_priority       : %d\n",
+    ntohs(v2x_tx_pdu_p->magic_num),
+    ntohs(v2x_tx_pdu_p->ver),
+    v2x_tx_pdu_p->e_payload_type,
+    ntohl(v2x_tx_pdu_p->psid),
+    v2x_tx_pdu_p->tx_power,
+    v2x_tx_pdu_p->e_signer_id,
+    v2x_tx_pdu_p->e_priority);
 
-	uint32_t i;
-	ssize_t n;
+    if (e_comm_type_g == eV2XCommType_LTEV2X || e_comm_type_g == eV2XCommType_5GNRV2X)
+    {
+        printf("  u.config_cv2x.transmitter_profile_id : %u\n"
+        "  u.config_cv2x.peer_l2id              : %u\n",
+        ntohl(v2x_tx_pdu_p->u.config_cv2x.transmitter_profile_id),
+        ntohl(v2x_tx_pdu_p->u.config_cv2x.peer_l2id));
+    }
+    else if (e_comm_type_g == eV2XCommType_DSRC)
+    {
+        printf("  u.config_wave.freq                  : %d\n"
+        "  u.config_wave.e_data_rate           : %d\n"
+        "  u.config_wave.e_time_slot           : %d\n"
+        "  u.config_wave.peer_mac_addr         : %s\n",
+        ntohs(v2x_tx_pdu_p->u.config_wave.freq),
+        ntohs(v2x_tx_pdu_p->u.config_wave.e_data_rate),
+        v2x_tx_pdu_p->u.config_wave.e_time_slot,
+        v2x_tx_pdu_p->u.config_wave.peer_mac_addr);
+    }
 
-	for (i = 0; i < tx_cnt_g; i++)
-	{
-		n = send(s_nSocketHandle, v2x_tx_pdu_p, v2x_tx_pdu_size, 0);
-		if (n < 0)
-		{
-			PrintError("send() is failed!!");
-			break;
-		}
-		else if (n != v2x_tx_pdu_size)
-		{
-			PrintError("send() sent a different number of bytes than expected!!");
-			break;
-		}
-		else
-		{
-			PrintDebug("tx send success (%ld bytes) : [%u/%u]", n, i + 1, tx_cnt_g);
-		}
+    uint32_t i;
+    ssize_t n;
 
-		usleep((1000 * tx_delay_g));
-	}
+    for (i = 0; i < tx_cnt_g; i++)
+    {
+        n = send(s_nSocketHandle, v2x_tx_pdu_p, v2x_tx_pdu_size, 0);
+        if (n < 0)
+        {
+            PrintError("send() is failed!!");
+            break;
+        }
+        else if (n != v2x_tx_pdu_size)
+        {
+            PrintError("send() sent a different number of bytes than expected!!");
+            break;
+        }
+        else
+        {
+            PrintDebug("tx send success (%ld bytes) : [%u/%u]", n, i + 1, tx_cnt_g);
+        }
 
-	free(v2x_tx_pdu_p);
-	free(db_v2x_tmp_p);
+        P_MSG_MANAGER_SendMsgToDbMgr(&stMsgMgrTx);
 
-	return NULL;
+        usleep((1000 * tx_delay_g));
+    }
+
+    free(v2x_tx_pdu_p);
+    free(db_v2x_tmp_p);
+
+    return NULL;
 }
 
 void *MSG_MANAGER_RxTask(void *arg)
@@ -443,6 +529,8 @@ int32_t P_MSG_MANAGER_CreateTask(void)
 
 	pthread_join(h_TxTask, &pTxTaskRet);
 	pthread_join(h_RxTask, &pRxTaskRet);
+
+    nRet = FRAMEWORK_OK;
 
 	return nRet;
 }
@@ -533,7 +621,6 @@ int32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager)
         PrintError("P_MSG_MANAGER_Init() is failed!!, nRet[%d]", nRet);
         return nRet;
     }
-
     return nRet;
 }
 
@@ -607,7 +694,16 @@ int32_t MSG_MANAGER_Init(MSG_MANAGER_T *pstMsgManager)
         return nRet;
     }
 
-    nRet = FRAMEWORK_OK;
+    if((s_nMsgId = msgget(s_msgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
+    {
+        PrintError("msgget() is failed!");
+        return nRet;
+    }
+    else
+    {
+        P_MSG_NABAGER_PrintMsgInfo(s_nMsgId);
+        nRet = FRAMEWORK_OK;
+    }
 
     return nRet;
 }

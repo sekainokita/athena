@@ -49,6 +49,7 @@
 ******************************************************************************/
 
 /***************************** Include ***************************************/
+#include "framework.h"
 #include "db_manager.h"
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -56,19 +57,13 @@
 
 /***************************** Definition ************************************/
 #define DB_MANAGER_DEFAULT_FILE_NAME "db_manager.log"
-#define DB_MANAGER_MSG_KEY           (0x840919)
 #define DB_MANAGER_THREAD_ID         (0x10)
 
 /***************************** Enum and Structure ****************************/
-typedef struct DB_MANAGER_EVENT_MSG {
-    DB_MANAGER_WRITE_T *pstDbManagerWrite;
-    DB_V2X_T *pstDbV2x;
-    void *pPayload;
-} DB_MANAGER_EVENT_MSG_T;
 
 /***************************** Static Variable *******************************/
 FILE* s_pDbManagerFd;
-static key_t s_msgKey = DB_MANAGER_MSG_KEY;
+static key_t s_msgKey = FRAMEWORK_MSG_KEY;
 static int s_nMsgId;
 
 static DB_MANAGER_TASK_T *s_pThreadInfo = NULL;
@@ -195,7 +190,7 @@ static void *P_DB_MANAGER_Task(void *arg)
     return NULL;
 }
 
-void P_DB_NABAGER_PrintMsgInfo(int msqid)
+static void P_DB_NABAGER_PrintMsgInfo(int msqid)
 {
 
     struct msqid_ds m_stat;
@@ -232,8 +227,11 @@ static int32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
         PrintError("msgget() is failed!");
         return nRet;
     }
-
-    P_DB_NABAGER_PrintMsgInfo(s_nMsgId);
+    else
+    {
+        P_DB_NABAGER_PrintMsgInfo(s_nMsgId);
+        nRet = FRAMEWORK_OK;
+    }
 
     pthread_t *s_pThread = (pthread_t *)malloc(nThreads * sizeof(pthread_t));
     DB_MANAGER_TASK_T *s_pThreadInfo = (DB_MANAGER_TASK_T *)malloc(nThreads * sizeof(DB_MANAGER_TASK_T));

@@ -103,6 +103,12 @@ typedef struct DB_MANAGER_READ {
     uint32_t unReserved;
 } DB_MANAGER_READ_T;
 
+typedef struct DB_MANAGER_EVENT_MSG {
+    DB_MANAGER_WRITE_T *pstDbManagerWrite;
+    DB_V2X_T *pstDbV2x;
+    void *pPayload;
+} DB_MANAGER_EVENT_MSG_T;
+
 typedef struct DB_MANAGER {
     DB_MANAGER_FILE_TYPE_E  eFileType;
     uint32_t unReserved;

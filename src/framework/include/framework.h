@@ -51,7 +51,7 @@
 #include "db_manager.h"
 
 /***************************** Definition ************************************/
-
+#define FRAMEWORK_MSG_KEY           (0x840919)
 
 /***************************** Enum and Structure ****************************/
 typedef struct FRAMEWORK {
