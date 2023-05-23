@@ -42,6 +42,12 @@
 #define SAMPLE_V2X_MSG_LEN 100
 
 #define CONFIG_KETI_PLATFORM 1
+#if defined(CONFIG_KETI_PLATFORM)
+#define CONFIG_CUSTOM_ETH (1)
+#if defined(CONFIG_CUSTOM_ETH)
+#define ETH_DEV "eth1"
+#endif
+#endif
 
 /////////////////////////////////////////////////////////////////////////////////////////
 /* MACRO - for sample */
@@ -244,6 +250,11 @@ int connect_v2x_socket(void)
 		return res;
 	}
 
+#if defined(CONFIG_KETI_PLATFORM)
+#if defined(CONFIG_CUSTOM_ETH)
+	setsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, "eth1", strlen("eth1"));
+#endif
+#endif
 	// Connect to the server
 	struct sockaddr_in server_addr =
 		{
