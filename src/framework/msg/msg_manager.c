@@ -372,7 +372,7 @@ void *MSG_MANAGER_TxTask(void *arg)
 		}
 		else
 		{
-			PrintDebug("tx send success (%ld bytes) : [%u/%u]\n", n, i + 1, tx_cnt_g);
+			PrintDebug("tx send success (%ld bytes) : [%u/%u]", n, i + 1, tx_cnt_g);
 		}
 
 		usleep((1000 * tx_delay_g));
@@ -437,13 +437,6 @@ int32_t P_MSG_MANAGER_CreateTask(void)
 
 	void *pTxTaskRet;
 	void *pRxTaskRet;
-
-	nRet = P_MSG_MANAGER_SetV2xWsrSetting();
-    if (nRet != FRAMEWORK_OK)
-    {
-        PrintError("P_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
-        return nRet;
-    }
 
 	pthread_create(&h_TxTask, NULL, MSG_MANAGER_TxTask, NULL);
 	pthread_create(&h_RxTask, NULL, MSG_MANAGER_RxTask, NULL);
@@ -524,6 +517,13 @@ int32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager)
     if (nRet != FRAMEWORK_OK)
     {
         PrintError("P_MSG_MANAGER_ConnectV2XDevice() is failed!!, nRet[%d]", nRet);
+        return nRet;
+    }
+
+	nRet = P_MSG_MANAGER_SetV2xWsrSetting();
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
         return nRet;
     }
 
