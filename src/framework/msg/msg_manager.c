@@ -236,6 +236,11 @@ int32_t P_MSG_MANAGER_SetV2xWsrSetting(void)
 		{
 			PrintError("recv() is received a different number of bytes than expected!!");
 		}
+        else
+        {
+            nRet = FRAMEWORK_OK;
+            PrintTrace("recv() is success to get ws_resp");
+        }
 
 		usleep(1000);
 	}
