@@ -60,14 +60,14 @@ typedef struct _WAVE_Tx_Struct
 
 	uint8_t peer_mac_addr[MAC_EUI48_LEN]; /* if manual_flg is true,
 											 ignore */
-} WAVE_Tx_Struct;
+} __attribute__((__packed__)) WAVE_Tx_Struct;
 
 typedef struct _CV2X_Tx_Struct
 {
 	/*CV2X*/
 	uint32_t transmitter_profile_id; /* Unsupport  RRC 설정 profile id ,  */
 	uint32_t peer_l2id;
-} CV2X_Tx_Struct;
+} __attribute__((__packed__)) CV2X_Tx_Struct;
 
 typedef struct _Ext_V2X_TxPDU_t
 {
