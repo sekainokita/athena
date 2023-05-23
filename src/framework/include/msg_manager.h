@@ -62,13 +62,14 @@ typedef struct MSG_MANAGER_READ {
 } MSG_MANAGER_RX_T;
 
 typedef struct MSG_MANAGER {
+    char *pchIfaceName;
     uint32_t unReserved;
 } MSG_MANAGER_T;
 
 /***************************** Function Protype ******************************/
 
-int32_t MSG_MANAGER_Write(MSG_MANAGER_TX_T *pstMsgManagerWrite, DB_V2X_T *pstDbV2x, void *pPayload);
-int32_t MSG_MANAGER_Read(MSG_MANAGER_RX_T *pstMsgManagerRead, DB_V2X_T *pstDbV2x, void *pPayload);
+int32_t MSG_MANAGER_Transmit(MSG_MANAGER_TX_T *pstMsgMgrTx, DB_V2X_T *pstDbV2x, void *pPayload);
+int32_t MSG_MANAGER_Receive(MSG_MANAGER_RX_T *pstMsgMgrRx, DB_V2X_T *pstDbV2x, void *pPayload);
 
 int32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager);
 int32_t MSG_MANAGER_Close(MSG_MANAGER_T *pstMsgManager);

@@ -50,18 +50,13 @@
 #include "framework.h"
 
 /***************************** Definition ************************************/
-#define CLI_DB_V2X_DEFAULT_DEVICE_ID    0x12345678
-#define CLI_DB_V2X_DEFAULT_TIMESTAMP    2023032314344766828
-#define CLI_DB_V2X_DEFAULT_HW_VER       0x1234
-#define CLI_DB_V2X_DEFAULT_PAYLOAD_LEN  1024
-
 
 /***************************** Static Variable *******************************/
 
 
 /***************************** Function Protype ******************************/
 
-static int P_CLI_DB_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
+static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
     int32_t nRet = APP_OK;
     int nFrameWorkRet = FRAMEWORK_ERROR;
@@ -195,7 +190,7 @@ int32_t CLI_DB_InitCmds(void)
     int32_t nRet = APP_ERROR;
 
     nRet = CLI_CMD_AddCmd("db",
-               P_CLI_DB_Help,
+               P_CLI_DB,
                NULL,
                "help for DB commands",
                "db [enter command]\n\n"
@@ -203,7 +198,9 @@ int32_t CLI_DB_InitCmds(void)
                "of available commands. For more details on a command, type and enter 'db'\n"
                "and the command name.\n\n"
                "db test    test db command\n"
-               "db v2x     test db v2x sample command",
+               "db v2x     test db v2x sample command (first, set CLI> db open)"
+               "db open    open a db file"
+               "db close   close a db file",
                "");
     if(nRet != APP_OK)
     {

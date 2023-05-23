@@ -44,8 +44,24 @@
 
 /***************************** Include ***************************************/
 #include "cli.h"
+#include "app.h"
+#include "db_v2x.h"
+#include "db_manager.h"
+#include "msg_manager.h"
+#include "framework.h"
 
 /***************************** Definition ************************************/
+#define SAMPLE_USAGE_STR "Usage: %s [OPTIONS]\n"                                                                  \
+						 "  -o payload_type  : Raw, EncodedbyJ2735, eITSK00130, eKETI, eETRI (default : Raw)\n"   \
+						 "  -p psid          : <decimal number> (default : 32)\n"                                 \
+						 "  -y comm_type     : DSRC, LTEV2X, 5GNRV2X (default : 5GNRV2X)\n"                       \
+						 "  -t tx_port       : tx port dbm (default : 20)\n"                                      \
+						 "  -s signer_id     : UNSECURED, CERTIFICATE, DIGEST, ALTERNATE (default : UNSECURED)\n" \
+						 "  -r priority      : 0~7 (default : 0)\n"                                               \
+						 "  -c tx_count      : total tx count (default : 100)\n"                                  \
+						 "  -d tx_delay      : msec delay (default : 100)\n"                                      \
+						 "  -m total_time    : total exec second (default : 10)\n"                                \
+						 "  -h help\n"
 
 
 /***************************** Static Variable *******************************/
@@ -163,10 +179,20 @@ static int P_CLI_MSG_TcpTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
     return nRet;
 }
 
-static int P_CLI_MSG_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
+static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
     int32_t nRet = APP_OK;
+    int nFrameWorkRet = FRAMEWORK_ERROR;
     char *pcCmd;
+    MSG_MANAGER_TX_T stMsgManagerTx;
+    MSG_MANAGER_RX_T stMsgManagerRx;
+    DB_V2X_T stDbV2x;
+    char cPayload[CLI_DB_V2X_DEFAULT_PAYLOAD_LEN];
+
+    (void*)memset(&stMsgManagerTx, 0x00, sizeof(MSG_MANAGER_TX_T));
+    (void*)memset(&stMsgManagerRx, 0x00, sizeof(MSG_MANAGER_RX_T));
+    (void*)memset(&stDbV2x, 0x00, sizeof(DB_V2X_T));
+    (void*)memset(&cPayload, 0x00, sizeof(cPayload));
 
     UNUSED(argc);
 
@@ -176,29 +202,125 @@ static int P_CLI_MSG_Help(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         return nRet;
     }
 
-    pcCmd = CLI_CMD_GetArg(pstCmd, 0);
+    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_0);
     if (pcCmd == NULL)
     {
         return CLI_CMD_Showusage(pstCmd);
     }
     else
     {
-        for(int i = 0; i < CMD_MAX; i++)
+        pcCmd = CLI_CMD_GetArg(pstCmd, CMD_0);
+        if(IS_CMD(pcCmd, "test"))
         {
-            pcCmd = CLI_CMD_GetArg(pstCmd, i);
-            PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
+            for(int i = 0; i < CMD_MAX; i++)
+            {
+                pcCmd = CLI_CMD_GetArg(pstCmd, i);
+                PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
+            }
+        }
+        else if(IS_CMD(pcCmd, "v2x-tx"))
+        {
+            stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
+            stDbV2x.eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5_BROADCAST;
+            stDbV2x.unDeviceId = CLI_DB_V2X_DEFAULT_DEVICE_ID;
+            stDbV2x.ulTimeStamp = CLI_DB_V2X_DEFAULT_TIMESTAMP;
+            stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
+            stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
+            stDbV2x.eRegionId = DB_V2X_REGION_ID_SEONGNAM;
+            stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_PLATOONING;
+            stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
+            stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
+            stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
+            stDbV2x.usSwVer = APP_VER;
+            stDbV2x.ulPayloadLength = sizeof(cPayload);
+            stDbV2x.ulPacketCrc32 = 0;
+
+            PrintTrace("========================================================");
+            PrintDebug("eDeviceType[%d]", stDbV2x.eDeviceType);
+            PrintDebug("eTeleCommType[%d]", stDbV2x.eTeleCommType);
+            PrintDebug("unDeviceId[0x%x]", stDbV2x.unDeviceId);
+            PrintDebug("ulTimeStamp[%ld]", stDbV2x.ulTimeStamp);
+            PrintDebug("eServiceId[%d]", stDbV2x.eServiceId);
+            PrintDebug("eActionType[%d]", stDbV2x.eActionType);
+            PrintDebug("eRegionId[%d]", stDbV2x.eRegionId);
+            PrintDebug("ePayloadType[%d]", stDbV2x.ePayloadType);
+            PrintDebug("eCommId[%d]", stDbV2x.eCommId);
+            PrintDebug("usDbVer[%d.%d]", stDbV2x.usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, stDbV2x.usDbVer & CLI_DB_V2X_MINOR_MASK);
+            PrintDebug("usHwVer[0x%x]", stDbV2x.usHwVer);
+            PrintDebug("usSwVer[0x%x]", stDbV2x.usSwVer);
+            PrintDebug("ulPayloadLength[%d]", stDbV2x.ulPayloadLength);
+            PrintDebug("cPayload");
+            for(int i=0; i < CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; i++)
+            {
+                cPayload[i] = rand();
+                printf("%d ", cPayload[i]);
+            }
+            printf("\r\n");
+
+            PrintDebug("ulPayloadCrc32[0x%x]", stDbV2x.ulPacketCrc32);
+            PrintTrace("========================================================");
+
+            nFrameWorkRet = MSG_MANAGER_Transmit(&stMsgManagerTx, &stDbV2x, (char*)&cPayload);
+            if(nFrameWorkRet != FRAMEWORK_OK)
+            {
+                PrintError("MSG_MANAGER_Transmit() is failed! [nRet:%d]", nFrameWorkRet);
+            }
+        }
+        else if(IS_CMD(pcCmd, "open"))
+        {
+            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+            if(pcCmd != NULL)
+            {
+                MSG_MANAGER_T *pstMsgManager;
+
+                pstMsgManager = FRAMEWORK_GetMsgManagerInstance();
+                PrintDebug("pstMsgManager[0x%p]", pstMsgManager);
+
+                pstMsgManager->pchIfaceName = pcCmd;
+
+                PrintTrace("pstMsgManager->pchIfaceName[%s]", pstMsgManager->pchIfaceName);
+
+                nFrameWorkRet = MSG_MANAGER_Open(pstMsgManager);
+                if(nFrameWorkRet != FRAMEWORK_OK)
+                {
+                    PrintError("MSG_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
+                }
+            }
+            else
+            {
+                PrintError("set an ethernet interface name, e.g. CLI> msg open eth1");
+            }
+        }
+        else if(IS_CMD(pcCmd, "close"))
+        {
+            MSG_MANAGER_T *pstMsgManager;
+
+            pstMsgManager = FRAMEWORK_GetMsgManagerInstance();
+            PrintDebug("pstDbManager[0x%p]", pstMsgManager);
+
+            nFrameWorkRet = MSG_MANAGER_Close(pstMsgManager);
+            if(nFrameWorkRet != FRAMEWORK_OK)
+            {
+                PrintError("MSG_MANAGER_Close() is failed! [nRet:%d]", nFrameWorkRet);
+            }
+        }
+
+        else
+        {
+            return CLI_CMD_Showusage(pstCmd);
         }
     }
 
 	return nRet;
 }
 
+
 int32_t CLI_MSG_InitCmds(void)
 {
     int32_t nRet = APP_ERROR;
 
     nRet = CLI_CMD_AddCmd("msg",
-               P_CLI_MSG_Help,
+               P_CLI_MSG,
                NULL,
                "help for MSG commands",
                "msg [enter command]\n\n"

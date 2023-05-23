@@ -49,24 +49,415 @@
 ******************************************************************************/
 
 /***************************** Include ***************************************/
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <time.h>
+#include <pthread.h>
+
 #include "msg_manager.h"
+#include "v2x_defs.h"
+#include "v2x_ext_type.h"
 
 /***************************** Definition ************************************/
-
+#define SAMPLE_V2X_API_VER 0x0001
+#define SAMPLE_V2X_IP_ADDR "192.168.1.11"
+#define SAMPLE_V2X_MSG_LEN 100
+#define SAMPLE_V2X_PORT_ADDR 47347
 
 /***************************** Static Variable *******************************/
-
+static int32_t s_nSocketHandle = -1;
 
 /***************************** Function  *************************************/
-int32_t MSG_MANAGER_Write(MSG_MANAGER_TX_T *pstMsgManagerWrite, DB_V2X_T *pstDbV2x, void *pPayload)
+
+/////////////////////////////////////////////////////////////////////////////////////////
+/* Global Variable Value */
+V2xAction_t e_action_g = eV2xAction_ADD;
+V2xPayloadType_t e_payload_type_g = eRaw;
+V2xPsid_t psid_g = 5271;
+V2XCommType_t e_comm_type_g = eV2XCommType_5GNRV2X;
+V2xPowerDbm_t tx_power_g = 20;
+V2xSignerId_t e_signer_id_g = eV2xSignerId_UNSECURED;
+V2xMsgPriority_t e_priority_g = eV2xPriority_CV2X_PPPP_0;
+uint32_t tx_cnt_g = 100;
+uint32_t tx_delay_g = 100;
+V2xFrequency_t freq_g = 5900;
+V2xDataRate_t e_data_rate_g = eV2xDataRate_6MBPS;
+V2xTimeSlot_t e_time_slot_g = eV2xTimeSlot_Continuous;
+uint8_t peer_mac_addr_g[MAC_EUI48_LEN] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+uint32_t transmitter_profile_id_g = 100;
+uint32_t peer_l2id_g = 0;
+
+uint32_t delay_time_sec_g = 10;
+
+static int32_t P_MSG_MANAGER_ConnectV2XDevice(MSG_MANAGER_T *pstMsgManager)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    int32_t nSocketHandle = -1;
+    int32_t nFlags = 0;
+
+    nSocketHandle = socket(AF_INET, SOCK_STREAM, 0);
+    if (nSocketHandle < 0)
+    {
+        PrintError("socket() is failed!!");
+        nRet = FRAMEWORK_ERROR;
+        return nRet;
+    }
+
+    PrintDebug("pstMsgManager->pchIfaceName[%s]", pstMsgManager->pchIfaceName);
+
+    nRet = setsockopt(nSocketHandle, SOL_SOCKET, SO_BINDTODEVICE, pstMsgManager->pchIfaceName, strlen(pstMsgManager->pchIfaceName));
+    if (nRet < 0)
+    {
+        PrintError("setsockopt() is failed");
+        return nRet;
+    }
+
+    struct sockaddr_in server_addr =
+    {
+        .sin_family = AF_INET,
+        .sin_addr.s_addr = inet_addr(SAMPLE_V2X_IP_ADDR),
+        .sin_port = htons(SAMPLE_V2X_PORT_ADDR)
+    };
+
+    nRet = connect(nSocketHandle, (struct sockaddr *)&server_addr, sizeof(server_addr));
+    if (nRet < 0)
+    {
+        PrintError("connect() is failed");
+        return nRet;
+    }
+
+    /* Change to NON-BLOCK socket */
+    nFlags = fcntl(nSocketHandle, F_GETFL, 0);
+    if (nFlags == -1)
+    {
+        PrintError("fcntl() is F_GETFL failed");
+        return nRet;
+    }
+
+    nFlags |= O_NONBLOCK;
+    nRet = fcntl(nSocketHandle, F_SETFL, nFlags);
+    if (nRet < 0)
+    {
+        PrintError("fcntl() is F_SETFL failed");
+        return nRet;
+    }
+
+    s_nSocketHandle = nSocketHandle;
+
+    PrintTrace("Connection of V2X Device is successed! [s_nSocketHandle:0x%x]", s_nSocketHandle);
+
+    nRet = FRAMEWORK_OK;
+
+    return nRet;
+}
+
+static int32_t P_MSG_MANAGER_DisconnectV2XDevice(void)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+	if (s_nSocketHandle >= 0)
+	{
+		close(s_nSocketHandle);
+        s_nSocketHandle = -1;
+        PrintTrace("s_nSocketHandle is closed, s_nSocketHandle[%d]", s_nSocketHandle);
+        nRet = FRAMEWORK_OK;
+	}
+    else
+    {
+        PrintError("s_nSocketHandle is not available!!");
+    }
+
+    return nRet;
+}
+
+int32_t P_MSG_MANAGER_SetV2xWsrSetting(void)
+{
+	int32_t nRet = FRAMEWORK_ERROR;
+
+	// Prepare the Ext_WSReq_t structure
+	Ext_WSReq_t ws_req;
+	memset(&ws_req, 0, sizeof(ws_req));
+	ws_req.magic_num = htons(MAGIC_WSREQ);
+	ws_req.ver = htons(SAMPLE_V2X_API_VER);
+	ws_req.e_action = eV2xAction_ADD;
+	ws_req.e_payload_type = e_payload_type_g;
+	ws_req.psid = htonl(psid_g);
+
+	printf("\nWSM Service REQ>>\n"
+		   "  magic_num        : 0x%04X\n"
+		   "  ver              : 0x%04X\n"
+		   "  e_action         : %d\n"
+		   "  e_payload_type   : %d\n"
+		   "  psid             : %u\n",
+		   ntohs(ws_req.magic_num),
+		   ntohs(ws_req.ver),
+		   ws_req.e_action,
+		   ws_req.e_payload_type,
+		   ntohl(ws_req.psid));
+
+	// Send the request
+	ssize_t n = send(s_nSocketHandle, &ws_req, sizeof(ws_req), 0);
+	if (n < 0)
+	{
+		PrintError("send() is failed!!");
+		return nRet;
+	}
+	else if (n != sizeof(ws_req))
+	{
+		PrintError("send() sent a different number of bytes than expected!");
+		return nRet;
+	}
+
+	// Wait for the response
+	Ext_WSResp_t ws_resp;
+	memset(&ws_resp, 0, sizeof(ws_resp));
+	n = -1;
+
+	while (n <= 0)
+	{
+		n = recv(s_nSocketHandle, &ws_resp, sizeof(ws_resp), 0);
+		if (n < 0)
+		{
+			if (errno != EAGAIN && errno != EWOULDBLOCK)
+			{
+				PrintError("recv() is failed!!");
+				break;
+			}
+		}
+		else if (n == 0)
+		{
+			PrintError("recv()'connection is closed by peer!!");
+		}
+		else if (n != sizeof(ws_resp))
+		{
+			PrintError("recv() is received a different number of bytes than expected!!");
+		}
+
+		usleep(1000);
+	}
+
+	PrintDebug("\nWSM Service RESP>>\n"
+		   "  magic_num      : 0x%04X\n"
+		   "  ver            : 0x%04X\n"
+		   "  e_action       : %d\n"
+		   "  is_confirmed   : %d\n"
+		   "  psid           : %u\n",
+		   ntohs(ws_resp.magic_num),
+		   ntohs(ws_resp.ver),
+		   ws_resp.e_action,
+		   ws_resp.is_confirmed,
+		   ntohl(ws_resp.psid));
+
+	return nRet;
+}
+
+void *MSG_MANAGER_TxTask(void *arg)
+{
+	(void)arg;
+
+	// Prepare the Ext_WSReq_t structure
+	int db_v2x_tmp_size = sizeof(DB_V2X_T) + SAMPLE_V2X_MSG_LEN;
+	int v2x_tx_pdu_size = sizeof(Ext_V2X_TxPDU_t) + db_v2x_tmp_size;
+
+	Ext_V2X_TxPDU_t *v2x_tx_pdu_p = NULL;
+	DB_V2X_T *db_v2x_tmp_p = NULL;
+
+	v2x_tx_pdu_p = malloc(v2x_tx_pdu_size);
+	memset(v2x_tx_pdu_p, 0, sizeof(Ext_V2X_TxPDU_t));
+
+	v2x_tx_pdu_p->ver = htons(SAMPLE_V2X_API_VER);
+	v2x_tx_pdu_p->e_payload_type = e_payload_type_g;
+	v2x_tx_pdu_p->psid = htonl(psid_g);
+	v2x_tx_pdu_p->tx_power = tx_power_g;
+	v2x_tx_pdu_p->e_signer_id = e_signer_id_g;
+	v2x_tx_pdu_p->e_priority = e_priority_g;
+
+	if (e_comm_type_g == eV2XCommType_LTEV2X || e_comm_type_g == eV2XCommType_5GNRV2X)
+	{
+		v2x_tx_pdu_p->magic_num = htons(MAGIC_CV2X_TX_PDU);
+		v2x_tx_pdu_p->u.config_cv2x.transmitter_profile_id = htonl(transmitter_profile_id_g);
+		v2x_tx_pdu_p->u.config_cv2x.peer_l2id = htonl(peer_l2id_g);
+	}
+	else if (e_comm_type_g == eV2XCommType_DSRC)
+	{
+		v2x_tx_pdu_p->magic_num = htons(MAGIC_DSRC_TX_PDU);
+		v2x_tx_pdu_p->u.config_wave.freq = htons(freq_g);
+		v2x_tx_pdu_p->u.config_wave.e_data_rate = htons(e_data_rate_g);
+		v2x_tx_pdu_p->u.config_wave.e_time_slot = e_time_slot_g;
+		memcpy(v2x_tx_pdu_p->u.config_wave.peer_mac_addr, peer_mac_addr_g, MAC_EUI48_LEN);
+	}
+
+	// Payload = KETI Format
+	v2x_tx_pdu_p->v2x_msg.length = htons(db_v2x_tmp_size);
+
+	db_v2x_tmp_p = malloc(db_v2x_tmp_size);
+	memset(db_v2x_tmp_p, 0, db_v2x_tmp_size);
+
+	db_v2x_tmp_p->eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
+	db_v2x_tmp_p->eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5;
+	db_v2x_tmp_p->unDeviceId = 0;
+	db_v2x_tmp_p->ulTimeStamp = 0ULL;
+	db_v2x_tmp_p->eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
+	db_v2x_tmp_p->eActionType = DB_V2X_ACTION_TYPE_REQUEST;
+	db_v2x_tmp_p->eRegionId = DB_V2X_REGION_ID_SEOUL;
+	db_v2x_tmp_p->ePayloadType = DB_V2X_PAYLOAD_TYPE_SAE_J2735_BSM;
+	db_v2x_tmp_p->eCommId = DB_V2X_COMM_ID_V2V;
+	db_v2x_tmp_p->usDbVer = 0;
+	db_v2x_tmp_p->usHwVer = 0;
+	db_v2x_tmp_p->usSwVer = 0;
+	db_v2x_tmp_p->ulPayloadLength = SAMPLE_V2X_MSG_LEN;
+	db_v2x_tmp_p->ulPacketCrc32 = 0;
+
+	memcpy(v2x_tx_pdu_p->v2x_msg.data, db_v2x_tmp_p, db_v2x_tmp_size);
+
+	printf("\nV2X TX PDU>>\n"
+		   "  magic_num        : 0x%04X\n"
+		   "  ver              : 0x%04X\n"
+		   "  e_payload_type   : %d\n"
+		   "  psid             : %u\n"
+		   "  tx_power         : %d\n"
+		   "  e_signer_id      : %d\n"
+		   "  e_priority       : %d\n",
+		   ntohs(v2x_tx_pdu_p->magic_num),
+		   ntohs(v2x_tx_pdu_p->ver),
+		   v2x_tx_pdu_p->e_payload_type,
+		   ntohl(v2x_tx_pdu_p->psid),
+		   v2x_tx_pdu_p->tx_power,
+		   v2x_tx_pdu_p->e_signer_id,
+		   v2x_tx_pdu_p->e_priority);
+
+	if (e_comm_type_g == eV2XCommType_LTEV2X || e_comm_type_g == eV2XCommType_5GNRV2X)
+	{
+		printf("  u.config_cv2x.transmitter_profile_id : %u\n"
+			   "  u.config_cv2x.peer_l2id              : %u\n",
+			   ntohl(v2x_tx_pdu_p->u.config_cv2x.transmitter_profile_id),
+			   ntohl(v2x_tx_pdu_p->u.config_cv2x.peer_l2id));
+	}
+	else if (e_comm_type_g == eV2XCommType_DSRC)
+	{
+		printf("  u.config_wave.freq                  : %d\n"
+			   "  u.config_wave.e_data_rate           : %d\n"
+			   "  u.config_wave.e_time_slot           : %d\n"
+			   "  u.config_wave.peer_mac_addr         : %s\n",
+			   ntohs(v2x_tx_pdu_p->u.config_wave.freq),
+			   ntohs(v2x_tx_pdu_p->u.config_wave.e_data_rate),
+			   v2x_tx_pdu_p->u.config_wave.e_time_slot,
+			   v2x_tx_pdu_p->u.config_wave.peer_mac_addr);
+	}
+
+	uint32_t i;
+	ssize_t n;
+
+	for (i = 0; i < tx_cnt_g; i++)
+	{
+		n = send(s_nSocketHandle, v2x_tx_pdu_p, v2x_tx_pdu_size, 0);
+		if (n < 0)
+		{
+			PrintError("send() is failed!!");
+			break;
+		}
+		else if (n != v2x_tx_pdu_size)
+		{
+			PrintError("send() sent a different number of bytes than expected!!");
+			break;
+		}
+		else
+		{
+			PrintDebug("tx send success (%ld bytes) : [%u/%u]\n", n, i + 1, tx_cnt_g);
+		}
+
+		usleep((1000 * tx_delay_g));
+	}
+
+	free(v2x_tx_pdu_p);
+	free(db_v2x_tmp_p);
+
+	return NULL;
+}
+
+void *MSG_MANAGER_RxTask(void *arg)
+{
+	(void)arg;
+
+	uint8_t buf[4096] = {0};
+	int n = -1;
+	time_t start_time = time(NULL);
+
+	while (1)
+	{
+		time_t current_time = time(NULL);
+		if (current_time - start_time >= delay_time_sec_g)
+		{
+			break;
+		}
+
+		n = recv(s_nSocketHandle, buf, sizeof(buf), 0);
+		if (n < 0)
+		{
+			if (errno != EAGAIN && errno != EWOULDBLOCK)
+			{
+				PrintError("recv() is failed!!");
+				break;
+			}
+			else
+			{
+				usleep(10000);
+				continue;
+			}
+		}
+		else if (n == 0)
+		{
+			PrintError("recv()'s connection is closed by peer!!");
+			break;
+		}
+		else
+		{
+			PrintDebug("recv() is success : len[%u]", n);
+		}
+	}
+
+	return NULL;
+}
+
+int32_t P_MSG_MANAGER_CreateTask(void)
+{
+	int32_t nRet = FRAMEWORK_ERROR;
+
+	pthread_t h_TxTask;
+	pthread_t h_RxTask;
+
+	void *pTxTaskRet;
+	void *pRxTaskRet;
+
+	nRet = P_MSG_MANAGER_SetV2xWsrSetting();
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
+        return nRet;
+    }
+
+	pthread_create(&h_TxTask, NULL, MSG_MANAGER_TxTask, NULL);
+	pthread_create(&h_RxTask, NULL, MSG_MANAGER_RxTask, NULL);
+
+	pthread_join(h_TxTask, &pTxTaskRet);
+	pthread_join(h_RxTask, &pRxTaskRet);
+
+	return nRet;
+}
+
+int32_t MSG_MANAGER_Transmit(MSG_MANAGER_TX_T *pstMsgMgrTx, DB_V2X_T *pstDbV2x, void *pPayload)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
-    if(pstMsgManagerWrite == NULL)
+    if(pstMsgMgrTx == NULL)
     {
-        PrintError("pstMsgManagerWrite == NULL!!");
+        PrintError("pstMsgMgrTx == NULL!!");
         return nRet;
     }
 
@@ -85,15 +476,15 @@ int32_t MSG_MANAGER_Write(MSG_MANAGER_TX_T *pstMsgManagerWrite, DB_V2X_T *pstDbV
     return nRet;
 }
 
-int32_t MSG_MANAGER_Read(MSG_MANAGER_RX_T *pstMsgManagerRead, DB_V2X_T *pstDbV2x, void *pPayload)
+int32_t MSG_MANAGER_Receive(MSG_MANAGER_RX_T *pstMsgMgrRx, DB_V2X_T *pstDbV2x, void *pPayload)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
-    if(pstMsgManagerRead == NULL)
+    if(pstMsgMgrRx == NULL)
     {
-        PrintError("pstMsgManagerRead == NULL!!");
+        PrintError("pstMsgMgrRx == NULL!!");
         return nRet;
     }
 
@@ -121,6 +512,20 @@ int32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager)
     if(pstMsgManager == NULL)
     {
         PrintError("pstMsgManager == NULL!!");
+        return nRet;
+    }
+
+    nRet = P_MSG_MANAGER_ConnectV2XDevice(pstMsgManager);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_MSG_MANAGER_ConnectV2XDevice() is failed!!, nRet[%d]", nRet);
+        return nRet;
+    }
+
+    nRet = P_MSG_MANAGER_CreateTask();
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_MSG_MANAGER_Init() is failed!!, nRet[%d]", nRet);
         return nRet;
     }
 
@@ -191,8 +596,6 @@ int32_t MSG_MANAGER_Init(MSG_MANAGER_T *pstMsgManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
-    PrintWarn("TODO");
-
     if(pstMsgManager == NULL)
     {
         PrintError("pstMsgManager == NULL!!");
@@ -208,15 +611,19 @@ int32_t MSG_MANAGER_DeInit(MSG_MANAGER_T *pstMsgManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
-    PrintWarn("TODO");
-
     if(pstMsgManager == NULL)
     {
         PrintError("pstMsgManager == NULL!!");
         return nRet;
     }
 
+    nRet = P_MSG_MANAGER_DisconnectV2XDevice();
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_MSG_MANAGER_ConnectV2XDevice() is failed!!, nRet[%d]", nRet);
+        return nRet;
+    }
+
     return nRet;
 }
-
 
