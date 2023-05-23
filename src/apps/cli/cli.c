@@ -157,7 +157,7 @@ int P_CLI_StartCmd(char *str)
 static int P_CLI_ParseInputString(char *prompt, char *str, int len)
 {
     int reading = 1;
-    char ch;
+    int ch;
     int idx = 0;
 
     s_nInputString++;
