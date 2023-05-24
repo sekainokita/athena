@@ -80,6 +80,9 @@ static key_t s_dbTaskMsgKey = FRAMEWORK_DB_TASK_MSG_KEY;
 static key_t s_MsgTxTaskMsgKey = FRAMEWORK_MSG_TX_TASK_MSG_KEY;
 static key_t s_MsgRxTaskMsgKey = FRAMEWORK_MSG_RX_TASK_MSG_KEY;
 
+static pthread_t sh_msgMgrTxTask;
+static pthread_t sh_msgMgrRxTask;
+
 /***************************** Function  *************************************/
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -470,19 +473,64 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     return nRet;
 }
 
-static void *P_MSG_MANAGER_TxTaskTemp(void *arg)
+static int32_t P_MSG_MANAGER_RxSendTxMsgToDbMgr(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMsg)
 {
-    MSG_MANAGER_TX_TASK_T const *const stThreadInfo = (MSG_MANAGER_TX_TASK_T *)arg;
-    MSG_MANAGER_TX_EVENT_MSG_T stEventMsg;
     int32_t nRet = FRAMEWORK_ERROR;
 
-    memset(&stEventMsg, 0, sizeof(DB_MANAGER_EVENT_MSG_T));
+    uint8_t buf[4096] = {0};
+    int n = -1;
+    time_t start_time = time(NULL);
 
-    PrintDebug("stThreadInfo[0x%x]", stThreadInfo->nThreadId);
+    UNUSED(pstEventMsg);
 
     while (1)
     {
-        if(msgrcv(s_nMsgTxTaskMsgId, &stEventMsg, sizeof(DB_MANAGER_EVENT_MSG_T), 0, MSG_NOERROR) == FRAMEWORK_MSG_ERR)
+        time_t current_time = time(NULL);
+        if (current_time - start_time >= delay_time_sec_g)
+        {
+            break;
+        }
+
+        n = recv(s_nSocketHandle, buf, sizeof(buf), 0);
+        if (n < 0)
+        {
+            if (errno != EAGAIN && errno != EWOULDBLOCK)
+            {
+                PrintError("recv() is failed!!");
+                break;
+            }
+            else
+            {
+                usleep(10000);
+                continue;
+            }
+        }
+        else if (n == 0)
+        {
+            PrintError("recv()'s connection is closed by peer!!");
+            break;
+        }
+        else
+        {
+            PrintDebug("recv() is success : len[%u]", n);
+        }
+    }
+
+    return nRet;
+}
+
+static void *P_MSG_MANAGER_TxTask(void *arg)
+{
+    MSG_MANAGER_TX_EVENT_MSG_T stEventMsg;
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    UNUSED(arg);
+
+    memset(&stEventMsg, 0, sizeof(MSG_MANAGER_TX_EVENT_MSG_T));
+
+    while (1)
+    {
+        if(msgrcv(s_nMsgTxTaskMsgId, &stEventMsg, sizeof(MSG_MANAGER_TX_EVENT_MSG_T), 0, MSG_NOERROR) == FRAMEWORK_MSG_ERR)
         {
             PrintError("msgrcv() is failed!");
         }
@@ -499,6 +547,34 @@ static void *P_MSG_MANAGER_TxTaskTemp(void *arg)
     return NULL;
 }
 
+
+static void *P_MSG_MANAGER_RxTask(void *arg)
+{
+    MSG_MANAGER_RX_EVENT_MSG_T stEventMsg;
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    UNUSED(arg);
+
+    memset(&stEventMsg, 0, sizeof(MSG_MANAGER_RX_EVENT_MSG_T));
+
+    while (1)
+    {
+        if(msgrcv(s_nMsgRxTaskMsgId, &stEventMsg, sizeof(MSG_MANAGER_RX_EVENT_MSG_T), 0, MSG_NOERROR) == FRAMEWORK_MSG_ERR)
+        {
+            PrintError("msgrcv() is failed!");
+        }
+        else
+        {
+            nRet = P_MSG_MANAGER_RxSendTxMsgToDbMgr(&stEventMsg);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("P_MSG_MANAGER_RxSendTxMsgToDbMgr() is faild! [nRet:%d]", nRet);
+            }
+        }
+    }
+
+    return NULL;
+}
 
 void *MSG_MANAGER_TxTask(void *arg)
 {
@@ -677,6 +753,61 @@ int32_t P_MSG_MANAGER_CreateTask(void)
 {
 	int32_t nRet = FRAMEWORK_ERROR;
 
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
+    nRet = pthread_create(&sh_msgMgrTxTask, &attr, P_MSG_MANAGER_TxTask, NULL);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("pthread_create() is failed!! (P_MSG_MANAGER_TxTask) [nRet:%d]", nRet);
+    }
+    else
+    {
+        PrintTrace("P_MSG_MANAGER_TxTask() is successfully created.");
+        nRet = FRAMEWORK_OK;
+    }
+
+    nRet = pthread_create(&sh_msgMgrRxTask, &attr, P_MSG_MANAGER_RxTask, NULL);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("pthread_create() is failed!! (P_MSG_MANAGER_RxTask) [nRet:%d]", nRet);
+    }
+    else
+    {
+        PrintTrace("P_MSG_MANAGER_RxTask() is successfully created.");
+        nRet = FRAMEWORK_OK;
+    }
+
+#if defined(CONFIG_PTHREAD_JOINABLE)
+    nRet = pthread_join(sh_msgMgrTxTask, NULL);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("pthread_join() is failed!! (P_MSG_MANAGER_TxTask) [nRet:%d]", nRet);
+    }
+    else
+    {
+        PrintDebug("P_MSG_MANAGER_TxTask() is successfully joined.");
+        nRet = FRAMEWORK_OK;
+    }
+
+    nRet = pthread_join(sh_msgMgrRxTask, NULL);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("pthread_join() is failed!! (P_MSG_MANAGER_RxTask) [nRet:%d]", nRet);
+    }
+    else
+    {
+        PrintDebug("P_MSG_MANAGER_RxTask() is successfully joined.");
+        nRet = FRAMEWORK_OK;
+    }
+#endif
+	return nRet;
+}
+
+int32_t P_MSG_MANAGER_CreateObuTask(void)
+{
+	int32_t nRet = FRAMEWORK_ERROR;
 	pthread_t h_TxTask;
 	pthread_t h_RxTask;
 
@@ -716,6 +847,21 @@ int32_t MSG_MANAGER_Transmit(MSG_MANAGER_TX_T *pstMsgMgrTx, DB_V2X_T *pstDbV2x, 
     {
         PrintError("pPayload == NULL!!");
         return nRet;
+    }
+    MSG_MANAGER_TX_EVENT_MSG_T stEventMsg;
+
+    stEventMsg.pstMsgManagerTx = pstMsgMgrTx;
+    stEventMsg.pstDbV2x = pstDbV2x;
+    stEventMsg.pPayload = pPayload;
+
+    if(msgsnd(s_nDbTaskMsgId, &stEventMsg, sizeof(DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
+    {
+        PrintError("msgsnd() is failed!!");
+        return nRet;
+    }
+    else
+    {
+        nRet = FRAMEWORK_OK;
     }
 
     return nRet;
@@ -774,12 +920,14 @@ int32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager)
         return nRet;
     }
 
-    nRet = P_MSG_MANAGER_CreateTask();
+#if 1
+    nRet = P_MSG_MANAGER_CreateObuTask();
     if (nRet != FRAMEWORK_OK)
     {
-        PrintError("P_MSG_MANAGER_Init() is failed!!, nRet[%d]", nRet);
+        PrintError("P_MSG_MANAGER_CreateObuTask() is failed!!, nRet[%d]", nRet);
         return nRet;
     }
+#endif
     return nRet;
 }
 
@@ -884,6 +1032,13 @@ int32_t MSG_MANAGER_Init(MSG_MANAGER_T *pstMsgManager)
     {
         P_MSG_NABAGER_PrintMsgInfo(s_nMsgRxTaskMsgId);
         nRet = FRAMEWORK_OK;
+    }
+
+    nRet = P_MSG_MANAGER_CreateTask();
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_MSG_MANAGER_CreateTask() is failed!!, nRet[%d]", nRet);
+        return nRet;
     }
 
     return nRet;

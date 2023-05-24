@@ -55,6 +55,8 @@
 #define FRAMEWORK_MSG_TX_TASK_MSG_KEY           (0x121202)
 #define FRAMEWORK_MSG_RX_TASK_MSG_KEY           (0x220916)
 
+//#define CONFIG_PTHREAD_JOINABLE                 (1)
+
 /***************************** Enum and Structure ****************************/
 typedef struct FRAMEWORK {
     uint32_t unReserved;

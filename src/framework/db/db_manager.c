@@ -69,6 +69,8 @@ static key_t s_dbTaskMsgKey = FRAMEWORK_DB_TASK_MSG_KEY;
 static key_t s_MsgTxTaskMsgKey = FRAMEWORK_MSG_TX_TASK_MSG_KEY;
 static key_t s_MsgRxTaskMsgKey = FRAMEWORK_MSG_RX_TASK_MSG_KEY;
 
+static pthread_t sh_DbMgrTask;
+
 /***************************** Function  *************************************/
 
 static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
@@ -243,12 +245,14 @@ static void *P_DB_MANAGER_Task(void *arg)
                 PrintWarn("unknown processing type [%d]", stEventMsg.pstDbManagerWrite->eProc);
             }
         }
+
+        usleep(1000);
     }
 
     return NULL;
 }
 
-static void P_DB_NABAGER_PrintMsgInfo(int msqid)
+static void P_DB_MANAGER_PrintMsgInfo(int msqid)
 {
 
     struct msqid_ds m_stat;
@@ -270,26 +274,39 @@ static void P_DB_NABAGER_PrintMsgInfo(int msqid)
 int32_t P_DB_MANAGER_CreateTask(void)
 {
 	int32_t nRet = FRAMEWORK_ERROR;
-	pthread_t h_DbMgrTask;
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-    if (pthread_create(&h_DbMgrTask, NULL, P_DB_MANAGER_Task, NULL) != FRAMEWORK_OK)
+    nRet = pthread_create(&sh_DbMgrTask, &attr, P_DB_MANAGER_Task, NULL);
+    if (nRet != FRAMEWORK_OK)
     {
-        PrintError("pthread_create() is failed!!");
+        PrintError("pthread_join() is failed!! (P_DB_MANAGER_Task) [nRet:%d]", nRet);
     }
     else
     {
+        PrintTrace("P_DB_MANAGER_Task() is successfully created.");
         nRet = FRAMEWORK_OK;
     }
 
+#if defined(CONFIG_PTHREAD_JOINABLE)
+    nRet = pthread_join(sh_DbMgrTask, NULL);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("pthread_join() is failed!! (P_DB_MANAGER_Task) [nRet:%d]", nRet);
+    }
+    else
+    {
+        PrintDebug("P_DB_MANAGER_Task() is successfully joined.");
+        nRet = FRAMEWORK_OK;
+    }
+#endif
 	return nRet;
 }
 
 static int32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
-    int nThreads = sysconf(_SC_NPROCESSORS_ONLN);
-
-    PrintDebug("nThreads[%d]", nThreads);
 
     if(pstDbManager == NULL)
     {
@@ -304,7 +321,7 @@ static int32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
     }
     else
     {
-        P_DB_NABAGER_PrintMsgInfo(s_nDbTaskMsgId);
+        P_DB_MANAGER_PrintMsgInfo(s_nDbTaskMsgId);
     }
 
     if((s_nMsgTxTaskMsgId = msgget(s_MsgTxTaskMsgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
@@ -314,7 +331,7 @@ static int32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
     }
     else
     {
-        P_DB_NABAGER_PrintMsgInfo(s_nMsgTxTaskMsgId);
+        P_DB_MANAGER_PrintMsgInfo(s_nMsgTxTaskMsgId);
     }
 
     if((s_nMsgRxTaskMsgId = msgget(s_MsgRxTaskMsgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
@@ -324,7 +341,7 @@ static int32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
     }
     else
     {
-        P_DB_NABAGER_PrintMsgInfo(s_nMsgRxTaskMsgId);
+        P_DB_MANAGER_PrintMsgInfo(s_nMsgRxTaskMsgId);
     }
 
     nRet = P_DB_MANAGER_CreateTask();

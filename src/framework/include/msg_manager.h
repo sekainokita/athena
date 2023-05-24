@@ -64,30 +64,6 @@ typedef struct MSG_MANAGER_RX_t {
 } MSG_MANAGER_RX_T;
 
 /**
-* @details MSG_MANAGER_TX_TASK_T
-* @param nThreads
-* @param nThreadId
-* @param nMsgId
-*/
-typedef struct MSG_MANAGER_TX_TASK_t {
-    int nThreads;
-    int nThreadId;
-    int nMsgId;
-} MSG_MANAGER_TX_TASK_T;
-
-/**
-* @details MSG_MANAGER_RX_TASK_T
-* @param nThreads
-* @param nThreadId
-* @param nMsgId
-*/
-typedef struct MSG_MANAGER_RX_TASK_t {
-    int nThreads;
-    int nThreadId;
-    int nMsgId;
-} MSG_MANAGER_RX_TASK_T;
-
-/**
 * @details MSG_MANAGER_TX_EVENT_MSG_T
 * @param pstMsgManagerTx
 * @param pstDbV2x
