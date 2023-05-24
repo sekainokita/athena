@@ -53,13 +53,63 @@
 
 
 /***************************** Enum and Structure ****************************/
-typedef struct MSG_MANAGER_WRITE {
+typedef struct MSG_MANAGER_TX_t {
+    uint32_t unTxCount;
+    uint32_t unTxDelay;
     uint32_t unReserved;
 } MSG_MANAGER_TX_T;
 
-typedef struct MSG_MANAGER_READ {
+typedef struct MSG_MANAGER_RX_t {
     uint32_t unReserved;
 } MSG_MANAGER_RX_T;
+
+/**
+* @details MSG_MANAGER_TX_TASK_T
+* @param nThreads
+* @param nThreadId
+* @param nMsgId
+*/
+typedef struct MSG_MANAGER_TX_TASK_t {
+    int nThreads;
+    int nThreadId;
+    int nMsgId;
+} MSG_MANAGER_TX_TASK_T;
+
+/**
+* @details MSG_MANAGER_RX_TASK_T
+* @param nThreads
+* @param nThreadId
+* @param nMsgId
+*/
+typedef struct MSG_MANAGER_RX_TASK_t {
+    int nThreads;
+    int nThreadId;
+    int nMsgId;
+} MSG_MANAGER_RX_TASK_T;
+
+/**
+* @details MSG_MANAGER_TX_EVENT_MSG_T
+* @param pstMsgManagerTx
+* @param pstDbV2x
+* @param pPayload
+*/
+typedef struct MSG_MANAGER_TX_EVENT_MSG_t {
+    MSG_MANAGER_TX_T        *pstMsgManagerTx;
+    DB_V2X_T                *pstDbV2x;
+    void                    *pPayload;
+} MSG_MANAGER_TX_EVENT_MSG_T;
+
+/**
+* @details MSG_MANAGER_RX_EVENT_MSG_T
+* @param pstMsgManagerRx
+* @param pstDbV2x
+* @param pPayload
+*/
+typedef struct MSG_MANAGER_RX_EVENT_MSG_t {
+    MSG_MANAGER_RX_T        *pstMsgManagerRx;
+    DB_V2X_T                *pstDbV2x;
+    void                    *pPayload;
+} MSG_MANAGER_RX_EVENT_MSG_T;
 
 typedef struct MSG_MANAGER {
     char *pchIfaceName;

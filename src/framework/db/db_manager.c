@@ -58,7 +58,6 @@
 /***************************** Definition ************************************/
 #define DB_MANAGER_TX_FILE     "db_v2x_tx_temp_writing.txt"
 #define DB_MANAGER_RX_FILE     "db_v2x_rx_temp_writing.txt"
-#define DB_MANAGER_THREAD_ID   (0x10)
 
 /***************************** Enum and Structure ****************************/
 
@@ -69,9 +68,6 @@ static int s_nDbTaskMsgId, s_nMsgTxTaskMsgId, s_nMsgRxTaskMsgId;
 static key_t s_dbTaskMsgKey = FRAMEWORK_DB_TASK_MSG_KEY;
 static key_t s_MsgTxTaskMsgKey = FRAMEWORK_MSG_TX_TASK_MSG_KEY;
 static key_t s_MsgRxTaskMsgKey = FRAMEWORK_MSG_RX_TASK_MSG_KEY;
-
-static DB_MANAGER_TASK_T *s_pThreadInfo = NULL;
-static pthread_t *s_pThread = NULL;
 
 /***************************** Function  *************************************/
 
@@ -181,24 +177,18 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
     return nRet;
 }
 
+
 static void *P_DB_MANAGER_Task(void *arg)
 {
-    DB_MANAGER_TASK_T const *const stThreadInfo = (DB_MANAGER_TASK_T *)arg;
-    int nMsgId;
     DB_MANAGER_EVENT_MSG_T stEventMsg;
     int32_t nRet = FRAMEWORK_ERROR;
+    memset(&stEventMsg, 0, sizeof(DB_MANAGER_EVENT_MSG_T));
 
-    PrintDebug("stThreadInfo[0x%x]", stThreadInfo->nThreadId);
-
-    if((nMsgId = msgget(s_dbTaskMsgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
-    {
-        PrintError("msgget() is failed!");
-        return NULL;
-    }
+    (void)arg;
 
     while (1)
     {
-        if(msgrcv(nMsgId, &stEventMsg, sizeof(DB_MANAGER_EVENT_MSG_T), 0, MSG_NOERROR) == FRAMEWORK_MSG_ERR)
+        if(msgrcv(s_nDbTaskMsgId, &stEventMsg, sizeof(DB_MANAGER_EVENT_MSG_T), 0, MSG_NOERROR) == FRAMEWORK_MSG_ERR)
         {
             PrintError("msgrcv() is failed!");
         }
@@ -277,6 +267,23 @@ static void P_DB_NABAGER_PrintMsgInfo(int msqid)
     PrintDebug("=================================================");
 }
 
+int32_t P_DB_MANAGER_CreateTask(void)
+{
+	int32_t nRet = FRAMEWORK_ERROR;
+	pthread_t h_DbMgrTask;
+
+    if (pthread_create(&h_DbMgrTask, NULL, P_DB_MANAGER_Task, NULL) != FRAMEWORK_OK)
+    {
+        PrintError("pthread_create() is failed!!");
+    }
+    else
+    {
+        nRet = FRAMEWORK_OK;
+    }
+
+	return nRet;
+}
+
 static int32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -298,7 +305,6 @@ static int32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
     else
     {
         P_DB_NABAGER_PrintMsgInfo(s_nDbTaskMsgId);
-        nRet = FRAMEWORK_OK;
     }
 
     if((s_nMsgTxTaskMsgId = msgget(s_MsgTxTaskMsgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
@@ -309,7 +315,6 @@ static int32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
     else
     {
         P_DB_NABAGER_PrintMsgInfo(s_nMsgTxTaskMsgId);
-        nRet = FRAMEWORK_OK;
     }
 
     if((s_nMsgRxTaskMsgId = msgget(s_MsgRxTaskMsgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
@@ -320,32 +325,15 @@ static int32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
     else
     {
         P_DB_NABAGER_PrintMsgInfo(s_nMsgRxTaskMsgId);
-        nRet = FRAMEWORK_OK;
     }
 
-    pthread_t *s_pThread = (pthread_t *)malloc(nThreads * sizeof(pthread_t));
-    DB_MANAGER_TASK_T *s_pThreadInfo = (DB_MANAGER_TASK_T *)malloc(nThreads * sizeof(DB_MANAGER_TASK_T));
-
-    for (int i = 0; i < nThreads; ++i)
+    nRet = P_DB_MANAGER_CreateTask();
+    if (nRet != FRAMEWORK_OK)
     {
-        s_pThreadInfo[i].nThreads = nThreads;
-        s_pThreadInfo[i].nThreadId = DB_MANAGER_THREAD_ID + i;
-        s_pThreadInfo[i].nMsgId = s_nDbTaskMsgId;
-        if (pthread_create(&s_pThread[i], NULL, &P_DB_MANAGER_Task, &s_pThreadInfo[i]) != FRAMEWORK_OK)
-        {
-            PrintError("pthread_create() is failed!!");
-        }
+        PrintError("P_DB_MANAGER_CreateTask() is failed! [nRet:%d]", nRet);
     }
 
-#if defined(CONFIG_MULTI_THREAD)
-    // Join all the threads
-    for (int i = 0; i < nThreads; ++i)
-    {
-        pthread_join(s_pThreadInfo[i], NULL);
-    }
-#endif
-
-    return FRAMEWORK_OK;
+    return nRet;
 }
 static int32_t P_DB_MANAGER_DeInit(DB_MANAGER_T *pstDbManager)
 {
@@ -356,9 +344,6 @@ static int32_t P_DB_MANAGER_DeInit(DB_MANAGER_T *pstDbManager)
         PrintError("pstDbManager == NULL!!");
         return nRet;
     }
-
-    free(s_pThread);
-    free(s_pThreadInfo);
 
     return nRet;
 }

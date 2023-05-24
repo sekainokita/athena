@@ -100,18 +100,6 @@ typedef enum {
 } DB_MANAGER_PROC_E;
 
 /**
-* @details DB_MANAGER_TASK_T
-* @param nThreads
-* @param nThreadId
-* @param nMsgId
-*/
-typedef struct DB_MANAGER_TASK_t {
-    int nThreads;
-    int nThreadId;
-    int nMsgId;
-} DB_MANAGER_TASK_T;
-
-/**
 * @details DB_MANAGER_WRITE_T
 * @param eFileType
 * @param eCommType
