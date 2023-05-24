@@ -75,40 +75,47 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
-    char *pcPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
-    memcpy(pcPayload, (char *)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
-
-    fprintf(s_pDbManagerFd, "eDeviceType[%d], ", pstEventMsg->pstDbV2x->eDeviceType);
-    fprintf(s_pDbManagerFd, "eTeleCommType[%d], ", pstEventMsg->pstDbV2x->eTeleCommType);
-    fprintf(s_pDbManagerFd, "unDeviceId[0x%x], ", pstEventMsg->pstDbV2x->unDeviceId);
-    fprintf(s_pDbManagerFd, "ulTimeStamp[%ld], ", pstEventMsg->pstDbV2x->ulTimeStamp);
-    fprintf(s_pDbManagerFd, "eServiceId[%d], ", pstEventMsg->pstDbV2x->eServiceId);
-    fprintf(s_pDbManagerFd, "eActionType[%d], ", pstEventMsg->pstDbV2x->eActionType);
-    fprintf(s_pDbManagerFd, "eRegionId[%d], ", pstEventMsg->pstDbV2x->eRegionId);
-    fprintf(s_pDbManagerFd, "ePayloadType[%d], ", pstEventMsg->pstDbV2x->ePayloadType);
-    fprintf(s_pDbManagerFd, "eCommId[%d], ", pstEventMsg->pstDbV2x->eCommId);
-    fprintf(s_pDbManagerFd, "usDbVer[%d.%d], ", pstEventMsg->pstDbV2x->usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, pstEventMsg->pstDbV2x->usDbVer & CLI_DB_V2X_MINOR_MASK);
-    fprintf(s_pDbManagerFd, "usHwVer[0x%x], ", pstEventMsg->pstDbV2x->usHwVer);
-    fprintf(s_pDbManagerFd, "usSwVer[0x%x], ", pstEventMsg->pstDbV2x->usSwVer);
-    fprintf(s_pDbManagerFd, "ulPayloadLength[%d], ", pstEventMsg->pstDbV2x->ulPayloadLength);
-
-    fprintf(s_pDbManagerFd, "cPayload[");
-    for(int i = 0; i < (int)pstEventMsg->pstDbV2x->ulPayloadLength; i++)
+    if (s_pDbManagerFd != NULL)
     {
-          fprintf(s_pDbManagerFd, "%d ", pcPayload[i]);
+        char *pcPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
+        memcpy(pcPayload, (char *)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
+
+        fprintf(s_pDbManagerFd, "eDeviceType[%d], ", pstEventMsg->pstDbV2x->eDeviceType);
+        fprintf(s_pDbManagerFd, "eTeleCommType[%d], ", pstEventMsg->pstDbV2x->eTeleCommType);
+        fprintf(s_pDbManagerFd, "unDeviceId[0x%x], ", pstEventMsg->pstDbV2x->unDeviceId);
+        fprintf(s_pDbManagerFd, "ulTimeStamp[%ld], ", pstEventMsg->pstDbV2x->ulTimeStamp);
+        fprintf(s_pDbManagerFd, "eServiceId[%d], ", pstEventMsg->pstDbV2x->eServiceId);
+        fprintf(s_pDbManagerFd, "eActionType[%d], ", pstEventMsg->pstDbV2x->eActionType);
+        fprintf(s_pDbManagerFd, "eRegionId[%d], ", pstEventMsg->pstDbV2x->eRegionId);
+        fprintf(s_pDbManagerFd, "ePayloadType[%d], ", pstEventMsg->pstDbV2x->ePayloadType);
+        fprintf(s_pDbManagerFd, "eCommId[%d], ", pstEventMsg->pstDbV2x->eCommId);
+        fprintf(s_pDbManagerFd, "usDbVer[%d.%d], ", pstEventMsg->pstDbV2x->usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, pstEventMsg->pstDbV2x->usDbVer & CLI_DB_V2X_MINOR_MASK);
+        fprintf(s_pDbManagerFd, "usHwVer[0x%x], ", pstEventMsg->pstDbV2x->usHwVer);
+        fprintf(s_pDbManagerFd, "usSwVer[0x%x], ", pstEventMsg->pstDbV2x->usSwVer);
+        fprintf(s_pDbManagerFd, "ulPayloadLength[%d], ", pstEventMsg->pstDbV2x->ulPayloadLength);
+
+        fprintf(s_pDbManagerFd, "cPayload[");
+        for(int i = 0; i < (int)pstEventMsg->pstDbV2x->ulPayloadLength; i++)
+        {
+              fprintf(s_pDbManagerFd, "%d ", pcPayload[i]);
+        }
+        fprintf(s_pDbManagerFd, "], ");
+
+        fprintf(s_pDbManagerFd, "ulPayloadCrc32[0x%x]", pstEventMsg->pstDbV2x->ulPacketCrc32);
+        fprintf(s_pDbManagerFd, "\r\n");
+
+        nRet = fflush(s_pDbManagerFd);
+        if (nRet < 0)
+        {
+            PrintError("fflush() is failed! [unRet:%d]", nRet);
+        }
+
+        free(pcPayload);
     }
-    fprintf(s_pDbManagerFd, "], ");
-
-    fprintf(s_pDbManagerFd, "ulPayloadCrc32[0x%x]", pstEventMsg->pstDbV2x->ulPacketCrc32);
-    fprintf(s_pDbManagerFd, "\r\n");
-
-    nRet = fflush(s_pDbManagerFd);
-    if (nRet < 0)
+    else
     {
-        PrintError("fflush() is failed! [unRet:%d]", nRet);
+        PrintError("s_pDbManagerFd is NULL!!, check whethter s_pDbManagerFd is opened before.");
     }
-
-    free(pcPayload);
 
     return nRet;
 }
@@ -450,14 +457,14 @@ int32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager)
         case DB_MANAGER_FILE_TYPE_TXT:
             PrintDebug("DB_MANAGER_FILE_TYPE_TXT [%d]", pstDbManager->eFileType);
 
-            nRet = fflush(s_pDbManagerFd);
-            if (nRet < 0)
-            {
-                PrintError("fflush() is failed! [unRet:%d]", nRet);
-            }
-
             if(s_pDbManagerFd != NULL)
             {
+                nRet = fflush(s_pDbManagerFd);
+                if (nRet < 0)
+                {
+                    PrintError("fflush() is failed! [unRet:%d]", nRet);
+                }
+
                 nRet = fclose(s_pDbManagerFd);
                 if (nRet < 0)
                 {
