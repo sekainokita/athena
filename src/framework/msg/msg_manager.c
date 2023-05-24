@@ -73,6 +73,8 @@
 #define SAMPLE_V2X_MSG_LEN 100
 #define SAMPLE_V2X_PORT_ADDR 47347
 
+//#define CONFIG_TEMP_OBU_TEST (1)
+
 /***************************** Static Variable *******************************/
 static int32_t s_nSocketHandle = -1;
 static int s_nDbTaskMsgId, s_nMsgTxTaskMsgId, s_nMsgRxTaskMsgId;
@@ -576,6 +578,7 @@ static void *P_MSG_MANAGER_RxTask(void *arg)
     return NULL;
 }
 
+#if defined(CONFIG_TEMP_OBU_TEST)
 void *MSG_MANAGER_TxTask(void *arg)
 {
     (void)arg;
@@ -748,6 +751,7 @@ void *MSG_MANAGER_RxTask(void *arg)
 
 	return NULL;
 }
+#endif
 
 int32_t P_MSG_MANAGER_CreateTask(void)
 {
@@ -805,6 +809,7 @@ int32_t P_MSG_MANAGER_CreateTask(void)
 	return nRet;
 }
 
+#if defined(CONFIG_TEMP_OBU_TEST)
 int32_t P_MSG_MANAGER_CreateObuTask(void)
 {
 	int32_t nRet = FRAMEWORK_ERROR;
@@ -824,6 +829,7 @@ int32_t P_MSG_MANAGER_CreateObuTask(void)
 
 	return nRet;
 }
+#endif
 
 int32_t MSG_MANAGER_Transmit(MSG_MANAGER_TX_T *pstMsgMgrTx, DB_V2X_T *pstDbV2x, void *pPayload)
 {
@@ -920,7 +926,7 @@ int32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager)
         return nRet;
     }
 
-#if 1
+#if defined(CONFIG_TEMP_OBU_TEST)
     nRet = P_MSG_MANAGER_CreateObuTask();
     if (nRet != FRAMEWORK_OK)
     {
