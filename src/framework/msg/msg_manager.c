@@ -308,11 +308,9 @@ static int32_t P_MSG_MANAGER_SendTxMsgToDbMgr(MSG_MANAGER_TX_EVENT_MSG_T *pstEve
     DB_MANAGER_WRITE_T stDbManagerWrite;
     DB_MANAGER_EVENT_MSG_T stEventMsg;
     DB_V2X_T stDbV2x;
-    char cPayload[CLI_DB_V2X_DEFAULT_PAYLOAD_LEN];
 
     (void*)memset(&stDbManagerWrite, 0x00, sizeof(DB_MANAGER_WRITE_T));
     (void*)memset(&stDbV2x, 0x00, sizeof(DB_V2X_T));
-    (void*)memset(&cPayload, 0x00, sizeof(cPayload));
 
     UNUSED(pstEventMsg);
 

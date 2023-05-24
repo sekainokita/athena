@@ -136,7 +136,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             for(int i=0; i < CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; i++)
             {
                 cPayload[i] = rand();
-                printf("%d ", cPayload[i]);
+                printf("[%d:%d] ", i, cPayload[i]);
             }
             printf("\r\n");
 
