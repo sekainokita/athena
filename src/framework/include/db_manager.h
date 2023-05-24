@@ -55,12 +55,13 @@
 #define CLI_DB_V2X_DEFAULT_HW_VER                 0x1234
 #define CLI_DB_V2X_DEFAULT_PAYLOAD_LEN            1024
 
-
 /***************************** Enum and Structure ****************************/
 
 /**
-* @details DB Manager File Type
-* @param DB_MANAGER_FILE_TYPE_E
+* @details DB_MANAGER_FILE_TYPE_E
+* @param DB_MANAGER_FILE_TYPE_TXT
+* @param DB_MANAGER_FILE_TYPE_CSV
+* @param DB_MANAGER_FILE_TYPE_SQLITE
 */
 typedef enum {
     DB_MANAGER_FILE_TYPE_UNKNOWN                  = 0x0000,
@@ -74,8 +75,21 @@ typedef enum {
 } DB_MANAGER_FILE_TYPE_E;
 
 /**
-* @details DB Manager Processing Type
-* @param DB_MANAGER_PROC_E
+* @details DB_MANAGER_COMM_MSG_TYPE_E
+* @param DB_MANAGER_COMM_MSG_TYPE_TX
+* @param DB_MANAGER_COMM_MSG_TYPE_RX
+*/
+typedef enum {
+    DB_MANAGER_COMM_MSG_TYPE_UNKNOW               = 0x0000,
+    DB_MANAGER_COMM_MSG_TYPE_TX                   = 0x0001,
+    DB_MANAGER_COMM_MSG_TYPE_RX                   = 0x0002,
+    DB_MANAGER_COMM_MSG_TYPE_MAX                  = 0xFFFF
+} DB_MANAGER_COMM_MSG_TYPE_E;
+
+/**
+* @details DB_MANAGER_PROC_E
+* @param DB_MANAGER_PROC_WRITE
+* @param DB_MANAGER_PROC_CONVERT
 */
 typedef enum {
     DB_MANAGER_PROC_UNKNOWN                        = 0x0000,
@@ -85,33 +99,63 @@ typedef enum {
     DB_MANAGER_PROC_MAX                            = 0xFFFF
 } DB_MANAGER_PROC_E;
 
+/**
+* @details DB_MANAGER_TASK_T
+* @param nThreads
+* @param nThreadId
+* @param nMsgId
+*/
 typedef struct DB_MANAGER_TASK_t {
     int nThreads;
     int nThreadId;
     int nMsgId;
 } DB_MANAGER_TASK_T;
 
+/**
+* @details DB_MANAGER_WRITE_T
+* @param eFileType
+* @param eCommType
+* @param eProc
+* @param unReserved
+*/
 typedef struct DB_MANAGER_WRITE {
-    DB_MANAGER_FILE_TYPE_E  eFileType;
-    DB_MANAGER_PROC_E       eProc;
-    uint32_t                unReserved;
+    DB_MANAGER_FILE_TYPE_E      eFileType;
+    DB_MANAGER_COMM_MSG_TYPE_E  eCommMsgType;
+    DB_MANAGER_PROC_E           eProc;
+    uint32_t                    unReserved;
 } DB_MANAGER_WRITE_T;
 
+/**
+* @details DB_MANAGER_READ_T
+* @param eFileType
+* @param eProc
+*/
 typedef struct DB_MANAGER_READ {
-    DB_MANAGER_FILE_TYPE_E  eFileType;
-    DB_MANAGER_PROC_E       eProc;
-    uint32_t unReserved;
+    DB_MANAGER_FILE_TYPE_E      eFileType;
+    DB_MANAGER_PROC_E           eProc;
+    uint32_t                    unReserved;
 } DB_MANAGER_READ_T;
 
+/**
+* @details DB_MANAGER_EVENT_MSG_T
+* @param pstDbManagerWrite
+* @param pstDbV2x
+* @param pPayload
+*/
 typedef struct DB_MANAGER_EVENT_MSG {
-    DB_MANAGER_WRITE_T *pstDbManagerWrite;
-    DB_V2X_T *pstDbV2x;
-    void *pPayload;
+    DB_MANAGER_WRITE_T      *pstDbManagerWrite;
+    DB_V2X_T                *pstDbV2x;
+    void                    *pPayload;
 } DB_MANAGER_EVENT_MSG_T;
 
+/**
+* @details DB_MANAGER_T
+* @param eFileType
+* @param unReserved
+*/
 typedef struct DB_MANAGER {
     DB_MANAGER_FILE_TYPE_E  eFileType;
-    uint32_t unReserved;
+    uint32_t                unReserved;
 } DB_MANAGER_T;
 
 /***************************** Function Protype ******************************/

@@ -75,8 +75,10 @@
 
 /***************************** Static Variable *******************************/
 static int32_t s_nSocketHandle = -1;
-static int s_nMsgId;
-static key_t s_msgKey = FRAMEWORK_MSG_KEY;
+static int s_nDbTaskMsgId, s_nMsgTxTaskMsgId, s_nMsgRxTaskMsgId;
+static key_t s_dbTaskMsgKey = FRAMEWORK_DB_TASK_MSG_KEY;
+static key_t s_MsgTxTaskMsgKey = FRAMEWORK_MSG_TX_TASK_MSG_KEY;
+static key_t s_MsgRxTaskMsgKey = FRAMEWORK_MSG_RX_TASK_MSG_KEY;
 
 /***************************** Function  *************************************/
 
@@ -302,6 +304,7 @@ static int32_t P_MSG_MANAGER_SendMsgToDbMgr(MSG_MANAGER_TX_T *pstMsgMgrTx)
     UNUSED(pstMsgMgrTx);
 
     stDbManagerWrite.eFileType = DB_MANAGER_FILE_TYPE_TXT;
+    stDbManagerWrite.eCommMsgType = DB_MANAGER_COMM_MSG_TYPE_TX;
     stDbManagerWrite.eProc = DB_MANAGER_PROC_WRITE;
 
     stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
@@ -328,7 +331,7 @@ static int32_t P_MSG_MANAGER_SendMsgToDbMgr(MSG_MANAGER_TX_T *pstMsgMgrTx)
     stEventMsg.pstDbV2x = &stDbV2x;
     stEventMsg.pPayload = (char*)&cPayload;
 
-    if(msgsnd(s_nMsgId, &stEventMsg, sizeof(DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
+    if(msgsnd(s_nDbTaskMsgId, &stEventMsg, sizeof(DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
     {
         PrintError("msgsnd() is failed!!");
         return nRet;
@@ -694,14 +697,36 @@ int32_t MSG_MANAGER_Init(MSG_MANAGER_T *pstMsgManager)
         return nRet;
     }
 
-    if((s_nMsgId = msgget(s_msgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
+    if((s_nDbTaskMsgId = msgget(s_dbTaskMsgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
     {
         PrintError("msgget() is failed!");
         return nRet;
     }
     else
     {
-        P_MSG_NABAGER_PrintMsgInfo(s_nMsgId);
+        P_MSG_NABAGER_PrintMsgInfo(s_nDbTaskMsgId);
+        nRet = FRAMEWORK_OK;
+    }
+
+    if((s_nMsgTxTaskMsgId = msgget(s_MsgTxTaskMsgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
+    {
+        PrintError("msgget() is failed!");
+        return nRet;
+    }
+    else
+    {
+        P_MSG_NABAGER_PrintMsgInfo(s_nMsgTxTaskMsgId);
+        nRet = FRAMEWORK_OK;
+    }
+
+    if((s_nMsgRxTaskMsgId = msgget(s_MsgRxTaskMsgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
+    {
+        PrintError("msgget() is failed!");
+        return nRet;
+    }
+    else
+    {
+        P_MSG_NABAGER_PrintMsgInfo(s_nMsgRxTaskMsgId);
         nRet = FRAMEWORK_OK;
     }
 

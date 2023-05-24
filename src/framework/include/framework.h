@@ -51,7 +51,9 @@
 #include "db_manager.h"
 
 /***************************** Definition ************************************/
-#define FRAMEWORK_MSG_KEY           (0x840919)
+#define FRAMEWORK_DB_TASK_MSG_KEY               (0x840919)
+#define FRAMEWORK_MSG_TX_TASK_MSG_KEY           (0x121202)
+#define FRAMEWORK_MSG_RX_TASK_MSG_KEY           (0x220916)
 
 /***************************** Enum and Structure ****************************/
 typedef struct FRAMEWORK {

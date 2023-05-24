@@ -96,6 +96,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         else if(IS_CMD(pcCmd, "v2x"))
         {
             stDbManagerWrite.eFileType = DB_MANAGER_FILE_TYPE_TXT;
+            stDbManagerWrite.eCommMsgType = DB_MANAGER_COMM_MSG_TYPE_TX;
             stDbManagerWrite.eProc = DB_MANAGER_PROC_WRITE;
 
             stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
@@ -115,6 +116,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
             PrintTrace("========================================================");
             PrintDebug("eFileType[%d]", stDbManagerWrite.eFileType);
+            PrintDebug("eCommMsgType[%d]", stDbManagerWrite.eCommMsgType);
             PrintDebug("eProc[%d]", stDbManagerWrite.eProc);
 
             PrintDebug("eDeviceType[%d]", stDbV2x.eDeviceType);
@@ -198,9 +200,9 @@ int32_t CLI_DB_InitCmds(void)
                "of available commands. For more details on a command, type and enter 'db'\n"
                "and the command name.\n\n"
                "db test    test db command\n"
-               "db v2x     test db v2x sample command (first, set CLI> db open)"
-               "db open    open a db file"
-               "db close   close a db file",
+               "db v2x     test db v2x sample command (first, set CLI> db open)\n"
+               "db open    open a db file\n"
+               "db close   close a db file\n",
                "");
     if(nRet != APP_OK)
     {
