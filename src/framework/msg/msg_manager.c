@@ -854,7 +854,7 @@ int32_t MSG_MANAGER_Transmit(MSG_MANAGER_TX_T *pstMsgMgrTx, DB_V2X_T *pstDbV2x, 
     stEventMsg.pstDbV2x = pstDbV2x;
     stEventMsg.pPayload = pPayload;
 
-    if(msgsnd(s_nDbTaskMsgId, &stEventMsg, sizeof(DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
+    if(msgsnd(s_nMsgTxTaskMsgId, &stEventMsg, sizeof(DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
     {
         PrintError("msgsnd() is failed!!");
         return nRet;
