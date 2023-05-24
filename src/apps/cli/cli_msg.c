@@ -218,8 +218,11 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
             }
         }
-        else if(IS_CMD(pcCmd, "v2x-tx"))
+        else if(IS_CMD(pcCmd, "tx"))
         {
+            stMsgManagerTx.unTxCount = 10;
+            stMsgManagerTx.unTxDelay = 100;
+
             stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
             stDbV2x.eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5_BROADCAST;
             stDbV2x.unDeviceId = CLI_DB_V2X_DEFAULT_DEVICE_ID;
@@ -236,6 +239,9 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             stDbV2x.ulPacketCrc32 = 0;
 
             PrintTrace("========================================================");
+            PrintDebug("unTxCount[%d]", stMsgManagerTx.unTxCount);
+            PrintDebug("unTxDelay[%d]", stMsgManagerTx.unTxDelay);
+
             PrintDebug("eDeviceType[%d]", stDbV2x.eDeviceType);
             PrintDebug("eTeleCommType[%d]", stDbV2x.eTeleCommType);
             PrintDebug("unDeviceId[0x%x]", stDbV2x.unDeviceId);
