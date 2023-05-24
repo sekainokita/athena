@@ -75,6 +75,14 @@
 
 //#define CONFIG_TEMP_OBU_TEST (1)
 
+#ifdef WORDS_BIGENDIAN
+#define htonll(x)   (x)
+#define ntohll(x)   (x)
+#else
+#define htonll(x)   ((((uint64_t)htonl(x)) << 32) + htonl(x >> 32))
+#define ntohll(x)   ((((uint64_t)ntohl(x)) << 32) + ntohl(x >> 32))
+#endif
+
 /***************************** Static Variable *******************************/
 static int32_t s_nSocketHandle = -1;
 static int s_nDbTaskMsgId, s_nMsgTxTaskMsgId, s_nMsgRxTaskMsgId;
@@ -312,29 +320,26 @@ static int32_t P_MSG_MANAGER_SendTxMsgToDbMgr(MSG_MANAGER_TX_EVENT_MSG_T *pstEve
     stDbManagerWrite.eCommMsgType = DB_MANAGER_COMM_MSG_TYPE_TX;
     stDbManagerWrite.eProc = DB_MANAGER_PROC_WRITE;
 
-    stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
-    stDbV2x.eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5_BROADCAST;
-    stDbV2x.unDeviceId = CLI_DB_V2X_DEFAULT_DEVICE_ID;
-    stDbV2x.ulTimeStamp = CLI_DB_V2X_DEFAULT_TIMESTAMP;
-    stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
-    stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
-    stDbV2x.eRegionId = DB_V2X_REGION_ID_SEONGNAM;
-    stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_PLATOONING;
-    stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
-    stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
-    stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
-    stDbV2x.usSwVer = 0;
-    stDbV2x.ulPayloadLength = sizeof(cPayload);
-    stDbV2x.ulPacketCrc32 = 0;
-    for(int i=0; i < CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; i++)
-    {
-        cPayload[i] = rand();
-        printf("%d ", cPayload[i]);
-    }
+#if 0
+    stDbV2x.eDeviceType = pstEventMsg->pstDbV2x->eDeviceType;
+    stDbV2x.eTeleCommType = pstEventMsg->pstDbV2x->eTeleCommType;
+    stDbV2x.unDeviceId = pstEventMsg->pstDbV2x->unDeviceId;
+    stDbV2x.ulTimeStamp = pstEventMsg->pstDbV2x->ulTimeStamp;
+    stDbV2x.eServiceId = pstEventMsg->pstDbV2x->eServiceId;
+    stDbV2x.eActionType = pstEventMsg->pstDbV2x->eActionType;
+    stDbV2x.eRegionId = pstEventMsg->pstDbV2x->eRegionId;
+    stDbV2x.ePayloadType = pstEventMsg->pstDbV2x->ePayloadType;
+    stDbV2x.eCommId = pstEventMsg->pstDbV2x->eCommId;
+    stDbV2x.usDbVer = pstEventMsg->pstDbV2x->usDbVer;
+    stDbV2x.usHwVer = pstEventMsg->pstDbV2x->usHwVer;
+    stDbV2x.usSwVer = pstEventMsg->pstDbV2x->usSwVer;
+    stDbV2x.ulPayloadLength = pstEventMsg->pstDbV2x->ulPayloadLength;
+    stDbV2x.ulPacketCrc32 = pstEventMsg->pstDbV2x->ulPacketCrc32;
+#endif
 
     stEventMsg.pstDbManagerWrite = &stDbManagerWrite;
-    stEventMsg.pstDbV2x = &stDbV2x;
-    stEventMsg.pPayload = (char*)&cPayload;
+    stEventMsg.pstDbV2x = pstEventMsg->pstDbV2x;
+    stEventMsg.pPayload = pstEventMsg->pPayload;
 
     if(msgsnd(s_nDbTaskMsgId, &stEventMsg, sizeof(DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
     {
@@ -359,11 +364,9 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
 
     Ext_V2X_TxPDU_t *v2x_tx_pdu_p = NULL;
     DB_V2X_T *db_v2x_tmp_p = NULL;
-    MSG_MANAGER_TX_EVENT_MSG_T stEventMsg;
 
     v2x_tx_pdu_p = malloc(v2x_tx_pdu_size);
 
-    memset(&stEventMsg, 0, sizeof(MSG_MANAGER_TX_T));
     memset(v2x_tx_pdu_p, 0, sizeof(Ext_V2X_TxPDU_t));
 
     v2x_tx_pdu_p->ver = htons(SAMPLE_V2X_API_VER);
@@ -394,20 +397,20 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     db_v2x_tmp_p = malloc(db_v2x_tmp_size);
     memset(db_v2x_tmp_p, 0, db_v2x_tmp_size);
 
-    db_v2x_tmp_p->eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
-    db_v2x_tmp_p->eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5;
-    db_v2x_tmp_p->unDeviceId = 0;
-    db_v2x_tmp_p->ulTimeStamp = 0ULL;
-    db_v2x_tmp_p->eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
-    db_v2x_tmp_p->eActionType = DB_V2X_ACTION_TYPE_REQUEST;
-    db_v2x_tmp_p->eRegionId = DB_V2X_REGION_ID_SEOUL;
-    db_v2x_tmp_p->ePayloadType = DB_V2X_PAYLOAD_TYPE_SAE_J2735_BSM;
-    db_v2x_tmp_p->eCommId = DB_V2X_COMM_ID_V2V;
-    db_v2x_tmp_p->usDbVer = 0;
-    db_v2x_tmp_p->usHwVer = 0;
-    db_v2x_tmp_p->usSwVer = 0;
-    db_v2x_tmp_p->ulPayloadLength = SAMPLE_V2X_MSG_LEN;
-    db_v2x_tmp_p->ulPacketCrc32 = 0;
+    db_v2x_tmp_p->eDeviceType = htons(pstEventMsg->pstDbV2x->eDeviceType);
+    db_v2x_tmp_p->eTeleCommType = htons(pstEventMsg->pstDbV2x->eTeleCommType);
+    db_v2x_tmp_p->unDeviceId = htonl(pstEventMsg->pstDbV2x->unDeviceId);
+    db_v2x_tmp_p->ulTimeStamp = htonll(pstEventMsg->pstDbV2x->ulTimeStamp);
+    db_v2x_tmp_p->eServiceId = htons(pstEventMsg->pstDbV2x->eServiceId);
+    db_v2x_tmp_p->eActionType = htons(pstEventMsg->pstDbV2x->eActionType);
+    db_v2x_tmp_p->eRegionId = htons(pstEventMsg->pstDbV2x->eRegionId);
+    db_v2x_tmp_p->ePayloadType = htons(pstEventMsg->pstDbV2x->ePayloadType);
+    db_v2x_tmp_p->eCommId = htons(pstEventMsg->pstDbV2x->eTeleCommType);
+    db_v2x_tmp_p->usDbVer = htons(pstEventMsg->pstDbV2x->usDbVer);
+    db_v2x_tmp_p->usHwVer = htons(pstEventMsg->pstDbV2x->usHwVer);
+    db_v2x_tmp_p->usSwVer = htons(pstEventMsg->pstDbV2x->usSwVer);
+    db_v2x_tmp_p->ulPayloadLength = htonl(pstEventMsg->pstDbV2x->ulPayloadLength);
+    db_v2x_tmp_p->ulPacketCrc32 = htonl(pstEventMsg->pstDbV2x->ulPacketCrc32);
 
     memcpy(v2x_tx_pdu_p->v2x_msg.data, db_v2x_tmp_p, db_v2x_tmp_size);
 
@@ -464,7 +467,11 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
             PrintDebug("tx send success (%ld bytes) : [%u/%u]", n, i + 1, pstEventMsg->pstMsgManagerTx->unTxCount);
         }
 
-        P_MSG_MANAGER_SendTxMsgToDbMgr(&stEventMsg);
+        nRet = P_MSG_MANAGER_SendTxMsgToDbMgr(pstEventMsg);
+        if (nRet != FRAMEWORK_OK)
+        {
+            PrintError("P_MSG_MANAGER_SendTxMsgToDbMgr() is faild! [nRet:%d]", nRet);
+        }
 
         usleep((1000 * pstEventMsg->pstMsgManagerTx->unTxDelay));
     }
