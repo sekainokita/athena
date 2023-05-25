@@ -54,8 +54,15 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+#include <time.h>
 
 /***************************** Definition ************************************/
+#define TIME_MGR_CHECK_NTP "rdate -p time.bora.net"
+#define TIME_MGR_SYNC_NTP  "sudo rdate -s time.bora.net"
+
+#define TIME_MILLI_SECOND   (1000)
+#define TIME_MICRO_SECOND   (1000*1000)
+#define TIME_NANO_SECOND    ((1000*1000)*1000)
 
 /***************************** Enum and Structure ****************************/
 
@@ -65,8 +72,36 @@ static int s_nTimeTaskMsgId;
 static key_t s_timeTaskMsgKey = FRAMEWORK_TIME_TASK_MSG_KEY;
 
 static pthread_t sh_TimeMgrTask;
+static struct timespec stCurTime, stCheckBeginTime, stCheckEndTime;
 
 /***************************** Function  *************************************/
+
+static int32_t P_TIME_MANAGER_SyncNtpServer(TIME_MANAGER_T *pstTimeMgr)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    if(pstTimeMgr == NULL)
+    {
+        PrintError("pstTimeMgr == NULL!!");
+        return nRet;
+    }
+
+    nRet = system(TIME_MGR_CHECK_NTP);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("system() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    nRet = system(TIME_MGR_SYNC_NTP);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("system() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    return nRet;
+}
 
 static void *P_TIME_MANAGER_Task(void *arg)
 {
@@ -146,13 +181,13 @@ int32_t P_TIME_MANAGER_CreateTask(void)
 	return nRet;
 }
 
-static int32_t P_TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeManager)
+static int32_t P_TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeMgr)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
-    if(pstTimeManager == NULL)
+    if(pstTimeMgr == NULL)
     {
-        PrintError("pstTimeManager == NULL!!");
+        PrintError("pstTimeMgr == NULL!!");
         return nRet;
     }
 
@@ -174,105 +209,177 @@ static int32_t P_TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeManager)
 
     return nRet;
 }
-static int32_t P_TIME_MANAGER_DeInit(TIME_MANAGER_T *pstTimeManager)
+static int32_t P_TIME_MANAGER_DeInit(TIME_MANAGER_T *pstTimeMgr)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
-    if(pstTimeManager == NULL)
+    if(pstTimeMgr == NULL)
     {
-        PrintError("pstTimeManager == NULL!!");
+        PrintError("pstTimeMgr == NULL!!");
         return nRet;
     }
 
     return nRet;
 }
 
-int32_t TIME_MANAGER_Open(TIME_MANAGER_T *pstTimeManager)
+int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    if(pstTimeMgr == NULL)
+    {
+        PrintError("pstTimeMgr == NULL!!");
+        return nRet;
+    }
+
+    pstTimeMgr->ulTimeStamp = system("echo date %Y%m%d%H%M%S%N");
+
+    return nRet;
+}
+
+
+int32_t TIME_MANAGER_Open(TIME_MANAGER_T *pstTimeMgr)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
-    if(pstTimeManager == NULL)
+    if(pstTimeMgr == NULL)
     {
-        PrintError("pstTimeManager == NULL!!");
+        PrintError("pstTimeMgr == NULL!!");
         return nRet;
     }
 
     return nRet;
 }
 
-int32_t TIME_MANAGER_Close(TIME_MANAGER_T *pstTimeManager)
+int32_t TIME_MANAGER_Close(TIME_MANAGER_T *pstTimeMgr)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
-    if(pstTimeManager == NULL)
+    if(pstTimeMgr == NULL)
     {
-        PrintError("pstTimeManager == NULL!!");
+        PrintError("pstTimeMgr == NULL!!");
         return nRet;
     }
 
     return nRet;
 }
 
-int32_t TIME_MANAGER_Start(TIME_MANAGER_T *pstTimeManager)
+int32_t TIME_MANAGER_Start(TIME_MANAGER_T *pstTimeMgr)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
-    if(pstTimeManager == NULL)
+    if(pstTimeMgr == NULL)
     {
-        PrintError("pstTimeManager == NULL!!");
+        PrintError("pstTimeMgr == NULL!!");
         return nRet;
     }
 
     return nRet;
 }
 
-int32_t TIME_MANAGER_Stop(TIME_MANAGER_T *pstTimeManager)
+int32_t TIME_MANAGER_Stop(TIME_MANAGER_T *pstTimeMgr)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
-    if(pstTimeManager == NULL)
+    if(pstTimeMgr == NULL)
     {
-        PrintError("pstTimeManager == NULL!!");
+        PrintError("pstTimeMgr == NULL!!");
         return nRet;
     }
 
     return nRet;
 }
 
-int32_t TIME_MANAGER_Status(TIME_MANAGER_T *pstTimeManager)
+void TIME_MANAGER_Status(TIME_MANAGER_T *pstTimeMgr)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
     PrintWarn("TODO");
 
-    if(pstTimeManager == NULL)
+    if(pstTimeMgr == NULL)
     {
-        PrintError("pstTimeManager == NULL!!");
+        PrintError("pstTimeMgr == NULL!!");
         return nRet;
     }
 
     return nRet;
 }
 
-int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeManager)
+void TIME_MANAGER_CheckLatencyTime(char *pStr, TIME_MANAGER_T *pstTimeMgr)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
-    if(pstTimeManager == NULL)
+    if(pstTimeMgr == NULL)
     {
-        PrintError("pstTimeManager == NULL!!");
+        PrintError("pstTimeMgr == NULL!!");
         return nRet;
     }
 
-    nRet = P_TIME_MANAGER_Init(pstTimeManager);
+#if 0
+    PrintDebug("[%s] Time (Nano): %ld", pStr, pstTimeMgr->ulLatency);
+    PrintDebug("[%s] Time (Micro): %lf", pStr, (double)pstTimeMgr->ulLatency/TIME_MILLI_SECOND);
+    PrintDebug("[%s] Time (Milli): %lf", pStr, (double)pstTimeMgr->ulLatency/TIME_MICRO_SECOND);
+#endif
+    PrintDebug("[%s] Time (Second): %lf", pStr, (double)pstTimeMgr->ulLatency/TIME_NANO_SECOND);
+
+    return nRet;
+}
+
+void TIME_MANAGER_CheckLatencyBegin(TIME_MANAGER_T *pstTimeMgr)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    if(pstTimeMgr == NULL)
+    {
+        PrintError("pstTimeMgr == NULL!!");
+        return nRet;
+    }
+
+    nRet = clock_gettime(CLOCK_MONOTONIC, &stCheckBeginTime);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("clock_gettime() is failed! [nRet:%d]", nRet);
+    }
+}
+
+void TIME_MANAGER_CheckLatencyEnd(TIME_MANAGER_T *pstTimeMgr)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    if(pstTimeMgr == NULL)
+    {
+        PrintError("pstTimeMgr == NULL!!");
+        return nRet;
+    }
+
+    nRet = clock_gettime(CLOCK_MONOTONIC, &stCheckEndTime);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("clock_gettime() is failed! [nRet:%d]", nRet);
+    }
+
+    pstTimeMgr->ulLatency = (stCheckEndTime.tv_sec - stCheckBeginTime.tv_sec) + (stCheckEndTime.tv_nsec - stCheckBeginTime.tv_nsec);
+}
+
+int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeMgr)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    if(pstTimeMgr == NULL)
+    {
+        PrintError("pstTimeMgr == NULL!!");
+        return nRet;
+    }
+
+    nRet = P_TIME_MANAGER_Init(pstTimeMgr);
     if(nRet != FRAMEWORK_OK)
     {
         PrintError("P_TIME_MANAGER_Init() is failed! [unRet:%d]", nRet);
@@ -283,20 +390,31 @@ int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeManager)
         PrintWarn("is successfully initialized.");
     }
 
+    nRet= P_TIME_MANAGER_SyncNtpServer(pstTimeMgr);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_TIME_MANAGER_Init() is failed! [unRet:%d]", nRet);
+    }
+    else
+    {
+        PrintWarn("P_TIME_MANAGER_SyncNtpServer() is successfully updated.");
+    }
+
+
     return nRet;
 }
 
-int32_t TIME_MANAGER_DeInit(TIME_MANAGER_T *pstTimeManager)
+int32_t TIME_MANAGER_DeInit(TIME_MANAGER_T *pstTimeMgr)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
-    if(pstTimeManager == NULL)
+    if(pstTimeMgr == NULL)
     {
-        PrintError("pstTimeManager == NULL!!");
+        PrintError("pstTimeMgr == NULL!!");
         return nRet;
     }
 
-    nRet = P_TIME_MANAGER_DeInit(pstTimeManager);
+    nRet = P_TIME_MANAGER_DeInit(pstTimeMgr);
     if(nRet != FRAMEWORK_OK)
     {
         PrintError("P_TIME_MANAGER_DeInit() is failed! [unRet:%d]", nRet);

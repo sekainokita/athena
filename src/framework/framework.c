@@ -77,6 +77,17 @@ int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
 
     PrintWarn("is successfully initialized.");
 
+    nRet = TIME_MANAGER_Init(&s_stTimeManager);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("TIME_MANAGER_Init() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    PrintDebug("TIME_MANAGER_Init() is successfully initialized, s_stTimeManager[0x%p]", &s_stTimeManager);
+
+    (void)TIME_MANAGER_CheckLatencyBegin(&s_stTimeManager);
+
     nRet = MSG_MANAGER_Init(&s_stMsgManager);
     if (nRet != FRAMEWORK_OK)
     {
@@ -95,14 +106,8 @@ int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
 
     PrintDebug("DB_MANAGER_Init() is successfully initialized, s_stDbManager[0x%p]", &s_stDbManager);
 
-    nRet = TIME_MANAGER_Init(&s_stTimeManager);
-    if (nRet != FRAMEWORK_OK)
-    {
-        PrintError("TIME_MANAGER_Init() is failed! [nRet:%d]", nRet);
-        return nRet;
-    }
-
-    PrintDebug("TIME_MANAGER_Init() is successfully initialized, s_stTimeManager[0x%p]", &s_stTimeManager);
+    (void)TIME_MANAGER_CheckLatencyEnd(&s_stTimeManager);
+    (void)TIME_MANAGER_CheckLatencyTime("Framework Init Time", &s_stTimeManager);
 
     return nRet;
 }
