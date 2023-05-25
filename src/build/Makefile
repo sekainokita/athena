@@ -35,6 +35,7 @@ include path.mk
 
 LIB_DB = db
 LIB_MSG = msg
+LIB_TIME = time
 LIB_FRAMEWORK = framework
 LIB_PLATFORM = platform
 
@@ -50,7 +51,7 @@ TARGET_CFLAGS += -Wall -Wextra -Wstrict-prototypes -O3 -fomit-frame-pointer -pip
 
 TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_FRAMEWORK) -l$(LIB_PLATFORM)
 TARGET_LDFLAGS += -lrt -pthread
-# To add Library : -l$(LIB_DB) -l$(LIB_MSG)
+# To add Library : -l$(LIB_DB) -l$(LIB_MSG) -l$(LIB_TIME)
 
 TARGET_CC=gcc
 TARGET_LD=ld
@@ -88,6 +89,17 @@ lib-msg-distclean:
 	$(MAKE) -C $(LIB_MSG_PATH) distclean
 
 .PHONY: lib-msg lib-msg-clean lib-msg-distclean
+
+lib-time:
+	@$(MAKE) -C $(LIB_TIME_PATH) $(TARGET_CONFIGS) all
+
+lib-time-clean:
+	$(MAKE) -C $(LIB_TIME_PATH) clean
+
+lib-time-distclean:
+	$(MAKE) -C $(LIB_TIME_PATH) distclean
+
+.PHONY: lib-time lib-time-clean lib-time-distclean
 
 lib-framework:
 	@$(MAKE) -C $(LIB_FRAMEWORK_PATH) $(TARGET_CONFIGS) all
@@ -141,7 +153,7 @@ plat-chem-obu-distclean:
 # Build All
 #
 
-lib-all:lib-db lib-msg
+lib-all:lib-db lib-msg lib-time
 all: lib-platform lib-framework app lib-all
 
 #
@@ -150,5 +162,5 @@ all: lib-platform lib-framework app lib-all
 
 clean: distclean
 
-distclean: lib-db-distclean lib-msg-distclean lib-platform-distclean lib-framework-distclean app-distclean
+distclean: lib-db-distclean lib-msg-distclean lib-time-distclean lib-platform-distclean lib-framework-distclean app-distclean
 	@$(RM) -f $(OUT_BIN_DIR)/* $(OUT_LIB_DIR)/*

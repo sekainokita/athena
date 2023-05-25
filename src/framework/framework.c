@@ -57,6 +57,7 @@
 /***************************** Static Variable *******************************/
 static MSG_MANAGER_T s_stMsgManager;
 static DB_MANAGER_T s_stDbManager;
+static TIME_MANAGER_T s_stTimeManager;
 
 /***************************** Function  *************************************/
 
@@ -72,6 +73,7 @@ int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
 
     (void*)memset(&s_stMsgManager, 0x00, sizeof(MSG_MANAGER_T));
     (void*)memset(&s_stDbManager, 0x00, sizeof(DB_MANAGER_T));
+    (void*)memset(&s_stTimeManager, 0x00, sizeof(TIME_MANAGER_T));
 
     PrintWarn("is successfully initialized.");
 
@@ -82,7 +84,7 @@ int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
         return nRet;
     }
 
-    PrintDebug("s_stMsgManager[0x%p]", &s_stMsgManager);
+    PrintDebug("MSG_MANAGER_Init() is successfully initialized, s_stMsgManager[0x%p]", &s_stMsgManager);
 
     nRet = DB_MANAGER_Init(&s_stDbManager);
     if (nRet != FRAMEWORK_OK)
@@ -91,7 +93,16 @@ int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
         return nRet;
     }
 
-    PrintDebug("s_stDbManager[0x%p]", &s_stDbManager);
+    PrintDebug("DB_MANAGER_Init() is successfully initialized, s_stDbManager[0x%p]", &s_stDbManager);
+
+    nRet = TIME_MANAGER_Init(&s_stTimeManager);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("TIME_MANAGER_Init() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    PrintDebug("TIME_MANAGER_Init() is successfully initialized, s_stTimeManager[0x%p]", &s_stTimeManager);
 
     return nRet;
 }
@@ -104,5 +115,10 @@ MSG_MANAGER_T* FRAMEWORK_GetMsgManagerInstance(void)
 DB_MANAGER_T* FRAMEWORK_GetDbManagerInstance(void)
 {
     return &s_stDbManager;
+}
+
+DB_MANAGER_T* FRAMEWORK_GetTimeManagerInstance(void)
+{
+    return &s_stTimeManager;
 }
 

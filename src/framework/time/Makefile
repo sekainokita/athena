@@ -31,41 +31,31 @@
 #
 #******************************************************************************
 
-include ../build/path.mk
-
-TARGET = lib-framework
-LIB_FRAMEWORK = libframework.a
-
+TARGET = lib-time
+LIB_TIME = libtime.a
 SRCS = $(wildcard *.c)
-SRCS += $(wildcard $(LIB_DB_PATH)/*.c)
-SRCS += $(wildcard $(LIB_MSG_PATH)/*.c)
-SRCS += $(wildcard $(LIB_TIME_PATH)/*.c)
-
 TARGET_AR = ar
 OBJS = ${SRCS:.c=.o}
 
-OUT_LIB_DIR = ../build/output/lib
+OUT_LIB_DIR = ../../build/output/lib
 
 %.o:%.c
 	@echo "Compiling..."
 	$(CC) $(CFLAGS) -c $^ -pthread
-	mkdir -p $(FRAMEWORK_OBJS_DIR)
-	mv *.o $(FRAMEWORK_OBJS_DIR)
 
 $(TARGET):$(OBJS)
 	@echo "Linking..."
-	@echo "Check SRCS:$(SRCS), OBJS:$(OBJS)"
-	@$(TARGET_AR) rcs $(LIB_FRAMEWORK) $(FRAMEWORK_OBJS)
+	@$(TARGET_AR) rcs $(LIB_TIME) $(OBJS)
 	@echo "Make and copy the common library..."
-	@mv $(LIB_FRAMEWORK) $(OUT_LIB_DIR)
+	@mv $(LIB_TIME) $(OUT_LIB_DIR)
 
 all: $(TARGET)
 
 clean:
-	@$(RM) -f $(FRAMEWORK_OBJS) $(OUT_LIB_DIR)/$(LIB_FRAMEWORK)
-	@$(RM) -rf $(FRAMEWORK_OBJS_DIR)
+	@$(RM) -f $(OBJS) $(OUT_LIB_DIR)/$(LIB_TIME)
 
-distclean: clean
+distclean:
+	@$(RM) -f $(OBJS) $(OUT_LIB_DIR)/$(LIB_TIME)
 
 .PHONY: clean distclean
 

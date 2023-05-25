@@ -1,5 +1,5 @@
-#ifndef	_FRAMEWORK_H_
-#define	_FRAMEWORK_H_
+#ifndef	_TIME_MANAGER_H_
+#define	_TIME_MANAGER_H_
 
 /******************************************************************************
 *
@@ -36,40 +36,52 @@
 /******************************************************************************/
 /**
 *
-* @file framework.h
+* @file time_manager.h
 *
 * @note
 *
-* V2X Framework Header
+* TIME Manager Header
 *
 ******************************************************************************/
 
 
 /***************************** Include ***************************************/
 #include "type.h"
-#include "msg_manager.h"
-#include "db_manager.h"
-#include "time_manager.h"
+#include "db_v2x.h"
 
 /***************************** Definition ************************************/
-#define FRAMEWORK_DB_TASK_MSG_KEY               (0x840919)
-#define FRAMEWORK_MSG_TX_TASK_MSG_KEY           (0x121202)
-#define FRAMEWORK_MSG_RX_TASK_MSG_KEY           (0x220916)
-#define FRAMEWORK_TIME_TASK_MSG_KEY             (0x230525)
-
-//#define CONFIG_PTHREAD_JOINABLE                 (1)
+#define TIME_MGR_TEST_TIMESTAMP              2023032314344766828
 
 /***************************** Enum and Structure ****************************/
-typedef struct FRAMEWORK {
-    uint32_t unReserved;
-} FRAMEWORK_T;
 
+/**
+* @details TIME_MANAGER_SETTING_T
+* @param unReserved
+*/
+typedef struct TIME_MANAGER_SETTING {
+    uint32_t                     unReserved;
+} TIME_MANAGER_SETTING_T;
+
+/**
+* @details TIME_MANAGER_EVENT_MSG_T
+* @param pstTimeMgrSetting
+*/
+typedef struct TIME_MANAGER_EVENT_MSG {
+    TIME_MANAGER_SETTING_T      *pstTimeMgrSetting;
+} TIME_MANAGER_EVENT_MSG_T;
+
+/**
+* @details TIME_MANAGER_T
+* @param unReserved
+*/
+typedef struct TIME_MANAGER {
+    uint32_t                    unReserved;
+} TIME_MANAGER_T;
 
 /***************************** Function Protype ******************************/
-int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework);
-MSG_MANAGER_T* FRAMEWORK_GetMsgManagerInstance(void);
-DB_MANAGER_T* FRAMEWORK_GetDbManagerInstance(void);
-DB_MANAGER_T* FRAMEWORK_GetTimeManagerInstance(void);
 
-#endif	/* _FRAMEWORK_H_ */
+int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeMgr);
+int32_t TIME_MANAGER_DeInit(TIME_MANAGER_T *pstTimeMgr);
+
+#endif	/* _TIME_MANAGER_H_ */
 
