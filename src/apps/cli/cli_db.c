@@ -177,7 +177,19 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintError("DB_MANAGER_Close() is failed! [nRet:%d]", nFrameWorkRet);
             }
         }
+        else if(IS_CMD(pcCmd, "time"))
+        {
+            TIME_MANAGER_T *pstTimeManager;
 
+            pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
+            PrintDebug("pstTimeManager[0x%p]", pstTimeManager);
+
+            nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
+            if(nFrameWorkRet != FRAMEWORK_OK)
+            {
+                PrintError("TIME_MANAGER_Get() is failed! [nRet:%d]", nFrameWorkRet);
+            }
+        }
         else
         {
             return CLI_CMD_Showusage(pstCmd);

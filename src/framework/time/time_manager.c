@@ -57,12 +57,14 @@
 #include <time.h>
 
 /***************************** Definition ************************************/
-#define TIME_MGR_CHECK_NTP "rdate -p time.bora.net"
-#define TIME_MGR_SYNC_NTP  "sudo rdate -s time.bora.net"
+#define TIME_MGR_CHECK_NTP          "rdate -p time.bora.net"
+#define TIME_MGR_SYNC_NTP           "sudo rdate -s time.bora.net"
 
-#define TIME_MILLI_SECOND   (1000)
-#define TIME_MICRO_SECOND   (1000*1000)
-#define TIME_NANO_SECOND    ((1000*1000)*1000)
+#define TIME_MILLI_SECOND           (1000)
+#define TIME_MICRO_SECOND           (1000*1000)
+#define TIME_NANO_SECOND            ((1000*1000)*1000)
+
+#define CONFIG_TIME_MANAGER_DEBUG   (1)
 
 /***************************** Enum and Structure ****************************/
 
@@ -109,7 +111,8 @@ static void *P_TIME_MANAGER_Task(void *arg)
     int32_t nRet = FRAMEWORK_ERROR;
     memset(&stEventMsg, 0, sizeof(TIME_MANAGER_EVENT_MSG_T));
 
-    (void)arg;
+    UNUSED(arg);
+    UNUSED(nRet);
 
     while (1)
     {
@@ -225,6 +228,13 @@ static int32_t P_TIME_MANAGER_DeInit(TIME_MANAGER_T *pstTimeMgr)
 int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr)
 {
     int32_t nRet = FRAMEWORK_ERROR;
+#if defined(CONFIG_TIME_MANAGER_DEBUG)
+    struct tm localtime_struct;
+    struct tm * retptr = NULL;
+    const char * time_format_str = "%a %b %-d %H:%M:%S %Y %z";
+    char time_str[100];
+    size_t bytes_written = 0;
+#endif
 
     if(pstTimeMgr == NULL)
     {
@@ -232,7 +242,52 @@ int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr)
         return nRet;
     }
 
-    pstTimeMgr->ulTimeStamp = system("echo date %Y%m%d%H%M%S%N");
+    nRet = clock_gettime(CLOCK_REALTIME, &stCurTime);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("clock_gettime() is failed! [nRet:%d]", nRet);
+    }
+
+#if defined(CONFIG_TIME_MANAGER_DEBUG)
+    PrintDebug("timestamp = %li.%09li sec", stCheckEndTime.tv_sec, stCheckEndTime.tv_nsec);
+
+    retptr = localtime_r(&stCheckEndTime.tv_sec, &localtime_struct);
+    if (retptr == NULL)
+    {
+        PrintError("localtime_r() is failed to convert to localtime!!");
+    }
+
+    PrintDebug("Human-readable System Time (NTP Epoch)\n"
+           "  ns    = %li\n" // ns (0-999999999) from clock_gettime's tv_nsec
+           "  sec   = %i\n"  // sec (0-60)
+           "  min   = %i\n"  // min (0-59)
+           "  hour  = %i\n"  // hour (0-23)
+           "  mday  = %i\n"  // day (1-31)
+           "  mon   = %i\n"  // month (0-11)
+           "  year  = %i\n"  // year - 1900
+           "  wday  = %i\n"  // day of the week (0-6, Sunday = 0)
+           "  yday  = %i\n"  // day in the year (0-365, 1 Jan = 0)
+           "  isdst = %i\n"  // daylight saving time
+           "\n",
+           stCheckEndTime.tv_nsec,
+           localtime_struct.tm_sec,
+           localtime_struct.tm_min,
+           localtime_struct.tm_hour,
+           localtime_struct.tm_mday,
+           localtime_struct.tm_mon,
+           localtime_struct.tm_year,
+           localtime_struct.tm_wday,
+           localtime_struct.tm_yday,
+           localtime_struct.tm_isdst);
+
+    bytes_written = strftime(time_str, sizeof(time_str), time_format_str, &localtime_struct);
+    if (bytes_written == 0)
+    {
+        PrintError("strftime() is failed to convert `struct tm` to a human-readable time string.");
+    }
+
+    PrintTrace("Human-redable system time is [%s]", time_str);
+#endif
 
     return nRet;
 }
@@ -304,46 +359,46 @@ void TIME_MANAGER_Status(TIME_MANAGER_T *pstTimeMgr)
 
     PrintWarn("TODO");
 
+    UNUSED(nRet);
+
     if(pstTimeMgr == NULL)
     {
         PrintError("pstTimeMgr == NULL!!");
-        return nRet;
     }
-
-    return nRet;
 }
 
 void TIME_MANAGER_CheckLatencyTime(char *pStr, TIME_MANAGER_T *pstTimeMgr)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
+    UNUSED(nRet);
+
     if(pstTimeMgr == NULL)
     {
         PrintError("pstTimeMgr == NULL!!");
-        return nRet;
     }
 
-#if 0
+#if defined(CONFIG_TIME_MANAGER_DEBUG)
     PrintDebug("[%s] Time (Nano): %ld", pStr, pstTimeMgr->ulLatency);
     PrintDebug("[%s] Time (Micro): %lf", pStr, (double)pstTimeMgr->ulLatency/TIME_MILLI_SECOND);
     PrintDebug("[%s] Time (Milli): %lf", pStr, (double)pstTimeMgr->ulLatency/TIME_MICRO_SECOND);
 #endif
     PrintDebug("[%s] Time (Second): %lf", pStr, (double)pstTimeMgr->ulLatency/TIME_NANO_SECOND);
 
-    return nRet;
 }
 
 void TIME_MANAGER_CheckLatencyBegin(TIME_MANAGER_T *pstTimeMgr)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
+    UNUSED(nRet);
+
     if(pstTimeMgr == NULL)
     {
         PrintError("pstTimeMgr == NULL!!");
-        return nRet;
     }
 
-    nRet = clock_gettime(CLOCK_MONOTONIC, &stCheckBeginTime);
+    nRet = clock_gettime(CLOCK_REALTIME, &stCheckBeginTime);
     if (nRet != FRAMEWORK_OK)
     {
         PrintError("clock_gettime() is failed! [nRet:%d]", nRet);
@@ -357,10 +412,9 @@ void TIME_MANAGER_CheckLatencyEnd(TIME_MANAGER_T *pstTimeMgr)
     if(pstTimeMgr == NULL)
     {
         PrintError("pstTimeMgr == NULL!!");
-        return nRet;
     }
 
-    nRet = clock_gettime(CLOCK_MONOTONIC, &stCheckEndTime);
+    nRet = clock_gettime(CLOCK_REALTIME, &stCheckEndTime);
     if (nRet != FRAMEWORK_OK)
     {
         PrintError("clock_gettime() is failed! [nRet:%d]", nRet);

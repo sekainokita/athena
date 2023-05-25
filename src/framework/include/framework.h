@@ -69,7 +69,7 @@ typedef struct FRAMEWORK {
 int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework);
 MSG_MANAGER_T* FRAMEWORK_GetMsgManagerInstance(void);
 DB_MANAGER_T* FRAMEWORK_GetDbManagerInstance(void);
-DB_MANAGER_T* FRAMEWORK_GetTimeManagerInstance(void);
+TIME_MANAGER_T* FRAMEWORK_GetTimeManagerInstance(void);
 
 #endif	/* _FRAMEWORK_H_ */
 

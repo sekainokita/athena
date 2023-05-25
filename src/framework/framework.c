@@ -122,7 +122,7 @@ DB_MANAGER_T* FRAMEWORK_GetDbManagerInstance(void)
     return &s_stDbManager;
 }
 
-DB_MANAGER_T* FRAMEWORK_GetTimeManagerInstance(void)
+TIME_MANAGER_T* FRAMEWORK_GetTimeManagerInstance(void)
 {
     return &s_stTimeManager;
 }

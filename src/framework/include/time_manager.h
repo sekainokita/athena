@@ -91,6 +91,7 @@ int32_t TIME_MANAGER_Stop(TIME_MANAGER_T *pstTimeMgr);
 void TIME_MANAGER_Status(TIME_MANAGER_T *pstTimeMgr);
 int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeMgr);
 int32_t TIME_MANAGER_DeInit(TIME_MANAGER_T *pstTimeMgr);
+int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr);
 void TIME_MANAGER_CheckLatencyTime(char *pStr, TIME_MANAGER_T *pstTimeMgr);
 void TIME_MANAGER_CheckLatencyBegin(TIME_MANAGER_T *pstTimeMgr);
 void TIME_MANAGER_CheckLatencyEnd(TIME_MANAGER_T *pstTimeMgr);
