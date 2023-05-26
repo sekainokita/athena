@@ -51,18 +51,6 @@
 #include "framework.h"
 
 /***************************** Definition ************************************/
-#define SAMPLE_USAGE_STR "Usage: %s [OPTIONS]\n"                                                                  \
-						 "  -o payload_type  : Raw, EncodedbyJ2735, eITSK00130, eKETI, eETRI (default : Raw)\n"   \
-						 "  -p psid          : <decimal number> (default : 32)\n"                                 \
-						 "  -y comm_type     : DSRC, LTEV2X, 5GNRV2X (default : 5GNRV2X)\n"                       \
-						 "  -t tx_port       : tx port dbm (default : 20)\n"                                      \
-						 "  -s signer_id     : UNSECURED, CERTIFICATE, DIGEST, ALTERNATE (default : UNSECURED)\n" \
-						 "  -r priority      : 0~7 (default : 0)\n"                                               \
-						 "  -c tx_count      : total tx count (default : 100)\n"                                  \
-						 "  -d tx_delay      : msec delay (default : 100)\n"                                      \
-						 "  -m total_time    : total exec second (default : 10)\n"                                \
-						 "  -h help\n"
-
 //#define CONFIG_CLI_MSG_DEBUG        (1)
 
 /***************************** Static Variable *******************************/
@@ -181,6 +169,44 @@ static int P_CLI_MSG_TcpTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
     return nRet;
 }
 
+void P_CLI_MSG_ShowTxSettings(void)
+{
+    PrintDebug("unTxCount[%d]", s_stMsgManagerTx.unTxCount);
+    PrintDebug("unTxDelay[%d ms]", s_stMsgManagerTx.unTxDelay);
+}
+
+int32_t P_CLI_MSG_SetTxSettings(MSG_MANAGER_TX_T *pstMsgManagerTx)
+{
+    int32_t nRet = APP_ERROR;
+
+    s_stMsgManagerTx.unTxCount = pstMsgManagerTx->unTxCount;
+    s_stMsgManagerTx.unTxDelay = pstMsgManagerTx->unTxDelay;
+
+    (void)P_CLI_MSG_ShowTxSettings();
+
+    nRet = APP_OK;
+
+    return nRet;
+}
+
+int32_t P_CLI_MSG_SetTxDefaultSettings(void)
+{
+    int32_t nRet = APP_ERROR;
+
+    MSG_MANAGER_TX_T stMsgManagerTx;
+
+    stMsgManagerTx.unTxCount = 10;
+    stMsgManagerTx.unTxDelay = 100;
+
+    nRet = P_CLI_MSG_SetTxSettings(&stMsgManagerTx);
+    if(nRet != APP_OK)
+    {
+        PrintError("P_CLI_MSG_SetTxSettings() is failed! [nRet:%d]", nRet);
+    }
+
+    return nRet;
+}
+
 static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
     int32_t nRet = APP_OK;
@@ -221,9 +247,6 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             TIME_MANAGER_T *pstTimeManager;
             uint32_t unTxCount = 0;
             int i = 0;
-
-            s_stMsgManagerTx.unTxCount = 10;
-            s_stMsgManagerTx.unTxDelay = 100;
 
             for (unTxCount = 0; unTxCount < s_stMsgManagerTx.unTxCount; unTxCount++)
             {
@@ -338,7 +361,14 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintError("MSG_MANAGER_Close() is failed! [nRet:%d]", nFrameWorkRet);
             }
         }
-
+        else if(IS_CMD(pcCmd, "info"))
+        {
+            (void)P_CLI_MSG_ShowTxSettings();
+        }
+        else if(IS_CMD(pcCmd, "set"))
+        {
+            PrintInfo();
+        }
         else
         {
             return CLI_CMD_Showusage(pstCmd);
@@ -347,7 +377,6 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
 	return nRet;
 }
-
 
 int32_t CLI_MSG_InitCmds(void)
 {
@@ -362,9 +391,20 @@ int32_t CLI_MSG_InitCmds(void)
                "of available commands. For more details on a command, type and enter 'msg'\n"
                "and the command name."
                "and the command name.\n\n"
+               "msg info             show msg settings\n"
                "msg open [eth#]      open message protocol, connect TCP server, e.g. msg open eth1\n"
                "msg close            close message protocol\n"
-               "msg tx               send v2x messages to v2x devices (set msg open before)\n",
+               "msg tx               send v2x messages to v2x devices (set msg open before)\n"
+               "msg set [OPTIONS]\n"
+               "  -o payload_type    Raw, EncodedbyJ2735, eITSK00130, eKETI, eETRI (default : Raw)\n"
+               "  -p psid            <decimal number> (default : 32)\n"
+               "  -y comm_type       DSRC, LTEV2X, 5GNRV2X (default : 5GNRV2X)\n"
+               "  -t tx_port         tx port dbm (default : 20)\n"
+               "  -s signer_id       UNSECURED, CERTIFICATE, DIGEST, ALTERNATE (default : UNSECURED)\n"
+               "  -r priority        0~7 (default : 0)\n"
+               "  -c tx_count        total tx count (default : 100)\n"
+               "  -d tx_delay        msec delay (default : 100)\n"
+               "  -m total_time      total exec second (default : 10)\n",
                "");
     if(nRet != APP_OK)
     {
@@ -444,6 +484,12 @@ int32_t CLI_MSG_InitCmds(void)
 
     (void*)memset(&s_stMsgManagerTx, 0x00, sizeof(MSG_MANAGER_TX_T));
     (void*)memset(&s_stMsgManagerRx, 0x00, sizeof(MSG_MANAGER_RX_T));
+
+    nRet = P_CLI_MSG_SetTxDefaultSettings();
+    if(nRet != APP_OK)
+    {
+        PrintError("P_CLI_MSG_SetTxDefaultSettings() is failed! [nRet:%d]", nRet);
+    }
 
     return nRet;
 }
