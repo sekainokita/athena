@@ -357,8 +357,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     int32_t nRet = FRAMEWORK_ERROR;
     int db_v2x_tmp_size = sizeof(DB_V2X_T) + SAMPLE_V2X_MSG_LEN;
     int v2x_tx_pdu_size = sizeof(Ext_V2X_TxPDU_t) + db_v2x_tmp_size;
-    uint32_t i;
-    ssize_t n;
+    ssize_t nRetSendSize;
 
     Ext_V2X_TxPDU_t *v2x_tx_pdu_p = NULL;
     DB_V2X_T *db_v2x_tmp_p = NULL;
@@ -374,7 +373,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     v2x_tx_pdu_p->e_signer_id = e_signer_id_g;
     v2x_tx_pdu_p->e_priority = e_priority_g;
 
-    if (e_comm_type_g == eV2XCommType_LTEV2X || e_comm_type_g == eV2XCommType_5GNRV2X)
+    if ((e_comm_type_g == eV2XCommType_LTEV2X) || (e_comm_type_g == eV2XCommType_5GNRV2X))
     {
         v2x_tx_pdu_p->magic_num = htons(MAGIC_CV2X_TX_PDU);
         v2x_tx_pdu_p->u.config_cv2x.transmitter_profile_id = htonl(transmitter_profile_id_g);
@@ -389,7 +388,6 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
         memcpy(v2x_tx_pdu_p->u.config_wave.peer_mac_addr, peer_mac_addr_g, MAC_EUI48_LEN);
     }
 
-    // Payload = KETI Format
     v2x_tx_pdu_p->v2x_msg.length = htons(db_v2x_tmp_size);
 
     db_v2x_tmp_p = malloc(db_v2x_tmp_size);
@@ -447,35 +445,40 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
         v2x_tx_pdu_p->u.config_wave.peer_mac_addr);
     }
 
-    for (i = 0; i < pstEventMsg->pstMsgManagerTx->unTxCount; i++)
+    nRetSendSize = send(s_nSocketHandle, v2x_tx_pdu_p, v2x_tx_pdu_size, 0);
+    if (nRetSendSize < 0)
     {
-        n = send(s_nSocketHandle, v2x_tx_pdu_p, v2x_tx_pdu_size, 0);
-        if (n < 0)
-        {
-            PrintError("send() is failed!!");
-            break;
-        }
-        else if (n != v2x_tx_pdu_size)
-        {
-            PrintError("send() sent a different number of bytes than expected!!");
-            break;
-        }
-        else
-        {
-            PrintDebug("tx send success (%ld bytes) : [%u/%u]", n, i + 1, pstEventMsg->pstMsgManagerTx->unTxCount);
-        }
-
-        nRet = P_MSG_MANAGER_SendTxMsgToDbMgr(pstEventMsg);
-        if (nRet != FRAMEWORK_OK)
-        {
-            PrintError("P_MSG_MANAGER_SendTxMsgToDbMgr() is faild! [nRet:%d]", nRet);
-        }
-
-        usleep((1000 * pstEventMsg->pstMsgManagerTx->unTxDelay));
+        PrintError("send() is failed!!");
+        nRet = FRAMEWORK_ERROR;
+        return nRet;
+    }
+    else if (nRetSendSize != v2x_tx_pdu_size)
+    {
+        PrintError("send() sent a different number of bytes than expected!!");
+        nRet = FRAMEWORK_ERROR;
+        return nRet;
+    }
+    else
+    {
+        PrintDebug("tx send success (%ld bytes)", nRetSendSize);
     }
 
-    free(v2x_tx_pdu_p);
-    free(db_v2x_tmp_p);
+    nRet = P_MSG_MANAGER_SendTxMsgToDbMgr(pstEventMsg);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_MSG_MANAGER_SendTxMsgToDbMgr() is faild! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    if(v2x_tx_pdu_p != NULL)
+    {
+        free(v2x_tx_pdu_p);
+    }
+
+    if(db_v2x_tmp_p != NULL)
+    {
+        free(db_v2x_tmp_p);
+    }
 
     return nRet;
 }
