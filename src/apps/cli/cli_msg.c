@@ -221,12 +221,13 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         else if(IS_CMD(pcCmd, "tx"))
         {
             TIME_MANAGER_T *pstTimeManager;
-            uint32_t i = 0;
+            uint32_t unTxCount = 0;
+            int i = 0;
 
             stMsgManagerTx.unTxCount = 10;
             stMsgManagerTx.unTxDelay = 100;
 
-            for (i = 0; i < stMsgManagerTx.unTxCount; i++)
+            for (unTxCount = 0; unTxCount < stMsgManagerTx.unTxCount; unTxCount++)
             {
                 stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
                 stDbV2x.eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5_BROADCAST;
@@ -273,7 +274,7 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintDebug("usSwVer[0x%x]", stDbV2x.usSwVer);
                 PrintDebug("ulPayloadLength[%d]", stDbV2x.ulPayloadLength);
                 PrintDebug("cPayload");
-                for(i = 0; i < (uint32_t)CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; i++)
+                for(i = 0; i < CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; i++)
                 {
                     cPayload[i] = rand();
                     printf("[%d:%d] ", i, cPayload[i]);
@@ -290,7 +291,7 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 }
                 else
                 {
-                    PrintDebug("Tx send success [%u/%u]", i + 1, stMsgManagerTx.unTxCount);
+                    PrintDebug("Tx send success [%u/%u]", unTxCount + 1, stMsgManagerTx.unTxCount);
                 }
 
                 usleep((1000 * stMsgManagerTx.unTxDelay));
