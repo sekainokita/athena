@@ -843,8 +843,6 @@ int32_t MSG_MANAGER_Transmit(MSG_MANAGER_TX_T *pstMsgMgrTx, DB_V2X_T *pstDbV2x, 
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
-    PrintWarn("TODO");
-
     if(pstMsgMgrTx == NULL)
     {
         PrintError("pstMsgMgrTx == NULL!!");

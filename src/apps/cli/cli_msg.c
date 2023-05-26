@@ -63,9 +63,11 @@
 						 "  -m total_time    : total exec second (default : 10)\n"                                \
 						 "  -h help\n"
 
+//#define CONFIG_CLI_MSG_DEBUG        (1)
 
 /***************************** Static Variable *******************************/
-
+static MSG_MANAGER_TX_T s_stMsgManagerTx;
+static MSG_MANAGER_RX_T s_stMsgManagerRx;
 
 /***************************** Function Protype ******************************/
 static int P_CLI_MSG_TcpRlogin(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
@@ -184,13 +186,9 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
     int32_t nRet = APP_OK;
     int nFrameWorkRet = FRAMEWORK_ERROR;
     char *pcCmd;
-    MSG_MANAGER_TX_T stMsgManagerTx;
-    MSG_MANAGER_RX_T stMsgManagerRx;
     DB_V2X_T stDbV2x;
     char cPayload[CLI_DB_V2X_DEFAULT_PAYLOAD_LEN];
 
-    (void*)memset(&stMsgManagerTx, 0x00, sizeof(MSG_MANAGER_TX_T));
-    (void*)memset(&stMsgManagerRx, 0x00, sizeof(MSG_MANAGER_RX_T));
     (void*)memset(&stDbV2x, 0x00, sizeof(DB_V2X_T));
     (void*)memset(&cPayload, 0x00, sizeof(cPayload));
 
@@ -224,10 +222,10 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             uint32_t unTxCount = 0;
             int i = 0;
 
-            stMsgManagerTx.unTxCount = 10;
-            stMsgManagerTx.unTxDelay = 100;
+            s_stMsgManagerTx.unTxCount = 10;
+            s_stMsgManagerTx.unTxDelay = 100;
 
-            for (unTxCount = 0; unTxCount < stMsgManagerTx.unTxCount; unTxCount++)
+            for (unTxCount = 0; unTxCount < s_stMsgManagerTx.unTxCount; unTxCount++)
             {
                 stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
                 stDbV2x.eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5_BROADCAST;
@@ -241,9 +239,8 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 }
                 else
                 {
-                    PrintTrace("Get:Current a timestamp is [%ld]", pstTimeManager->ulTimeStamp);
+                    stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
                 }
-                stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
 
                 stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
                 stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
@@ -253,12 +250,17 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
                 stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
                 stDbV2x.usSwVer = APP_VER;
-                stDbV2x.ulPayloadLength = sizeof(cPayload);
+                stDbV2x.ulPayloadLength = CLI_DB_V2X_DEFAULT_PAYLOAD_LEN;
+                for(i = 0; i < (int)stDbV2x.ulPayloadLength; i++)
+                {
+                    cPayload[i] = rand();
+                }
                 stDbV2x.ulPacketCrc32 = 0;
 
+#if defined(CONFIG_CLI_MSG_DEBUG)
                 PrintTrace("========================================================");
-                PrintDebug("unTxCount[%d]", stMsgManagerTx.unTxCount);
-                PrintDebug("unTxDelay[%d ms]", stMsgManagerTx.unTxDelay);
+                PrintDebug("unTxCount[%d]", s_stMsgManagerTx.unTxCount);
+                PrintDebug("unTxDelay[%d ms]", s_stMsgManagerTx.unTxDelay);
 
                 PrintDebug("eDeviceType[%d]", stDbV2x.eDeviceType);
                 PrintDebug("eTeleCommType[%d]", stDbV2x.eTeleCommType);
@@ -283,18 +285,19 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
                 PrintDebug("ulPayloadCrc32[0x%x]", stDbV2x.ulPacketCrc32);
                 PrintTrace("========================================================");
+#endif
 
-                nFrameWorkRet = MSG_MANAGER_Transmit(&stMsgManagerTx, &stDbV2x, (char*)&cPayload);
+                nFrameWorkRet = MSG_MANAGER_Transmit(&s_stMsgManagerTx, &stDbV2x, (char*)&cPayload);
                 if(nFrameWorkRet != FRAMEWORK_OK)
                 {
                     PrintError("MSG_MANAGER_Transmit() is failed! [nRet:%d]", nFrameWorkRet);
                 }
                 else
                 {
-                    PrintDebug("Tx send success [%u/%u], delay[%d ms]", unTxCount + 1, stMsgManagerTx.unTxCount, stMsgManagerTx.unTxDelay);
+                    PrintDebug("Tx Success, Counts[%u/%u], Delay[%d ms]", unTxCount + 1, s_stMsgManagerTx.unTxCount, s_stMsgManagerTx.unTxDelay);
                 }
 
-                usleep((stMsgManagerTx.unTxDelay*USLEEP_MS));
+                usleep((s_stMsgManagerTx.unTxDelay*USLEEP_MS));
             }
         }
         else if(IS_CMD(pcCmd, "open"))
@@ -438,6 +441,9 @@ int32_t CLI_MSG_InitCmds(void)
     {
         PrintError("CLI_CMD_AddCmd() is failed! [nRet:%d]", nRet);
     }
+
+    (void*)memset(&s_stMsgManagerTx, 0x00, sizeof(MSG_MANAGER_TX_T));
+    (void*)memset(&s_stMsgManagerRx, 0x00, sizeof(MSG_MANAGER_RX_T));
 
     return nRet;
 }
