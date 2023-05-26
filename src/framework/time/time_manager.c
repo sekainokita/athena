@@ -64,7 +64,8 @@
 #define TIME_MICRO_SECOND           (1000*1000)
 #define TIME_NANO_SECOND            ((1000*1000)*1000)
 
-#define CONFIG_TIME_MANAGER_DEBUG   (1)
+//#define CONFIG_TIME_MANAGER_DEBUG   (1)
+#define TIME_MANAGER_TIME_MAX_SIZE  (19)
 
 /***************************** Enum and Structure ****************************/
 
@@ -225,16 +226,17 @@ static int32_t P_TIME_MANAGER_DeInit(TIME_MANAGER_T *pstTimeMgr)
     return nRet;
 }
 
+
 int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr)
 {
     int32_t nRet = FRAMEWORK_ERROR;
-#if defined(CONFIG_TIME_MANAGER_DEBUG)
-    struct tm localtime_struct;
-    struct tm * retptr = NULL;
-    const char * time_format_str = "%a %b %-d %H:%M:%S %Y %z";
-    char time_str[100];
-    size_t bytes_written = 0;
-#endif
+    struct tm stLocalTime;
+    struct tm *stRetPtr = NULL;
+    const char *chTimestampFmtStr = "%Y%m%d%H%M%S";
+    char chTimeTempStr[100], chTimeTempNsStr[10];
+    char chTimestampStr[50];
+    size_t unBytesWritten = 0;
+    long lValue;
 
     if(pstTimeMgr == NULL)
     {
@@ -250,13 +252,14 @@ int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr)
 
 #if defined(CONFIG_TIME_MANAGER_DEBUG)
     PrintDebug("timestamp = %li.%09li sec", stCheckEndTime.tv_sec, stCheckEndTime.tv_nsec);
-
-    retptr = localtime_r(&stCheckEndTime.tv_sec, &localtime_struct);
-    if (retptr == NULL)
+#endif
+    stRetPtr = localtime_r(&stCheckEndTime.tv_sec, &stLocalTime);
+    if (stRetPtr == NULL)
     {
         PrintError("localtime_r() is failed to convert to localtime!!");
     }
 
+#if defined(CONFIG_TIME_MANAGER_DEBUG)
     PrintDebug("Human-readable System Time (NTP Epoch)\n"
            "  ns    = %li\n" // ns (0-999999999) from clock_gettime's tv_nsec
            "  sec   = %i\n"  // sec (0-60)
@@ -270,23 +273,31 @@ int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr)
            "  isdst = %i\n"  // daylight saving time
            "\n",
            stCheckEndTime.tv_nsec,
-           localtime_struct.tm_sec,
-           localtime_struct.tm_min,
-           localtime_struct.tm_hour,
-           localtime_struct.tm_mday,
-           localtime_struct.tm_mon,
-           localtime_struct.tm_year,
-           localtime_struct.tm_wday,
-           localtime_struct.tm_yday,
-           localtime_struct.tm_isdst);
+           stLocalTime.tm_sec,
+           stLocalTime.tm_min,
+           stLocalTime.tm_hour,
+           stLocalTime.tm_mday,
+           stLocalTime.tm_mon + 1,
+           stLocalTime.tm_year + 1900,
+           stLocalTime.tm_wday,
+           stLocalTime.tm_yday,
+           stLocalTime.tm_isdst);
+#endif
 
-    bytes_written = strftime(time_str, sizeof(time_str), time_format_str, &localtime_struct);
-    if (bytes_written == 0)
+    unBytesWritten = strftime(chTimeTempStr, sizeof(chTimeTempStr), chTimestampFmtStr, &stLocalTime);
+    if (unBytesWritten == 0)
     {
         PrintError("strftime() is failed to convert `struct tm` to a human-readable time string.");
     }
 
-    PrintTrace("Human-redable system time is [%s]", time_str);
+    sprintf(chTimeTempNsStr, "%09li", stCheckEndTime.tv_nsec);
+    strcat(chTimeTempStr, chTimeTempNsStr);
+    strncpy(chTimestampStr, chTimeTempStr, TIME_MANAGER_TIME_MAX_SIZE);
+    lValue = atol(chTimestampStr);
+    pstTimeMgr->ulTimeStamp = lValue;
+
+#if defined(CONFIG_TIME_MANAGER_DEBUG)
+    PrintTrace("tiemstamp system time is [%lu], [%ld]", lValue, pstTimeMgr->ulTimeStamp);
 #endif
 
     return nRet;

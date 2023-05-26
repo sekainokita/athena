@@ -189,6 +189,10 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             {
                 PrintError("TIME_MANAGER_Get() is failed! [nRet:%d]", nFrameWorkRet);
             }
+            else
+            {
+                PrintTrace("Get:Current a timestamp is [%ld]", pstTimeManager->ulTimeStamp);
+            }
         }
         else
         {
