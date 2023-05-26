@@ -291,7 +291,7 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 }
                 else
                 {
-                    PrintDebug("Tx send success [%u/%u], delay[%d ms]", unTxCount + 1, stMsgManagerTx.unTxCount, stMsgManagerTx.unTxDelay*USLEEP_MS);
+                    PrintDebug("Tx send success [%u/%u], delay[%d ms]", unTxCount + 1, stMsgManagerTx.unTxCount, stMsgManagerTx.unTxDelay);
                 }
 
                 usleep((stMsgManagerTx.unTxDelay*USLEEP_MS));
