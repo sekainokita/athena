@@ -251,9 +251,9 @@ int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr)
     }
 
 #if defined(CONFIG_TIME_MANAGER_DEBUG)
-    PrintDebug("timestamp = %li.%09li sec", stCheckEndTime.tv_sec, stCheckEndTime.tv_nsec);
+    PrintDebug("timestamp = %li.%09li sec", stCurTime.tv_sec, stCurTime.tv_nsec);
 #endif
-    stRetPtr = localtime_r(&stCheckEndTime.tv_sec, &stLocalTime);
+    stRetPtr = localtime_r(&stCurTime.tv_sec, &stLocalTime);
     if (stRetPtr == NULL)
     {
         PrintError("localtime_r() is failed to convert to localtime!!");
@@ -272,7 +272,7 @@ int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr)
            "  yday  = %i\n"  // day in the year (0-365, 1 Jan = 0)
            "  isdst = %i\n"  // daylight saving time
            "\n",
-           stCheckEndTime.tv_nsec,
+           stCurTime.tv_nsec,
            stLocalTime.tm_sec,
            stLocalTime.tm_min,
            stLocalTime.tm_hour,
@@ -290,7 +290,7 @@ int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr)
         PrintError("strftime() is failed to convert `struct tm` to a human-readable time string.");
     }
 
-    sprintf(chTimeTempNsStr, "%09li", stCheckEndTime.tv_nsec);
+    sprintf(chTimeTempNsStr, "%09li", stCurTime.tv_nsec);
     strcat(chTimeTempStr, chTimeTempNsStr);
     strncpy(chTimestampStr, chTimeTempStr, TIME_MANAGER_TIME_MAX_SIZE);
     lValue = atol(chTimestampStr);
