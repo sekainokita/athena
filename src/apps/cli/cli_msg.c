@@ -220,13 +220,27 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         }
         else if(IS_CMD(pcCmd, "tx"))
         {
+            TIME_MANAGER_T *pstTimeManager;
+
             stMsgManagerTx.unTxCount = 10;
             stMsgManagerTx.unTxDelay = 100;
 
             stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
             stDbV2x.eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5_BROADCAST;
             stDbV2x.unDeviceId = CLI_DB_V2X_DEFAULT_DEVICE_ID;
-            stDbV2x.ulTimeStamp = CLI_DB_V2X_DEFAULT_TIMESTAMP;
+
+            pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
+            nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
+            if(nFrameWorkRet != FRAMEWORK_OK)
+            {
+                PrintError("TIME_MANAGER_Get() is failed! [nRet:%d]", nFrameWorkRet);
+            }
+            else
+            {
+                PrintTrace("Get:Current a timestamp is [%ld]", pstTimeManager->ulTimeStamp);
+            }
+            stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
+
             stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
             stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
             stDbV2x.eRegionId = DB_V2X_REGION_ID_SEONGNAM;

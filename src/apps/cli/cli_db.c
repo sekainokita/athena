@@ -95,6 +95,8 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         }
         else if(IS_CMD(pcCmd, "v2x"))
         {
+            TIME_MANAGER_T *pstTimeManager;
+
             stDbManagerWrite.eFileType = DB_MANAGER_FILE_TYPE_TXT;
             stDbManagerWrite.eCommMsgType = DB_MANAGER_COMM_MSG_TYPE_TX;
             stDbManagerWrite.eProc = DB_MANAGER_PROC_WRITE;
@@ -102,7 +104,18 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
             stDbV2x.eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5_BROADCAST;
             stDbV2x.unDeviceId = CLI_DB_V2X_DEFAULT_DEVICE_ID;
-            stDbV2x.ulTimeStamp = CLI_DB_V2X_DEFAULT_TIMESTAMP;
+
+            pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
+            nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
+            if(nFrameWorkRet != FRAMEWORK_OK)
+            {
+                PrintError("TIME_MANAGER_Get() is failed! [nRet:%d]", nFrameWorkRet);
+            }
+            else
+            {
+                PrintTrace("Get:Current a timestamp is [%ld]", pstTimeManager->ulTimeStamp);
+            }
+            stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
             stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
             stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
             stDbV2x.eRegionId = DB_V2X_REGION_ID_SEONGNAM;
@@ -218,7 +231,8 @@ int32_t CLI_DB_InitCmds(void)
                "db test    test db command\n"
                "db v2x     test db v2x sample command (first, set CLI> db open)\n"
                "db open    open a db file\n"
-               "db close   close a db file\n",
+               "db close   close a db file\n"
+               "db time    get a current timestamp\n",
                "");
     if(nRet != APP_OK)
     {
