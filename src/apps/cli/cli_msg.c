@@ -51,11 +51,12 @@
 #include "framework.h"
 
 /***************************** Definition ************************************/
-//#define CONFIG_CLI_MSG_DEBUG        (1)
+#define CONFIG_CLI_MSG_DEBUG        (1)
 
 /***************************** Static Variable *******************************/
 static MSG_MANAGER_TX_T s_stMsgManagerTx;
 static MSG_MANAGER_RX_T s_stMsgManagerRx;
+static DB_V2X_T s_stDbV2x;
 
 /***************************** Function Protype ******************************/
 static int P_CLI_MSG_TcpRlogin(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
@@ -171,16 +172,47 @@ static int P_CLI_MSG_TcpTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
 void P_CLI_MSG_ShowTxSettings(void)
 {
+    PrintTrace("========================================================");
     PrintDebug("unTxCount[%d]", s_stMsgManagerTx.unTxCount);
     PrintDebug("unTxDelay[%d ms]", s_stMsgManagerTx.unTxDelay);
+
+    PrintDebug("eDeviceType[%d]", s_stDbV2x.eDeviceType);
+    PrintDebug("eTeleCommType[%d]", s_stDbV2x.eTeleCommType);
+    PrintDebug("unDeviceId[0x%x]", s_stDbV2x.unDeviceId);
+    PrintDebug("eServiceId[%d]", s_stDbV2x.eServiceId);
+    PrintDebug("eActionType[%d]", s_stDbV2x.eActionType);
+    PrintDebug("eRegionId[%d]", s_stDbV2x.eRegionId);
+    PrintDebug("ePayloadType[%d]", s_stDbV2x.ePayloadType);
+    PrintDebug("eCommId[%d]", s_stDbV2x.eCommId);
+    PrintDebug("usDbVer[%d.%d]", s_stDbV2x.usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, s_stDbV2x.usDbVer & CLI_DB_V2X_MINOR_MASK);
+    PrintDebug("usHwVer[0x%x]", s_stDbV2x.usHwVer);
+    PrintDebug("usSwVer[0x%x]", s_stDbV2x.usSwVer);
+    PrintTrace("========================================================");
 }
 
-int32_t P_CLI_MSG_SetTxSettings(MSG_MANAGER_TX_T *pstMsgManagerTx)
+int32_t P_CLI_MSG_SetSettings(MSG_MANAGER_TX_T *pstMsgManagerTx, DB_V2X_T *pstDbV2x)
 {
     int32_t nRet = APP_ERROR;
 
+    if((pstMsgManagerTx == NULL) || (pstDbV2x == NULL))
+    {
+        PrintError("pstMsgManagerTx, or pstDbV2x is NULL!!");
+    }
+
     s_stMsgManagerTx.unTxCount = pstMsgManagerTx->unTxCount;
     s_stMsgManagerTx.unTxDelay = pstMsgManagerTx->unTxDelay;
+
+    s_stDbV2x.eDeviceType = pstDbV2x->eDeviceType;
+    s_stDbV2x.eTeleCommType = pstDbV2x->eTeleCommType;
+    s_stDbV2x.unDeviceId = pstDbV2x->unDeviceId;
+    s_stDbV2x.eServiceId = pstDbV2x->eServiceId;
+    s_stDbV2x.eActionType = pstDbV2x->eActionType;
+    s_stDbV2x.eRegionId = pstDbV2x->eRegionId;
+    s_stDbV2x.ePayloadType = pstDbV2x->ePayloadType;
+    s_stDbV2x.eCommId = pstDbV2x->eCommId;
+    s_stDbV2x.usDbVer = pstDbV2x->usDbVer;
+    s_stDbV2x.usHwVer = pstDbV2x->usHwVer;
+    s_stDbV2x.usSwVer = pstDbV2x->usSwVer;
 
     (void)P_CLI_MSG_ShowTxSettings();
 
@@ -189,19 +221,32 @@ int32_t P_CLI_MSG_SetTxSettings(MSG_MANAGER_TX_T *pstMsgManagerTx)
     return nRet;
 }
 
-int32_t P_CLI_MSG_SetTxDefaultSettings(void)
+int32_t P_CLI_MSG_SetDefaultSettings(void)
 {
     int32_t nRet = APP_ERROR;
 
     MSG_MANAGER_TX_T stMsgManagerTx;
+    DB_V2X_T stDbV2x;
 
     stMsgManagerTx.unTxCount = 10;
     stMsgManagerTx.unTxDelay = 100;
 
-    nRet = P_CLI_MSG_SetTxSettings(&stMsgManagerTx);
+    stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
+    stDbV2x.eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5_BROADCAST;
+    stDbV2x.unDeviceId = CLI_DB_V2X_DEFAULT_DEVICE_ID;
+    stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
+    stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
+    stDbV2x.eRegionId = DB_V2X_REGION_ID_SEONGNAM;
+    stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_PLATOONING;
+    stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
+    stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
+    stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
+    stDbV2x.usSwVer = APP_VER;
+
+    nRet = P_CLI_MSG_SetSettings(&stMsgManagerTx, &stDbV2x);
     if(nRet != APP_OK)
     {
-        PrintError("P_CLI_MSG_SetTxSettings() is failed! [nRet:%d]", nRet);
+        PrintError("P_CLI_MSG_SetSettings() is failed! [nRet:%d]", nRet);
     }
 
     return nRet;
@@ -212,10 +257,11 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
     int32_t nRet = APP_OK;
     int nFrameWorkRet = FRAMEWORK_ERROR;
     char *pcCmd;
-    DB_V2X_T stDbV2x;
     char cPayload[CLI_DB_V2X_DEFAULT_PAYLOAD_LEN];
+    TIME_MANAGER_T *pstTimeManager;
+    uint32_t unTxCount = 0;
+    int i = 0;
 
-    (void*)memset(&stDbV2x, 0x00, sizeof(DB_V2X_T));
     (void*)memset(&cPayload, 0x00, sizeof(cPayload));
 
     UNUSED(argc);
@@ -244,16 +290,8 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         }
         else if(IS_CMD(pcCmd, "tx"))
         {
-            TIME_MANAGER_T *pstTimeManager;
-            uint32_t unTxCount = 0;
-            int i = 0;
-
             for (unTxCount = 0; unTxCount < s_stMsgManagerTx.unTxCount; unTxCount++)
             {
-                stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
-                stDbV2x.eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5_BROADCAST;
-                stDbV2x.unDeviceId = CLI_DB_V2X_DEFAULT_DEVICE_ID;
-
                 pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
                 nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
                 if(nFrameWorkRet != FRAMEWORK_OK)
@@ -262,42 +300,22 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 }
                 else
                 {
-                    stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
+                    s_stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
                 }
 
-                stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
-                stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
-                stDbV2x.eRegionId = DB_V2X_REGION_ID_SEONGNAM;
-                stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_PLATOONING;
-                stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
-                stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
-                stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
-                stDbV2x.usSwVer = APP_VER;
-                stDbV2x.ulPayloadLength = CLI_DB_V2X_DEFAULT_PAYLOAD_LEN;
-                for(i = 0; i < (int)stDbV2x.ulPayloadLength; i++)
+                s_stDbV2x.ulPayloadLength = CLI_DB_V2X_DEFAULT_PAYLOAD_LEN;
+                for(i = 0; i < (int)s_stDbV2x.ulPayloadLength; i++)
                 {
                     cPayload[i] = rand();
                 }
-                stDbV2x.ulPacketCrc32 = 0;
+                s_stDbV2x.ulPacketCrc32 = 0;
 
 #if defined(CONFIG_CLI_MSG_DEBUG)
-                PrintTrace("========================================================");
-                PrintDebug("unTxCount[%d]", s_stMsgManagerTx.unTxCount);
-                PrintDebug("unTxDelay[%d ms]", s_stMsgManagerTx.unTxDelay);
+                (void)P_CLI_MSG_ShowTxSettings();
 
-                PrintDebug("eDeviceType[%d]", stDbV2x.eDeviceType);
-                PrintDebug("eTeleCommType[%d]", stDbV2x.eTeleCommType);
-                PrintDebug("unDeviceId[0x%x]", stDbV2x.unDeviceId);
-                PrintDebug("ulTimeStamp[%ld]", stDbV2x.ulTimeStamp);
-                PrintDebug("eServiceId[%d]", stDbV2x.eServiceId);
-                PrintDebug("eActionType[%d]", stDbV2x.eActionType);
-                PrintDebug("eRegionId[%d]", stDbV2x.eRegionId);
-                PrintDebug("ePayloadType[%d]", stDbV2x.ePayloadType);
-                PrintDebug("eCommId[%d]", stDbV2x.eCommId);
-                PrintDebug("usDbVer[%d.%d]", stDbV2x.usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, stDbV2x.usDbVer & CLI_DB_V2X_MINOR_MASK);
-                PrintDebug("usHwVer[0x%x]", stDbV2x.usHwVer);
-                PrintDebug("usSwVer[0x%x]", stDbV2x.usSwVer);
-                PrintDebug("ulPayloadLength[%d]", stDbV2x.ulPayloadLength);
+                PrintTrace("========================================================");
+                PrintDebug("ulTimeStamp[%ld]", s_stDbV2x.ulTimeStamp);
+                PrintDebug("ulPayloadLength[%d]", s_stDbV2x.ulPayloadLength);
                 PrintDebug("cPayload");
                 for(i = 0; i < CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; i++)
                 {
@@ -306,11 +324,11 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 }
                 printf("\r\n");
 
-                PrintDebug("ulPayloadCrc32[0x%x]", stDbV2x.ulPacketCrc32);
+                PrintDebug("ulPayloadCrc32[0x%x]", s_stDbV2x.ulPacketCrc32);
                 PrintTrace("========================================================");
 #endif
 
-                nFrameWorkRet = MSG_MANAGER_Transmit(&s_stMsgManagerTx, &stDbV2x, (char*)&cPayload);
+                nFrameWorkRet = MSG_MANAGER_Transmit(&s_stMsgManagerTx, &s_stDbV2x, (char*)&cPayload);
                 if(nFrameWorkRet != FRAMEWORK_OK)
                 {
                     PrintError("MSG_MANAGER_Transmit() is failed! [nRet:%d]", nFrameWorkRet);
@@ -484,11 +502,12 @@ int32_t CLI_MSG_InitCmds(void)
 
     (void*)memset(&s_stMsgManagerTx, 0x00, sizeof(MSG_MANAGER_TX_T));
     (void*)memset(&s_stMsgManagerRx, 0x00, sizeof(MSG_MANAGER_RX_T));
+    (void*)memset(&s_stDbV2x, 0x00, sizeof(DB_V2X_T));
 
-    nRet = P_CLI_MSG_SetTxDefaultSettings();
+    nRet = P_CLI_MSG_SetDefaultSettings();
     if(nRet != APP_OK)
     {
-        PrintError("P_CLI_MSG_SetTxDefaultSettings() is failed! [nRet:%d]", nRet);
+        PrintError("P_CLI_MSG_SetDefaultSettings() is failed! [nRet:%d]", nRet);
     }
 
     return nRet;
