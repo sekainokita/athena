@@ -60,10 +60,6 @@
 #define TIME_MGR_CHECK_NTP          "rdate -p time.bora.net"
 #define TIME_MGR_SYNC_NTP           "sudo rdate -s time.bora.net"
 
-#define TIME_MILLI_SECOND           (1000)
-#define TIME_MICRO_SECOND           (1000*1000)
-#define TIME_NANO_SECOND            ((1000*1000)*1000)
-
 //#define CONFIG_TIME_MANAGER_DEBUG   (1)
 #define TIME_MANAGER_TIME_MAX_SIZE  (19)
 

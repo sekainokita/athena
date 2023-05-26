@@ -51,6 +51,13 @@
 
 /***************************** Definition ************************************/
 #define TIME_MGR_TEST_TIMESTAMP              2023032314344766828
+#define TIME_MILLI_SECOND                    (1000)
+#define TIME_MICRO_SECOND                    (1000*1000)
+#define TIME_NANO_SECOND                     ((1000*1000)*1000)
+
+#define USLEEP_US                            (1)
+#define USLEEP_MS                            (USLEEP_US*1000)
+#define USLEEP_S                             (USLEEP_MS*USLEEP_MS)
 
 /***************************** Enum and Structure ****************************/
 
