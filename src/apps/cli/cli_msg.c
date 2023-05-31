@@ -328,9 +328,12 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         }
         else if(IS_CMD(pcCmd, "tx"))
         {
+            pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
+
+            (void)TIME_MANAGER_CheckLatencyBegin(pstTimeManager);
+
             for (unTxCount = 0; unTxCount < s_stMsgManagerTx.unTxCount; unTxCount++)
             {
-                pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
                 nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
                 if(nFrameWorkRet != FRAMEWORK_OK)
                 {
@@ -378,6 +381,9 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
                 usleep((s_stMsgManagerTx.unTxDelay*USLEEP_MS));
             }
+
+            (void)TIME_MANAGER_CheckLatencyEnd(pstTimeManager);
+            (void)TIME_MANAGER_CheckLatencyTime("Tx Total Time", pstTimeManager);
         }
         else if(IS_CMD(pcCmd, "open"))
         {
