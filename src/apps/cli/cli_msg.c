@@ -421,6 +421,33 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         {
             (void)P_CLI_MSG_ShowTxSettings();
         }
+        else if(IS_CMD(pcCmd, "log"))
+        {
+            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+            if(pcCmd != NULL)
+            {
+                FRAMEWORK_T *pstFramework;
+                pstFramework = APP_GetFrameworkInstance();
+                PrintDebug("pstFramework [0x%p]", pstFramework);
+
+                if(IS_CMD(pcCmd, "on"))
+                {
+                    (void)FRAMEWORK_SetLog(pstFramework, ON);
+                }
+                else if(IS_CMD(pcCmd, "off"))
+                {
+                    (void)FRAMEWORK_SetLog(pstFramework, OFF);
+                }
+                else
+                {
+                    PrintError("msg log on/off, e.g. msg set log on, or msg set log off");
+                }
+            }
+            else
+            {
+                PrintError("msg log on/off, e.g. msg set log on, or msg set log off");
+            }
+        }
         else if(IS_CMD(pcCmd, "set"))
         {
             pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);

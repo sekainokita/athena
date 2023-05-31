@@ -47,6 +47,7 @@
 
 /***************************** Include ***************************************/
 #include "type.h"
+#include "framework.h"
 
 /***************************** Definition ************************************/
 #define APP_VER     0x1
@@ -58,6 +59,9 @@ typedef struct APP {
 
 
 /***************************** Function Protype ******************************/
+FRAMEWORK_T* APP_GetFrameworkInstance(void);
+APP_T* APP_GetAppInstance(void);
+
 int32_t APP_Init(APP_T *pstApp);
 
 #endif	/* _APP_H_ */

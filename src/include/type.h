@@ -87,6 +87,11 @@
 
 #define UNUSED(x)           (void)(x)
 
+#define TRUE                true
+#define FALSE               FALSE
+#define ON                  true
+#define OFF                 false
+
 #define PrintError(fmt, args...) \
     do { \
         printf(COLOR_RED "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \

@@ -93,6 +93,8 @@ static key_t s_MsgRxTaskMsgKey = FRAMEWORK_MSG_RX_TASK_MSG_KEY;
 static pthread_t sh_msgMgrTxTask;
 static pthread_t sh_msgMgrRxTask;
 
+static bool s_bMsgMgrLog = OFF;
+
 /***************************** Function  *************************************/
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -410,39 +412,42 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
 
     memcpy(v2x_tx_pdu_p->v2x_msg.data, db_v2x_tmp_p, db_v2x_tmp_size);
 
-    printf("\nV2X TX PDU>>\n"
-    "  magic_num        : 0x%04X\n"
-    "  ver              : 0x%04X\n"
-    "  e_payload_type   : %d\n"
-    "  psid             : %u\n"
-    "  tx_power         : %d\n"
-    "  e_signer_id      : %d\n"
-    "  e_priority       : %d\n",
-    ntohs(v2x_tx_pdu_p->magic_num),
-    ntohs(v2x_tx_pdu_p->ver),
-    v2x_tx_pdu_p->e_payload_type,
-    ntohl(v2x_tx_pdu_p->psid),
-    v2x_tx_pdu_p->tx_power,
-    v2x_tx_pdu_p->e_signer_id,
-    v2x_tx_pdu_p->e_priority);
+    if(s_bMsgMgrLog == ON)
+    {
+        printf("\nV2X TX PDU>>\n"
+        "  magic_num        : 0x%04X\n"
+        "  ver              : 0x%04X\n"
+        "  e_payload_type   : %d\n"
+        "  psid             : %u\n"
+        "  tx_power         : %d\n"
+        "  e_signer_id      : %d\n"
+        "  e_priority       : %d\n",
+        ntohs(v2x_tx_pdu_p->magic_num),
+        ntohs(v2x_tx_pdu_p->ver),
+        v2x_tx_pdu_p->e_payload_type,
+        ntohl(v2x_tx_pdu_p->psid),
+        v2x_tx_pdu_p->tx_power,
+        v2x_tx_pdu_p->e_signer_id,
+        v2x_tx_pdu_p->e_priority);
 
-    if (e_comm_type_g == eV2XCommType_LTEV2X || e_comm_type_g == eV2XCommType_5GNRV2X)
-    {
-        printf("  u.config_cv2x.transmitter_profile_id : %u\n"
-        "  u.config_cv2x.peer_l2id              : %u\n",
-        ntohl(v2x_tx_pdu_p->u.config_cv2x.transmitter_profile_id),
-        ntohl(v2x_tx_pdu_p->u.config_cv2x.peer_l2id));
-    }
-    else if (e_comm_type_g == eV2XCommType_DSRC)
-    {
-        printf("  u.config_wave.freq                  : %d\n"
-        "  u.config_wave.e_data_rate           : %d\n"
-        "  u.config_wave.e_time_slot           : %d\n"
-        "  u.config_wave.peer_mac_addr         : %s\n",
-        ntohs(v2x_tx_pdu_p->u.config_wave.freq),
-        ntohs(v2x_tx_pdu_p->u.config_wave.e_data_rate),
-        v2x_tx_pdu_p->u.config_wave.e_time_slot,
-        v2x_tx_pdu_p->u.config_wave.peer_mac_addr);
+        if (e_comm_type_g == eV2XCommType_LTEV2X || e_comm_type_g == eV2XCommType_5GNRV2X)
+        {
+            printf("  u.config_cv2x.transmitter_profile_id : %u\n"
+            "  u.config_cv2x.peer_l2id              : %u\n",
+            ntohl(v2x_tx_pdu_p->u.config_cv2x.transmitter_profile_id),
+            ntohl(v2x_tx_pdu_p->u.config_cv2x.peer_l2id));
+        }
+        else if (e_comm_type_g == eV2XCommType_DSRC)
+        {
+            printf("  u.config_wave.freq                  : %d\n"
+            "  u.config_wave.e_data_rate           : %d\n"
+            "  u.config_wave.e_time_slot           : %d\n"
+            "  u.config_wave.peer_mac_addr         : %s\n",
+            ntohs(v2x_tx_pdu_p->u.config_wave.freq),
+            ntohs(v2x_tx_pdu_p->u.config_wave.e_data_rate),
+            v2x_tx_pdu_p->u.config_wave.e_time_slot,
+            v2x_tx_pdu_p->u.config_wave.peer_mac_addr);
+        }
     }
 
     nRetSendSize = send(s_nSocketHandle, v2x_tx_pdu_p, v2x_tx_pdu_size, 0);
@@ -460,7 +465,10 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     }
     else
     {
-        PrintDebug("tx send success (%ld bytes)", nRetSendSize);
+        if(s_bMsgMgrLog == ON)
+        {
+            PrintDebug("tx send success (%ld bytes)", nRetSendSize);
+        }
     }
 
     nRet = P_MSG_MANAGER_SendTxMsgToDbMgr(pstEventMsg);
@@ -906,6 +914,24 @@ int32_t MSG_MANAGER_Receive(MSG_MANAGER_RX_T *pstMsgMgrRx, DB_V2X_T *pstDbV2x, v
     return nRet;
 }
 
+int32_t MSG_MANAGER_SetLog(MSG_MANAGER_T *pstMsgManager)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    if(pstMsgManager == NULL)
+    {
+        PrintError("pstMsgManager == NULL!!");
+        return nRet;
+    }
+
+    s_bMsgMgrLog = pstMsgManager->bLogLevel;
+    PrintTrace("SET:s_bMsgMgrLog [%s]", s_bMsgMgrLog == ON ? "ON" : "OFF");
+
+    nRet = FRAMEWORK_OK;
+
+    return nRet;
+}
+
 int32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -1052,6 +1078,9 @@ int32_t MSG_MANAGER_Init(MSG_MANAGER_T *pstMsgManager)
         PrintError("P_MSG_MANAGER_CreateTask() is failed!!, nRet[%d]", nRet);
         return nRet;
     }
+
+    s_bMsgMgrLog = pstMsgManager->bLogLevel;
+    PrintDebug("s_bMsgMgrLog [%s]", s_bMsgMgrLog == ON ? "ON" : "OFF");
 
     return nRet;
 }

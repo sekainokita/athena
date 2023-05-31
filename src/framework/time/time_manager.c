@@ -73,6 +73,8 @@ static key_t s_timeTaskMsgKey = FRAMEWORK_TIME_TASK_MSG_KEY;
 static pthread_t sh_TimeMgrTask;
 static struct timespec stCurTime, stCheckBeginTime, stCheckEndTime;
 
+static bool s_bTimeMgrLog = OFF;
+
 /***************************** Function  *************************************/
 
 static int32_t P_TIME_MANAGER_SyncNtpServer(TIME_MANAGER_T *pstTimeMgr)
@@ -222,6 +224,23 @@ static int32_t P_TIME_MANAGER_DeInit(TIME_MANAGER_T *pstTimeMgr)
     return nRet;
 }
 
+int32_t TIME_MANAGER_SetLog(TIME_MANAGER_T *pstTimeMgr)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    if(pstTimeMgr == NULL)
+    {
+        PrintError("pstTimeMgr == NULL!!");
+        return nRet;
+    }
+
+    s_bTimeMgrLog = pstTimeMgr->bLogLevel;
+    PrintTrace("SET:s_bTimeMgrLog [%s]", s_bTimeMgrLog == ON ? "ON" : "OFF");
+
+    nRet = FRAMEWORK_OK;
+
+    return nRet;
+}
 
 int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr)
 {
@@ -461,6 +480,8 @@ int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeMgr)
         PrintWarn("P_TIME_MANAGER_SyncNtpServer() is successfully updated.");
     }
 
+    s_bTimeMgrLog = pstTimeMgr->bLogLevel;
+    PrintDebug("s_bTimeMgrLog [%s]", s_bTimeMgrLog == ON ? "ON" : "OFF");
 
     return nRet;
 }

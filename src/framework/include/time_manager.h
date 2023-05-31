@@ -84,6 +84,7 @@ typedef struct TIME_MANAGER_EVENT_MSG {
 typedef struct TIME_MANAGER {
     uint64_t                    ulTimeStamp;
     uint64_t                    ulLatency;
+    bool                        bLogLevel;
     uint32_t                    unReserved;
 } TIME_MANAGER_T;
 
@@ -91,14 +92,19 @@ typedef struct TIME_MANAGER {
 
 int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeMgr);
 int32_t TIME_MANAGER_DeInit(TIME_MANAGER_T *pstTimeMgr);
+
+int32_t TIME_MANAGER_SetLog(TIME_MANAGER_T *pstTimeMgr);
+int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr);
+
 int32_t TIME_MANAGER_Open(TIME_MANAGER_T *pstTimeMgr);
 int32_t TIME_MANAGER_Close(TIME_MANAGER_T *pstTimeMgr);
 int32_t TIME_MANAGER_Start(TIME_MANAGER_T *pstTimeMgr);
 int32_t TIME_MANAGER_Stop(TIME_MANAGER_T *pstTimeMgr);
+
 void TIME_MANAGER_Status(TIME_MANAGER_T *pstTimeMgr);
 int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeMgr);
 int32_t TIME_MANAGER_DeInit(TIME_MANAGER_T *pstTimeMgr);
-int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr);
+
 void TIME_MANAGER_CheckLatencyTime(char *pStr, TIME_MANAGER_T *pstTimeMgr);
 void TIME_MANAGER_CheckLatencyBegin(TIME_MANAGER_T *pstTimeMgr);
 void TIME_MANAGER_CheckLatencyEnd(TIME_MANAGER_T *pstTimeMgr);

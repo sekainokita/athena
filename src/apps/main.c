@@ -60,13 +60,24 @@
 
 /***************************** Static Variable *******************************/
 
+static FRAMEWORK_T s_stFramework;
+static APP_T s_stApp;
 
 /***************************** Function  *************************************/
 
+FRAMEWORK_T* APP_GetFrameworkInstance(void)
+{
+    return &s_stFramework;
+}
+
+APP_T* APP_GetAppInstance(void)
+{
+    return &s_stApp;
+}
+
 int main(int argc, char *argv[])
 {
-    FRAMEWORK_T stFramework;
-    APP_T stApp;
+     ;
     int32_t nRet = APP_ERROR;
 
     UNUSED(argc);
@@ -79,17 +90,20 @@ int main(int argc, char *argv[])
 
     PrintDebug("Start the main");
 
-    (void*)memset(&stFramework, 0x00, sizeof(FRAMEWORK_T));
-    (void*)memset(&stApp, 0x00, sizeof(APP_T));
+    (void*)memset(&s_stFramework, 0x00, sizeof(FRAMEWORK_T));
+    (void*)memset(&s_stApp, 0x00, sizeof(APP_T));
 
-    nRet = FRAMEWORK_Init(&stFramework);
+    PrintDebug("pstFramework [0x%p]", &s_stFramework);
+    PrintDebug("s_stApp [0x%p]", &s_stApp);
+
+    nRet = FRAMEWORK_Init(&s_stFramework);
     if (nRet != FRAMEWORK_OK)
     {
         PrintError("FRAMEWORK_Init() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
-    nRet = APP_Init(&stApp);
+    nRet = APP_Init(&s_stApp);
     if (nRet != APP_OK)
     {
         PrintError("APP_Init() is failed! [nRet:%d]", nRet);

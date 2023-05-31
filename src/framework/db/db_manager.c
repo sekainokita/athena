@@ -71,6 +71,8 @@ static key_t s_MsgRxTaskMsgKey = FRAMEWORK_MSG_RX_TASK_MSG_KEY;
 
 static pthread_t sh_DbMgrTask;
 
+static bool s_bDbMgrLog = OFF;
+
 /***************************** Function  *************************************/
 
 static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
@@ -477,6 +479,24 @@ int32_t DB_MANAGER_Converter(DB_MANAGER_READ_T *pstDbManagerRead, DB_MANAGER_WRI
     return nRet;
 }
 
+int32_t DB_MANAGER_SetLog(DB_MANAGER_T *pstDbManager)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    if(pstDbManager == NULL)
+    {
+        PrintError("pstDbManager == NULL!!");
+        return nRet;
+    }
+
+    s_bDbMgrLog = pstDbManager->bLogLevel;
+    PrintTrace("SET:s_bDbMgrLog [%s]", s_bDbMgrLog == ON ? "ON" : "OFF");
+
+    nRet = FRAMEWORK_OK;
+
+    return nRet;
+}
+
 int32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -685,6 +705,9 @@ int32_t DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
     {
         PrintWarn("is successfully initialized.");
     }
+
+    s_bDbMgrLog = pstDbManager->bLogLevel;
+    PrintDebug("s_bDbMgrLog [%s]", s_bDbMgrLog == ON ? "ON" : "OFF");
 
     return nRet;
 }

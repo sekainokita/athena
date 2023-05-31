@@ -61,6 +61,42 @@ static TIME_MANAGER_T s_stTimeManager;
 
 /***************************** Function  *************************************/
 
+void FRAMEWORK_SetLog(FRAMEWORK_T *pstFramework, bool bOnOff)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    switch(pstFramework->eFrameworkLog)
+    {
+        case FRAMEWORK_LOG_ALL:
+            s_stTimeManager.bLogLevel = bOnOff;
+            nRet = TIME_MANAGER_SetLog(&s_stTimeManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("TIME_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
+            }
+
+            s_stMsgManager.bLogLevel = bOnOff;
+            nRet = MSG_MANAGER_SetLog(&s_stMsgManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("MSG_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
+            }
+
+            s_stDbManager.bLogLevel = bOnOff;
+            nRet = DB_MANAGER_SetLog(&s_stDbManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("DB_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
+            }
+
+            break;
+
+        default:
+            PrintError("Unknown Log Type [%d]", pstFramework->eFrameworkLog);
+            break;
+    }
+}
+
 int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -77,6 +113,8 @@ int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
 
     PrintWarn("is successfully initialized.");
 
+    s_stTimeManager.bLogLevel = OFF;
+
     nRet = TIME_MANAGER_Init(&s_stTimeManager);
     if (nRet != FRAMEWORK_OK)
     {
@@ -88,6 +126,8 @@ int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
 
     (void)TIME_MANAGER_CheckLatencyBegin(&s_stTimeManager);
 
+    s_stMsgManager.bLogLevel = OFF;
+
     nRet = MSG_MANAGER_Init(&s_stMsgManager);
     if (nRet != FRAMEWORK_OK)
     {
@@ -96,6 +136,8 @@ int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
     }
 
     PrintDebug("MSG_MANAGER_Init() is successfully initialized, s_stMsgManager[0x%p]", &s_stMsgManager);
+
+    s_stDbManager.bLogLevel = OFF;
 
     nRet = DB_MANAGER_Init(&s_stDbManager);
     if (nRet != FRAMEWORK_OK)

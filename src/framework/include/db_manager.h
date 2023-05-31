@@ -144,6 +144,7 @@ typedef struct DB_MANAGER_EVENT_MSG {
 */
 typedef struct DB_MANAGER {
     DB_MANAGER_FILE_TYPE_E  eFileType;
+    bool                    bLogLevel;
     uint32_t                unReserved;
 } DB_MANAGER_T;
 
@@ -152,6 +153,8 @@ typedef struct DB_MANAGER {
 int32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void *pPayload);
 int32_t DB_MANAGER_Read(DB_MANAGER_READ_T *pstDbManagerRead, DB_V2X_T *pstDbV2x, void *pPayload);
 int32_t DB_MANAGER_Converter(DB_MANAGER_READ_T *pstDbManagerRead, DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void *pPayload);
+
+int32_t DB_MANAGER_SetLog(DB_MANAGER_T *pstDbManager);
 
 int32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager);
 int32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager);
