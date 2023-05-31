@@ -55,6 +55,48 @@
 
 /***************************** Function  *************************************/
 
+/* Lookup table for reversing 4 bits. */
+static uint8_t s_unReverse4bitTable[] = {
+    0x0, 0x8, 0x4, 0xC,
+    0x2, 0xA, 0x6, 0xE,
+    0x1, 0x9, 0x5, 0xD,
+    0x3, 0xB, 0x7, 0xF
+};
+
+static uint8_t P_CLI_UTIL_ReverseByte(uint8_t unVal)
+{
+    return (s_unReverse4bitTable[unVal & 0xF] << 4) | s_unReverse4bitTable[unVal >> 4];
+}
+
+static uint32_t P_CLI_UTIL_ReverseUint32(uint32_t unVal)
+{
+    return (P_CLI_UTIL_ReverseByte(unVal) << 24) | (P_CLI_UTIL_ReverseByte(unVal >> 8) << 16) | (P_CLI_UTIL_ReverseByte(unVal >> 16) << 8) | P_CLI_UTIL_ReverseByte(unVal >> 24);
+}
+
+uint32_t CLI_UTIL_GetCrc32(const uint8_t* pBuf, size_t unSize)
+{
+    uint32_t unCrc = 0xFFFFFFFF;
+
+    for (size_t i = 0; i < unSize; ++i)
+    {
+        unCrc = unCrc ^ ((uint32_t)P_CLI_UTIL_ReverseByte(pBuf[i]) << 24);
+
+        for (int j = 0; j < 8; ++j)
+        {
+            if (unCrc & 0x80000000)
+            {
+                unCrc = (unCrc << 1) ^ 0x04C11DB7;
+            }
+            else
+            {
+                unCrc <<= 1;
+            }
+        }
+    }
+
+    return P_CLI_UTIL_ReverseUint32(~unCrc);
+}
+
 void CLI_UTIL_Enqueue(CLI_UTIL_QUEUE_T *qb, CLI_UTIL_QUEUE_T *item)
 {
     qb->q_prev->q_next = item;

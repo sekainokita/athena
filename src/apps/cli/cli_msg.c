@@ -346,7 +346,7 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 {
                     cPayload[i] = rand();
                 }
-                s_stDbV2x.ulPacketCrc32 = 0;
+                s_stDbV2x.ulPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, s_stDbV2x.ulPayloadLength);
 
 #if defined(CONFIG_CLI_MSG_DEBUG)
                 (void)P_CLI_MSG_ShowTxSettings();

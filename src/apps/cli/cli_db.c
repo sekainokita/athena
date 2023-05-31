@@ -153,6 +153,8 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             }
             printf("\r\n");
 
+            stDbV2x.ulPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, stDbV2x.ulPayloadLength);
+
             PrintDebug("ulPayloadCrc32[0x%x]", stDbV2x.ulPacketCrc32);
             PrintTrace("========================================================");
 

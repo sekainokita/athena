@@ -65,6 +65,7 @@ typedef struct CLI_UTIL_QUEUE_t
 
 /***************************** Function  *************************************/
 
+uint32_t CLI_UTIL_GetCrc32(const uint8_t* pBuf, size_t unSize);
 void CLI_UTIL_Enqueue(CLI_UTIL_QUEUE_T *, CLI_UTIL_QUEUE_T *);
 void CLI_UTIL_Dequeue(CLI_UTIL_QUEUE_T *);
 CLI_UTIL_QUEUE_T *CLI_UTIL_DequeueNext(CLI_UTIL_QUEUE_T *);
