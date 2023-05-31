@@ -52,6 +52,7 @@
 #include <stdio.h>
 #include "type.h"
 #include "framework.h"
+#include "svc_platooning.h"
 
 #include "app.h"
 #include "cli.h"
@@ -62,6 +63,7 @@
 static FRAMEWORK_T s_stFramework;
 static APP_T s_stApp;
 
+static SVC_PLATOONING_T s_stSvcPlatooning;
 
 /***************************** Function  *************************************/
 
@@ -76,6 +78,13 @@ int32_t APP_Init(APP_T *pstApp)
     }
 
     PrintNotice("Init");
+
+    nRet = SVC_PLATOONING_Init(&s_stSvcPlatooning);
+    if (nRet != APP_OK)
+    {
+        PrintError("SVC_PLATOONING_Init() is failed! [unRet:%d]", nRet);
+        return nRet;
+    }
 
     nRet = CLI_Init();
     if (nRet != APP_OK)
@@ -114,6 +123,7 @@ int main(int argc, char *argv[])
 
     (void*)memset(&s_stFramework, 0x00, sizeof(FRAMEWORK_T));
     (void*)memset(&s_stApp, 0x00, sizeof(APP_T));
+    (void*)memset(&s_stSvcPlatooning, 0x00, sizeof(SVC_PLATOONING_T));
 
     PrintDebug("pstFramework [0x%p]", &s_stFramework);
     PrintDebug("s_stApp [0x%p]", &s_stApp);

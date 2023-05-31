@@ -38,6 +38,7 @@ APP_BIN = app-v2x
 
 SRCS = $(wildcard *.c)
 SRCS += $(wildcard $(APP_CLI_PATH)/*.c)
+SRCS += $(wildcard $(APP_SVC_PLATOONING_PATH)/*.c)
 
 OBJS = ${SRCS:.c=.o}
 

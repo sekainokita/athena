@@ -74,6 +74,7 @@
 #define PLATFORM_OK         0
 #define PLATFORM_ERROR      1
 
+#define APP_MSG_ERR         -1
 #define APP_OK              0
 #define APP_ERROR           1
 #define APP_ERR_INVALID     2

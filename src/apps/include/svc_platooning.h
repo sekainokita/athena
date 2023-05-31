@@ -1,5 +1,5 @@
-#ifndef	_TIME_MANAGER_H_
-#define	_TIME_MANAGER_H_
+#ifndef	_SVC_PLATOONING_H_
+#define	_SVC_PLATOONING_H_
 
 /******************************************************************************
 *
@@ -36,11 +36,11 @@
 /******************************************************************************/
 /**
 *
-* @file time_manager.h
+* @file db_manager.h
 *
 * @note
 *
-* TIME Manager Header
+* DB Manager Header
 *
 ******************************************************************************/
 
@@ -50,66 +50,48 @@
 #include "db_v2x.h"
 
 /***************************** Definition ************************************/
-#define TIME_MGR_TEST_TIMESTAMP              2023032314344766828
-
-#define USLEEP_US                            (1)
-#define USLEEP_MS                            (USLEEP_US*1000)
-#define USLEEP_S                             (USLEEP_MS*USLEEP_MS)
+#define SVC_PLATOONING_TASK_MSG_KEY               (0x230531)
 
 /***************************** Enum and Structure ****************************/
 
 /**
-* @details TIME_MANAGER_SETTING_T
+* @details SVC_PLATOONING_SETTING_T
 * @param unReserved
 */
-typedef struct TIME_MANAGER_SETTING_t {
+typedef struct SVC_PLATOONING_SETTING_t {
     uint32_t                     unReserved;
-} TIME_MANAGER_SETTING_T;
+} SVC_PLATOONING_SETTING_T;
 
 /**
-* @details TIME_MANAGER_EVENT_MSG_T
+* @details SVC_PLATOONING_EVENT_MSG_T
 * @param pstTimeMgrSetting
 */
-typedef struct TIME_MANAGER_EVENT_MSG_t {
-    TIME_MANAGER_SETTING_T      *pstTimeMgrSetting;
-} TIME_MANAGER_EVENT_MSG_T;
-
-typedef struct TIME_MANAGER_LATENCY_t {
-    uint64_t                    ulTime_s;
-    uint64_t                    ulTime_ms;
-} TIME_MANAGER_LATENCY_T;
+typedef struct SVC_PLATOONING_EVENT_MSG_t {
+    SVC_PLATOONING_SETTING_T      *pstSvcPlatooningSetting;
+} SVC_PLATOONING_EVENT_MSG_T;
 
 /**
-* @details TIME_MANAGER_T
+* @details SVC_PLATOONING_T
+* @param bLogLevel
 * @param unReserved
 */
-typedef struct TIME_MANAGER_t {
-    TIME_MANAGER_LATENCY_T      stLatency;
-    uint64_t                    ulTimeStamp;
-    bool                        bLogLevel;
-    uint32_t                    unReserved;
-} TIME_MANAGER_T;
+typedef struct SVC_PLATOONING_t {
+    bool                    bLogLevel;
+    uint32_t                unReserved;
+} SVC_PLATOONING_T;
 
 /***************************** Function Protype ******************************/
 
-int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeMgr);
-int32_t TIME_MANAGER_DeInit(TIME_MANAGER_T *pstTimeMgr);
+int32_t SVC_PLATOONING_SetLog(SVC_PLATOONING_T *pstSvcPlatooning);
 
-int32_t TIME_MANAGER_SetLog(TIME_MANAGER_T *pstTimeMgr);
-int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr);
+int32_t SVC_PLATOONING_Open(SVC_PLATOONING_T *pstSvcPlatooning);
+int32_t SVC_PLATOONING_Close(SVC_PLATOONING_T *pstSvcPlatooning);
+int32_t SVC_PLATOONING_Start(SVC_PLATOONING_T *pstSvcPlatooning);
+int32_t SVC_PLATOONING_Stop(SVC_PLATOONING_T *pstSvcPlatooning);
+int32_t SVC_PLATOONING_Status(SVC_PLATOONING_T *pstSvcPlatooning);
 
-int32_t TIME_MANAGER_Open(TIME_MANAGER_T *pstTimeMgr);
-int32_t TIME_MANAGER_Close(TIME_MANAGER_T *pstTimeMgr);
-int32_t TIME_MANAGER_Start(TIME_MANAGER_T *pstTimeMgr);
-int32_t TIME_MANAGER_Stop(TIME_MANAGER_T *pstTimeMgr);
+int32_t SVC_PLATOONING_Init(SVC_PLATOONING_T *pstSvcPlatooning);
+int32_t SVC_PLATOONING_DeInit(SVC_PLATOONING_T *pstSvcPlatooning);
 
-void TIME_MANAGER_Status(TIME_MANAGER_T *pstTimeMgr);
-int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeMgr);
-int32_t TIME_MANAGER_DeInit(TIME_MANAGER_T *pstTimeMgr);
-
-void TIME_MANAGER_CheckLatencyTime(char *pStr, TIME_MANAGER_T *pstTimeMgr);
-void TIME_MANAGER_CheckLatencyBegin(TIME_MANAGER_T *pstTimeMgr);
-void TIME_MANAGER_CheckLatencyEnd(TIME_MANAGER_T *pstTimeMgr);
-
-#endif	/* _TIME_MANAGER_H_ */
+#endif	/* _SVC_PLATOONING_H_ */
 

@@ -225,7 +225,7 @@ typedef struct MSG_MANAGER_RX_EVENT_MSG_t {
     void                    *pPayload;
 } MSG_MANAGER_RX_EVENT_MSG_T;
 
-typedef struct MSG_MANAGER {
+typedef struct MSG_MANAGER_t {
     char *pchIfaceName;
     bool bLogLevel;
     uint32_t unReserved;

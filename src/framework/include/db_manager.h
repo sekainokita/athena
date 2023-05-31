@@ -107,7 +107,7 @@ typedef enum {
 * @param eProc
 * @param unReserved
 */
-typedef struct DB_MANAGER_WRITE {
+typedef struct DB_MANAGER_WRITE_t {
     DB_MANAGER_FILE_TYPE_E      eFileType;
     DB_MANAGER_COMM_MSG_TYPE_E  eCommMsgType;
     DB_MANAGER_PROC_E           eProc;
@@ -119,7 +119,7 @@ typedef struct DB_MANAGER_WRITE {
 * @param eFileType
 * @param eProc
 */
-typedef struct DB_MANAGER_READ {
+typedef struct DB_MANAGER_READ_t {
     DB_MANAGER_FILE_TYPE_E      eFileType;
     DB_MANAGER_PROC_E           eProc;
     uint32_t                    unReserved;
@@ -131,7 +131,7 @@ typedef struct DB_MANAGER_READ {
 * @param pstDbV2x
 * @param pPayload
 */
-typedef struct DB_MANAGER_EVENT_MSG {
+typedef struct DB_MANAGER_EVENT_MSG_t {
     DB_MANAGER_WRITE_T      *pstDbManagerWrite;
     DB_V2X_T                *pstDbV2x;
     void                    *pPayload;
@@ -142,7 +142,7 @@ typedef struct DB_MANAGER_EVENT_MSG {
 * @param eFileType
 * @param unReserved
 */
-typedef struct DB_MANAGER {
+typedef struct DB_MANAGER_t {
     DB_MANAGER_FILE_TYPE_E  eFileType;
     bool                    bLogLevel;
     uint32_t                unReserved;
