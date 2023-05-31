@@ -200,13 +200,20 @@ static void *P_DB_MANAGER_Task(void *arg)
         {
             if(stEventMsg.pstDbManagerWrite->eProc == DB_MANAGER_PROC_WRITE)
             {
-                PrintDebug("DB_MANAGER_PROC_WRITE [%d]", stEventMsg.pstDbManagerWrite->eProc);
+                if (s_bDbMgrLog == ON)
+                {
+                    PrintDebug("DB_MANAGER_PROC_WRITE [%d]", stEventMsg.pstDbManagerWrite->eProc);
+                }
 
                 switch(stEventMsg.pstDbManagerWrite->eFileType)
                 {
                     case DB_MANAGER_FILE_TYPE_TXT:
                     {
-                        PrintDebug("DB_MANAGER_FILE_TYPE_TXT [%d]", stEventMsg.pstDbManagerWrite->eFileType);
+                        if (s_bDbMgrLog == ON)
+                        {
+                            PrintDebug("DB_MANAGER_FILE_TYPE_TXT [%d]", stEventMsg.pstDbManagerWrite->eFileType);
+                        }
+
                         nRet = P_DB_MANAGER_Write(&stEventMsg);
                         if(nRet != FRAMEWORK_OK)
                         {
@@ -247,8 +254,6 @@ static void *P_DB_MANAGER_Task(void *arg)
                 PrintWarn("unknown processing type [%d]", stEventMsg.pstDbManagerWrite->eProc);
             }
         }
-
-        usleep(1000);
     }
 
     return NULL;
