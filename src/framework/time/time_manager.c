@@ -60,7 +60,6 @@
 #define TIME_MGR_CHECK_NTP          "rdate -p time.bora.net"
 #define TIME_MGR_SYNC_NTP           "sudo rdate -s time.bora.net"
 
-//#define CONFIG_TIME_MANAGER_DEBUG   (1)
 #define TIME_MANAGER_TIME_MAX_SIZE  (19)
 
 /***************************** Enum and Structure ****************************/
@@ -265,39 +264,42 @@ int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr)
         PrintError("clock_gettime() is failed! [nRet:%d]", nRet);
     }
 
-#if defined(CONFIG_TIME_MANAGER_DEBUG)
-    PrintDebug("timestamp = %li.%09li sec", stCurTime.tv_sec, stCurTime.tv_nsec);
-#endif
+    if (s_bTimeMgrLog == ON)
+    {
+        PrintDebug("timestamp = %li.%09li sec", stCurTime.tv_sec, stCurTime.tv_nsec);
+    }
+
     stRetPtr = localtime_r(&stCurTime.tv_sec, &stLocalTime);
     if (stRetPtr == NULL)
     {
         PrintError("localtime_r() is failed to convert to localtime!!");
     }
 
-#if defined(CONFIG_TIME_MANAGER_DEBUG)
-    PrintDebug("Human-readable System Time (NTP Epoch)\n"
-           "  ns    = %li\n" // ns (0-999999999) from clock_gettime's tv_nsec
-           "  sec   = %i\n"  // sec (0-60)
-           "  min   = %i\n"  // min (0-59)
-           "  hour  = %i\n"  // hour (0-23)
-           "  mday  = %i\n"  // day (1-31)
-           "  mon   = %i\n"  // month (0-11)
-           "  year  = %i\n"  // year - 1900
-           "  wday  = %i\n"  // day of the week (0-6, Sunday = 0)
-           "  yday  = %i\n"  // day in the year (0-365, 1 Jan = 0)
-           "  isdst = %i\n"  // daylight saving time
-           "\n",
-           stCurTime.tv_nsec,
-           stLocalTime.tm_sec,
-           stLocalTime.tm_min,
-           stLocalTime.tm_hour,
-           stLocalTime.tm_mday,
-           stLocalTime.tm_mon + 1,
-           stLocalTime.tm_year + 1900,
-           stLocalTime.tm_wday,
-           stLocalTime.tm_yday,
-           stLocalTime.tm_isdst);
-#endif
+    if (s_bTimeMgrLog == ON)
+    {
+        PrintDebug("Human-readable System Time (NTP Epoch)\n"
+               "  ns    = %li\n" // ns (0-999999999) from clock_gettime's tv_nsec
+               "  sec   = %i\n"  // sec (0-60)
+               "  min   = %i\n"  // min (0-59)
+               "  hour  = %i\n"  // hour (0-23)
+               "  mday  = %i\n"  // day (1-31)
+               "  mon   = %i\n"  // month (0-11)
+               "  year  = %i\n"  // year - 1900
+               "  wday  = %i\n"  // day of the week (0-6, Sunday = 0)
+               "  yday  = %i\n"  // day in the year (0-365, 1 Jan = 0)
+               "  isdst = %i\n"  // daylight saving time
+               "\n",
+               stCurTime.tv_nsec,
+               stLocalTime.tm_sec,
+               stLocalTime.tm_min,
+               stLocalTime.tm_hour,
+               stLocalTime.tm_mday,
+               stLocalTime.tm_mon + 1,
+               stLocalTime.tm_year + 1900,
+               stLocalTime.tm_wday,
+               stLocalTime.tm_yday,
+               stLocalTime.tm_isdst);
+    }
 
     unBytesWritten = strftime(chTimeTempStr, sizeof(chTimeTempStr), chTimestampFmtStr, &stLocalTime);
     if (unBytesWritten == 0)
@@ -311,9 +313,10 @@ int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr)
     lValue = atol(chTimestampStr);
     pstTimeMgr->ulTimeStamp = lValue;
 
-#if defined(CONFIG_TIME_MANAGER_DEBUG)
-    PrintTrace("tiemstamp system time is [%lu], [%ld]", lValue, pstTimeMgr->ulTimeStamp);
-#endif
+    if (s_bTimeMgrLog == ON)
+    {
+        PrintTrace("tiemstamp system time is [%lu], [%ld]", lValue, pstTimeMgr->ulTimeStamp);
+    }
 
     return nRet;
 }
@@ -404,11 +407,13 @@ void TIME_MANAGER_CheckLatencyTime(char *pStr, TIME_MANAGER_T *pstTimeMgr)
         PrintError("pstTimeMgr == NULL!!");
     }
 
-#if defined(CONFIG_TIME_MANAGER_DEBUG)
-    PrintDebug("[%s] Time (Nano): %ld", pStr, pstTimeMgr->ulLatency);
-    PrintDebug("[%s] Time (Micro): %lf", pStr, (double)pstTimeMgr->ulLatency/TIME_MILLI_SECOND);
-    PrintDebug("[%s] Time (Milli): %lf", pStr, (double)pstTimeMgr->ulLatency/TIME_MICRO_SECOND);
-#endif
+    if (s_bTimeMgrLog == ON)
+    {
+        PrintDebug("[%s] Time (Nano): %ld", pStr, pstTimeMgr->ulLatency);
+        PrintDebug("[%s] Time (Micro): %lf", pStr, (double)pstTimeMgr->ulLatency/TIME_MILLI_SECOND);
+        PrintDebug("[%s] Time (Milli): %lf", pStr, (double)pstTimeMgr->ulLatency/TIME_MICRO_SECOND);
+    }
+
     PrintDebug("[%s] Time (Second): %lf", pStr, (double)pstTimeMgr->ulLatency/TIME_NANO_SECOND);
 
 }
