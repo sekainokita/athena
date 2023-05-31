@@ -563,6 +563,134 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                         PrintError("CMD_2 is NULL, see. msg help");
                     }
                 }
+                else if(IS_CMD(pcCmd, "device"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        uint32_t unTmp = 0;
+                        unTmp = (uint32_t)atoi(pcCmd);
+
+                        PrintDebug("SET:Device Type[%d]", unTmp);
+                        stDbV2x.eDeviceType = unTmp;
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
+                else if(IS_CMD(pcCmd, "tele_comm"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        uint32_t unTmp = 0;
+                        unTmp = (uint32_t)atoi(pcCmd);
+
+                        PrintDebug("SET:Telecommunication Type[%d]", unTmp);
+                        stDbV2x.eTeleCommType = unTmp;
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
+                else if(IS_CMD(pcCmd, "device_id"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        uint32_t unTmp = 0;
+                        unTmp = (uint32_t)atoi(pcCmd);
+
+                        PrintDebug("SET:Device ID[%d]", unTmp);
+                        stDbV2x.unDeviceId = unTmp;
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
+                else if(IS_CMD(pcCmd, "service_id"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        uint32_t unTmp = 0;
+                        unTmp = (uint32_t)atoi(pcCmd);
+
+                        PrintDebug("SET:Service ID[%d]", unTmp);
+                        stDbV2x.eServiceId = unTmp;
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
+                else if(IS_CMD(pcCmd, "action"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        uint32_t unTmp = 0;
+                        unTmp = (uint32_t)atoi(pcCmd);
+
+                        PrintDebug("SET:Action Type[%d]", unTmp);
+                        stDbV2x.eActionType = unTmp;
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
+                else if(IS_CMD(pcCmd, "region"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        uint32_t unTmp = 0;
+                        unTmp = (uint32_t)atoi(pcCmd);
+
+                        PrintDebug("SET:Region ID[%d]", unTmp);
+                        stDbV2x.eRegionId = unTmp;
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
+                else if(IS_CMD(pcCmd, "pl_type"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        uint32_t unTmp = 0;
+                        unTmp = (uint32_t)atoi(pcCmd);
+
+                        PrintDebug("SET:Payload Type[%d]", unTmp);
+                        stDbV2x.ePayloadType = unTmp;
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
+                else if(IS_CMD(pcCmd, "comm_id"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        uint32_t unTmp = 0;
+                        unTmp = (uint32_t)atoi(pcCmd);
+
+                        PrintDebug("SET:Communication ID[%d]", unTmp);
+                        stDbV2x.eCommId = unTmp;
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
                 else
                 {
                     PrintError("CMD_2 is NULL, see. msg help");
@@ -677,7 +805,15 @@ int32_t CLI_MSG_InitCmds(void)
                "  priority        0~7 (default : 0)\n"
                "  tx_count        total tx count (default : 100)\n"
                "  tx_delay        msec delay (default : 100)\n"
-               "msg get              get setting values of v2x structures\n",
+               "  device          [0]UNKNOWN, [1]OBU, [2]RSU, [3]Contrl Center\n"
+               "  tele_comm       [0]UNKNOWN, [1]4G,  [20]5G Uu, [30]5G PC5, [31]5G PC5 Broadcast, [32]5G PC5 Unicast, [33]5G PC5 Multicast, [34]5G PC5 Groupcast\n"
+               "  device_id       device id (default : 23040015)\n"
+               "  service_id      [0]UNKONWN, [1]Platooning(default), [2]Sensor sharing, [3]Remote driving, [4]Advanced driving\n"
+               "  action          [0]UNKONWN, [1]Request(default), [2]Response\n"
+               "  region          [0]UNKONWN, [1]Seoul, [2]Sejong, [3]Busan, [4]Daegeon, [5]Incheon, [6]Daegu, [7]Daegu KIAPI PG, [8]Cheongju, [9]Seongnam(default)\n"
+               "  pl_type         [0]UNKONWN, [1]SAE J2735 BSM, [2]SAE J2736 PVD, [201]Platooning(default), [301]Sensor sharing, [401]Remote driving, [501] Advanced driving\n"
+               "  comm_id         [0]UNKONWN, [1]V2V(default), [2]V2I,...\n"
+               "msg get           get setting values of v2x structures\n",
                "");
     if(nRet != APP_OK)
     {
