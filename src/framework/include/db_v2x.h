@@ -81,6 +81,13 @@
 #define CLI_DB_V2X_MAJOR_SHIFT                  (4)
 #define CLI_DB_V2X_MINOR_MASK                   (0x0F)
 
+
+/**
+* @details DB V2X PSID
+* @param DB_V2X_PSID           5G-NR-V2X Application PSID
+*/
+#define DB_V2X_PSID                             (5271)
+
 /***************************** Enum and Structure ****************************/
 /**
 * @details DB V2X Device Type

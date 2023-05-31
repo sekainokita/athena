@@ -173,20 +173,37 @@ static int P_CLI_MSG_TcpTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 void P_CLI_MSG_ShowTxSettings(void)
 {
     PrintTrace("========================================================");
-    PrintDebug("unTxCount[%d]", s_stMsgManagerTx.unTxCount);
-    PrintDebug("unTxDelay[%d ms]", s_stMsgManagerTx.unTxDelay);
+    PrintWarn("MSG V2X Tx Info>");
+    PrintDebug(" ePayloadType[%d]", s_stMsgManagerTx.ePayloadType);
+    PrintDebug(" eCommType[%d]", s_stMsgManagerTx.eCommType);
+    PrintDebug(" eSignId[%d]", s_stMsgManagerTx.eSignId);
+    PrintDebug(" eV2xFreq[%d]", s_stMsgManagerTx.eV2xFreq);
+    PrintDebug(" eV2xDataRate[%d]", s_stMsgManagerTx.eV2xDataRate);
+    PrintDebug(" eV2xTimeSlot[%d]", s_stMsgManagerTx.eV2xTimeSlot);
+    PrintDebug(" unPsid[%d]", s_stMsgManagerTx.unPsid);
+    PrintDebug(" nTxPower[%d]", s_stMsgManagerTx.nTxPower);
+    PrintDebug(" unTxCount[%d]", s_stMsgManagerTx.unTxCount);
+    PrintDebug(" unTxDelay[%d ms]", s_stMsgManagerTx.unTxDelay);
+    for(int i = 0; i < MSG_MANAGER_MAC_LENGTH; i++)
+    {
+        PrintDebug(" unTxCount[i:%d][0x%x]", i, s_stMsgManagerTx.uchPeerMacAddr[i]);
+    }
 
-    PrintDebug("eDeviceType[%d]", s_stDbV2x.eDeviceType);
-    PrintDebug("eTeleCommType[%d]", s_stDbV2x.eTeleCommType);
-    PrintDebug("unDeviceId[0x%x]", s_stDbV2x.unDeviceId);
-    PrintDebug("eServiceId[%d]", s_stDbV2x.eServiceId);
-    PrintDebug("eActionType[%d]", s_stDbV2x.eActionType);
-    PrintDebug("eRegionId[%d]", s_stDbV2x.eRegionId);
-    PrintDebug("ePayloadType[%d]", s_stDbV2x.ePayloadType);
-    PrintDebug("eCommId[%d]", s_stDbV2x.eCommId);
-    PrintDebug("usDbVer[%d.%d]", s_stDbV2x.usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, s_stDbV2x.usDbVer & CLI_DB_V2X_MINOR_MASK);
-    PrintDebug("usHwVer[0x%x]", s_stDbV2x.usHwVer);
-    PrintDebug("usSwVer[0x%x]", s_stDbV2x.usSwVer);
+    PrintDebug(" unTransmitterProfileId[%d]", s_stMsgManagerTx.unTransmitterProfileId);
+    PrintDebug(" unPeerL2Id[%d]", s_stMsgManagerTx.unPeerL2Id);
+
+    PrintWarn("DB V2X Info>");
+    PrintDebug(" eDeviceType[%d]", s_stDbV2x.eDeviceType);
+    PrintDebug(" eTeleCommType[%d]", s_stDbV2x.eTeleCommType);
+    PrintDebug(" unDeviceId[0x%x]", s_stDbV2x.unDeviceId);
+    PrintDebug(" eServiceId[%d]", s_stDbV2x.eServiceId);
+    PrintDebug(" eActionType[%d]", s_stDbV2x.eActionType);
+    PrintDebug(" eRegionId[%d]", s_stDbV2x.eRegionId);
+    PrintDebug(" ePayloadType[%d]", s_stDbV2x.ePayloadType);
+    PrintDebug(" eCommId[%d]", s_stDbV2x.eCommId);
+    PrintDebug(" usDbVer[%d.%d]", s_stDbV2x.usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, s_stDbV2x.usDbVer & CLI_DB_V2X_MINOR_MASK);
+    PrintDebug(" usHwVer[0x%x]", s_stDbV2x.usHwVer);
+    PrintDebug(" usSwVer[0x%x]", s_stDbV2x.usSwVer);
     PrintTrace("========================================================");
 }
 
@@ -199,22 +216,25 @@ int32_t P_CLI_MSG_SetSettings(MSG_MANAGER_TX_T *pstMsgManagerTx, DB_V2X_T *pstDb
         PrintError("pstMsgManagerTx, or pstDbV2x is NULL!!");
     }
 
-    s_stMsgManagerTx.unTxCount = pstMsgManagerTx->unTxCount;
-    s_stMsgManagerTx.unTxDelay = pstMsgManagerTx->unTxDelay;
+    memcpy(&s_stMsgManagerTx, pstMsgManagerTx, sizeof(MSG_MANAGER_TX_T));
+    memcpy(&s_stDbV2x, pstDbV2x, sizeof(DB_V2X_T));
 
-    s_stDbV2x.eDeviceType = pstDbV2x->eDeviceType;
-    s_stDbV2x.eTeleCommType = pstDbV2x->eTeleCommType;
-    s_stDbV2x.unDeviceId = pstDbV2x->unDeviceId;
-    s_stDbV2x.eServiceId = pstDbV2x->eServiceId;
-    s_stDbV2x.eActionType = pstDbV2x->eActionType;
-    s_stDbV2x.eRegionId = pstDbV2x->eRegionId;
-    s_stDbV2x.ePayloadType = pstDbV2x->ePayloadType;
-    s_stDbV2x.eCommId = pstDbV2x->eCommId;
-    s_stDbV2x.usDbVer = pstDbV2x->usDbVer;
-    s_stDbV2x.usHwVer = pstDbV2x->usHwVer;
-    s_stDbV2x.usSwVer = pstDbV2x->usSwVer;
+    nRet = APP_OK;
 
-    (void)P_CLI_MSG_ShowTxSettings();
+    return nRet;
+}
+
+int32_t P_CLI_MSG_GetSettings(MSG_MANAGER_TX_T *pstMsgManagerTx, DB_V2X_T *pstDbV2x)
+{
+    int32_t nRet = APP_ERROR;
+
+    if((pstMsgManagerTx == NULL) || (pstDbV2x == NULL))
+    {
+        PrintError("pstMsgManagerTx, or pstDbV2x is NULL!!");
+    }
+
+    memcpy(pstMsgManagerTx, &s_stMsgManagerTx, sizeof(MSG_MANAGER_TX_T));
+    memcpy(pstDbV2x, &s_stDbV2x, sizeof(DB_V2X_T));
 
     nRet = APP_OK;
 
@@ -228,8 +248,24 @@ int32_t P_CLI_MSG_SetDefaultSettings(void)
     MSG_MANAGER_TX_T stMsgManagerTx;
     DB_V2X_T stDbV2x;
 
+    stMsgManagerTx.ePayloadType = MSG_MANAGER_PAYLOAD_TYPE_RAW;
+    stMsgManagerTx.eCommType = MSG_MANAGER_COMM_TYPE_5GNRV2X;
+    stMsgManagerTx.eSignId = MSG_MANAGER_SIGN_ID_UNSECURED;
+    stMsgManagerTx.eV2xFreq = MSG_MANAGER_V2X_FREQ_5900;
+    stMsgManagerTx.eV2xDataRate = MSG_MANAGER_V2X_DATA_RATE_6MBPS;
+    stMsgManagerTx.eV2xTimeSlot = MSG_MANAGER_V2X_TIME_SLOT_CONTINUOUS;
+    stMsgManagerTx.unPsid = DB_V2X_PSID;
+    stMsgManagerTx.nTxPower = MSG_MANAGER_V2X_TX_POWER;
     stMsgManagerTx.unTxCount = 10;
     stMsgManagerTx.unTxDelay = 100;
+
+    for(int i = 0; i < MSG_MANAGER_MAC_LENGTH; i++)
+    {
+        stMsgManagerTx.uchPeerMacAddr[i] = 0xFF;
+    }
+
+    stMsgManagerTx.unTransmitterProfileId = MSG_MANAGER_V2X_TX_PROFILE_ID;
+    stMsgManagerTx.unPeerL2Id = MSG_MANAGER_V2X_TX_PEER_L2_ID;
 
     stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
     stDbV2x.eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5_BROADCAST;
@@ -387,6 +423,51 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         {
             PrintInfo();
         }
+        else if(IS_CMD(pcCmd, "get"))
+        {
+            MSG_MANAGER_TX_T stMsgManagerTx;
+            DB_V2X_T stDbV2x;
+
+            nRet = P_CLI_MSG_GetSettings(&stMsgManagerTx, &stDbV2x);
+            if (nRet != APP_OK)
+            {
+                PrintError("P_CLI_MSG_GetSettings() is failed! [nRet:%d]", nRet);
+            }
+
+            PrintTrace("========================================================");
+            PrintWarn("MSG V2X Tx Info>");
+            PrintDebug(" ePayloadType[%d]", stMsgManagerTx.ePayloadType);
+            PrintDebug(" eCommType[%d]", stMsgManagerTx.eCommType);
+            PrintDebug(" eSignId[%d]", stMsgManagerTx.eSignId);
+            PrintDebug(" eV2xFreq[%d]", stMsgManagerTx.eV2xFreq);
+            PrintDebug(" eV2xDataRate[%d]", stMsgManagerTx.eV2xDataRate);
+            PrintDebug(" eV2xTimeSlot[%d]", stMsgManagerTx.eV2xTimeSlot);
+            PrintDebug(" unPsid[%d]", stMsgManagerTx.unPsid);
+            PrintDebug(" nTxPower[%d]", stMsgManagerTx.nTxPower);
+            PrintDebug(" unTxCount[%d]", stMsgManagerTx.unTxCount);
+            PrintDebug(" unTxDelay[%d ms]", stMsgManagerTx.unTxDelay);
+            for(int i = 0; i < MSG_MANAGER_MAC_LENGTH; i++)
+            {
+                PrintDebug(" unTxCount[i:%d][0x%x]", i, stMsgManagerTx.uchPeerMacAddr[i]);
+            }
+
+            PrintDebug(" unTransmitterProfileId[%d]", stMsgManagerTx.unTransmitterProfileId);
+            PrintDebug(" unPeerL2Id[%d]", stMsgManagerTx.unPeerL2Id);
+
+            PrintWarn("DB V2X Info>");
+            PrintDebug(" eDeviceType[%d]", stDbV2x.eDeviceType);
+            PrintDebug(" eTeleCommType[%d]", stDbV2x.eTeleCommType);
+            PrintDebug(" unDeviceId[0x%x]", stDbV2x.unDeviceId);
+            PrintDebug(" eServiceId[%d]", stDbV2x.eServiceId);
+            PrintDebug(" eActionType[%d]", stDbV2x.eActionType);
+            PrintDebug(" eRegionId[%d]", stDbV2x.eRegionId);
+            PrintDebug(" ePayloadType[%d]", stDbV2x.ePayloadType);
+            PrintDebug(" eCommId[%d]", stDbV2x.eCommId);
+            PrintDebug(" usDbVer[%d.%d]", stDbV2x.usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, s_stDbV2x.usDbVer & CLI_DB_V2X_MINOR_MASK);
+            PrintDebug(" usHwVer[0x%x]", stDbV2x.usHwVer);
+            PrintDebug(" usSwVer[0x%x]", stDbV2x.usSwVer);
+            PrintTrace("========================================================");
+        }
         else
         {
             return CLI_CMD_Showusage(pstCmd);
@@ -422,7 +503,8 @@ int32_t CLI_MSG_InitCmds(void)
                "  -r priority        0~7 (default : 0)\n"
                "  -c tx_count        total tx count (default : 100)\n"
                "  -d tx_delay        msec delay (default : 100)\n"
-               "  -m total_time      total exec second (default : 10)\n",
+               "  -m total_time      total exec second (default : 10)\n"
+               "msg get              get setting values of v2x structures\n",
                "");
     if(nRet != APP_OK)
     {

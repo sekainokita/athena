@@ -50,7 +50,17 @@
 #include "db_v2x.h"
 
 /***************************** Definition ************************************/
-#define MSG_MANAGER_MAC_LENGTH  (6)
+#define MSG_MANAGER_MAC_LENGTH          (6)
+
+ /**
+* @details V2X TX POWER
+* @param MSG_MANAGER_V2X_TX_POWER       DSRC (0 ~ 23, Korea 20), C-V2X (-30~23)
+*/
+#define MSG_MANAGER_V2X_TX_POWER        (20)
+
+#define MSG_MANAGER_V2X_TX_PROFILE_ID   (100)
+#define MSG_MANAGER_V2X_TX_PEER_L2_ID   (0)
+
 /***************************** Enum and Structure ****************************/
 
 /**
@@ -152,6 +162,22 @@ typedef enum
 	MSG_MANAGER_V2X_TIME_SLOT_MAX,
 } MSG_MANAGER_V2X_TIME_SLOT_E;
 
+/**
+* @details MSG_MANAGER_TX_T
+* @param ePayloadType
+* @param eCommType
+* @param eSignId
+* @param eV2xFreq
+* @param eV2xDataRate
+* @param eV2xTimeSlot
+* @param unPsid
+* @param nTxPower
+* @param unTxCount
+* @param uchPeerMacAddr
+* @param unTransmitterProfileId
+* @param unPeerL2Id
+* @param unReserved
+*/
 typedef struct MSG_MANAGER_TX_t {
     MSG_MANAGER_PAYLOAD_TYPE_E ePayloadType;
     MSG_MANAGER_COMM_TYPE_E eCommType;
@@ -163,10 +189,10 @@ typedef struct MSG_MANAGER_TX_t {
     int8_t nTxPower;
     uint32_t unTxCount;
     uint32_t unTxDelay;
-    uint32_t unReserved;
     uint8_t uchPeerMacAddr[MSG_MANAGER_MAC_LENGTH];
     uint32_t unTransmitterProfileId;
     uint32_t unPeerL2Id;
+    uint32_t unReserved;
 } MSG_MANAGER_TX_T;
 
 typedef struct MSG_MANAGER_RX_t {
