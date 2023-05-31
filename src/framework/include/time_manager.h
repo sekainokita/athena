@@ -51,9 +51,6 @@
 
 /***************************** Definition ************************************/
 #define TIME_MGR_TEST_TIMESTAMP              2023032314344766828
-#define TIME_MILLI_SECOND                    (1000)
-#define TIME_MICRO_SECOND                    (1000*1000)
-#define TIME_NANO_SECOND                     ((1000*1000)*1000)
 
 #define USLEEP_US                            (1)
 #define USLEEP_MS                            (USLEEP_US*1000)
@@ -77,13 +74,18 @@ typedef struct TIME_MANAGER_EVENT_MSG {
     TIME_MANAGER_SETTING_T      *pstTimeMgrSetting;
 } TIME_MANAGER_EVENT_MSG_T;
 
+typedef struct TIME_MANAGER_LATENCY_t {
+    uint64_t                    ulTime_s;
+    uint64_t                    ulTime_ms;
+} TIME_MANAGER_LATENCY_T;
+
 /**
 * @details TIME_MANAGER_T
 * @param unReserved
 */
-typedef struct TIME_MANAGER {
+typedef struct TIME_MANAGER_t {
+    TIME_MANAGER_LATENCY_T      stLatency;
     uint64_t                    ulTimeStamp;
-    uint64_t                    ulLatency;
     bool                        bLogLevel;
     uint32_t                    unReserved;
 } TIME_MANAGER_T;

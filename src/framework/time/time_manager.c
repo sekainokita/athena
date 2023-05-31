@@ -409,12 +409,10 @@ void TIME_MANAGER_CheckLatencyTime(char *pStr, TIME_MANAGER_T *pstTimeMgr)
 
     if (s_bTimeMgrLog == ON)
     {
-        PrintDebug("[%s] Time (Nano): %ld", pStr, pstTimeMgr->ulLatency);
-        PrintDebug("[%s] Time (Micro): %lf", pStr, (double)pstTimeMgr->ulLatency/TIME_MILLI_SECOND);
-        PrintDebug("[%s] Time (Milli): %lf", pStr, (double)pstTimeMgr->ulLatency/TIME_MICRO_SECOND);
+
     }
 
-    PrintDebug("[%s] Time (Second): %lf", pStr, (double)pstTimeMgr->ulLatency/TIME_NANO_SECOND);
+    PrintDebug("[%s] Latency %ld.%lds", pStr, pstTimeMgr->stLatency.ulTime_s, pstTimeMgr->stLatency.ulTime_ms);
 
 }
 
@@ -451,7 +449,8 @@ void TIME_MANAGER_CheckLatencyEnd(TIME_MANAGER_T *pstTimeMgr)
         PrintError("clock_gettime() is failed! [nRet:%d]", nRet);
     }
 
-    pstTimeMgr->ulLatency = (stCheckEndTime.tv_sec - stCheckBeginTime.tv_sec) + (stCheckEndTime.tv_nsec - stCheckBeginTime.tv_nsec);
+    pstTimeMgr->stLatency.ulTime_s = (stCheckEndTime.tv_sec - stCheckBeginTime.tv_sec);
+    pstTimeMgr->stLatency.ulTime_ms = ((stCheckEndTime.tv_nsec - stCheckBeginTime.tv_nsec)/(1000*1000));
 }
 
 int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeMgr)
