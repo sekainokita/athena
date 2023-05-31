@@ -49,12 +49,18 @@
 ******************************************************************************/
 
 /***************************** Include ***************************************/
+#include <stdio.h>
+#include "type.h"
+#include "framework.h"
+
 #include "app.h"
 #include "cli.h"
 /***************************** Definition ************************************/
 
 
 /***************************** Static Variable *******************************/
+static FRAMEWORK_T s_stFramework;
+static APP_T s_stApp;
 
 
 /***************************** Function  *************************************/
@@ -75,6 +81,54 @@ int32_t APP_Init(APP_T *pstApp)
     if (nRet != APP_OK)
     {
         PrintError("CLI_Init() is failed! [unRet:%d]", nRet);
+        return nRet;
+    }
+
+    return nRet;
+}
+
+FRAMEWORK_T* APP_GetFrameworkInstance(void)
+{
+    return &s_stFramework;
+}
+
+APP_T* APP_GetAppInstance(void)
+{
+    return &s_stApp;
+}
+
+int main(int argc, char *argv[])
+{
+     ;
+    int32_t nRet = APP_ERROR;
+
+    UNUSED(argc);
+
+    if(argv == NULL)
+    {
+        PrintError("argv == NULL!!");
+        return nRet;
+    }
+
+    PrintDebug("Start the main");
+
+    (void*)memset(&s_stFramework, 0x00, sizeof(FRAMEWORK_T));
+    (void*)memset(&s_stApp, 0x00, sizeof(APP_T));
+
+    PrintDebug("pstFramework [0x%p]", &s_stFramework);
+    PrintDebug("s_stApp [0x%p]", &s_stApp);
+
+    nRet = FRAMEWORK_Init(&s_stFramework);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("FRAMEWORK_Init() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    nRet = APP_Init(&s_stApp);
+    if (nRet != APP_OK)
+    {
+        PrintError("APP_Init() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
