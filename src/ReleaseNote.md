@@ -1,3 +1,16 @@
+# Release Note
+ - Release Note of V2X Software
 
-#define CLI_DB_V2X_DEFAULT_HW_VER                 0x0001 // OBU rel. 230518
-#define CLI_DB_V2X_DEFAULT_SW_VER                 0x0001 // OBU rel. 230523
+# Version 1.0
+ - Implemented and Supported
+   + DB V2X VER (1.5)
+   + OBU HW VER (0x0001, rel. 230518)
+   + OBU SW VER (0x0001, rel. 230523)
+   + Implement frameworks of DB, MSG, Timer
+   + Implement the CLI (Command Line Interface) Application
+   + Calculate CRC32 of Payload
+   + Porting Chemtronics SDK
+   + Support the Doxygen
+ - Next Version will be supported
+   + Platooning services
+   + Platooning headers
