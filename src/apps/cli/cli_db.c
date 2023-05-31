@@ -123,7 +123,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
             stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
             stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
-            stDbV2x.usSwVer = APP_VER;
+            stDbV2x.usSwVer = CLI_DB_V2X_DEFAULT_SW_VER;
             stDbV2x.ulPayloadLength = sizeof(cPayload);
             stDbV2x.ulPacketCrc32 = 0;
 
@@ -142,8 +142,8 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             PrintDebug("ePayloadType[%d]", stDbV2x.ePayloadType);
             PrintDebug("eCommId[%d]", stDbV2x.eCommId);
             PrintDebug("usDbVer[%d.%d]", stDbV2x.usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, stDbV2x.usDbVer & CLI_DB_V2X_MINOR_MASK);
-            PrintDebug("usHwVer[0x%x]", stDbV2x.usHwVer);
-            PrintDebug("usSwVer[0x%x]", stDbV2x.usSwVer);
+            PrintDebug("usHwVer[%d]", stDbV2x.usHwVer);
+            PrintDebug("usSwVer[%d]", stDbV2x.usSwVer);
             PrintDebug("ulPayloadLength[%d]", stDbV2x.ulPayloadLength);
             PrintDebug("cPayload");
             for(int i=0; i < CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; i++)

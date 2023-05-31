@@ -178,6 +178,7 @@ void P_CLI_MSG_ShowTxSettings(void)
     PrintDebug(" eCommType[%d]", s_stMsgManagerTx.eCommType);
     PrintDebug(" eSignId[%d]", s_stMsgManagerTx.eSignId);
     PrintDebug(" eV2xFreq[%d]", s_stMsgManagerTx.eV2xFreq);
+    PrintDebug(" ePriority[%d]", s_stMsgManagerTx.ePriority);
     PrintDebug(" eV2xDataRate[%d]", s_stMsgManagerTx.eV2xDataRate);
     PrintDebug(" eV2xTimeSlot[%d]", s_stMsgManagerTx.eV2xTimeSlot);
     PrintDebug(" unPsid[%d]", s_stMsgManagerTx.unPsid);
@@ -252,6 +253,7 @@ int32_t P_CLI_MSG_SetDefaultSettings(void)
     stMsgManagerTx.eCommType = MSG_MANAGER_COMM_TYPE_5GNRV2X;
     stMsgManagerTx.eSignId = MSG_MANAGER_SIGN_ID_UNSECURED;
     stMsgManagerTx.eV2xFreq = MSG_MANAGER_V2X_FREQ_5900;
+    stMsgManagerTx.ePriority = MSG_MANAGER_PRIORITY_CV2X_PPPP_0;
     stMsgManagerTx.eV2xDataRate = MSG_MANAGER_V2X_DATA_RATE_6MBPS;
     stMsgManagerTx.eV2xTimeSlot = MSG_MANAGER_V2X_TIME_SLOT_CONTINUOUS;
     stMsgManagerTx.unPsid = DB_V2X_PSID;
@@ -277,7 +279,7 @@ int32_t P_CLI_MSG_SetDefaultSettings(void)
     stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
     stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
     stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
-    stDbV2x.usSwVer = APP_VER;
+    stDbV2x.usSwVer = CLI_DB_V2X_DEFAULT_SW_VER;
 
     nRet = P_CLI_MSG_SetSettings(&stMsgManagerTx, &stDbV2x);
     if(nRet != APP_OK)
@@ -421,7 +423,178 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         }
         else if(IS_CMD(pcCmd, "set"))
         {
-            PrintInfo();
+            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+            if(pcCmd != NULL)
+            {
+                MSG_MANAGER_TX_T stMsgManagerTx;
+                DB_V2X_T stDbV2x;
+
+                nRet = P_CLI_MSG_GetSettings(&stMsgManagerTx, &stDbV2x);
+                if (nRet != APP_OK)
+                {
+                    PrintError("P_CLI_MSG_GetSettings() is failed! [nRet:%d]", nRet);
+                }
+
+                if(IS_CMD(pcCmd, "payload"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        uint32_t unTmp = 0;
+                        unTmp = (uint32_t)atoi(pcCmd);
+
+                        PrintDebug("SET:payload type[%d]", unTmp);
+                        stMsgManagerTx.ePayloadType = unTmp;
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
+                else if(IS_CMD(pcCmd, "psid"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        uint32_t unTmp = 0;
+                        unTmp = (uint32_t)atoi(pcCmd);
+
+                        PrintDebug("SET:psid[%d]", unTmp);
+                        stMsgManagerTx.unPsid = unTmp;
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
+                else if(IS_CMD(pcCmd, "comm"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        uint32_t unTmp = 0;
+                        unTmp = (uint32_t)atoi(pcCmd);
+
+                        PrintDebug("SET:communication type[%d]", unTmp);
+                        stMsgManagerTx.eCommType = unTmp;
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
+                else if(IS_CMD(pcCmd, "tx_power"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        int8_t unTmp = 0;
+                        unTmp = (int8_t)atoi(pcCmd);
+
+                        PrintDebug("SET:Tx Power dBm[%d]", unTmp);
+                        stMsgManagerTx.nTxPower = unTmp;
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
+                else if(IS_CMD(pcCmd, "sign"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        uint32_t unTmp = 0;
+                        unTmp = (uint32_t)atoi(pcCmd);
+
+                        PrintDebug("SET:Signer ID[%d]", unTmp);
+                        stMsgManagerTx.eSignId = unTmp;
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
+                else if(IS_CMD(pcCmd, "priority"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        uint32_t unTmp = 0;
+                        unTmp = (uint32_t)atoi(pcCmd);
+
+                        PrintDebug("SET:Priority[%d]", unTmp);
+                        stMsgManagerTx.ePriority = unTmp;
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
+                else if(IS_CMD(pcCmd, "tx_count"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        uint32_t unTmp = 0;
+                        unTmp = (uint32_t)atoi(pcCmd);
+
+                        PrintDebug("SET:Tx Count[%d]", unTmp);
+                        stMsgManagerTx.unTxCount = unTmp;
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
+                else if(IS_CMD(pcCmd, "tx_delay"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        uint32_t unTmp = 0;
+                        unTmp = (uint32_t)atoi(pcCmd);
+
+                        PrintDebug("SET:Tx delay[%d]", unTmp);
+                        stMsgManagerTx.unTxDelay = unTmp;
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
+                else
+                {
+                    PrintError("CMD_2 is NULL, see. msg help");
+                }
+
+                nRet = P_CLI_MSG_SetSettings(&stMsgManagerTx, &stDbV2x);
+                if (nRet != APP_OK)
+                {
+                    PrintError("P_CLI_MSG_GetSettings() is failed! [nRet:%d]", nRet);
+                }
+            }
+            else
+            {
+                PrintError("msg set [OPTIONS]\n"
+                           "  payload         [0]Raw, [1]EncodedbyJ2735, [2]eITSK00130, [3]eKETI, [4]eETRI, (default : Raw)\n"
+                           "  psid            <decimal number> (default : 32)\n"
+                           "  comm            [0] UNKNOWN, [1]DSRC, [2]LTEV2X, [3]5GNRV2X, (default : 5GNRV2X)\n"
+                           "  tx_power        tx power dbm (default : 20)\n"
+                           "  sign            [0]UNSECURED, [1]CERTIFICATE, [2]DIGEST, [3]ALTERNATE (default : UNSECURED)\n"
+                           "  priority        0~7 (default : 0)\n"
+                           "  tx_count        total tx count (default : 100)\n"
+                           "  tx_delay        msec delay (default : 100)\n"
+                           "  device          [0]UNKNOWN, [1]OBU, [2]RSU, [3]Contrl Center\n"
+                           "  tele_comm       [0]UNKNOWN, [1]4G,  [20]5G Uu, [30]5G PC5, [31]5G PC5 Broadcast, [32]5G PC5 Unicast, [33]5G PC5 Multicast, [34]5G PC5 Groupcast\n"
+                           "  device_id       device id (default : 23040015)\n"
+                           "  service_id      [0]UNKONWN, [1]Platooning(default), [2]Sensor sharing, [3]Remote driving, [4]Advanced driving\n"
+                           "  action          [0]UNKONWN, [1]Request(default), [2]Response\n"
+                           "  region          [0]UNKONWN, [1]Seoul, [2]Sejong, [3]Busan, [4]Daegeon, [5]Incheon, [6]Daegu, [7]Daegu KIAPI PG, [8]Cheongju, [9]Seongnam(default)\n"
+                           "  pl_type         [0]UNKONWN, [1]SAE J2735 BSM, [2]SAE J2736 PVD, [201]Platooning(default), [301]Sensor sharing, [401]Remote driving, [501] Advanced driving\n"
+                           "  comm_id         [0]UNKONWN, [1]V2V(default), [2]V2I,...\n"
+                           "");
+            }
         }
         else if(IS_CMD(pcCmd, "get"))
         {
@@ -440,6 +613,7 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             PrintDebug(" eCommType[%d]", stMsgManagerTx.eCommType);
             PrintDebug(" eSignId[%d]", stMsgManagerTx.eSignId);
             PrintDebug(" eV2xFreq[%d]", stMsgManagerTx.eV2xFreq);
+            PrintDebug(" ePriority[%d]", stMsgManagerTx.ePriority);
             PrintDebug(" eV2xDataRate[%d]", stMsgManagerTx.eV2xDataRate);
             PrintDebug(" eV2xTimeSlot[%d]", stMsgManagerTx.eV2xTimeSlot);
             PrintDebug(" unPsid[%d]", stMsgManagerTx.unPsid);
@@ -495,15 +669,14 @@ int32_t CLI_MSG_InitCmds(void)
                "msg close            close message protocol\n"
                "msg tx               send v2x messages to v2x devices (set msg open before)\n"
                "msg set [OPTIONS]\n"
-               "  -o payload_type    Raw, EncodedbyJ2735, eITSK00130, eKETI, eETRI (default : Raw)\n"
-               "  -p psid            <decimal number> (default : 32)\n"
-               "  -y comm_type       DSRC, LTEV2X, 5GNRV2X (default : 5GNRV2X)\n"
-               "  -t tx_port         tx port dbm (default : 20)\n"
-               "  -s signer_id       UNSECURED, CERTIFICATE, DIGEST, ALTERNATE (default : UNSECURED)\n"
-               "  -r priority        0~7 (default : 0)\n"
-               "  -c tx_count        total tx count (default : 100)\n"
-               "  -d tx_delay        msec delay (default : 100)\n"
-               "  -m total_time      total exec second (default : 10)\n"
+               "  payload         [0]Raw, [1]EncodedbyJ2735, [2]eITSK00130, [3]eKETI, [4]eETRI, (default : Raw)\n"
+               "  psid            <decimal number> (default : 32)\n"
+               "  comm            [0] UNKNOWN, [1]DSRC, [2]LTEV2X, [3]5GNRV2X, (default : 5GNRV2X)\n"
+               "  tx_power        tx port dbm (default : 20)\n"
+               "  sign            [0]UNSECURED, [1]CERTIFICATE, [2]DIGEST, [3]ALTERNATE (default : UNSECURED)\n"
+               "  priority        0~7 (default : 0)\n"
+               "  tx_count        total tx count (default : 100)\n"
+               "  tx_delay        msec delay (default : 100)\n"
                "msg get              get setting values of v2x structures\n",
                "");
     if(nRet != APP_OK)

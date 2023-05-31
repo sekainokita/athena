@@ -183,6 +183,7 @@ typedef struct MSG_MANAGER_TX_t {
     MSG_MANAGER_COMM_TYPE_E eCommType;
     MSG_MANAGER_SIGN_ID_E eSignId;
     MSG_MANAGER_V2X_FREQ_E eV2xFreq;
+    MSG_MANAGER_PRIORITY_E ePriority;
     MSG_MANAGER_V2X_DATA_RATE_E eV2xDataRate;
     MSG_MANAGER_V2X_TIME_SLOT_E eV2xTimeSlot;
     uint32_t unPsid;
