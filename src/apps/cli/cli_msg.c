@@ -51,7 +51,7 @@
 #include "framework.h"
 
 /***************************** Definition ************************************/
-#define CONFIG_CLI_MSG_DEBUG        (1)
+//#define CONFIG_CLI_MSG_DEBUG        (1)
 
 /***************************** Static Variable *******************************/
 static MSG_MANAGER_TX_T s_stMsgManagerTx;
@@ -711,8 +711,8 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                            "  tx_power        tx power dbm (default : 20)\n"
                            "  sign            [0]UNSECURED, [1]CERTIFICATE, [2]DIGEST, [3]ALTERNATE (default : UNSECURED)\n"
                            "  priority        0~7 (default : 0)\n"
-                           "  tx_count        total tx count (default : 100)\n"
-                           "  tx_delay        msec delay (default : 100)\n"
+                           "  tx_count        total tx count (default : 10)\n"
+                           "  tx_delay        msec delay (default : 100ms)\n"
                            "  device          [0]UNKNOWN, [1]OBU, [2]RSU, [3]Contrl Center\n"
                            "  tele_comm       [0]UNKNOWN, [1]4G,  [20]5G Uu, [30]5G PC5, [31]5G PC5 Broadcast, [32]5G PC5 Unicast, [33]5G PC5 Multicast, [34]5G PC5 Groupcast\n"
                            "  device_id       device id (default : 23040015)\n"
@@ -803,8 +803,8 @@ int32_t CLI_MSG_InitCmds(void)
                "  tx_power        tx port dbm (default : 20)\n"
                "  sign            [0]UNSECURED, [1]CERTIFICATE, [2]DIGEST, [3]ALTERNATE (default : UNSECURED)\n"
                "  priority        0~7 (default : 0)\n"
-               "  tx_count        total tx count (default : 100)\n"
-               "  tx_delay        msec delay (default : 100)\n"
+               "  tx_count        total tx count (default : 10)\n"
+               "  tx_delay        msec delay (default : 100ms)\n"
                "  device          [0]UNKNOWN, [1]OBU, [2]RSU, [3]Contrl Center\n"
                "  tele_comm       [0]UNKNOWN, [1]4G,  [20]5G Uu, [30]5G PC5, [31]5G PC5 Broadcast, [32]5G PC5 Unicast, [33]5G PC5 Multicast, [34]5G PC5 Groupcast\n"
                "  device_id       device id (default : 23040015)\n"
