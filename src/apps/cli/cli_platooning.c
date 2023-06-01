@@ -76,7 +76,45 @@ static int P_CLI_PLATOONING(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
     }
     else
     {
-        PrintWarn("TODO");
+        if(IS_CMD(pcCmd, "test"))
+        {
+            for(int i = 0; i < CMD_MAX; i++)
+            {
+                pcCmd = CLI_CMD_GetArg(pstCmd, i);
+                PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
+            }
+        }
+        else if(IS_CMD(pcCmd, "sce"))
+        {
+            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+            if(pcCmd != NULL)
+            {
+                if(IS_CMD(pcCmd, "base"))
+                {
+                    PrintTrace("Open DB");
+
+                    PrintTrace("Connect V2X Device (OBU/RSU)");
+
+                    PrintTrace("Setting Parameters");
+
+                    PrintTrace("Start V2X Tx/Rx Communication of Platooing");
+
+                    PrintTrace("Save DB");
+                }
+                else
+                {
+                    return CLI_CMD_Showusage(pstCmd);
+                }
+            }
+            else
+            {
+                return CLI_CMD_Showusage(pstCmd);
+            }
+        }
+        else
+        {
+            return CLI_CMD_Showusage(pstCmd);
+        }
     }
 
 	return nRet;
@@ -94,8 +132,10 @@ int32_t CLI_PLATOONING_InitCmds(void)
                "Without any parameters, the 'pt' show a description\n"
                "of available commands. For more details on a command, type and enter 'pt'\n"
                "and the command name.\n\n"
-               "pt test    test pt command\n"
-               "pt info    get a status platooning\n",
+               "pt test           test pt command\n"
+               "pt sce [OPTIONS]\n"
+               "  base            start a base platooing scenario\n"
+               "pt info           get a status platooning\n",
                "");
     if(nRet != APP_OK)
     {
