@@ -97,7 +97,7 @@ static int P_CLI_PLATOONING(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
                     PrintTrace("Setting Parameters");
 
-                    PrintTrace("Start V2X Tx/Rx Communication of Platooing");
+                    PrintTrace("Start V2X Tx/Rx Communication of Platooning");
 
                     PrintTrace("Save DB");
                 }
