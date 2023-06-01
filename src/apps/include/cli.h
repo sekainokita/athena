@@ -52,6 +52,7 @@
 #include "cli_util.h"
 #include "cli_msg.h"
 #include "cli_db.h"
+#include "cli_platooning.h"
 
 /***************************** Definition ************************************/
 //#define CONFIG_CLI_DEBUG (1)

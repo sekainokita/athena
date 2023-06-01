@@ -292,6 +292,12 @@ static int32_t P_CLI_InitCmd(void)
         PrintError("CLI_DB_InitCmds() is failed! [nRet:%d]", nRet);
     }
 
+    nRet = CLI_PLATOONING_InitCmds();
+    if (nRet != APP_OK)
+    {
+        PrintError("CLI_PLATOONING_InitCmds() is failed! [nRet:%d]", nRet);
+    }
+
     return nRet;
 }
 
