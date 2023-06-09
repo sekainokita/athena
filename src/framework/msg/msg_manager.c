@@ -115,8 +115,9 @@ uint8_t peer_mac_addr_g[MAC_EUI48_LEN] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 uint32_t transmitter_profile_id_g = 100;
 uint32_t peer_l2id_g = 0;
 
+#if defined(CONFIG_TEMP_OBU_TEST)
 uint32_t delay_time_sec_g = 10;
-
+#endif
 
 static void P_MSG_NABAGER_PrintMsgInfo(int msqid)
 {
@@ -497,29 +498,22 @@ static int32_t P_MSG_MANAGER_RxSendTxMsgToDbMgr(MSG_MANAGER_RX_EVENT_MSG_T *pstE
 
     uint8_t buf[4096] = {0};
     int n = -1;
-    time_t start_time = time(NULL);
 
     UNUSED(pstEventMsg);
 
     while (1)
     {
-        time_t current_time = time(NULL);
-        if (current_time - start_time >= delay_time_sec_g)
-        {
-            break;
-        }
-
         n = recv(s_nSocketHandle, buf, sizeof(buf), 0);
         if (n < 0)
         {
-            if (errno != EAGAIN && errno != EWOULDBLOCK)
+            if ((errno != EAGAIN) && (errno != EWOULDBLOCK))
             {
                 PrintError("recv() is failed!!");
-                break;
+                usleep(1000*1000);
             }
             else
             {
-                usleep(10000);
+                usleep(10*1000);
                 continue;
             }
         }
@@ -575,20 +569,10 @@ static void *P_MSG_MANAGER_RxTask(void *arg)
 
     memset(&stEventMsg, 0, sizeof(MSG_MANAGER_RX_EVENT_MSG_T));
 
-    while (1)
+    nRet = P_MSG_MANAGER_RxSendTxMsgToDbMgr(&stEventMsg);
+    if (nRet != FRAMEWORK_OK)
     {
-        if(msgrcv(s_nMsgRxTaskMsgId, &stEventMsg, sizeof(MSG_MANAGER_RX_EVENT_MSG_T), 0, MSG_NOERROR) == FRAMEWORK_MSG_ERR)
-        {
-            PrintError("msgrcv() is failed!");
-        }
-        else
-        {
-            nRet = P_MSG_MANAGER_RxSendTxMsgToDbMgr(&stEventMsg);
-            if (nRet != FRAMEWORK_OK)
-            {
-                PrintError("P_MSG_MANAGER_RxSendTxMsgToDbMgr() is faild! [nRet:%d]", nRet);
-            }
-        }
+        PrintError("P_MSG_MANAGER_RxSendTxMsgToDbMgr() is faild! [nRet:%d]", nRet);
     }
 
     return NULL;

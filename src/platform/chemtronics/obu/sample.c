@@ -45,7 +45,7 @@
 #if defined(CONFIG_KETI_PLATFORM)
 #define CONFIG_CUSTOM_ETH (1)
 #if defined(CONFIG_CUSTOM_ETH)
-#define ETH_DEV "eth1"
+#define ETH_DEV "enp0s5"
 #endif
 #endif
 
