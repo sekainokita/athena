@@ -253,7 +253,7 @@ typedef enum {
 * @param ulPayloadLength    payload length
 * @param ulPacketCrc32      header + payload crc32
 */
-typedef struct DB_V2X {
+typedef struct DB_V2X_t {
     DB_V2X_DEVICE_TYPE_E                        eDeviceType;
     DB_V2X_TELECOMMUNICATION_TYPE_E             eTeleCommType;
     uint32_t                                    unDeviceId;
