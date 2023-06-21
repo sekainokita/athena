@@ -446,12 +446,12 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 }
                 else
                 {
-                    PrintError("msg log on/off, e.g. msg set log on, or msg set log off");
+                    PrintError("msg log on/off, e.g. msg log on, or msg log off");
                 }
             }
             else
             {
-                PrintError("msg log on/off, e.g. msg set log on, or msg set log off");
+                PrintError("msg log on/off, e.g. msg log on, or msg log off");
             }
         }
         else if(IS_CMD(pcCmd, "set"))
@@ -826,6 +826,7 @@ int32_t CLI_MSG_InitCmds(void)
                "and the command name."
                "and the command name.\n\n"
                "msg info          show msg settings\n"
+               "msg log [opt]     show msg debug logs (on/off)\n"
                "msg open [eth#]   open message protocol, connect TCP server, e.g. msg open eth1\n"
                "msg close         close message protocol\n"
                "msg tx            send v2x messages to v2x devices (set msg open before)\n"
