@@ -60,27 +60,27 @@ static char *P_CLI_CMD_RemoveQuotedArg(CLI_UTIL_QUEUE_T *head, CLI_CMD_TOKEN_T *
 
 static char *P_CLI_CMD_Strdup(char *str)
 {
-	char *buf;
+    char *buf;
 
-	buf = malloc(strlen(str) + 1);
-	if (buf)
-	{
-		strcpy(buf, str);
-	}
+    buf = malloc(strlen(str) + 1);
+    if (buf)
+    {
+        strcpy(buf, str);
+    }
 
-	return buf;
+    return buf;
 }
 
 static inline int P_CLI_CMD_IsWhiteSpace(CLI_CMD_TOKEN_T *t)
 {
-	return (strchr(s_cSpaceChars, t->token) != NULL);
+    return (strchr(s_cSpaceChars, t->token) != NULL);
 }
 
 char *CLI_CMD_CheckName(CLI_CMDLINE_T *cmd, int swidx)
 {
-	if ((swidx < 0) || (swidx >= cmd->swc))
+    if ((swidx < 0) || (swidx >= cmd->swc))
     {
-		return NULL;
+        return NULL;
     }
 
 	return cmd->swv[swidx].swname;
@@ -296,6 +296,12 @@ int32_t CLI_CMD_AddCmd(char *command, int (*func)(CLI_CMDLINE_T *, int argc, cha
 			if (!cmd)
 			{
 				cmd = malloc(sizeof(CLI_CMD_T) + strlen(&(t->token)) + 1);
+                if(cmd == NULL)
+                {
+                    PrintError("malloc() is failed! [NULL]");
+                    return nRet;
+                }
+
 				memset(cmd, 0, sizeof(CLI_CMD_T));
 				cmd->cmdword = (char *)(cmd + 1);
 				strcpy(cmd->cmdword, &(t->token));
@@ -614,7 +620,12 @@ int32_t CLI_CMD_Init(void)
 {
     int32_t nRet = APP_ERROR;
 
-	sh_pstCliCmd = malloc(sizeof(CLI_CMD_T)); /* Todo add handle free */
+    sh_pstCliCmd = malloc(sizeof(CLI_CMD_T)); /* Todo add handle free */
+    if(sh_pstCliCmd == NULL)
+    {
+        PrintError("malloc() is failed! [NULL]");
+        return nRet;
+    }
 
 	nRet = CLI_CMD_AddCmd("help",
 			   P_CLI_CMD_Help,
@@ -757,7 +768,13 @@ CLI_LIST_T *CLI_CMD_Read(CLI_UTIL_QUEUE_T *head)
 		return NULL;
     }
 
-	cmd = (CLI_LIST_T *)malloc(sizeof(CLI_LIST_T));
+    cmd = (CLI_LIST_T *)malloc(sizeof(CLI_LIST_T));
+    if(cmd == NULL)
+    {
+        PrintError("malloc() is failed! [NULL]");
+        return NULL;
+    }
+
 	CLI_UTIL_InitQueue(&(cmd->head));
 
 	while ((t = (CLI_CMD_TOKEN_T *)CLI_UTIL_DequeueNext(head)))
@@ -811,7 +828,14 @@ CLI_LIST_T *CLI_CMD_Read(CLI_UTIL_QUEUE_T *head)
 
 static CLI_CMD_TOKEN_T *P_CLI_CMD_MakeToken(char *str, int len)
 {
-	CLI_CMD_TOKEN_T *t = (CLI_CMD_TOKEN_T *)malloc(sizeof(CLI_CMD_TOKEN_T) + len);
+    CLI_CMD_TOKEN_T *t = NULL;
+
+    t = (CLI_CMD_TOKEN_T *)malloc(sizeof(CLI_CMD_TOKEN_T) + len);
+    if(t == NULL)
+    {
+        PrintError("malloc() is failed! [NULL]");
+        return NULL;
+    }
 
 	memcpy(&(t->token), str, len);
 	(&(t->token))[len] = 0;
@@ -956,9 +980,11 @@ static char *P_CLI_CMD_RemoveQuotedArg(CLI_UTIL_QUEUE_T *head, CLI_CMD_TOKEN_T *
 		maxlen += strlen(&(((CLI_CMD_TOKEN_T *)q)->token));
 	}
 
-	dest = malloc(maxlen + 1);
-	if (!dest)
-		return NULL;
+    dest = malloc(maxlen + 1);
+    if (dest == NULL)
+    {
+        return NULL;
+    }
 
 	*dest = '\0';
 

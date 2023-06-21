@@ -347,6 +347,11 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     DB_V2X_T *db_v2x_tmp_p = NULL;
 
     v2x_tx_pdu_p = malloc(v2x_tx_pdu_size);
+    if(v2x_tx_pdu_p == NULL)
+    {
+        PrintError("malloc() is failed! [NULL]");
+        return nRet;
+    }
 
     memset(v2x_tx_pdu_p, 0, sizeof(Ext_V2X_TxPDU_t));
 
@@ -375,6 +380,12 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     v2x_tx_pdu_p->v2x_msg.length = htons(db_v2x_tmp_size);
 
     db_v2x_tmp_p = malloc(db_v2x_tmp_size);
+    if(db_v2x_tmp_p == NULL)
+    {
+        PrintError("malloc() is failed! [NULL]");
+        return nRet;
+    }
+
     memset(db_v2x_tmp_p, 0, db_v2x_tmp_size);
 
     db_v2x_tmp_p->eDeviceType = htons(pstEventMsg->pstDbV2x->eDeviceType);
@@ -506,19 +517,24 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
 {
     int32_t nRet = FRAMEWORK_ERROR;
     uint8_t buf[4096] = {0};
-    int n = -1;
+    int nRecvLen = -1;
     int db_v2x_tmp_size = sizeof(DB_V2X_T) + SAMPLE_V2X_MSG_LEN;
     int v2x_tx_pdu_size = sizeof(Ext_V2X_TxPDU_t) + db_v2x_tmp_size;
     Ext_V2X_TxPDU_t *v2x_tx_pdu_p = NULL;
 
     v2x_tx_pdu_p = malloc(v2x_tx_pdu_size);
+    if(v2x_tx_pdu_p == NULL)
+    {
+        PrintError("malloc() is failed! [NULL]");
+        return nRet;
+    }
 
     memset(v2x_tx_pdu_p, 0, sizeof(Ext_V2X_TxPDU_t));
 
     while (1)
     {
-        n = recv(s_nSocketHandle, buf, sizeof(buf), 0);
-        if (n < 0)
+        nRecvLen = recv(s_nSocketHandle, buf, sizeof(buf), 0);
+        if (nRecvLen < 0)
         {
             if ((errno != EAGAIN) && (errno != EWOULDBLOCK))
             {
@@ -535,14 +551,14 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
                 continue;
             }
         }
-        else if (n == 0)
+        else if (nRecvLen == 0)
         {
             PrintError("recv()'s connection is closed by peer!!");
             break;
         }
         else
         {
-            PrintDebug("recv() is success : len[%u]", n);
+            PrintDebug("recv() is success : nRecvLen[%u], v2x_tx_pdu_size[%u]", nRecvLen, v2x_tx_pdu_size);
 
             memcpy(v2x_tx_pdu_p, buf, v2x_tx_pdu_size);
 
@@ -638,6 +654,11 @@ void *MSG_MANAGER_TxTask(void *arg)
     MSG_MANAGER_TX_EVENT_MSG_T stEventMsg;
 
     v2x_tx_pdu_p = malloc(v2x_tx_pdu_size);
+    if(v2x_tx_pdu_p == NULL)
+    {
+        PrintError("malloc() is failed! [NULL]");
+        return NULL;
+    }
 
     memset(&stEventMsg, 0, sizeof(MSG_MANAGER_TX_T));
     memset(v2x_tx_pdu_p, 0, sizeof(Ext_V2X_TxPDU_t));
@@ -668,6 +689,12 @@ void *MSG_MANAGER_TxTask(void *arg)
     v2x_tx_pdu_p->v2x_msg.length = htons(db_v2x_tmp_size);
 
     db_v2x_tmp_p = malloc(db_v2x_tmp_size);
+    if(db_v2x_tmp_p == NULL)
+    {
+        PrintError("malloc() is failed! [NULL]");
+        return NULL;
+    }
+
     memset(db_v2x_tmp_p, 0, db_v2x_tmp_size);
 
     db_v2x_tmp_p->eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
@@ -759,7 +786,7 @@ void *MSG_MANAGER_RxTask(void *arg)
 	(void)arg;
 
 	uint8_t buf[4096] = {0};
-	int n = -1;
+	int nRecvLen = -1;
 	time_t start_time = time(NULL);
 
 	while (1)
@@ -770,10 +797,10 @@ void *MSG_MANAGER_RxTask(void *arg)
 			break;
 		}
 
-		n = recv(s_nSocketHandle, buf, sizeof(buf), 0);
-		if (n < 0)
+		nRecvLen = recv(s_nSocketHandle, buf, sizeof(buf), 0);
+		if (nRecvLen < 0)
 		{
-			if (errno != EAGAIN && errno != EWOULDBLOCK)
+			if ((errno != EAGAIN) && (errno != EWOULDBLOCK)
 			{
 				PrintError("recv() is failed!!");
 				break;
@@ -784,14 +811,14 @@ void *MSG_MANAGER_RxTask(void *arg)
 				continue;
 			}
 		}
-		else if (n == 0)
+		else if (nRecvLen == 0)
 		{
 			PrintError("recv()'s connection is closed by peer!!");
 			break;
 		}
 		else
 		{
-			PrintDebug("recv() is success : len[%u]", n);
+			PrintDebug("recv() is success : nRecvLen[%u]", nRecvLen);
 		}
 	}
 

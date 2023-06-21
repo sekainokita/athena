@@ -78,6 +78,7 @@ static bool s_bDbMgrLog = OFF;
 static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
+    char *pchPayload = NULL;
 
     switch(pstEventMsg->pstDbManagerWrite->eCommMsgType)
     {
@@ -85,8 +86,14 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
         {
             if (sh_pDbMgrTxMsg != NULL)
             {
-                char *pcPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
-                memcpy(pcPayload, (char *)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
+                pchPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
+                if(pchPayload == NULL)
+                {
+                    PrintError("malloc() is failed! [NULL]");
+                    return nRet;
+                }
+
+                memcpy(pchPayload, (char *)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
 
                 fprintf(sh_pDbMgrTxMsg, "eDeviceType[%d], ", pstEventMsg->pstDbV2x->eDeviceType);
                 fprintf(sh_pDbMgrTxMsg, "eTeleCommType[%d], ", pstEventMsg->pstDbV2x->eTeleCommType);
@@ -105,7 +112,7 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                 fprintf(sh_pDbMgrTxMsg, "cPayload[");
                 for(int i = 0; i < (int)pstEventMsg->pstDbV2x->ulPayloadLength; i++)
                 {
-                      fprintf(sh_pDbMgrTxMsg, "%d ", pcPayload[i]);
+                      fprintf(sh_pDbMgrTxMsg, "%d ", pchPayload[i]);
                 }
                 fprintf(sh_pDbMgrTxMsg, "], ");
 
@@ -118,7 +125,7 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                     PrintError("fflush() is failed! [unRet:%d]", nRet);
                 }
 
-                free(pcPayload);
+                free(pchPayload);
             }
             else
             {
@@ -131,8 +138,14 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
         {
             if (sh_pDbMgrRxMsg != NULL)
             {
-                char *pcPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
-                memcpy(pcPayload, (char *)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
+                pchPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
+                if(pchPayload == NULL)
+                {
+                    PrintError("malloc() is failed! [NULL]");
+                    return nRet;
+                }
+
+                memcpy(pchPayload, (char *)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
 
                 fprintf(sh_pDbMgrRxMsg, "eDeviceType[%d], ", pstEventMsg->pstDbV2x->eDeviceType);
                 fprintf(sh_pDbMgrRxMsg, "eTeleCommType[%d], ", pstEventMsg->pstDbV2x->eTeleCommType);
@@ -151,7 +164,7 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                 fprintf(sh_pDbMgrRxMsg, "cPayload[");
                 for(int i = 0; i < (int)pstEventMsg->pstDbV2x->ulPayloadLength; i++)
                 {
-                      fprintf(sh_pDbMgrRxMsg, "%d ", pcPayload[i]);
+                      fprintf(sh_pDbMgrRxMsg, "%d ", pchPayload[i]);
                 }
                 fprintf(sh_pDbMgrRxMsg, "], ");
 
@@ -164,7 +177,7 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                     PrintError("fflush() is failed! [unRet:%d]", nRet);
                 }
 
-                free(pcPayload);
+                free(pchPayload);
             }
             else
             {
