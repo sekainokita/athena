@@ -47,6 +47,7 @@
 
 /***************************** Include ***************************************/
 #include "type.h"
+#include "config.h"
 #include "db_v2x.h"
 
 /***************************** Definition ************************************/
@@ -179,26 +180,26 @@ typedef enum
 * @param unReserved
 */
 typedef struct MSG_MANAGER_TX_t {
-    MSG_MANAGER_PAYLOAD_TYPE_E ePayloadType;
-    MSG_MANAGER_COMM_TYPE_E eCommType;
-    MSG_MANAGER_SIGN_ID_E eSignId;
-    MSG_MANAGER_V2X_FREQ_E eV2xFreq;
-    MSG_MANAGER_PRIORITY_E ePriority;
-    MSG_MANAGER_V2X_DATA_RATE_E eV2xDataRate;
-    MSG_MANAGER_V2X_TIME_SLOT_E eV2xTimeSlot;
-    uint32_t unPsid;
-    int8_t nTxPower;
-    uint32_t unTxCount;
-    uint32_t unTxDelay;
-    uint8_t uchPeerMacAddr[MSG_MANAGER_MAC_LENGTH];
-    uint32_t unTransmitterProfileId;
-    uint32_t unPeerL2Id;
-    uint32_t unReserved;
+    MSG_MANAGER_PAYLOAD_TYPE_E      ePayloadType;
+    MSG_MANAGER_COMM_TYPE_E         eCommType;
+    MSG_MANAGER_SIGN_ID_E           eSignId;
+    MSG_MANAGER_V2X_FREQ_E          eV2xFreq;
+    MSG_MANAGER_PRIORITY_E          ePriority;
+    MSG_MANAGER_V2X_DATA_RATE_E     eV2xDataRate;
+    MSG_MANAGER_V2X_TIME_SLOT_E     eV2xTimeSlot;
+    uint32_t                        unPsid;
+    int8_t                          nTxPower;
+    uint32_t                        unTxCount;
+    uint32_t                        unTxDelay;
+    uint8_t                         uchPeerMacAddr[MSG_MANAGER_MAC_LENGTH];
+    uint32_t                        unTransmitterProfileId;
+    uint32_t                        unPeerL2Id;
+    uint32_t                        unReserved;
 } MSG_MANAGER_TX_T;
 
 typedef struct MSG_MANAGER_RX_t {
-    uint32_t unDelayTime;
-    uint32_t unReserved;
+    uint32_t                        unDelayTime;
+    uint32_t                        unReserved;
 } MSG_MANAGER_RX_T;
 
 /**
@@ -208,9 +209,9 @@ typedef struct MSG_MANAGER_RX_t {
 * @param pPayload
 */
 typedef struct MSG_MANAGER_TX_EVENT_MSG_t {
-    MSG_MANAGER_TX_T        *pstMsgManagerTx;
-    DB_V2X_T                *pstDbV2x;
-    void                    *pPayload;
+    MSG_MANAGER_TX_T                *pstMsgManagerTx;
+    DB_V2X_T                        *pstDbV2x;
+    void                            *pPayload;
 } MSG_MANAGER_TX_EVENT_MSG_T;
 
 /**
@@ -220,15 +221,15 @@ typedef struct MSG_MANAGER_TX_EVENT_MSG_t {
 * @param pPayload
 */
 typedef struct MSG_MANAGER_RX_EVENT_MSG_t {
-    MSG_MANAGER_RX_T        *pstMsgManagerRx;
-    DB_V2X_T                *pstDbV2x;
-    void                    *pPayload;
+    MSG_MANAGER_RX_T                *pstMsgManagerRx;
+    DB_V2X_T                        *pstDbV2x;
+    void                            *pPayload;
 } MSG_MANAGER_RX_EVENT_MSG_T;
 
 typedef struct MSG_MANAGER_t {
-    char *pchIfaceName;
-    bool bLogLevel;
-    uint32_t unReserved;
+    char                            *pchIfaceName;
+    bool                            bLogLevel;
+    uint32_t                        unReserved;
 } MSG_MANAGER_T;
 
 /***************************** Function Protype ******************************/

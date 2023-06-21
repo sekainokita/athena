@@ -487,6 +487,9 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
 static int32_t P_MSG_MANAGER_SendRxMsgToDbMgr(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
+
+    UNUSED(pstEventMsg);
+#if 0
     DB_MANAGER_WRITE_T stDbManagerWrite;
     DB_MANAGER_EVENT_MSG_T stEventMsg;
 
@@ -509,7 +512,7 @@ static int32_t P_MSG_MANAGER_SendRxMsgToDbMgr(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
     {
         nRet = FRAMEWORK_OK;
     }
-
+#endif
 	return nRet;
 }
 
@@ -587,6 +590,7 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
                 PrintError("P_MSG_MANAGER_SendTxMsgToDbMgr() is faild! [nRet:%d]", nRet);
                 return nRet;
             }
+
         }
     }
 

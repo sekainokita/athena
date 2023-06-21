@@ -47,6 +47,7 @@
 
 /***************************** Include ***************************************/
 #include "type.h"
+#include "config.h"
 #include "msg_manager.h"
 #include "db_manager.h"
 #include "time_manager.h"

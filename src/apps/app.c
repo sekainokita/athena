@@ -50,7 +50,6 @@
 
 /***************************** Include ***************************************/
 #include <stdio.h>
-#include "type.h"
 #include "framework.h"
 #include "svc_platooning.h"
 

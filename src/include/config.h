@@ -1,5 +1,5 @@
-#ifndef	_SVC_PLATOONING_H_
-#define	_SVC_PLATOONING_H_
+#ifndef	_CONFIG_H_
+#define	_CONFIG_H_
 
 /******************************************************************************
 *
@@ -36,63 +36,20 @@
 /******************************************************************************/
 /**
 *
-* @file db_manager.h
+* @file config.h
 *
 * @note
 *
-* DB Manager Header
+* Config Header
 *
 ******************************************************************************/
 
-
 /***************************** Include ***************************************/
-#include "type.h"
-#include "config.h"
-#include "db_v2x.h"
 
 /***************************** Definition ************************************/
-#define SVC_PLATOONING_TASK_MSG_KEY               (0x230531)
+#define CONFIG_SQLITE                   (1)
 
 /***************************** Enum and Structure ****************************/
 
-/**
-* @details SVC_PLATOONING_SETTING_T
-* @param unReserved
-*/
-typedef struct SVC_PLATOONING_SETTING_t {
-    uint32_t                     unReserved;
-} SVC_PLATOONING_SETTING_T;
-
-/**
-* @details SVC_PLATOONING_EVENT_MSG_T
-* @param pstTimeMgrSetting
-*/
-typedef struct SVC_PLATOONING_EVENT_MSG_t {
-    SVC_PLATOONING_SETTING_T      *pstSvcPlatooningSetting;
-} SVC_PLATOONING_EVENT_MSG_T;
-
-/**
-* @details SVC_PLATOONING_T
-* @param bLogLevel
-* @param unReserved
-*/
-typedef struct SVC_PLATOONING_t {
-    bool                    bLogLevel;
-    uint32_t                unReserved;
-} SVC_PLATOONING_T;
-
 /***************************** Function Protype ******************************/
-
-int32_t SVC_PLATOONING_SetLog(SVC_PLATOONING_T *pstSvcPlatooning);
-
-int32_t SVC_PLATOONING_Open(SVC_PLATOONING_T *pstSvcPlatooning);
-int32_t SVC_PLATOONING_Close(SVC_PLATOONING_T *pstSvcPlatooning);
-int32_t SVC_PLATOONING_Start(SVC_PLATOONING_T *pstSvcPlatooning);
-int32_t SVC_PLATOONING_Stop(SVC_PLATOONING_T *pstSvcPlatooning);
-int32_t SVC_PLATOONING_Status(SVC_PLATOONING_T *pstSvcPlatooning);
-
-int32_t SVC_PLATOONING_Init(SVC_PLATOONING_T *pstSvcPlatooning);
-int32_t SVC_PLATOONING_DeInit(SVC_PLATOONING_T *pstSvcPlatooning);
-
-#endif	/* _SVC_PLATOONING_H_ */
-
+#endif	/* _CONFIG_H_ */

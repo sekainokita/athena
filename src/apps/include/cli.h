@@ -49,6 +49,7 @@
 
 /***************************** Include ***************************************/
 #include "type.h"
+#include "config.h"
 #include "cli_util.h"
 #include "cli_msg.h"
 #include "cli_db.h"
