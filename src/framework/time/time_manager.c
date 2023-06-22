@@ -412,7 +412,7 @@ void TIME_MANAGER_CheckLatencyTime(char *pStr, TIME_MANAGER_T *pstTimeMgr)
 
     }
 
-    PrintDebug("[%s] Latency %ld.%lds", pStr, pstTimeMgr->stLatency.ulTime_s, pstTimeMgr->stLatency.ulTime_ms);
+    PrintDebug("[%s] Time[%ld.%lds]", pStr, pstTimeMgr->stLatency.ulTime_s, pstTimeMgr->stLatency.ulTime_ms);
 
 }
 
