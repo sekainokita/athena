@@ -567,7 +567,10 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
         }
         else
         {
-            PrintDebug("recv() is success : nRecvLen[%u]", nRecvLen);
+            if(s_bMsgMgrLog == ON)
+            {
+                PrintDebug("recv() is success, nRecvLen[%u]", nRecvLen);
+            }
 
             v2x_rx_pdu_p = malloc(nRecvLen);
             if(v2x_rx_pdu_p == NULL)
