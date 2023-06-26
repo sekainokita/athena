@@ -318,11 +318,11 @@ static int32_t P_MSG_MANAGER_SendTxMsgToDbMgr(MSG_MANAGER_TX_EVENT_MSG_T *pstEve
     stDbManagerWrite.eFileType = DB_MANAGER_FILE_TYPE_TXT;
     stDbManagerWrite.eCommMsgType = DB_MANAGER_COMM_MSG_TYPE_TX;
     stDbManagerWrite.eProc = DB_MANAGER_PROC_WRITE;
+    stDbManagerWrite.unCrc32 = unCrc32;
 
     stEventMsg.pstDbManagerWrite = &stDbManagerWrite;
     stEventMsg.pstDbV2x = pstEventMsg->pstDbV2x;
     stEventMsg.pPayload = pstEventMsg->pPayload;
-    stDbManagerWrite.unCrc32 = unCrc32;
 
     if(msgsnd(s_nDbTaskMsgId, &stEventMsg, sizeof(DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
     {
@@ -524,7 +524,16 @@ static int32_t P_MSG_MANAGER_SendRxMsgToDbMgr(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
 
     stEventMsg.pstDbManagerWrite = &stDbManagerWrite;
     stEventMsg.pstDbV2x = pstEventMsg->pstDbV2x;
-    stEventMsg.pPayload = pstEventMsg->pPayload;
+
+    /* free at P_DB_MANAGER_Write() */
+    stEventMsg.pPayload = malloc(pstEventMsg->pstDbV2x->ulPayloadLength);
+    if(stEventMsg.pPayload == NULL)
+    {
+        PrintError("malloc() is failed! [NULL]");
+        return nRet;
+    }
+
+    memcpy(stEventMsg.pPayload, pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
 
     if(msgsnd(s_nDbTaskMsgId, &stEventMsg, sizeof(DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
     {

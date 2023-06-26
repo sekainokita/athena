@@ -184,6 +184,15 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                 {
                     free(pchPayload);
                 }
+
+                if(pstEventMsg->pPayload != NULL)
+                {
+                    if(s_bDbMgrLog == ON)
+                    {
+                        PrintDebug("free [%p] allocated at P_MSG_MANAGER_SendRxMsgToDbMgr()", pstEventMsg->pPayload);
+                    }
+                    free(pstEventMsg->pPayload);
+                }
             }
             else
             {
