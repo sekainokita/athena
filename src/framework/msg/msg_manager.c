@@ -483,7 +483,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
         }
     }
 
-    nRet = P_MSG_MANAGER_SendTxMsgToDbMgr(pstEventMsg, ulDbV2xTotalPacketCrc32);
+    nRet = P_MSG_MANAGER_SendTxMsgToDbMgr(pstEventMsg, ntohl(ulDbV2xTotalPacketCrc32));
     if (nRet != FRAMEWORK_OK)
     {
         PrintError("P_MSG_MANAGER_SendTxMsgToDbMgr() is faild! [nRet:%d]", nRet);
