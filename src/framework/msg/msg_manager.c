@@ -339,7 +339,7 @@ static int32_t P_MSG_MANAGER_SendTxMsgToDbMgr(MSG_MANAGER_TX_EVENT_MSG_T *pstEve
 static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
-    int db_v2x_tmp_size = sizeof(DB_V2X_T) + SAMPLE_V2X_MSG_LEN;
+    int db_v2x_tmp_size = sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength;
     int v2x_tx_pdu_size = sizeof(Ext_V2X_TxPDU_t) + db_v2x_tmp_size;
     ssize_t nRetSendSize;
 
@@ -404,6 +404,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     db_v2x_tmp_p->ulPacketCrc32 = htonl(pstEventMsg->pstDbV2x->ulPacketCrc32);
 
     memcpy(v2x_tx_pdu_p->v2x_msg.data, db_v2x_tmp_p, db_v2x_tmp_size);
+    memcpy(v2x_tx_pdu_p->v2x_msg.data + sizeof(DB_V2X_T), pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
 
     if(s_bMsgMgrLog == ON)
     {
