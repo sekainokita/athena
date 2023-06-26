@@ -116,7 +116,7 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                 }
                 fprintf(sh_pDbMgrTxMsg, "], ");
 
-                fprintf(sh_pDbMgrTxMsg, "ulPayloadCrc32[0x%x]", pstEventMsg->pstDbV2x->ulPacketCrc32);
+                fprintf(sh_pDbMgrTxMsg, "unTotalPacketCrc32[0x%x]", pstEventMsg->pstDbManagerWrite->unCrc32);
                 fprintf(sh_pDbMgrTxMsg, "\r\n");
 
                 nRet = fflush(sh_pDbMgrTxMsg);
@@ -171,7 +171,7 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                 }
                 fprintf(sh_pDbMgrRxMsg, "], ");
 
-                fprintf(sh_pDbMgrRxMsg, "ulPayloadCrc32[0x%x]", pstEventMsg->pstDbV2x->ulPacketCrc32);
+                fprintf(sh_pDbMgrRxMsg, "unTotalPacketCrc32[0x%x]", pstEventMsg->pstDbManagerWrite->unCrc32);
                 fprintf(sh_pDbMgrRxMsg, "\r\n");
 
                 nRet = fflush(sh_pDbMgrRxMsg);

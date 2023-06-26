@@ -307,7 +307,7 @@ int32_t P_MSG_MANAGER_SetV2xWsrSetting(void)
 	return nRet;
 }
 
-static int32_t P_MSG_MANAGER_SendTxMsgToDbMgr(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
+static int32_t P_MSG_MANAGER_SendTxMsgToDbMgr(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg, uint32_t unCrc32)
 {
     int32_t nRet = FRAMEWORK_ERROR;
     DB_MANAGER_WRITE_T stDbManagerWrite;
@@ -322,6 +322,7 @@ static int32_t P_MSG_MANAGER_SendTxMsgToDbMgr(MSG_MANAGER_TX_EVENT_MSG_T *pstEve
     stEventMsg.pstDbManagerWrite = &stDbManagerWrite;
     stEventMsg.pstDbV2x = pstEventMsg->pstDbV2x;
     stEventMsg.pPayload = pstEventMsg->pPayload;
+    stDbManagerWrite.unCrc32 = unCrc32;
 
     if(msgsnd(s_nDbTaskMsgId, &stEventMsg, sizeof(DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
     {
@@ -482,7 +483,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
         }
     }
 
-    nRet = P_MSG_MANAGER_SendTxMsgToDbMgr(pstEventMsg);
+    nRet = P_MSG_MANAGER_SendTxMsgToDbMgr(pstEventMsg, ulDbV2xTotalPacketCrc32);
     if (nRet != FRAMEWORK_OK)
     {
         PrintError("P_MSG_MANAGER_SendTxMsgToDbMgr() is faild! [nRet:%d]", nRet);
@@ -507,7 +508,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     return nRet;
 }
 
-static int32_t P_MSG_MANAGER_SendRxMsgToDbMgr(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMsg)
+static int32_t P_MSG_MANAGER_SendRxMsgToDbMgr(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMsg, uint32_t unCrc32)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
@@ -519,6 +520,7 @@ static int32_t P_MSG_MANAGER_SendRxMsgToDbMgr(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
     stDbManagerWrite.eFileType = DB_MANAGER_FILE_TYPE_TXT;
     stDbManagerWrite.eCommMsgType = DB_MANAGER_COMM_MSG_TYPE_RX;
     stDbManagerWrite.eProc = DB_MANAGER_PROC_WRITE;
+    stDbManagerWrite.unCrc32 = unCrc32;
 
     stEventMsg.pstDbManagerWrite = &stDbManagerWrite;
     stEventMsg.pstDbV2x = pstEventMsg->pstDbV2x;
@@ -686,7 +688,7 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             pstEventMsg->pstDbV2x->ulPayloadLength = ntohl(pstDbV2x->ulPayloadLength);
             pstEventMsg->pstDbV2x->ulPacketCrc32 = ntohl(pstDbV2x->ulPacketCrc32);
 
-            nRet = P_MSG_MANAGER_SendRxMsgToDbMgr(pstEventMsg);
+            nRet = P_MSG_MANAGER_SendRxMsgToDbMgr(pstEventMsg, ulDbV2xTotalPacketCrc32);
             if (nRet != FRAMEWORK_OK)
             {
                 PrintError("P_MSG_MANAGER_SendTxMsgToDbMgr() is faild! [nRet:%d]", nRet);
