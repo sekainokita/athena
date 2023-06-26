@@ -340,12 +340,14 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
     uint32_t unDbV2xPacketLength = sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength + sizeof(pstEventMsg->pstDbV2x->ulPacketCrc32);
+    uint32_t unDbV2xCrcCalcuatedLength = sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength;
     uint32_t unV2xTxPduLength = sizeof(Ext_V2X_TxPDU_t) + unDbV2xPacketLength;
     ssize_t nRetSendSize = 0;
     uint32_t ulTempDbV2xTotalPacketCrc32 = 0, ulDbV2xTotalPacketCrc32 = 0;
 
     Ext_V2X_TxPDU_t *pstV2xTxPdu = NULL;
     DB_V2X_T *pstDbV2x = NULL;
+    uint8_t *pchDbV2xCrc = NULL;
 
     pstV2xTxPdu = malloc(unV2xTxPduLength);
     if(pstV2xTxPdu == NULL)
@@ -404,7 +406,17 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     pstDbV2x->ulPayloadLength = htonl(pstEventMsg->pstDbV2x->ulPayloadLength);
     pstDbV2x->ulPacketCrc32 = htonl(pstEventMsg->pstDbV2x->ulPacketCrc32);
 
-    ulTempDbV2xTotalPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)pstV2xTxPdu->v2x_msg.data, sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength);
+    pchDbV2xCrc = malloc(unDbV2xPacketLength);
+    if(pchDbV2xCrc == NULL)
+    {
+        PrintError("malloc() is failed! [NULL]");
+        return nRet;
+    }
+    memset(pchDbV2xCrc, 0, unDbV2xCrcCalcuatedLength);
+    memcpy(pchDbV2xCrc, pstDbV2x, unDbV2xPacketLength);
+    memcpy(pchDbV2xCrc + sizeof(DB_V2X_T), pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
+
+    ulTempDbV2xTotalPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)pchDbV2xCrc, sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength);
     ulDbV2xTotalPacketCrc32 = htonl(ulTempDbV2xTotalPacketCrc32);
 
     memcpy(pstV2xTxPdu->v2x_msg.data, pstDbV2x, unDbV2xPacketLength);
@@ -485,6 +497,11 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     if(pstDbV2x != NULL)
     {
         free(pstDbV2x);
+    }
+
+    if(pchDbV2xCrc != NULL)
+    {
+        free(pchDbV2xCrc);
     }
 
     return nRet;
