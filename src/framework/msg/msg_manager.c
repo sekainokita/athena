@@ -571,12 +571,6 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             memset(pstV2xRxPdu, 0, sizeof(Ext_V2X_RxPDU_t));
             memcpy(pstV2xRxPdu, buf, nRecvLen);
 
-            ulCompDbV2xTotalPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)pstV2xRxPdu->v2x_msg.data, sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength);
-            if(ulDbV2xTotalPacketCrc32 != ulCompDbV2xTotalPacketCrc32)
-            {
-                PrintError("CRC32 does not matched!! check Get:ulDbV2xTotalPacketCrc32[0x%x] != Calculate:ulCompDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32, ulCompDbV2xTotalPacketCrc32);
-            }
-
             pstDbV2x = malloc(pstV2xRxPdu->v2x_msg.length);
             if(pstDbV2x == NULL)
             {
@@ -599,9 +593,12 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             memcpy(&ulTempDbV2xTotalPacketCrc32, pstV2xRxPdu->v2x_msg.data + sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength, sizeof(uint32_t));
             ulDbV2xTotalPacketCrc32 = ntohl(ulTempDbV2xTotalPacketCrc32);
 
-#if 0 // Check payload CRC Only
-            ulCompDbV2xTotalPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
-#endif
+            ulCompDbV2xTotalPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)&pstV2xRxPdu->v2x_msg.data[0], sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength);
+            if(ulDbV2xTotalPacketCrc32 != ulCompDbV2xTotalPacketCrc32)
+            {
+                PrintError("CRC32 does not matched!! check Get:ulDbV2xTotalPacketCrc32[0x%x] != Calculate:ulCompDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32, ulCompDbV2xTotalPacketCrc32);
+            }
+
             if(s_bMsgMgrLog == ON)
             {
                 printf("\nV2X RX PDU>>\n"
@@ -645,6 +642,11 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
 
                 PrintDebug("received CRC:ulDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32);
                 PrintDebug("calcuated CRC:ulCompDbV2xTotalPacketCrc32[0x%x]", ulCompDbV2xTotalPacketCrc32);
+
+                if(ulDbV2xTotalPacketCrc32 == ulCompDbV2xTotalPacketCrc32)
+                {
+                    PrintTrace("CRC32 is matched!");
+                }
             }
 
             if(pstEventMsg == NULL)
