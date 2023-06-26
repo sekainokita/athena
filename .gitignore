@@ -2,4 +2,5 @@
 *.a
 *.log
 *.txt
+*.pcap
 app-v2x
