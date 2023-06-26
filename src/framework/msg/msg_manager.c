@@ -315,8 +315,6 @@ static int32_t P_MSG_MANAGER_SendTxMsgToDbMgr(MSG_MANAGER_TX_EVENT_MSG_T *pstEve
 
     (void*)memset(&stDbManagerWrite, 0x00, sizeof(DB_MANAGER_WRITE_T));
 
-    UNUSED(pstEventMsg);
-
     stDbManagerWrite.eFileType = DB_MANAGER_FILE_TYPE_TXT;
     stDbManagerWrite.eCommMsgType = DB_MANAGER_COMM_MSG_TYPE_TX;
     stDbManagerWrite.eProc = DB_MANAGER_PROC_WRITE;
@@ -343,8 +341,8 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     int32_t nRet = FRAMEWORK_ERROR;
     uint32_t unDbV2xPacketLength = sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength + sizeof(pstEventMsg->pstDbV2x->ulPacketCrc32);
     uint32_t unV2xTxPduLength = sizeof(Ext_V2X_TxPDU_t) + unDbV2xPacketLength;
-    ssize_t nRetSendSize;
-    uint32_t ulTempDbV2xTotalPacketCrc32, ulDbV2xTotalPacketCrc32;
+    ssize_t nRetSendSize = 0;
+    uint32_t ulTempDbV2xTotalPacketCrc32 = 0, ulDbV2xTotalPacketCrc32 = 0;
 
     Ext_V2X_TxPDU_t *pstV2xTxPdu = NULL;
     DB_V2X_T *pstDbV2x = NULL;
@@ -529,7 +527,7 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
     int nRecvLen = -1;
     Ext_V2X_RxPDU_t *pstV2xRxPdu = NULL;
     DB_V2X_T *pstDbV2x = NULL;
-    uint32_t ulTempDbV2xTotalPacketCrc32, ulDbV2xTotalPacketCrc32;
+    uint32_t ulDbV2xTotalPacketCrc32 = 0, ulCompDbV2xTotalPacketCrc32 = 0, ulTempDbV2xTotalPacketCrc32 = 0;
 
     while (1)
     {
@@ -573,6 +571,12 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             memset(pstV2xRxPdu, 0, sizeof(Ext_V2X_RxPDU_t));
             memcpy(pstV2xRxPdu, buf, nRecvLen);
 
+            ulCompDbV2xTotalPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)pstV2xRxPdu->v2x_msg.data, sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength);
+            if(ulDbV2xTotalPacketCrc32 != ulCompDbV2xTotalPacketCrc32)
+            {
+                PrintError("CRC32 does not matched!! check Get:ulDbV2xTotalPacketCrc32[0x%x] != Calculate:ulCompDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32, ulCompDbV2xTotalPacketCrc32);
+            }
+
             pstDbV2x = malloc(pstV2xRxPdu->v2x_msg.length);
             if(pstDbV2x == NULL)
             {
@@ -591,9 +595,13 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             }
 
             memcpy(pstEventMsg->pPayload, pstV2xRxPdu->v2x_msg.data + sizeof(DB_V2X_T), pstEventMsg->pstDbV2x->ulPayloadLength);
+
             memcpy(&ulTempDbV2xTotalPacketCrc32, pstV2xRxPdu->v2x_msg.data + sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength, sizeof(uint32_t));
             ulDbV2xTotalPacketCrc32 = ntohl(ulTempDbV2xTotalPacketCrc32);
 
+#if 0 // Check payload CRC Only
+            ulCompDbV2xTotalPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
+#endif
             if(s_bMsgMgrLog == ON)
             {
                 printf("\nV2X RX PDU>>\n"
@@ -634,7 +642,9 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
                 PrintDebug("db_v2x_tmp_p->usSwVer[%d]", ntohs(pstDbV2x->usSwVer));
                 PrintDebug("db_v2x_tmp_p->ulPayloadLength[%d]", ntohl(pstDbV2x->ulPayloadLength));
                 PrintDebug("db_v2x_tmp_p->ulPacketCrc32[0x%x]", ntohl(pstDbV2x->ulPacketCrc32));
-                PrintDebug("ulDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32);
+
+                PrintDebug("received CRC:ulDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32);
+                PrintDebug("calcuated CRC:ulCompDbV2xTotalPacketCrc32[0x%x]", ulCompDbV2xTotalPacketCrc32);
             }
 
             if(pstEventMsg == NULL)
@@ -650,7 +660,7 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             pstEventMsg->pstDbV2x->eActionType = ntohs(pstDbV2x->eActionType);
             pstEventMsg->pstDbV2x->eRegionId = ntohs(pstDbV2x->eRegionId);
             pstEventMsg->pstDbV2x->ePayloadType = ntohs(pstDbV2x->ePayloadType);
-            pstEventMsg->pstDbV2x->eTeleCommType = ntohs(pstDbV2x->eCommId);
+            pstEventMsg->pstDbV2x->eCommId = ntohs(pstDbV2x->eCommId);
             pstEventMsg->pstDbV2x->usDbVer = ntohs(pstDbV2x->usDbVer);
             pstEventMsg->pstDbV2x->usHwVer = ntohs(pstDbV2x->usHwVer);
             pstEventMsg->pstDbV2x->usSwVer = ntohs(pstDbV2x->usSwVer);

@@ -125,7 +125,10 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                     PrintError("fflush() is failed! [unRet:%d]", nRet);
                 }
 
-                free(pchPayload);
+                if(pchPayload != NULL)
+                {
+                    free(pchPayload);
+                }
             }
             else
             {
@@ -177,7 +180,10 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                     PrintError("fflush() is failed! [unRet:%d]", nRet);
                 }
 
-                free(pchPayload);
+                if(pchPayload != NULL)
+                {
+                    free(pchPayload);
+                }
             }
             else
             {
