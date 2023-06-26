@@ -241,6 +241,7 @@ static int P_CLI_ParseInputString(char *prompt, char *str, int len)
     s_nInputString--;
 
     str[idx] = 0;
+
     return idx;
 }
 
