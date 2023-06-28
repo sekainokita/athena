@@ -1,9 +1,11 @@
 <map id="src/apps/include/cli_util.h" name="src/apps/include/cli_util.h">
-<area shape="rect" id="node1" title=" " alt="" coords="340,5,487,47"/>
-<area shape="rect" id="node2" href="$cli_8h.html" title=" " alt="" coords="334,95,493,121"/>
-<area shape="rect" id="node3" href="$cli_8c.html" title=" " alt="" coords="5,169,131,196"/>
-<area shape="rect" id="node4" href="$cli__cmd_8c.html" title=" " alt="" coords="155,169,315,196"/>
-<area shape="rect" id="node5" href="$cli__db_8c.html" title=" " alt="" coords="339,169,487,196"/>
-<area shape="rect" id="node6" href="$cli__msg_8c.html" title=" " alt="" coords="512,169,672,196"/>
-<area shape="rect" id="node7" href="$cli__util_8c.html" title=" " alt="" coords="697,169,850,196"/>
+<area shape="rect" id="node1" title=" " alt="" coords="525,5,672,47"/>
+<area shape="rect" id="node2" href="$cli_8h.html" title=" " alt="" coords="423,102,582,129"/>
+<area shape="rect" id="node9" href="$msg__manager_8c.html" title=" " alt="" coords="606,95,786,136"/>
+<area shape="rect" id="node3" href="$cli_8c.html" title=" " alt="" coords="5,184,131,211"/>
+<area shape="rect" id="node4" href="$cli__cmd_8c.html" title=" " alt="" coords="155,184,315,211"/>
+<area shape="rect" id="node5" href="$cli__db_8c.html" title=" " alt="" coords="339,184,487,211"/>
+<area shape="rect" id="node6" href="$cli__msg_8c.html" title=" " alt="" coords="512,184,672,211"/>
+<area shape="rect" id="node7" href="$cli__platooning_8c.html" title=" " alt="" coords="697,184,898,211"/>
+<area shape="rect" id="node8" href="$cli__util_8c.html" title=" " alt="" coords="922,184,1075,211"/>
 </map>

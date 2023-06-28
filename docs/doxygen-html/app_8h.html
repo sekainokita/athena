@@ -75,23 +75,31 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="type_8h_source.html">type.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="config_8h_source.html">config.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="framework_8h_source.html">framework.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for app.h:</div>
 <div class="dyncontent">
 <div class="center"><img src="app_8h__incl.png" border="0" usemap="#src_2apps_2include_2app_8h" alt=""/></div>
 <map name="src_2apps_2include_2app_8h" id="src_2apps_2include_2app_8h">
-<area shape="rect" title=" " alt="" coords="389,5,555,32"/>
-<area shape="rect" href="type_8h.html" title=" " alt="" coords="441,80,503,107"/>
-<area shape="rect" title=" " alt="" coords="5,155,72,181"/>
-<area shape="rect" title=" " alt="" coords="97,155,167,181"/>
-<area shape="rect" title=" " alt="" coords="191,155,262,181"/>
-<area shape="rect" title=" " alt="" coords="287,155,361,181"/>
-<area shape="rect" title=" " alt="" coords="386,155,457,181"/>
-<area shape="rect" title=" " alt="" coords="481,155,564,181"/>
-<area shape="rect" title=" " alt="" coords="588,155,663,181"/>
-<area shape="rect" title=" " alt="" coords="687,155,774,181"/>
-<area shape="rect" title=" " alt="" coords="798,155,882,181"/>
-<area shape="rect" title=" " alt="" coords="907,155,981,181"/>
+<area shape="rect" title=" " alt="" coords="639,5,806,32"/>
+<area shape="rect" href="type_8h.html" title=" " alt="" coords="499,229,562,256"/>
+<area shape="rect" href="config_8h.html" title=" " alt="" coords="838,229,911,256"/>
+<area shape="rect" href="framework_8h.html" title=" " alt="" coords="670,80,775,107"/>
+<area shape="rect" title=" " alt="" coords="5,304,72,331"/>
+<area shape="rect" title=" " alt="" coords="911,304,982,331"/>
+<area shape="rect" title=" " alt="" coords="97,304,167,331"/>
+<area shape="rect" title=" " alt="" coords="192,304,267,331"/>
+<area shape="rect" title=" " alt="" coords="291,304,362,331"/>
+<area shape="rect" title=" " alt="" coords="387,304,469,331"/>
+<area shape="rect" title=" " alt="" coords="493,304,568,331"/>
+<area shape="rect" title=" " alt="" coords="593,304,679,331"/>
+<area shape="rect" title=" " alt="" coords="703,304,787,331"/>
+<area shape="rect" title=" " alt="" coords="812,304,887,331"/>
+<area shape="rect" href="msg__manager_8h.html" title=" " alt="" coords="811,155,938,181"/>
+<area shape="rect" href="db__manager_8h.html" title=" " alt="" coords="520,155,635,181"/>
+<area shape="rect" href="time__manager_8h.html" title=" " alt="" coords="659,155,787,181"/>
+<area shape="rect" href="db__v2x_8h.html" title=" " alt="" coords="707,229,789,256"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -99,9 +107,10 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="app_8h__dep__incl.png" border="0" usemap="#src_2apps_2include_2app_8hdep" alt=""/></div>
 <map name="src_2apps_2include_2app_8hdep" id="src_2apps_2include_2app_8hdep">
-<area shape="rect" title=" " alt="" coords="76,5,243,32"/>
+<area shape="rect" title=" " alt="" coords="175,5,341,32"/>
 <area shape="rect" href="cli__db_8c.html" title=" " alt="" coords="5,80,153,107"/>
-<area shape="rect" href="main_8c.html" title=" " alt="" coords="177,80,301,107"/>
+<area shape="rect" href="cli__msg_8c.html" title=" " alt="" coords="178,80,338,107"/>
+<area shape="rect" href="cli__platooning_8c.html" title=" " alt="" coords="363,80,564,107"/>
 </map>
 </div>
 </div>
@@ -126,6 +135,12 @@ typedef struct <a class="el" href="structAPP.html">APP</a>&#160;</td><td class="
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:ac1bf2c733608cb95b24eea6c3d4fe651"><td class="memItemLeft" align="right" valign="top"><a id="ac1bf2c733608cb95b24eea6c3d4fe651"></a>
+<a class="el" href="structFRAMEWORK.html">FRAMEWORK_T</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>APP_GetFrameworkInstance</b> (void)</td></tr>
+<tr class="separator:ac1bf2c733608cb95b24eea6c3d4fe651"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1b6dcceec5b2a85a6103ffc9996c568"><td class="memItemLeft" align="right" valign="top"><a id="ad1b6dcceec5b2a85a6103ffc9996c568"></a>
+<a class="el" href="structAPP.html">APP_T</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>APP_GetAppInstance</b> (void)</td></tr>
+<tr class="separator:ad1b6dcceec5b2a85a6103ffc9996c568"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a582bb72e2e9e3b19fc83cb0d2b8f6b5d"><td class="memItemLeft" align="right" valign="top"><a id="a582bb72e2e9e3b19fc83cb0d2b8f6b5d"></a>
 int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>APP_Init</b> (<a class="el" href="structAPP.html">APP_T</a> *pstApp)</td></tr>
 <tr class="separator:a582bb72e2e9e3b19fc83cb0d2b8f6b5d"><td class="memSeparator" colspan="2">&#160;</td></tr>

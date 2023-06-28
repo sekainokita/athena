@@ -1,9 +1,11 @@
 <map id="src/apps/include/cli.h" name="src/apps/include/cli.h">
-<area shape="rect" id="node1" title=" " alt="" coords="483,5,642,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="555,5,714,32"/>
 <area shape="rect" id="node2" href="$type_8h.html" title=" " alt="" coords="441,155,503,181"/>
-<area shape="rect" id="node13" href="$cli__util_8h.html" title=" " alt="" coords="472,80,549,107"/>
-<area shape="rect" id="node14" href="$cli__msg_8h.html" title=" " alt="" coords="574,80,658,107"/>
-<area shape="rect" id="node15" href="$cli__db_8h.html" title=" " alt="" coords="683,80,755,107"/>
+<area shape="rect" id="node13" href="$config_8h.html" title=" " alt="" coords="542,155,615,181"/>
+<area shape="rect" id="node14" href="$cli__util_8h.html" title=" " alt="" coords="480,80,557,107"/>
+<area shape="rect" id="node15" href="$cli__msg_8h.html" title=" " alt="" coords="633,80,717,107"/>
+<area shape="rect" id="node16" href="$cli__db_8h.html" title=" " alt="" coords="741,80,813,107"/>
+<area shape="rect" id="node17" href="$cli__platooning_8h.html" title=" " alt="" coords="837,80,963,107"/>
 <area shape="rect" id="node3" title=" " alt="" coords="5,229,72,256"/>
 <area shape="rect" id="node4" title=" " alt="" coords="97,229,167,256"/>
 <area shape="rect" id="node5" title=" " alt="" coords="191,229,262,256"/>
