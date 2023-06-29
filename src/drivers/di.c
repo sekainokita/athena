@@ -50,10 +50,12 @@
 
 /***************************** Include ***************************************/
 #include "di.h"
+#include "di_gps.h"
 
 /***************************** Definition ************************************/
 
 /***************************** Static Variable *******************************/
+static DI_GPS_T s_stDiGps;
 
 /***************************** Function  *************************************/
 
@@ -83,8 +85,14 @@ int32_t DI_Init(DI_T *pstDi)
         PrintError("pstDi == NULL!!");
         return nRet;
     }
+    (void*)memset(&s_stDiGps, 0x00, sizeof(DI_GPS_T));
 
-    nRet = DI_OK;
+    nRet = DI_GPS_Init(&s_stDiGps);
+    if(nRet != DI_OK)
+    {
+        PrintError("DI_GPS_Init() is failed! [unRet:%d]", nRet);
+        return nRet;
+    }
 
     PrintWarn("is successfully initialized.");
 

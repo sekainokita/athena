@@ -37,7 +37,7 @@ TARGET = lib-di
 LIB_DI = libdi.a
 
 SRCS = $(wildcard *.c)
-SRCS += $(wildcard $(DI_GPS)/*.c)
+SRCS += $(wildcard $(LIB_DI_GPS_PATH)/*.c)
 
 TARGET_AR = ar
 OBJS = ${SRCS:.c=.o}
