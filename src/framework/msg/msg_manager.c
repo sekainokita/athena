@@ -312,10 +312,18 @@ static int32_t P_MSG_MANAGER_SendTxMsgToDbMgr(MSG_MANAGER_TX_EVENT_MSG_T *pstEve
     int32_t nRet = FRAMEWORK_ERROR;
     DB_MANAGER_WRITE_T stDbManagerWrite;
     DB_MANAGER_EVENT_MSG_T stEventMsg;
+    DB_MANAGER_T *pstDbManager;
 
     (void*)memset(&stDbManagerWrite, 0x00, sizeof(DB_MANAGER_WRITE_T));
 
-    stDbManagerWrite.eFileType = DB_MANAGER_FILE_TYPE_TXT;
+    pstDbManager = FRAMEWORK_GetDbManagerInstance();
+    if(pstDbManager == NULL)
+    {
+        PrintError("FRAMEWORK_GetDbManagerInstance() is failed!! pstDbManager is NULL");
+        return nRet;
+    }
+
+    stDbManagerWrite.eFileType = pstDbManager->eFileType;
     stDbManagerWrite.eCommMsgType = DB_MANAGER_COMM_MSG_TYPE_TX;
     stDbManagerWrite.eProc = DB_MANAGER_PROC_WRITE;
     stDbManagerWrite.unCrc32 = unCrc32;
@@ -514,10 +522,18 @@ static int32_t P_MSG_MANAGER_SendRxMsgToDbMgr(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
 
     DB_MANAGER_WRITE_T stDbManagerWrite;
     DB_MANAGER_EVENT_MSG_T stEventMsg;
+    DB_MANAGER_T *pstDbManager;
 
     (void*)memset(&stDbManagerWrite, 0x00, sizeof(DB_MANAGER_WRITE_T));
 
-    stDbManagerWrite.eFileType = DB_MANAGER_FILE_TYPE_TXT;
+    pstDbManager = FRAMEWORK_GetDbManagerInstance();
+    if(pstDbManager == NULL)
+    {
+        PrintError("FRAMEWORK_GetDbManagerInstance() is failed!! pstDbManager is NULL");
+        return nRet;
+    }
+
+    stDbManagerWrite.eFileType = pstDbManager->eFileType;
     stDbManagerWrite.eCommMsgType = DB_MANAGER_COMM_MSG_TYPE_RX;
     stDbManagerWrite.eProc = DB_MANAGER_PROC_WRITE;
     stDbManagerWrite.unCrc32 = unCrc32;
@@ -525,7 +541,7 @@ static int32_t P_MSG_MANAGER_SendRxMsgToDbMgr(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
     stEventMsg.pstDbManagerWrite = &stDbManagerWrite;
     stEventMsg.pstDbV2x = pstEventMsg->pstDbV2x;
 
-    /* free at P_DB_MANAGER_WriteTxt() */
+    /* free at P_DB_MANAGER_WriteXXX() */
     stEventMsg.pPayload = malloc(pstEventMsg->pstDbV2x->ulPayloadLength);
     if(stEventMsg.pPayload == NULL)
     {
