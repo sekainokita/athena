@@ -199,6 +199,7 @@ typedef struct MSG_MANAGER_TX_t {
 
 typedef struct MSG_MANAGER_RX_t {
     uint32_t                        unDelayTime;
+    uint32_t                        unVerifiedTxRxCrc32;
     uint32_t                        unReserved;
 } MSG_MANAGER_RX_T;
 

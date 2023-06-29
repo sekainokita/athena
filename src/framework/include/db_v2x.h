@@ -268,7 +268,7 @@ typedef struct DB_V2X_t {
     uint16_t                                    usSwVer;
     uint32_t                                    ulPayloadLength;
     uint32_t                                    ulPacketCrc32;
-} DB_V2X_T;
+} __attribute__((__packed__)) DB_V2X_T;
 
 /***************************** Function Protype ******************************/
 

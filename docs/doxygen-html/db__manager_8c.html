@@ -66,102 +66,103 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#func-members">Functions</a>  </div>
+<a href="#define-members">Macros</a> &#124;
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
 <div class="title">db_manager.c File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="db__manager_8h_source.html">db_manager.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="framework_8h_source.html">framework.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="db__manager_8h_source.html">db_manager.h</a>&quot;</code><br />
+<code>#include &lt;sys/types.h&gt;</code><br />
+<code>#include &lt;sys/ipc.h&gt;</code><br />
+<code>#include &lt;sys/msg.h&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for db_manager.c:</div>
 <div class="dyncontent">
 <div class="center"><img src="db__manager_8c__incl.png" border="0" usemap="#src_2framework_2db_2db__manager_8c" alt=""/></div>
 <map name="src_2framework_2db_2db__manager_8c" id="src_2framework_2db_2db__manager_8c">
-<area shape="rect" title=" " alt="" coords="153,5,309,47"/>
-<area shape="rect" href="db__manager_8h.html" title=" " alt="" coords="174,95,289,121"/>
-<area shape="rect" href="type_8h.html" title=" " alt="" coords="391,169,453,196"/>
-<area shape="rect" href="db__v2x_8h.html" title=" " alt="" coords="143,169,224,196"/>
-<area shape="rect" title=" " alt="" coords="101,244,167,271"/>
-<area shape="rect" title=" " alt="" coords="5,244,76,271"/>
-<area shape="rect" title=" " alt="" coords="192,244,263,271"/>
-<area shape="rect" title=" " alt="" coords="287,244,362,271"/>
-<area shape="rect" title=" " alt="" coords="387,244,457,271"/>
-<area shape="rect" title=" " alt="" coords="482,244,565,271"/>
-<area shape="rect" title=" " alt="" coords="589,244,663,271"/>
-<area shape="rect" title=" " alt="" coords="688,244,775,271"/>
-<area shape="rect" title=" " alt="" coords="799,244,883,271"/>
-<area shape="rect" title=" " alt="" coords="907,244,982,271"/>
+<area shape="rect" title=" " alt="" coords="325,5,481,47"/>
+<area shape="rect" href="framework_8h.html" title=" " alt="" coords="225,95,331,121"/>
+<area shape="rect" href="db__manager_8h.html" title=" " alt="" coords="90,169,205,196"/>
+<area shape="rect" title=" " alt="" coords="355,95,451,121"/>
+<area shape="rect" title=" " alt="" coords="476,95,555,121"/>
+<area shape="rect" title=" " alt="" coords="579,95,667,121"/>
+<area shape="rect" href="type_8h.html" title=" " alt="" coords="413,244,476,271"/>
+<area shape="rect" href="config_8h.html" title=" " alt="" coords="123,244,196,271"/>
+<area shape="rect" href="msg__manager_8h.html" title=" " alt="" coords="229,169,356,196"/>
+<area shape="rect" href="time__manager_8h.html" title=" " alt="" coords="381,169,509,196"/>
+<area shape="rect" title=" " alt="" coords="719,319,786,345"/>
+<area shape="rect" title=" " alt="" coords="5,319,76,345"/>
+<area shape="rect" title=" " alt="" coords="811,319,881,345"/>
+<area shape="rect" title=" " alt="" coords="906,319,981,345"/>
+<area shape="rect" title=" " alt="" coords="100,319,171,345"/>
+<area shape="rect" title=" " alt="" coords="195,319,278,345"/>
+<area shape="rect" title=" " alt="" coords="302,319,377,345"/>
+<area shape="rect" title=" " alt="" coords="401,319,488,345"/>
+<area shape="rect" title=" " alt="" coords="512,319,596,345"/>
+<area shape="rect" title=" " alt="" coords="621,319,695,345"/>
+<area shape="rect" href="db__v2x_8h.html" title=" " alt="" coords="231,244,312,271"/>
 </map>
 </div>
 </div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a5ba7001a6ad68bb8711a611427dc2820"><td class="memItemLeft" align="right" valign="top"><a id="a5ba7001a6ad68bb8711a611427dc2820"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_TX_FILE</b>&#160;&#160;&#160;&quot;db_v2x_tx_temp_writing.txt&quot;</td></tr>
+<tr class="separator:a5ba7001a6ad68bb8711a611427dc2820"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6cb6aa4a95466cb80d66c6480d0557b"><td class="memItemLeft" align="right" valign="top"><a id="ac6cb6aa4a95466cb80d66c6480d0557b"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_RX_FILE</b>&#160;&#160;&#160;&quot;db_v2x_rx_temp_writing.txt&quot;</td></tr>
+<tr class="separator:ac6cb6aa4a95466cb80d66c6480d0557b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a0a32b86f0eb3f5b5b3841778adbc23b1"><td class="memItemLeft" align="right" valign="top"><a id="a0a32b86f0eb3f5b5b3841778adbc23b1"></a>
-<a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_T</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_MsgNew</b> (int id, const char *text)</td></tr>
-<tr class="separator:a0a32b86f0eb3f5b5b3841778adbc23b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a08a207dcad6a70d18d4c6bb198c66b39"><td class="memItemLeft" align="right" valign="top"><a id="a08a207dcad6a70d18d4c6bb198c66b39"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_MsgId</b> (<a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_T</a> *pstMsg)</td></tr>
-<tr class="separator:a08a207dcad6a70d18d4c6bb198c66b39"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8061d1967b5a6c0ceeb0add825edd3f2"><td class="memItemLeft" align="right" valign="top"><a id="a8061d1967b5a6c0ceeb0add825edd3f2"></a>
-char *&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_MsgText</b> (<a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_T</a> *pstMsg)</td></tr>
-<tr class="separator:a8061d1967b5a6c0ceeb0add825edd3f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a784cd4d260af53df392c8e11ddc72d0c"><td class="memItemLeft" align="right" valign="top"><a id="a784cd4d260af53df392c8e11ddc72d0c"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_MsgFree</b> (<a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_T</a> *pstMsg)</td></tr>
-<tr class="separator:a784cd4d260af53df392c8e11ddc72d0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a50edab75c4d999794104228a95545513"><td class="memItemLeft" align="right" valign="top"><a id="a50edab75c4d999794104228a95545513"></a>
-<a class="el" href="structDB__MANAGER__ARCHIVE__t.html">DB_MANAGER_ARCHIVE_T</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_ArchiveNew</b> (size_t size, const char *data)</td></tr>
-<tr class="separator:a50edab75c4d999794104228a95545513"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a84ad171d2c4b8552f1aa84de6bb2fc68"><td class="memItemLeft" align="right" valign="top"><a id="a84ad171d2c4b8552f1aa84de6bb2fc68"></a>
-size_t&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_ArchiveSize</b> (<a class="el" href="structDB__MANAGER__ARCHIVE__t.html">DB_MANAGER_ARCHIVE_T</a> *pstAr)</td></tr>
-<tr class="separator:a84ad171d2c4b8552f1aa84de6bb2fc68"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:accf48667befe9d7afb2ac07034356b51"><td class="memItemLeft" align="right" valign="top"><a id="accf48667befe9d7afb2ac07034356b51"></a>
-char *&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_ArchiveData</b> (<a class="el" href="structDB__MANAGER__ARCHIVE__t.html">DB_MANAGER_ARCHIVE_T</a> *pstAr)</td></tr>
-<tr class="separator:accf48667befe9d7afb2ac07034356b51"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2a66767c530ed81d71ca3e6693ac9b96"><td class="memItemLeft" align="right" valign="top"><a id="a2a66767c530ed81d71ca3e6693ac9b96"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_ArchiveFree</b> (<a class="el" href="structDB__MANAGER__ARCHIVE__t.html">DB_MANAGER_ARCHIVE_T</a> *pstAr)</td></tr>
-<tr class="separator:a2a66767c530ed81d71ca3e6693ac9b96"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a90da296b7be8db55427ac64d0c049b63"><td class="memItemLeft" align="right" valign="top"><a id="a90da296b7be8db55427ac64d0c049b63"></a>
-<a class="el" href="structDB__MANAGER__ARCHIVE__t.html">DB_MANAGER_ARCHIVE_T</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_MsgSerialize</b> (const <a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_T</a> *pstMsg)</td></tr>
-<tr class="separator:a90da296b7be8db55427ac64d0c049b63"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac6a302a64675df7234f40947ca49fa04"><td class="memItemLeft" align="right" valign="top"><a id="ac6a302a64675df7234f40947ca49fa04"></a>
-<a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_T</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_MsgUnSerialize</b> (const char *buffer)</td></tr>
-<tr class="separator:ac6a302a64675df7234f40947ca49fa04"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:add03f690ede130d9a7049f7791f05a14"><td class="memItemLeft" align="right" valign="top"><a id="add03f690ede130d9a7049f7791f05a14"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_MsgSend</b> (mqd_t mqdes, const <a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_T</a> *pstMsg, unsigned int msg_prio)</td></tr>
-<tr class="separator:add03f690ede130d9a7049f7791f05a14"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa48f4ae96fce9036b810298f83b714ec"><td class="memItemLeft" align="right" valign="top"><a id="aa48f4ae96fce9036b810298f83b714ec"></a>
-<a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_T</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_MsgReceive</b> (mqd_t mqdes, char *buffer, size_t size)</td></tr>
-<tr class="separator:aa48f4ae96fce9036b810298f83b714ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f423201b7aab6d3d04c7acfd6219d6f"><td class="memItemLeft" align="right" valign="top"><a id="a0f423201b7aab6d3d04c7acfd6219d6f"></a>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>P_DB_MANAGER_CreateTask</b> (void)</td></tr>
+<tr class="separator:a0f423201b7aab6d3d04c7acfd6219d6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a32c7b9c457c6b59b9e31496e00b916a0"><td class="memItemLeft" align="right" valign="top"><a id="a32c7b9c457c6b59b9e31496e00b916a0"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Write</b> (<a class="el" href="structDB__MANAGER__WRITE.html">DB_MANAGER_WRITE_T</a> *pstDbManagerWrite, <a class="el" href="db__v2x_8h.html#a29f3cc9a2608a375609b7c7f6e1473be">DB_V2X_T</a> *pstDbV2x, void *pPayload)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Write</b> (<a class="el" href="db__manager_8h.html#ad58ab3b32728304d3adf1c9b7fcf530d">DB_MANAGER_WRITE_T</a> *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void *pPayload)</td></tr>
 <tr class="separator:a32c7b9c457c6b59b9e31496e00b916a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac2050f377d4297de3fc2bc008de89563"><td class="memItemLeft" align="right" valign="top"><a id="ac2050f377d4297de3fc2bc008de89563"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Read</b> (<a class="el" href="structDB__MANAGER__READ.html">DB_MANAGER_READ_T</a> *pstDbManagerRead, <a class="el" href="db__v2x_8h.html#a29f3cc9a2608a375609b7c7f6e1473be">DB_V2X_T</a> *pstDbV2x, void *pPayload)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Read</b> (<a class="el" href="db__manager_8h.html#a2d012d2b808f935ec447c18e39f44943">DB_MANAGER_READ_T</a> *pstDbManagerRead, DB_V2X_T *pstDbV2x, void *pPayload)</td></tr>
 <tr class="separator:ac2050f377d4297de3fc2bc008de89563"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a724fd6580d3f2dddd8b6b14dfbdf02f4"><td class="memItemLeft" align="right" valign="top"><a id="a724fd6580d3f2dddd8b6b14dfbdf02f4"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Converter</b> (<a class="el" href="structDB__MANAGER__READ.html">DB_MANAGER_READ_T</a> *pstDbManagerRead, <a class="el" href="structDB__MANAGER__WRITE.html">DB_MANAGER_WRITE_T</a> *pstDbManagerWrite, <a class="el" href="db__v2x_8h.html#a29f3cc9a2608a375609b7c7f6e1473be">DB_V2X_T</a> *pstDbV2x, void *pPayload)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Converter</b> (<a class="el" href="db__manager_8h.html#a2d012d2b808f935ec447c18e39f44943">DB_MANAGER_READ_T</a> *pstDbManagerRead, <a class="el" href="db__manager_8h.html#ad58ab3b32728304d3adf1c9b7fcf530d">DB_MANAGER_WRITE_T</a> *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void *pPayload)</td></tr>
 <tr class="separator:a724fd6580d3f2dddd8b6b14dfbdf02f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9be0364c923b073f7ff0b66c239170f9"><td class="memItemLeft" align="right" valign="top"><a id="a9be0364c923b073f7ff0b66c239170f9"></a>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_SetLog</b> (<a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a> *pstDbManager)</td></tr>
+<tr class="separator:a9be0364c923b073f7ff0b66c239170f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae0cea866c49fe97f018db819d9ae313a"><td class="memItemLeft" align="right" valign="top"><a id="ae0cea866c49fe97f018db819d9ae313a"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Open</b> (<a class="el" href="structDB__MANAGER.html">DB_MANAGER_T</a> *pstDbManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Open</b> (<a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a> *pstDbManager)</td></tr>
 <tr class="separator:ae0cea866c49fe97f018db819d9ae313a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac2aa089984c24d0538c2b6ac89cd4cac"><td class="memItemLeft" align="right" valign="top"><a id="ac2aa089984c24d0538c2b6ac89cd4cac"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Close</b> (<a class="el" href="structDB__MANAGER.html">DB_MANAGER_T</a> *pstDbManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Close</b> (<a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a> *pstDbManager)</td></tr>
 <tr class="separator:ac2aa089984c24d0538c2b6ac89cd4cac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a99b1f01182b4a10e2252433f15dc3c4c"><td class="memItemLeft" align="right" valign="top"><a id="a99b1f01182b4a10e2252433f15dc3c4c"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Start</b> (<a class="el" href="structDB__MANAGER.html">DB_MANAGER_T</a> *pstDbManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Start</b> (<a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a> *pstDbManager)</td></tr>
 <tr class="separator:a99b1f01182b4a10e2252433f15dc3c4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa7dca44fc3ac3a4bd3e2923626e2a568"><td class="memItemLeft" align="right" valign="top"><a id="aa7dca44fc3ac3a4bd3e2923626e2a568"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Stop</b> (<a class="el" href="structDB__MANAGER.html">DB_MANAGER_T</a> *pstDbManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Stop</b> (<a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a> *pstDbManager)</td></tr>
 <tr class="separator:aa7dca44fc3ac3a4bd3e2923626e2a568"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66457c251ed7d163da245eb15f86c99a"><td class="memItemLeft" align="right" valign="top"><a id="a66457c251ed7d163da245eb15f86c99a"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Status</b> (<a class="el" href="structDB__MANAGER.html">DB_MANAGER_T</a> *pstDbManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Status</b> (<a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a> *pstDbManager)</td></tr>
 <tr class="separator:a66457c251ed7d163da245eb15f86c99a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a41b6153db3234a6881d7934b33d9d4ef"><td class="memItemLeft" align="right" valign="top"><a id="a41b6153db3234a6881d7934b33d9d4ef"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Init</b> (<a class="el" href="structDB__MANAGER.html">DB_MANAGER_T</a> *pstDbManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Init</b> (<a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a> *pstDbManager)</td></tr>
 <tr class="separator:a41b6153db3234a6881d7934b33d9d4ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad0caa475c41e8989cfba75cfcb20352"><td class="memItemLeft" align="right" valign="top"><a id="aad0caa475c41e8989cfba75cfcb20352"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_DeInit</b> (<a class="el" href="structDB__MANAGER.html">DB_MANAGER_T</a> *pstDbManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_DeInit</b> (<a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a> *pstDbManager)</td></tr>
 <tr class="separator:aad0caa475c41e8989cfba75cfcb20352"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:ab109aa3750c2a14c3fd7b9b523687966"><td class="memItemLeft" align="right" valign="top"><a id="ab109aa3750c2a14c3fd7b9b523687966"></a>
+FILE *&#160;</td><td class="memItemRight" valign="bottom"><b>sh_pDbMgrTxMsg</b></td></tr>
+<tr class="separator:ab109aa3750c2a14c3fd7b9b523687966"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64c02a2d1030b38784878f4cb88dacb3"><td class="memItemLeft" align="right" valign="top"><a id="a64c02a2d1030b38784878f4cb88dacb3"></a>
+FILE *&#160;</td><td class="memItemRight" valign="bottom"><b>sh_pDbMgrRxMsg</b></td></tr>
+<tr class="separator:a64c02a2d1030b38784878f4cb88dacb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This file contains a data format design</p>

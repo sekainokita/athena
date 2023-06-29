@@ -220,6 +220,10 @@ static int P_CLI_ParseInputString(char *prompt, char *str, int len)
             }
             break;
 
+        case 'q':
+            PrintTrace("Exit the CLI, kill the process");
+            exit(0);
+
         case '\r':
         case '\n':
             reading = 0;
@@ -241,6 +245,7 @@ static int P_CLI_ParseInputString(char *prompt, char *str, int len)
     s_nInputString--;
 
     str[idx] = 0;
+
     return idx;
 }
 

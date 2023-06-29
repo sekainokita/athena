@@ -67,32 +67,36 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
+<a href="#define-members">Macros</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">db_manager.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="type_8h_source.html">type.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="config_8h_source.html">config.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="db__v2x_8h_source.html">db_v2x.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for db_manager.h:</div>
 <div class="dyncontent">
 <div class="center"><img src="db__manager_8h__incl.png" border="0" usemap="#src_2framework_2include_2db__manager_8h" alt=""/></div>
 <map name="src_2framework_2include_2db__manager_8h" id="src_2framework_2include_2db__manager_8h">
-<area shape="rect" title=" " alt="" coords="148,5,315,47"/>
-<area shape="rect" href="type_8h.html" title=" " alt="" coords="391,95,453,121"/>
-<area shape="rect" href="db__v2x_8h.html" title=" " alt="" coords="143,95,224,121"/>
-<area shape="rect" title=" " alt="" coords="101,169,167,196"/>
-<area shape="rect" title=" " alt="" coords="5,169,76,196"/>
-<area shape="rect" title=" " alt="" coords="192,169,263,196"/>
-<area shape="rect" title=" " alt="" coords="287,169,362,196"/>
-<area shape="rect" title=" " alt="" coords="387,169,457,196"/>
-<area shape="rect" title=" " alt="" coords="482,169,565,196"/>
-<area shape="rect" title=" " alt="" coords="589,169,663,196"/>
-<area shape="rect" title=" " alt="" coords="688,169,775,196"/>
-<area shape="rect" title=" " alt="" coords="799,169,883,196"/>
-<area shape="rect" title=" " alt="" coords="907,169,982,196"/>
+<area shape="rect" title=" " alt="" coords="650,5,817,47"/>
+<area shape="rect" href="type_8h.html" title=" " alt="" coords="499,95,562,121"/>
+<area shape="rect" href="config_8h.html" title=" " alt="" coords="697,95,770,121"/>
+<area shape="rect" href="db__v2x_8h.html" title=" " alt="" coords="850,95,931,121"/>
+<area shape="rect" title=" " alt="" coords="5,169,72,196"/>
+<area shape="rect" title=" " alt="" coords="911,169,982,196"/>
+<area shape="rect" title=" " alt="" coords="97,169,167,196"/>
+<area shape="rect" title=" " alt="" coords="192,169,267,196"/>
+<area shape="rect" title=" " alt="" coords="291,169,362,196"/>
+<area shape="rect" title=" " alt="" coords="387,169,469,196"/>
+<area shape="rect" title=" " alt="" coords="493,169,568,196"/>
+<area shape="rect" title=" " alt="" coords="593,169,679,196"/>
+<area shape="rect" title=" " alt="" coords="703,169,787,196"/>
+<area shape="rect" title=" " alt="" coords="812,169,887,196"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -100,11 +104,16 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="db__manager_8h__dep__incl.png" border="0" usemap="#src_2framework_2include_2db__manager_8hdep" alt=""/></div>
 <map name="src_2framework_2include_2db__manager_8hdep" id="src_2framework_2include_2db__manager_8hdep">
-<area shape="rect" title=" " alt="" coords="172,5,339,47"/>
-<area shape="rect" href="cli__db_8c.html" title=" " alt="" coords="5,102,153,129"/>
-<area shape="rect" href="db__manager_8c.html" title=" " alt="" coords="177,95,333,136"/>
-<area shape="rect" href="framework_8h.html" title=" " alt="" coords="357,95,524,136"/>
-<area shape="rect" href="main_8c.html" title=" " alt="" coords="379,184,503,211"/>
+<area shape="rect" title=" " alt="" coords="726,5,893,47"/>
+<area shape="rect" href="cli__db_8c.html" title=" " alt="" coords="144,273,292,300"/>
+<area shape="rect" href="cli__msg_8c.html" title=" " alt="" coords="316,273,476,300"/>
+<area shape="rect" href="cli__platooning_8c.html" title=" " alt="" coords="816,273,1017,300"/>
+<area shape="rect" href="db__manager_8c.html" title=" " alt="" coords="28,184,184,225"/>
+<area shape="rect" href="framework_8h.html" title=" " alt="" coords="493,95,660,136"/>
+<area shape="rect" href="msg__manager_8c.html" title=" " alt="" coords="954,184,1134,225"/>
+<area shape="rect" href="app_8h.html" title=" " alt="" coords="310,191,477,218"/>
+<area shape="rect" href="framework_8c.html" title=" " alt="" coords="676,191,879,218"/>
+<area shape="rect" href="time__manager_8c.html" title=" " alt="" coords="501,184,652,225"/>
 </map>
 </div>
 </div>
@@ -112,77 +121,269 @@ This graph shows which files directly or indirectly include this file:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_t</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structDB__MANAGER__WRITE__t.html">DB_MANAGER_WRITE_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structDB__MANAGER__ARCHIVE__t.html">DB_MANAGER_ARCHIVE_t</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structDB__MANAGER__READ__t.html">DB_MANAGER_READ_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structDB__MANAGER__TASK__t.html">DB_MANAGER_TASK_t</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structDB__MANAGER__EVENT__MSG__t.html">DB_MANAGER_EVENT_MSG_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structDB__MANAGER__WRITE.html">DB_MANAGER_WRITE</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structDB__MANAGER__t.html">DB_MANAGER_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structDB__MANAGER__READ.html">DB_MANAGER_READ</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structDB__MANAGER.html">DB_MANAGER</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:ad7a22dd98fb60e4a56d442c18435ef0c"><td class="memItemLeft" align="right" valign="top"><a id="ad7a22dd98fb60e4a56d442c18435ef0c"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_DB_V2X_DEFAULT_DEVICE_ID</b>&#160;&#160;&#160;0x23040015</td></tr>
+<tr class="separator:ad7a22dd98fb60e4a56d442c18435ef0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab8a7a0af1d1f097734fd074f1fe86ab6"><td class="memItemLeft" align="right" valign="top"><a id="ab8a7a0af1d1f097734fd074f1fe86ab6"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_DB_V2X_DEFAULT_TIMESTAMP</b>&#160;&#160;&#160;2023032314344766828</td></tr>
+<tr class="separator:ab8a7a0af1d1f097734fd074f1fe86ab6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9652ecb66e8d8450a449e26f67c2a19"><td class="memItemLeft" align="right" valign="top"><a id="ae9652ecb66e8d8450a449e26f67c2a19"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_DB_V2X_DEFAULT_HW_VER</b>&#160;&#160;&#160;0x0001</td></tr>
+<tr class="separator:ae9652ecb66e8d8450a449e26f67c2a19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58055e682e0167a4b8b29a1b28697a6a"><td class="memItemLeft" align="right" valign="top"><a id="a58055e682e0167a4b8b29a1b28697a6a"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_DB_V2X_DEFAULT_SW_VER</b>&#160;&#160;&#160;0x0001</td></tr>
+<tr class="separator:a58055e682e0167a4b8b29a1b28697a6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad733f31be192ab278f3df7b46b3ecc6"><td class="memItemLeft" align="right" valign="top"><a id="aad733f31be192ab278f3df7b46b3ecc6"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_DB_V2X_DEFAULT_PAYLOAD_LEN</b>&#160;&#160;&#160;1024</td></tr>
+<tr class="separator:aad733f31be192ab278f3df7b46b3ecc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:ab8cfc3db1d574e670fde5efbb9347530"><td class="memItemLeft" align="right" valign="top"><a id="ab8cfc3db1d574e670fde5efbb9347530"></a>
-typedef struct <a class="el" href="structDB__MANAGER__MSG__t.html">DB_MANAGER_MSG_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_MSG_T</b></td></tr>
-<tr class="separator:ab8cfc3db1d574e670fde5efbb9347530"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aede736e19c75dc6e8d6c6c5887e9abb4"><td class="memItemLeft" align="right" valign="top"><a id="aede736e19c75dc6e8d6c6c5887e9abb4"></a>
-typedef struct <a class="el" href="structDB__MANAGER__ARCHIVE__t.html">DB_MANAGER_ARCHIVE_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_ARCHIVE_T</b></td></tr>
-<tr class="separator:aede736e19c75dc6e8d6c6c5887e9abb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae3417f71076b9a096aaca14c58c081e5"><td class="memItemLeft" align="right" valign="top"><a id="ae3417f71076b9a096aaca14c58c081e5"></a>
-typedef struct <a class="el" href="structDB__MANAGER__TASK__t.html">DB_MANAGER_TASK_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_TASK_T</b></td></tr>
-<tr class="separator:ae3417f71076b9a096aaca14c58c081e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a87d002c29878e7c48be0aa44163a597d"><td class="memItemLeft" align="right" valign="top"><a id="a87d002c29878e7c48be0aa44163a597d"></a>
-typedef struct <a class="el" href="structDB__MANAGER__WRITE.html">DB_MANAGER_WRITE</a>&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_WRITE_T</b></td></tr>
-<tr class="separator:a87d002c29878e7c48be0aa44163a597d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a75754eb045ddc6ca5c6f687a6b350b03"><td class="memItemLeft" align="right" valign="top"><a id="a75754eb045ddc6ca5c6f687a6b350b03"></a>
-typedef struct <a class="el" href="structDB__MANAGER__READ.html">DB_MANAGER_READ</a>&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_READ_T</b></td></tr>
-<tr class="separator:a75754eb045ddc6ca5c6f687a6b350b03"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0b6c60a66b05663771bb24ba80018d78"><td class="memItemLeft" align="right" valign="top"><a id="a0b6c60a66b05663771bb24ba80018d78"></a>
-typedef struct <a class="el" href="structDB__MANAGER.html">DB_MANAGER</a>&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_T</b></td></tr>
-<tr class="separator:a0b6c60a66b05663771bb24ba80018d78"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad58ab3b32728304d3adf1c9b7fcf530d"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structDB__MANAGER__WRITE__t.html">DB_MANAGER_WRITE_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="db__manager_8h.html#ad58ab3b32728304d3adf1c9b7fcf530d">DB_MANAGER_WRITE_T</a></td></tr>
+<tr class="separator:ad58ab3b32728304d3adf1c9b7fcf530d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d012d2b808f935ec447c18e39f44943"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structDB__MANAGER__READ__t.html">DB_MANAGER_READ_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="db__manager_8h.html#a2d012d2b808f935ec447c18e39f44943">DB_MANAGER_READ_T</a></td></tr>
+<tr class="separator:a2d012d2b808f935ec447c18e39f44943"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76c3b204acb13e69808aaff782621a5d"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structDB__MANAGER__EVENT__MSG__t.html">DB_MANAGER_EVENT_MSG_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="db__manager_8h.html#a76c3b204acb13e69808aaff782621a5d">DB_MANAGER_EVENT_MSG_T</a></td></tr>
+<tr class="separator:a76c3b204acb13e69808aaff782621a5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7edd3e7d7e16895300f8f96c8b559279"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structDB__MANAGER__t.html">DB_MANAGER_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a></td></tr>
+<tr class="separator:a7edd3e7d7e16895300f8f96c8b559279"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a33a7795723fd011f073321c36dc2a960"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="db__manager_8h.html#a33a7795723fd011f073321c36dc2a960">DB_MANAGER_FILE_TYPE_E</a> { <br />
+&#160;&#160;<b>DB_MANAGER_FILE_TYPE_UNKNOWN</b> = 0x0000, 
+<b>DB_MANAGER_FILE_TYPE_TXT</b> = 0x0001, 
+<b>DB_MANAGER_FILE_TYPE_CSV</b> = 0x0002, 
+<b>DB_MANAGER_FILE_TYPE_SQLITE</b> = 0x0003, 
+<br />
+&#160;&#160;<b>DB_MANAGER_FILE_TYPE_UNDEFINED_1</b>, 
+<b>DB_MANAGER_FILE_TYPE_UNDEFINED_2</b>, 
+<b>DB_MANAGER_FILE_TYPE_UNDEFINED_3</b>, 
+<b>DB_MANAGER_FILE_TYPE_MAX</b> = 0xFFFF
+<br />
+ }</td></tr>
+<tr class="separator:a33a7795723fd011f073321c36dc2a960"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abbb159d0c23ae9ba674fd425c516914c"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="db__manager_8h.html#abbb159d0c23ae9ba674fd425c516914c">DB_MANAGER_COMM_MSG_TYPE_E</a> { <b>DB_MANAGER_COMM_MSG_TYPE_UNKNOW</b> = 0x0000, 
+<b>DB_MANAGER_COMM_MSG_TYPE_TX</b> = 0x0001, 
+<b>DB_MANAGER_COMM_MSG_TYPE_RX</b> = 0x0002, 
+<b>DB_MANAGER_COMM_MSG_TYPE_MAX</b> = 0xFFFF
+ }</td></tr>
+<tr class="separator:abbb159d0c23ae9ba674fd425c516914c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48bd2afe38fe5dfd12daa5b3407887cf"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="db__manager_8h.html#a48bd2afe38fe5dfd12daa5b3407887cf">DB_MANAGER_PROC_E</a> { <br />
+&#160;&#160;<b>DB_MANAGER_PROC_UNKNOWN</b> = 0x0000, 
+<b>DB_MANAGER_PROC_WRITE</b> = 0x0001, 
+<b>DB_MANAGER_PROC_READ</b> = 0x0002, 
+<b>DB_MANAGER_PROC_CONVERT</b> = 0x0003, 
+<br />
+&#160;&#160;<b>DB_MANAGER_PROC_MAX</b> = 0xFFFF
+<br />
+ }</td></tr>
+<tr class="separator:a48bd2afe38fe5dfd12daa5b3407887cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a32c7b9c457c6b59b9e31496e00b916a0"><td class="memItemLeft" align="right" valign="top"><a id="a32c7b9c457c6b59b9e31496e00b916a0"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Write</b> (<a class="el" href="structDB__MANAGER__WRITE.html">DB_MANAGER_WRITE_T</a> *pstDbManagerWrite, <a class="el" href="db__v2x_8h.html#a29f3cc9a2608a375609b7c7f6e1473be">DB_V2X_T</a> *pstDbV2x, void *pPayload)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Write</b> (<a class="el" href="db__manager_8h.html#ad58ab3b32728304d3adf1c9b7fcf530d">DB_MANAGER_WRITE_T</a> *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void *pPayload)</td></tr>
 <tr class="separator:a32c7b9c457c6b59b9e31496e00b916a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac2050f377d4297de3fc2bc008de89563"><td class="memItemLeft" align="right" valign="top"><a id="ac2050f377d4297de3fc2bc008de89563"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Read</b> (<a class="el" href="structDB__MANAGER__READ.html">DB_MANAGER_READ_T</a> *pstDbManagerRead, <a class="el" href="db__v2x_8h.html#a29f3cc9a2608a375609b7c7f6e1473be">DB_V2X_T</a> *pstDbV2x, void *pPayload)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Read</b> (<a class="el" href="db__manager_8h.html#a2d012d2b808f935ec447c18e39f44943">DB_MANAGER_READ_T</a> *pstDbManagerRead, DB_V2X_T *pstDbV2x, void *pPayload)</td></tr>
 <tr class="separator:ac2050f377d4297de3fc2bc008de89563"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a724fd6580d3f2dddd8b6b14dfbdf02f4"><td class="memItemLeft" align="right" valign="top"><a id="a724fd6580d3f2dddd8b6b14dfbdf02f4"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Converter</b> (<a class="el" href="structDB__MANAGER__READ.html">DB_MANAGER_READ_T</a> *pstDbManagerRead, <a class="el" href="structDB__MANAGER__WRITE.html">DB_MANAGER_WRITE_T</a> *pstDbManagerWrite, <a class="el" href="db__v2x_8h.html#a29f3cc9a2608a375609b7c7f6e1473be">DB_V2X_T</a> *pstDbV2x, void *pPayload)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Converter</b> (<a class="el" href="db__manager_8h.html#a2d012d2b808f935ec447c18e39f44943">DB_MANAGER_READ_T</a> *pstDbManagerRead, <a class="el" href="db__manager_8h.html#ad58ab3b32728304d3adf1c9b7fcf530d">DB_MANAGER_WRITE_T</a> *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void *pPayload)</td></tr>
 <tr class="separator:a724fd6580d3f2dddd8b6b14dfbdf02f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9be0364c923b073f7ff0b66c239170f9"><td class="memItemLeft" align="right" valign="top"><a id="a9be0364c923b073f7ff0b66c239170f9"></a>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_SetLog</b> (<a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a> *pstDbManager)</td></tr>
+<tr class="separator:a9be0364c923b073f7ff0b66c239170f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae0cea866c49fe97f018db819d9ae313a"><td class="memItemLeft" align="right" valign="top"><a id="ae0cea866c49fe97f018db819d9ae313a"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Open</b> (<a class="el" href="structDB__MANAGER.html">DB_MANAGER_T</a> *pstDbManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Open</b> (<a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a> *pstDbManager)</td></tr>
 <tr class="separator:ae0cea866c49fe97f018db819d9ae313a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac2aa089984c24d0538c2b6ac89cd4cac"><td class="memItemLeft" align="right" valign="top"><a id="ac2aa089984c24d0538c2b6ac89cd4cac"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Close</b> (<a class="el" href="structDB__MANAGER.html">DB_MANAGER_T</a> *pstDbManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Close</b> (<a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a> *pstDbManager)</td></tr>
 <tr class="separator:ac2aa089984c24d0538c2b6ac89cd4cac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a99b1f01182b4a10e2252433f15dc3c4c"><td class="memItemLeft" align="right" valign="top"><a id="a99b1f01182b4a10e2252433f15dc3c4c"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Start</b> (<a class="el" href="structDB__MANAGER.html">DB_MANAGER_T</a> *pstDbManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Start</b> (<a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a> *pstDbManager)</td></tr>
 <tr class="separator:a99b1f01182b4a10e2252433f15dc3c4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa7dca44fc3ac3a4bd3e2923626e2a568"><td class="memItemLeft" align="right" valign="top"><a id="aa7dca44fc3ac3a4bd3e2923626e2a568"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Stop</b> (<a class="el" href="structDB__MANAGER.html">DB_MANAGER_T</a> *pstDbManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Stop</b> (<a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a> *pstDbManager)</td></tr>
 <tr class="separator:aa7dca44fc3ac3a4bd3e2923626e2a568"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66457c251ed7d163da245eb15f86c99a"><td class="memItemLeft" align="right" valign="top"><a id="a66457c251ed7d163da245eb15f86c99a"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Status</b> (<a class="el" href="structDB__MANAGER.html">DB_MANAGER_T</a> *pstDbManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Status</b> (<a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a> *pstDbManager)</td></tr>
 <tr class="separator:a66457c251ed7d163da245eb15f86c99a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a41b6153db3234a6881d7934b33d9d4ef"><td class="memItemLeft" align="right" valign="top"><a id="a41b6153db3234a6881d7934b33d9d4ef"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Init</b> (<a class="el" href="structDB__MANAGER.html">DB_MANAGER_T</a> *pstDbManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_Init</b> (<a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a> *pstDbManager)</td></tr>
 <tr class="separator:a41b6153db3234a6881d7934b33d9d4ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad0caa475c41e8989cfba75cfcb20352"><td class="memItemLeft" align="right" valign="top"><a id="aad0caa475c41e8989cfba75cfcb20352"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_DeInit</b> (<a class="el" href="structDB__MANAGER.html">DB_MANAGER_T</a> *pstDbManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>DB_MANAGER_DeInit</b> (<a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a> *pstDbManager)</td></tr>
 <tr class="separator:aad0caa475c41e8989cfba75cfcb20352"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><dl class="section note"><dt>Note</dt><dd></dd></dl>
 <p>DB Manager Header </p>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Typedef Documentation</h2>
+<a id="a76c3b204acb13e69808aaff782621a5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76c3b204acb13e69808aaff782621a5d">&#9670;&nbsp;</a></span>DB_MANAGER_EVENT_MSG_T</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structDB__MANAGER__EVENT__MSG__t.html">DB_MANAGER_EVENT_MSG_t</a> <a class="el" href="db__manager_8h.html#a76c3b204acb13e69808aaff782621a5d">DB_MANAGER_EVENT_MSG_T</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>DB_MANAGER_EVENT_MSG_T </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pstDbManagerWrite</td><td></td></tr>
+    <tr><td class="paramname">pstDbV2x</td><td></td></tr>
+    <tr><td class="paramname">pPayload</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a2d012d2b808f935ec447c18e39f44943"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d012d2b808f935ec447c18e39f44943">&#9670;&nbsp;</a></span>DB_MANAGER_READ_T</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structDB__MANAGER__READ__t.html">DB_MANAGER_READ_t</a> <a class="el" href="db__manager_8h.html#a2d012d2b808f935ec447c18e39f44943">DB_MANAGER_READ_T</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>DB_MANAGER_READ_T </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">eFileType</td><td></td></tr>
+    <tr><td class="paramname">eProc</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a7edd3e7d7e16895300f8f96c8b559279"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7edd3e7d7e16895300f8f96c8b559279">&#9670;&nbsp;</a></span>DB_MANAGER_T</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structDB__MANAGER__t.html">DB_MANAGER_t</a> <a class="el" href="db__manager_8h.html#a7edd3e7d7e16895300f8f96c8b559279">DB_MANAGER_T</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>DB_MANAGER_T </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">eFileType</td><td></td></tr>
+    <tr><td class="paramname">unReserved</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad58ab3b32728304d3adf1c9b7fcf530d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad58ab3b32728304d3adf1c9b7fcf530d">&#9670;&nbsp;</a></span>DB_MANAGER_WRITE_T</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structDB__MANAGER__WRITE__t.html">DB_MANAGER_WRITE_t</a> <a class="el" href="db__manager_8h.html#ad58ab3b32728304d3adf1c9b7fcf530d">DB_MANAGER_WRITE_T</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>DB_MANAGER_WRITE_T </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">eFileType</td><td></td></tr>
+    <tr><td class="paramname">eCommType</td><td></td></tr>
+    <tr><td class="paramname">eProc</td><td></td></tr>
+    <tr><td class="paramname">unReserved</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="abbb159d0c23ae9ba674fd425c516914c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abbb159d0c23ae9ba674fd425c516914c">&#9670;&nbsp;</a></span>DB_MANAGER_COMM_MSG_TYPE_E</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="db__manager_8h.html#abbb159d0c23ae9ba674fd425c516914c">DB_MANAGER_COMM_MSG_TYPE_E</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>DB_MANAGER_COMM_MSG_TYPE_E </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">DB_MANAGER_COMM_MSG_TYPE_TX</td><td></td></tr>
+    <tr><td class="paramname">DB_MANAGER_COMM_MSG_TYPE_RX</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a33a7795723fd011f073321c36dc2a960"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a33a7795723fd011f073321c36dc2a960">&#9670;&nbsp;</a></span>DB_MANAGER_FILE_TYPE_E</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="db__manager_8h.html#a33a7795723fd011f073321c36dc2a960">DB_MANAGER_FILE_TYPE_E</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>DB_MANAGER_FILE_TYPE_E </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">DB_MANAGER_FILE_TYPE_TXT</td><td></td></tr>
+    <tr><td class="paramname">DB_MANAGER_FILE_TYPE_CSV</td><td></td></tr>
+    <tr><td class="paramname">DB_MANAGER_FILE_TYPE_SQLITE</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a48bd2afe38fe5dfd12daa5b3407887cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48bd2afe38fe5dfd12daa5b3407887cf">&#9670;&nbsp;</a></span>DB_MANAGER_PROC_E</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="db__manager_8h.html#a48bd2afe38fe5dfd12daa5b3407887cf">DB_MANAGER_PROC_E</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>DB_MANAGER_PROC_E </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">DB_MANAGER_PROC_WRITE</td><td></td></tr>
+    <tr><td class="paramname">DB_MANAGER_PROC_CONVERT</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+</div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

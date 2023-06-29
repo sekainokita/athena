@@ -56,8 +56,11 @@
 #include <sys/msg.h>
 
 /***************************** Definition ************************************/
-#define DB_MANAGER_TX_FILE     "db_v2x_tx_temp_writing.txt"
-#define DB_MANAGER_RX_FILE     "db_v2x_rx_temp_writing.txt"
+#define DB_MANAGER_TXT_TX_FILE     "db_v2x_tx_temp_writing.txt"
+#define DB_MANAGER_TXT_RX_FILE     "db_v2x_rx_temp_writing.txt"
+
+#define DB_MANAGER_CSV_TX_FILE     "db_v2x_tx_temp_writing.csv"
+#define DB_MANAGER_CSV_RX_FILE     "db_v2x_rx_temp_writing.csv"
 
 /***************************** Enum and Structure ****************************/
 
@@ -75,7 +78,7 @@ static bool s_bDbMgrLog = OFF;
 
 /***************************** Function  *************************************/
 
-static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
+static int32_t P_DB_MANAGER_WriteTxt(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
     char *pchPayload = NULL;
@@ -116,7 +119,7 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                 }
                 fprintf(sh_pDbMgrTxMsg, "], ");
 
-                fprintf(sh_pDbMgrTxMsg, "ulPayloadCrc32[0x%x]", pstEventMsg->pstDbV2x->ulPacketCrc32);
+                fprintf(sh_pDbMgrTxMsg, "unTotalPacketCrc32[0x%x]", pstEventMsg->pstDbManagerWrite->unCrc32);
                 fprintf(sh_pDbMgrTxMsg, "\r\n");
 
                 nRet = fflush(sh_pDbMgrTxMsg);
@@ -125,7 +128,10 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                     PrintError("fflush() is failed! [unRet:%d]", nRet);
                 }
 
-                free(pchPayload);
+                if(pchPayload != NULL)
+                {
+                    free(pchPayload);
+                }
             }
             else
             {
@@ -168,7 +174,7 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                 }
                 fprintf(sh_pDbMgrRxMsg, "], ");
 
-                fprintf(sh_pDbMgrRxMsg, "ulPayloadCrc32[0x%x]", pstEventMsg->pstDbV2x->ulPacketCrc32);
+                fprintf(sh_pDbMgrRxMsg, "unTotalPacketCrc32[0x%x]", pstEventMsg->pstDbManagerWrite->unCrc32);
                 fprintf(sh_pDbMgrRxMsg, "\r\n");
 
                 nRet = fflush(sh_pDbMgrRxMsg);
@@ -177,11 +183,23 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                     PrintError("fflush() is failed! [unRet:%d]", nRet);
                 }
 
-                free(pchPayload);
+                if(pchPayload != NULL)
+                {
+                    free(pchPayload);
+                }
+
+                if(pstEventMsg->pPayload != NULL)
+                {
+                    if(s_bDbMgrLog == ON)
+                    {
+                        PrintDebug("free [%p] allocated at P_MSG_MANAGER_SendRxMsgToDbMgr()", pstEventMsg->pPayload);
+                    }
+                    free(pstEventMsg->pPayload);
+                }
             }
             else
             {
-                PrintError("sh_pDbMgrTxMsg is NULL!!, check whethter sh_pDbMgrTxMsg is opened before.");
+                PrintError("sh_pDbMgrRxMsg is NULL!!, check whethter sh_pDbMgrRxMsg is opened before.");
             }
 
             break;
@@ -194,6 +212,226 @@ static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
     return nRet;
 }
 
+static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    UNUSED(pstDbManager);
+
+    if(sh_pDbMgrTxMsg == NULL)
+    {
+        sh_pDbMgrTxMsg = fopen(DB_MANAGER_CSV_TX_FILE, "a+");
+        if(sh_pDbMgrTxMsg == NULL)
+        {
+            PrintError("fopen() is failed!!");
+        }
+        else
+        {
+            PrintTrace("DB_MANAGER_TX_FILE[%s] is opened.", DB_MANAGER_CSV_TX_FILE);
+            nRet = FRAMEWORK_OK;
+        }
+    }
+
+    if(sh_pDbMgrRxMsg == NULL)
+    {
+        sh_pDbMgrRxMsg = fopen(DB_MANAGER_CSV_RX_FILE, "a+");
+        if(sh_pDbMgrRxMsg == NULL)
+        {
+            PrintError("fopen() is failed!!");
+        }
+        else
+        {
+            PrintTrace("DB_MANAGER_RX_FILE[%s] is opened.", DB_MANAGER_CSV_RX_FILE);
+            nRet = FRAMEWORK_OK;
+        }
+    }
+
+    if (sh_pDbMgrTxMsg != NULL)
+    {
+        fprintf(sh_pDbMgrTxMsg, "eDeviceType,");
+        fprintf(sh_pDbMgrTxMsg, "eTeleCommType,");
+        fprintf(sh_pDbMgrTxMsg, "unDeviceId,");
+        fprintf(sh_pDbMgrTxMsg, "ulTimeStamp,");
+        fprintf(sh_pDbMgrTxMsg, "eServiceId,");
+        fprintf(sh_pDbMgrTxMsg, "eActionType,");
+        fprintf(sh_pDbMgrTxMsg, "eRegionId,");
+        fprintf(sh_pDbMgrTxMsg, "ePayloadType,");
+        fprintf(sh_pDbMgrTxMsg, "eCommId,");
+        fprintf(sh_pDbMgrTxMsg, "usDbVer,");
+        fprintf(sh_pDbMgrTxMsg, "usHwVer,");
+        fprintf(sh_pDbMgrTxMsg, "usSwVer,");
+        fprintf(sh_pDbMgrTxMsg, "ulPayloadLength,");
+        fprintf(sh_pDbMgrTxMsg, "cPayload,");
+        fprintf(sh_pDbMgrTxMsg, "unTotalPacketCrc32");
+        fprintf(sh_pDbMgrTxMsg, "\r\n");
+    }
+
+    nRet = fflush(sh_pDbMgrTxMsg);
+    if (nRet < 0)
+    {
+        PrintError("fflush() is failed! [unRet:%d]", nRet);
+    }
+
+    if (sh_pDbMgrRxMsg != NULL)
+    {
+        fprintf(sh_pDbMgrRxMsg, "eDeviceType,");
+        fprintf(sh_pDbMgrRxMsg, "eTeleCommType,");
+        fprintf(sh_pDbMgrRxMsg, "unDeviceId,");
+        fprintf(sh_pDbMgrRxMsg, "ulTimeStamp,");
+        fprintf(sh_pDbMgrRxMsg, "eServiceId,");
+        fprintf(sh_pDbMgrRxMsg, "eActionType,");
+        fprintf(sh_pDbMgrRxMsg, "eRegionId,");
+        fprintf(sh_pDbMgrRxMsg, "ePayloadType,");
+        fprintf(sh_pDbMgrRxMsg, "eCommId,");
+        fprintf(sh_pDbMgrRxMsg, "usDbVer,");
+        fprintf(sh_pDbMgrRxMsg, "usHwVer,");
+        fprintf(sh_pDbMgrRxMsg, "usSwVer,");
+        fprintf(sh_pDbMgrRxMsg, "ulPayloadLength,");
+        fprintf(sh_pDbMgrRxMsg, "cPayload,");
+        fprintf(sh_pDbMgrRxMsg, "unTotalPacketCrc32");
+        fprintf(sh_pDbMgrRxMsg, "\r\n");
+    }
+
+    nRet = fflush(sh_pDbMgrRxMsg);
+    if (nRet < 0)
+    {
+        PrintError("fflush() is failed! [unRet:%d]", nRet);
+    }
+
+    return nRet;
+}
+
+static int32_t P_DB_MANAGER_WriteCsv(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    char *pchPayload = NULL;
+
+    switch(pstEventMsg->pstDbManagerWrite->eCommMsgType)
+    {
+        case DB_MANAGER_COMM_MSG_TYPE_TX:
+        {
+            if (sh_pDbMgrTxMsg != NULL)
+            {
+                pchPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
+                if(pchPayload == NULL)
+                {
+                    PrintError("malloc() is failed! [NULL]");
+                    return nRet;
+                }
+
+                memcpy(pchPayload, (char *)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
+
+                fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eDeviceType);
+                fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eTeleCommType);
+                fprintf(sh_pDbMgrTxMsg, "0x%x,", pstEventMsg->pstDbV2x->unDeviceId);
+                fprintf(sh_pDbMgrTxMsg, "%ld,", pstEventMsg->pstDbV2x->ulTimeStamp);
+                fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eServiceId);
+                fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eActionType);
+                fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eRegionId);
+                fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->ePayloadType);
+                fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eCommId);
+                fprintf(sh_pDbMgrTxMsg, "%d.%d,", pstEventMsg->pstDbV2x->usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, pstEventMsg->pstDbV2x->usDbVer & CLI_DB_V2X_MINOR_MASK);
+                fprintf(sh_pDbMgrTxMsg, "0x%x,", pstEventMsg->pstDbV2x->usHwVer);
+                fprintf(sh_pDbMgrTxMsg, "0x%x,", pstEventMsg->pstDbV2x->usSwVer);
+                fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->ulPayloadLength);
+
+                for(int i = 0; i < (int)pstEventMsg->pstDbV2x->ulPayloadLength; i++)
+                {
+                      fprintf(sh_pDbMgrTxMsg, "%d ", pchPayload[i]);
+                }
+                fprintf(sh_pDbMgrTxMsg, ",");
+
+                fprintf(sh_pDbMgrTxMsg, "0x%x", pstEventMsg->pstDbManagerWrite->unCrc32);
+                fprintf(sh_pDbMgrTxMsg, "\r\n");
+
+                nRet = fflush(sh_pDbMgrTxMsg);
+                if (nRet < 0)
+                {
+                    PrintError("fflush() is failed! [unRet:%d]", nRet);
+                }
+
+                if(pchPayload != NULL)
+                {
+                    free(pchPayload);
+                }
+            }
+            else
+            {
+                PrintError("sh_pDbMgrTxMsg is NULL!!, check whethter sh_pDbMgrTxMsg is opened before.");
+            }
+
+            break;
+        }
+        case DB_MANAGER_COMM_MSG_TYPE_RX:
+        {
+            if (sh_pDbMgrRxMsg != NULL)
+            {
+                pchPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
+                if(pchPayload == NULL)
+                {
+                    PrintError("malloc() is failed! [NULL]");
+                    return nRet;
+                }
+
+                memcpy(pchPayload, (char *)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
+
+                fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eDeviceType);
+                fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eTeleCommType);
+                fprintf(sh_pDbMgrRxMsg, "0x%x,", pstEventMsg->pstDbV2x->unDeviceId);
+                fprintf(sh_pDbMgrRxMsg, "%ld,", pstEventMsg->pstDbV2x->ulTimeStamp);
+                fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eServiceId);
+                fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eActionType);
+                fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eRegionId);
+                fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->ePayloadType);
+                fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eCommId);
+                fprintf(sh_pDbMgrRxMsg, "%d.%d,", pstEventMsg->pstDbV2x->usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, pstEventMsg->pstDbV2x->usDbVer & CLI_DB_V2X_MINOR_MASK);
+                fprintf(sh_pDbMgrRxMsg, "0x%x,", pstEventMsg->pstDbV2x->usHwVer);
+                fprintf(sh_pDbMgrRxMsg, "0x%x,", pstEventMsg->pstDbV2x->usSwVer);
+                fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->ulPayloadLength);
+
+                for(int i = 0; i < (int)pstEventMsg->pstDbV2x->ulPayloadLength; i++)
+                {
+                      fprintf(sh_pDbMgrRxMsg, "%d ", pchPayload[i]);
+                }
+                fprintf(sh_pDbMgrRxMsg, ",");
+
+                fprintf(sh_pDbMgrRxMsg, "0x%x", pstEventMsg->pstDbManagerWrite->unCrc32);
+                fprintf(sh_pDbMgrRxMsg, "\r\n");
+
+                nRet = fflush(sh_pDbMgrRxMsg);
+                if (nRet < 0)
+                {
+                    PrintError("fflush() is failed! [unRet:%d]", nRet);
+                }
+
+                if(pchPayload != NULL)
+                {
+                    free(pchPayload);
+                }
+
+                if(pstEventMsg->pPayload != NULL)
+                {
+                    if(s_bDbMgrLog == ON)
+                    {
+                        PrintDebug("free [%p] allocated at P_MSG_MANAGER_SendRxMsgToDbMgr()", pstEventMsg->pPayload);
+                    }
+                    free(pstEventMsg->pPayload);
+                }
+            }
+            else
+            {
+                PrintError("sh_pDbMgrRxMsg is NULL!!, check whethter sh_pDbMgrRxMsg is opened before.");
+            }
+
+            break;
+        }
+        default:
+            PrintError("unknown eCommMsgType [%d]", pstEventMsg->pstDbManagerWrite->eCommMsgType);
+            break;
+    }
+
+    return nRet;
+}
 
 static void *P_DB_MANAGER_Task(void *arg)
 {
@@ -227,17 +465,21 @@ static void *P_DB_MANAGER_Task(void *arg)
                             PrintDebug("DB_MANAGER_FILE_TYPE_TXT [%d]", stEventMsg.pstDbManagerWrite->eFileType);
                         }
 
-                        nRet = P_DB_MANAGER_Write(&stEventMsg);
+                        nRet = P_DB_MANAGER_WriteTxt(&stEventMsg);
                         if(nRet != FRAMEWORK_OK)
                         {
-                            PrintError("P_DB_MANAGER_Write() is failed! [unRet:%d]", nRet);
+                            PrintError("P_DB_MANAGER_WriteTxt() is failed! [unRet:%d]", nRet);
                         }
                         break;
                     }
                     case DB_MANAGER_FILE_TYPE_CSV:
                     {
                         PrintDebug("DB_MANAGER_FILE_TYPE_CSV [%d]", stEventMsg.pstDbManagerWrite->eFileType);
-                        PrintWarn("TODO");
+                        nRet = P_DB_MANAGER_WriteCsv(&stEventMsg);
+                        if(nRet != FRAMEWORK_OK)
+                        {
+                            PrintError("P_DB_MANAGER_WriteCsv() is failed! [unRet:%d]", nRet);
+                        }
                         break;
                     }
                     case DB_MANAGER_FILE_TYPE_SQLITE:
@@ -532,28 +774,28 @@ int32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager)
 
             if(sh_pDbMgrTxMsg == NULL)
             {
-                sh_pDbMgrTxMsg = fopen(DB_MANAGER_TX_FILE, "a+");
+                sh_pDbMgrTxMsg = fopen(DB_MANAGER_TXT_TX_FILE, "a+");
                 if(sh_pDbMgrTxMsg == NULL)
                 {
                     PrintError("fopen() is failed!!");
                 }
                 else
                 {
-                    PrintTrace("DB_MANAGER_TX_FILE[%s] is opened.", DB_MANAGER_TX_FILE);
+                    PrintTrace("DB_MANAGER_TX_FILE[%s] is opened.", DB_MANAGER_TXT_TX_FILE);
                     nRet = FRAMEWORK_OK;
                 }
             }
 
             if(sh_pDbMgrRxMsg == NULL)
             {
-                sh_pDbMgrRxMsg = fopen(DB_MANAGER_RX_FILE, "a+");
+                sh_pDbMgrRxMsg = fopen(DB_MANAGER_TXT_RX_FILE, "a+");
                 if(sh_pDbMgrRxMsg == NULL)
                 {
                     PrintError("fopen() is failed!!");
                 }
                 else
                 {
-                    PrintTrace("DB_MANAGER_RX_FILE[%s] is opened.", DB_MANAGER_RX_FILE);
+                    PrintTrace("DB_MANAGER_RX_FILE[%s] is opened.", DB_MANAGER_TXT_RX_FILE);
                     nRet = FRAMEWORK_OK;
                 }
             }
@@ -562,7 +804,13 @@ int32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager)
 
         case DB_MANAGER_FILE_TYPE_CSV:
             PrintDebug("DB_MANAGER_FILE_TYPE_CSV [%d]", pstDbManager->eFileType);
-            PrintWarn("TODO");
+
+            nRet = P_DB_MANAGER_OpenCsv(pstDbManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("P_DB_MANAGER_OpenCsv() is failed! [nRet:%d]", nRet);
+                return nRet;
+            }
             break;
 
         case DB_MANAGER_FILE_TYPE_SQLITE:
@@ -609,7 +857,7 @@ int32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager)
                 }
                 else
                 {
-                    PrintTrace("DB_MANAGER_TX_FILE[%s] is closed.", DB_MANAGER_TX_FILE);
+                    PrintTrace("DB_MANAGER_TX_FILE[%s] is closed.", DB_MANAGER_TXT_TX_FILE);
                     sh_pDbMgrTxMsg = NULL;
                     nRet = FRAMEWORK_OK;
                 }
@@ -630,7 +878,7 @@ int32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager)
                 }
                 else
                 {
-                    PrintTrace("DB_MANAGER_RX_FILE[%s] is closed.", DB_MANAGER_RX_FILE);
+                    PrintTrace("DB_MANAGER_RX_FILE[%s] is closed.", DB_MANAGER_TXT_RX_FILE);
                     sh_pDbMgrRxMsg = NULL;
                     nRet = FRAMEWORK_OK;
                 }
@@ -639,7 +887,47 @@ int32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager)
 
         case DB_MANAGER_FILE_TYPE_CSV:
             PrintDebug("DB_MANAGER_FILE_TYPE_CSV [%d]", pstDbManager->eFileType);
-            PrintWarn("TODO");
+            if(sh_pDbMgrTxMsg != NULL)
+            {
+                nRet = fflush(sh_pDbMgrTxMsg);
+                if (nRet < 0)
+                {
+                    PrintError("fflush() is failed! [unRet:%d]", nRet);
+                }
+
+                nRet = fclose(sh_pDbMgrTxMsg);
+                if (nRet < 0)
+                {
+                    PrintError("fclose() is failed! [unRet:%d]", nRet);
+                }
+                else
+                {
+                    PrintTrace("DB_MANAGER_TX_FILE[%s] is closed.", DB_MANAGER_CSV_TX_FILE);
+                    sh_pDbMgrTxMsg = NULL;
+                    nRet = FRAMEWORK_OK;
+                }
+            }
+
+            if(sh_pDbMgrRxMsg != NULL)
+            {
+                nRet = fflush(sh_pDbMgrRxMsg);
+                if (nRet < 0)
+                {
+                    PrintError("fflush() is failed! [unRet:%d]", nRet);
+                }
+
+                nRet = fclose(sh_pDbMgrRxMsg);
+                if (nRet < 0)
+                {
+                    PrintError("fclose() is failed! [unRet:%d]", nRet);
+                }
+                else
+                {
+                    PrintTrace("DB_MANAGER_RX_FILE[%s] is closed.", DB_MANAGER_CSV_RX_FILE);
+                    sh_pDbMgrRxMsg = NULL;
+                    nRet = FRAMEWORK_OK;
+                }
+            }
             break;
 
         case DB_MANAGER_FILE_TYPE_SQLITE:

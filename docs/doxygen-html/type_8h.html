@@ -104,21 +104,25 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="type_8h__dep__incl.png" border="0" usemap="#src_2include_2type_8hdep" alt=""/></div>
 <map name="src_2include_2type_8hdep" id="src_2include_2type_8hdep">
-<area shape="rect" title=" " alt="" coords="769,5,906,32"/>
-<area shape="rect" href="app_8h.html" title=" " alt="" coords="754,177,921,203"/>
-<area shape="rect" href="main_8c.html" title=" " alt="" coords="966,259,1090,285"/>
-<area shape="rect" href="cli_8h.html" title=" " alt="" coords="339,177,498,203"/>
-<area shape="rect" href="cli__util_8h.html" title=" " alt="" coords="355,80,501,121"/>
-<area shape="rect" href="db__manager_8h.html" title=" " alt="" coords="625,80,791,121"/>
-<area shape="rect" href="framework_8h.html" title=" " alt="" coords="945,169,1111,211"/>
-<area shape="rect" href="msg__manager_8h.html" title=" " alt="" coords="945,80,1111,121"/>
-<area shape="rect" href="cli__db_8c.html" title=" " alt="" coords="701,259,849,285"/>
-<area shape="rect" href="cli_8c.html" title=" " alt="" coords="5,259,131,285"/>
-<area shape="rect" href="cli__cmd_8c.html" title=" " alt="" coords="155,259,315,285"/>
-<area shape="rect" href="cli__msg_8c.html" title=" " alt="" coords="339,259,499,285"/>
-<area shape="rect" href="cli__util_8c.html" title=" " alt="" coords="523,259,677,285"/>
-<area shape="rect" href="db__manager_8c.html" title=" " alt="" coords="574,169,730,211"/>
-<area shape="rect" href="msg__manager_8c.html" title=" " alt="" coords="1135,169,1315,211"/>
+<area shape="rect" title=" " alt="" coords="642,5,779,32"/>
+<area shape="rect" href="app_8h.html" title=" " alt="" coords="927,266,1094,293"/>
+<area shape="rect" href="cli_8h.html" title=" " alt="" coords="155,266,314,293"/>
+<area shape="rect" href="cli__util_8h.html" title=" " alt="" coords="168,169,315,211"/>
+<area shape="rect" href="svc__platooning_8h_source.html" title=" " alt="" coords="577,80,730,121"/>
+<area shape="rect" href="db__manager_8h.html" title=" " alt="" coords="386,80,553,121"/>
+<area shape="rect" href="framework_8h.html" title=" " alt="" coords="927,169,1094,211"/>
+<area shape="rect" href="msg__manager_8h.html" title=" " alt="" coords="806,80,973,121"/>
+<area shape="rect" href="time__manager_8h.html" title=" " alt="" coords="1049,80,1215,121"/>
+<area shape="rect" href="cli__db_8c.html" title=" " alt="" coords="754,348,902,375"/>
+<area shape="rect" href="cli__msg_8c.html" title=" " alt="" coords="931,348,1091,375"/>
+<area shape="rect" href="cli__platooning_8c.html" title=" " alt="" coords="521,348,722,375"/>
+<area shape="rect" href="cli_8c.html" title=" " alt="" coords="5,348,131,375"/>
+<area shape="rect" href="cli__cmd_8c.html" title=" " alt="" coords="155,348,315,375"/>
+<area shape="rect" href="cli__util_8c.html" title=" " alt="" coords="339,348,493,375"/>
+<area shape="rect" href="msg__manager_8c.html" title=" " alt="" coords="491,259,671,300"/>
+<area shape="rect" href="db__manager_8c.html" title=" " alt="" coords="695,259,851,300"/>
+<area shape="rect" href="framework_8c.html" title=" " alt="" coords="1119,266,1321,293"/>
+<area shape="rect" href="time__manager_8c.html" title=" " alt="" coords="1447,259,1598,300"/>
 </map>
 </div>
 </div>
@@ -147,12 +151,24 @@ Macros</h2></td></tr>
 <tr class="memitem:a17f760256046df23dd0ab46602f04d02"><td class="memItemLeft" align="right" valign="top"><a id="a17f760256046df23dd0ab46602f04d02"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>COLOR_RESET</b>&#160;&#160;&#160;&quot;\x1b[0m&quot;</td></tr>
 <tr class="separator:a17f760256046df23dd0ab46602f04d02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c274dae01d11b855c7fbefbccb1cb53"><td class="memItemLeft" align="right" valign="top"><a id="a0c274dae01d11b855c7fbefbccb1cb53"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>FRAMEWORK_MSG_ERR</b>&#160;&#160;&#160;-1</td></tr>
+<tr class="separator:a0c274dae01d11b855c7fbefbccb1cb53"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89dd25ed1b497c15e642a7be2152d39f"><td class="memItemLeft" align="right" valign="top"><a id="a89dd25ed1b497c15e642a7be2152d39f"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>FRAMEWORK_OK</b>&#160;&#160;&#160;0</td></tr>
 <tr class="separator:a89dd25ed1b497c15e642a7be2152d39f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae2fd52ef2b6f2f742c0fffb0119638d6"><td class="memItemLeft" align="right" valign="top"><a id="ae2fd52ef2b6f2f742c0fffb0119638d6"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>FRAMEWORK_ERROR</b>&#160;&#160;&#160;1</td></tr>
 <tr class="separator:ae2fd52ef2b6f2f742c0fffb0119638d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96146b2814d6c06e227a857f30d74c14"><td class="memItemLeft" align="right" valign="top"><a id="a96146b2814d6c06e227a857f30d74c14"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>PLATFORM_OK</b>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:a96146b2814d6c06e227a857f30d74c14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12efd06fda89d6826f820e75148d8fd7"><td class="memItemLeft" align="right" valign="top"><a id="a12efd06fda89d6826f820e75148d8fd7"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>PLATFORM_ERROR</b>&#160;&#160;&#160;1</td></tr>
+<tr class="separator:a12efd06fda89d6826f820e75148d8fd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8bc42323b00384f069e44d32e397aab9"><td class="memItemLeft" align="right" valign="top"><a id="a8bc42323b00384f069e44d32e397aab9"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>APP_MSG_ERR</b>&#160;&#160;&#160;-1</td></tr>
+<tr class="separator:a8bc42323b00384f069e44d32e397aab9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a59bf2009b268e9fb48f53a5b94ddac06"><td class="memItemLeft" align="right" valign="top"><a id="a59bf2009b268e9fb48f53a5b94ddac06"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>APP_OK</b>&#160;&#160;&#160;0</td></tr>
 <tr class="separator:a59bf2009b268e9fb48f53a5b94ddac06"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -183,6 +199,18 @@ Macros</h2></td></tr>
 <tr class="memitem:a86d500a34c624c2cae56bc25a31b12f3"><td class="memItemLeft" align="right" valign="top"><a id="a86d500a34c624c2cae56bc25a31b12f3"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>UNUSED</b>(x)&#160;&#160;&#160;(void)(x)</td></tr>
 <tr class="separator:a86d500a34c624c2cae56bc25a31b12f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8cecfc5c5c054d2875c03e77b7be15d"><td class="memItemLeft" align="right" valign="top"><a id="aa8cecfc5c5c054d2875c03e77b7be15d"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>TRUE</b>&#160;&#160;&#160;true</td></tr>
+<tr class="separator:aa8cecfc5c5c054d2875c03e77b7be15d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa93f0eb578d23995850d61f7d61c55c1"><td class="memItemLeft" align="right" valign="top"><a id="aa93f0eb578d23995850d61f7d61c55c1"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>FALSE</b>&#160;&#160;&#160;FALSE</td></tr>
+<tr class="separator:aa93f0eb578d23995850d61f7d61c55c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad76d1750a6cdeebd506bfcd6752554d2"><td class="memItemLeft" align="right" valign="top"><a id="ad76d1750a6cdeebd506bfcd6752554d2"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>ON</b>&#160;&#160;&#160;true</td></tr>
+<tr class="separator:ad76d1750a6cdeebd506bfcd6752554d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29e413f6725b2ba32d165ffaa35b01e5"><td class="memItemLeft" align="right" valign="top"><a id="a29e413f6725b2ba32d165ffaa35b01e5"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>OFF</b>&#160;&#160;&#160;false</td></tr>
+<tr class="separator:a29e413f6725b2ba32d165ffaa35b01e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a8ca07ad0f20efd32d4abecdfa9366f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><b>PrintError</b>(fmt,  args...)</td></tr>
 <tr class="separator:a3a8ca07ad0f20efd32d4abecdfa9366f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a148ae81b3285f5a64c61013042c996f1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><b>PrintNotice</b>(fmt,  args...)</td></tr>

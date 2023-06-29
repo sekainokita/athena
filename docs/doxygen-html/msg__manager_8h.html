@@ -67,32 +67,36 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
+<a href="#define-members">Macros</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">msg_manager.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="type_8h_source.html">type.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="config_8h_source.html">config.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="db__v2x_8h_source.html">db_v2x.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for msg_manager.h:</div>
 <div class="dyncontent">
 <div class="center"><img src="msg__manager_8h__incl.png" border="0" usemap="#src_2framework_2include_2msg__manager_8h" alt=""/></div>
 <map name="src_2framework_2include_2msg__manager_8h" id="src_2framework_2include_2msg__manager_8h">
-<area shape="rect" title=" " alt="" coords="148,5,315,47"/>
-<area shape="rect" href="type_8h.html" title=" " alt="" coords="391,95,453,121"/>
-<area shape="rect" href="db__v2x_8h.html" title=" " alt="" coords="143,95,224,121"/>
-<area shape="rect" title=" " alt="" coords="101,169,167,196"/>
-<area shape="rect" title=" " alt="" coords="5,169,76,196"/>
-<area shape="rect" title=" " alt="" coords="192,169,263,196"/>
-<area shape="rect" title=" " alt="" coords="287,169,362,196"/>
-<area shape="rect" title=" " alt="" coords="387,169,457,196"/>
-<area shape="rect" title=" " alt="" coords="482,169,565,196"/>
-<area shape="rect" title=" " alt="" coords="589,169,663,196"/>
-<area shape="rect" title=" " alt="" coords="688,169,775,196"/>
-<area shape="rect" title=" " alt="" coords="799,169,883,196"/>
-<area shape="rect" title=" " alt="" coords="907,169,982,196"/>
+<area shape="rect" title=" " alt="" coords="650,5,817,47"/>
+<area shape="rect" href="type_8h.html" title=" " alt="" coords="499,95,562,121"/>
+<area shape="rect" href="config_8h.html" title=" " alt="" coords="697,95,770,121"/>
+<area shape="rect" href="db__v2x_8h.html" title=" " alt="" coords="850,95,931,121"/>
+<area shape="rect" title=" " alt="" coords="5,169,72,196"/>
+<area shape="rect" title=" " alt="" coords="911,169,982,196"/>
+<area shape="rect" title=" " alt="" coords="97,169,167,196"/>
+<area shape="rect" title=" " alt="" coords="192,169,267,196"/>
+<area shape="rect" title=" " alt="" coords="291,169,362,196"/>
+<area shape="rect" title=" " alt="" coords="387,169,469,196"/>
+<area shape="rect" title=" " alt="" coords="493,169,568,196"/>
+<area shape="rect" title=" " alt="" coords="593,169,679,196"/>
+<area shape="rect" title=" " alt="" coords="703,169,787,196"/>
+<area shape="rect" title=" " alt="" coords="812,169,887,196"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -100,10 +104,16 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="msg__manager_8h__dep__incl.png" border="0" usemap="#src_2framework_2include_2msg__manager_8hdep" alt=""/></div>
 <map name="src_2framework_2include_2msg__manager_8hdep" id="src_2framework_2include_2msg__manager_8hdep">
-<area shape="rect" title=" " alt="" coords="104,5,271,47"/>
-<area shape="rect" href="framework_8h.html" title=" " alt="" coords="5,95,172,136"/>
-<area shape="rect" href="msg__manager_8c.html" title=" " alt="" coords="196,95,376,136"/>
-<area shape="rect" href="main_8c.html" title=" " alt="" coords="27,184,151,211"/>
+<area shape="rect" title=" " alt="" coords="939,5,1106,47"/>
+<area shape="rect" href="cli__msg_8c.html" title=" " alt="" coords="815,273,975,300"/>
+<area shape="rect" href="framework_8h.html" title=" " alt="" coords="510,95,677,136"/>
+<area shape="rect" href="msg__manager_8c.html" title=" " alt="" coords="933,184,1113,225"/>
+<area shape="rect" href="cli__db_8c.html" title=" " alt="" coords="533,273,681,300"/>
+<area shape="rect" href="cli__platooning_8c.html" title=" " alt="" coords="307,273,509,300"/>
+<area shape="rect" href="app_8h.html" title=" " alt="" coords="510,191,677,218"/>
+<area shape="rect" href="db__manager_8c.html" title=" " alt="" coords="701,184,857,225"/>
+<area shape="rect" href="framework_8c.html" title=" " alt="" coords="5,191,208,218"/>
+<area shape="rect" href="time__manager_8c.html" title=" " alt="" coords="233,184,383,225"/>
 </map>
 </div>
 </div>
@@ -111,59 +121,322 @@ This graph shows which files directly or indirectly include this file:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMSG__MANAGER__WRITE.html">MSG_MANAGER_WRITE</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMSG__MANAGER__TX__t.html">MSG_MANAGER_TX_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMSG__MANAGER__READ.html">MSG_MANAGER_READ</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMSG__MANAGER__RX__t.html">MSG_MANAGER_RX_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMSG__MANAGER.html">MSG_MANAGER</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMSG__MANAGER__TX__EVENT__MSG__t.html">MSG_MANAGER_TX_EVENT_MSG_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMSG__MANAGER__RX__EVENT__MSG__t.html">MSG_MANAGER_RX_EVENT_MSG_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMSG__MANAGER__t.html">MSG_MANAGER_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:ab512dcdf71a1bd44402db0816d05d4c3"><td class="memItemLeft" align="right" valign="top"><a id="ab512dcdf71a1bd44402db0816d05d4c3"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_MAC_LENGTH</b>&#160;&#160;&#160;(6)</td></tr>
+<tr class="separator:ab512dcdf71a1bd44402db0816d05d4c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51852803585fd4ebb79c7ed1b1530fb8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="msg__manager_8h.html#a51852803585fd4ebb79c7ed1b1530fb8">MSG_MANAGER_V2X_TX_POWER</a>&#160;&#160;&#160;(20)</td></tr>
+<tr class="separator:a51852803585fd4ebb79c7ed1b1530fb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3dc7e3b22f01be0476025ad6c1900f81"><td class="memItemLeft" align="right" valign="top"><a id="a3dc7e3b22f01be0476025ad6c1900f81"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_V2X_TX_PROFILE_ID</b>&#160;&#160;&#160;(100)</td></tr>
+<tr class="separator:a3dc7e3b22f01be0476025ad6c1900f81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24b64970b06fc9d7a6cdc0fb0fb31425"><td class="memItemLeft" align="right" valign="top"><a id="a24b64970b06fc9d7a6cdc0fb0fb31425"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_V2X_TX_PEER_L2_ID</b>&#160;&#160;&#160;(0)</td></tr>
+<tr class="separator:a24b64970b06fc9d7a6cdc0fb0fb31425"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a77e64d258626b6acd47c7467a3dd0b56"><td class="memItemLeft" align="right" valign="top"><a id="a77e64d258626b6acd47c7467a3dd0b56"></a>
-typedef struct <a class="el" href="structMSG__MANAGER__WRITE.html">MSG_MANAGER_WRITE</a>&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_TX_T</b></td></tr>
-<tr class="separator:a77e64d258626b6acd47c7467a3dd0b56"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a744dacbf662d0009621d36b65ced291b"><td class="memItemLeft" align="right" valign="top"><a id="a744dacbf662d0009621d36b65ced291b"></a>
-typedef struct <a class="el" href="structMSG__MANAGER__READ.html">MSG_MANAGER_READ</a>&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_RX_T</b></td></tr>
-<tr class="separator:a744dacbf662d0009621d36b65ced291b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a82c2b1d37a513c802804958f55bbf699"><td class="memItemLeft" align="right" valign="top"><a id="a82c2b1d37a513c802804958f55bbf699"></a>
-typedef struct <a class="el" href="structMSG__MANAGER.html">MSG_MANAGER</a>&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_T</b></td></tr>
-<tr class="separator:a82c2b1d37a513c802804958f55bbf699"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d68590e6f69782f5eb6f9dc7cadae4a"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structMSG__MANAGER__TX__t.html">MSG_MANAGER_TX_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="msg__manager_8h.html#a8d68590e6f69782f5eb6f9dc7cadae4a">MSG_MANAGER_TX_T</a></td></tr>
+<tr class="separator:a8d68590e6f69782f5eb6f9dc7cadae4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58be61fb3a9c40643a4ad1970fab98ad"><td class="memItemLeft" align="right" valign="top"><a id="a58be61fb3a9c40643a4ad1970fab98ad"></a>
+typedef struct <a class="el" href="structMSG__MANAGER__RX__t.html">MSG_MANAGER_RX_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_RX_T</b></td></tr>
+<tr class="separator:a58be61fb3a9c40643a4ad1970fab98ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac5f07cf288ddfacc45c2edb8fe6c1527"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structMSG__MANAGER__TX__EVENT__MSG__t.html">MSG_MANAGER_TX_EVENT_MSG_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="msg__manager_8h.html#ac5f07cf288ddfacc45c2edb8fe6c1527">MSG_MANAGER_TX_EVENT_MSG_T</a></td></tr>
+<tr class="separator:ac5f07cf288ddfacc45c2edb8fe6c1527"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09dd6c52b50a226bf12c9f7925d862fc"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structMSG__MANAGER__RX__EVENT__MSG__t.html">MSG_MANAGER_RX_EVENT_MSG_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="msg__manager_8h.html#a09dd6c52b50a226bf12c9f7925d862fc">MSG_MANAGER_RX_EVENT_MSG_T</a></td></tr>
+<tr class="separator:a09dd6c52b50a226bf12c9f7925d862fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab632b1cc43d3077b986896942ab3a8e5"><td class="memItemLeft" align="right" valign="top"><a id="ab632b1cc43d3077b986896942ab3a8e5"></a>
+typedef struct <a class="el" href="structMSG__MANAGER__t.html">MSG_MANAGER_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_T</b></td></tr>
+<tr class="separator:ab632b1cc43d3077b986896942ab3a8e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a3fd5c9c405487ff15389948e2bf8c0d6"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="msg__manager_8h.html#a3fd5c9c405487ff15389948e2bf8c0d6">MSG_MANAGER_PAYLOAD_TYPE_E</a> { <br />
+&#160;&#160;<b>MSG_MANAGER_PAYLOAD_TYPE_RAW</b> = 0, 
+<b>MSG_MANAGER_PAYLOAD_TYPE_ENCODED_J2735</b> = 1, 
+<b>MSG_MANAGER_PAYLOAD_TYPE_ITSK00130</b> = 2, 
+<b>MSG_MANAGER_PAYLOAD_TYPE_5GNRV2X</b> = 3, 
+<br />
+&#160;&#160;<b>MSG_MANAGER_PAYLOAD_TYPE_5GNRV2X_SS</b> = 4, 
+<b>MSG_MANAGER_PAYLOAD_TYPE_MAX</b> = 0xFF
+<br />
+ }</td></tr>
+<tr class="separator:a3fd5c9c405487ff15389948e2bf8c0d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69fa819ec4253e94c42ac58e61f64dff"><td class="memItemLeft" align="right" valign="top"><a id="a69fa819ec4253e94c42ac58e61f64dff"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_COMM_TYPE_E</b> { <br />
+&#160;&#160;<b>MSG_MANAGER_COMM_TYPE_UNKNOWN</b> = 0, 
+<b>MSG_MANAGER_COMM_TYPE_DSRC</b>, 
+<b>MSG_MANAGER_COMM_TYPE_LTEV2X</b>, 
+<b>MSG_MANAGER_COMM_TYPE_5GNRV2X</b>, 
+<br />
+&#160;&#160;<b>MSG_MANAGER_COMM_TYPE_MAX</b> = 0xFF
+<br />
+ }</td></tr>
+<tr class="separator:a69fa819ec4253e94c42ac58e61f64dff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74e21b16859b55b8bd48a74ea55e1bea"><td class="memItemLeft" align="right" valign="top"><a id="a74e21b16859b55b8bd48a74ea55e1bea"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_SIGN_ID_E</b> { <br />
+&#160;&#160;<b>MSG_MANAGER_SIGN_ID_UNSECURED</b> = 0, 
+<b>MSG_MANAGER_SIGN_ID_CERTIFICATE</b>, 
+<b>MSG_MANAGER_SIGN_ID_DIGEST</b>, 
+<b>MSG_MANAGER_SIGN_ID_ALTERNATE</b>, 
+<br />
+&#160;&#160;<b>MSG_MANAGER_SIGN_ID_MAX</b> = 0xFF
+<br />
+ }</td></tr>
+<tr class="separator:a74e21b16859b55b8bd48a74ea55e1bea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95ce5f2ee32778feb887114f105c6206"><td class="memItemLeft" align="right" valign="top"><a id="a95ce5f2ee32778feb887114f105c6206"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_PRIORITY_E</b> { <br />
+&#160;&#160;<b>MSG_MANAGER_PRIORITY_CV2X_PPPP_MIN</b> = 0, 
+<b>MSG_MANAGER_PRIORITY_CV2X_PPPP_0</b> = 0, 
+<b>MSG_MANAGER_PRIORITY_CV2X_PPPP_1</b> = 1, 
+<b>MSG_MANAGER_PRIORITY_CV2X_PPPP_2</b> = 2, 
+<br />
+&#160;&#160;<b>MSG_MANAGER_PRIORITY_CV2X_PPPP_3</b> = 3, 
+<b>MSG_MANAGER_PRIORITY_CV2X_PPPP_4</b> = 4, 
+<b>MSG_MANAGER_PRIORITY_CV2X_PPPP_5</b> = 5, 
+<b>MSG_MANAGER_PRIORITY_CV2X_PPPP_6</b> = 6, 
+<br />
+&#160;&#160;<b>MSG_MANAGER_PRIORITY_CV2X_PPPP_7</b> = 7, 
+<b>MSG_MANAGER_PRIORITY_CV2X_PPPP_MAX</b> = 7, 
+<b>MSG_MANAGER_PRIORITY_CV2X_PPPP_INVALID</b> = 8, 
+<b>MSG_MANAGER_PRIORITY_DSRC_USER_PRIO_MIN</b> = 0, 
+<br />
+&#160;&#160;<b>MSG_MANAGER_PRIORITY_DSRC_USER_PRIO_00</b> = 0, 
+<b>MSG_MANAGER_PRIORITY_DSRC_USER_PRIO_01</b> = 1, 
+<b>MSG_MANAGER_PRIORITY_DSRC_USER_PRIO_02</b> = 2, 
+<b>MSG_MANAGER_PRIORITY_DSRC_USER_PRIO_03</b> = 3, 
+<br />
+&#160;&#160;<b>MSG_MANAGER_PRIORITY_DSRC_USER_PRIO_04</b> = 4, 
+<b>MSG_MANAGER_PRIORITY_DSRC_USER_PRIO_05</b> = 5, 
+<b>MSG_MANAGER_PRIORITY_DSRC_USER_PRIO_06</b> = 6, 
+<b>MSG_MANAGER_PRIORITY_DSRC_USER_PRIO_07</b> = 7, 
+<br />
+&#160;&#160;<b>MSG_MANAGER_PRIORITY_DSRC_USER_PRIO_MAX</b> = 7, 
+<b>MSG_MANAGER_PRIORITY_DSRC_USER_PRIO_INVALID</b> = 8
+<br />
+ }</td></tr>
+<tr class="separator:a95ce5f2ee32778feb887114f105c6206"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d82eb2db84696828c3cdf3be4b0b31b"><td class="memItemLeft" align="right" valign="top"><a id="a6d82eb2db84696828c3cdf3be4b0b31b"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_V2X_FREQ_E</b> { <br />
+&#160;&#160;<b>MSG_MANAGER_V2X_FREQ_5860</b> = 5860, 
+<b>MSG_MANAGER_V2X_FREQ_5870</b> = 5870, 
+<b>MSG_MANAGER_V2X_FREQ_5880</b> = 5880, 
+<b>MSG_MANAGER_V2X_FREQ_5890</b> = 5890, 
+<br />
+&#160;&#160;<b>MSG_MANAGER_V2X_FREQ_5900</b> = 5900, 
+<b>MSG_MANAGER_V2X_FREQ_5910</b> = 5910, 
+<b>MSG_MANAGER_V2X_FREQ_5920</b> = 5920, 
+<b>MSG_MANAGER_V2X_FREQ_Min</b> = MSG_MANAGER_V2X_FREQ_5860, 
+<br />
+&#160;&#160;<b>MSG_MANAGER_V2X_FREQ_Max</b> = MSG_MANAGER_V2X_FREQ_5920
+<br />
+ }</td></tr>
+<tr class="separator:a6d82eb2db84696828c3cdf3be4b0b31b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05c7fbef2237d749e51ea1fb52433299"><td class="memItemLeft" align="right" valign="top"><a id="a05c7fbef2237d749e51ea1fb52433299"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_V2X_DATA_RATE_E</b> { <br />
+&#160;&#160;<b>MSG_MANAGER_V2X_DATA_RATE_NA</b> = 0, 
+<b>MSG_MANAGER_V2X_DATA_RATE_3MBPS</b> = 0x06, 
+<b>MSG_MANAGER_V2X_DATA_RATE_4_5MBPS</b> = 0x09, 
+<b>MSG_MANAGER_V2X_DATA_RATE_6MBPS</b> = 0x0C, 
+<br />
+&#160;&#160;<b>MSG_MANAGER_V2X_DATA_RATE_9MBPS</b> = 0x12, 
+<b>MSG_MANAGER_V2X_DATA_RATE_12MBPS</b> = 0x18, 
+<b>MSG_MANAGER_V2X_DATA_RATE_18MBPS</b> = 0x24, 
+<b>MSG_MANAGER_V2X_DATA_RATE_24MBPS</b> = 0x30, 
+<br />
+&#160;&#160;<b>MSG_MANAGER_V2X_DATA_RATE_27MBPS</b> = 0x36
+<br />
+ }</td></tr>
+<tr class="separator:a05c7fbef2237d749e51ea1fb52433299"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5934dfd8fa21232b980145d4a95d681a"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="msg__manager_8h.html#a5934dfd8fa21232b980145d4a95d681a">MSG_MANAGER_V2X_TIME_SLOT_E</a> { <b>MSG_MANAGER_V2X_TIME_SLOT_0</b> = 0, 
+<b>MSG_MANAGER_V2X_TIME_SLOT_1</b>, 
+<b>MSG_MANAGER_V2X_TIME_SLOT_CONTINUOUS</b>, 
+<b>MSG_MANAGER_V2X_TIME_SLOT_MAX</b>
+ }</td></tr>
+<tr class="separator:a5934dfd8fa21232b980145d4a95d681a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a21b60a89e204fedbe98ed1e76b21cd8b"><td class="memItemLeft" align="right" valign="top"><a id="a21b60a89e204fedbe98ed1e76b21cd8b"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_Write</b> (<a class="el" href="structMSG__MANAGER__WRITE.html">MSG_MANAGER_TX_T</a> *pstMsgManagerWrite, <a class="el" href="db__v2x_8h.html#a29f3cc9a2608a375609b7c7f6e1473be">DB_V2X_T</a> *pstDbV2x, void *pPayload)</td></tr>
-<tr class="separator:a21b60a89e204fedbe98ed1e76b21cd8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa0f6f733dd74e27c134d8b83d5477c47"><td class="memItemLeft" align="right" valign="top"><a id="aa0f6f733dd74e27c134d8b83d5477c47"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_Read</b> (<a class="el" href="structMSG__MANAGER__READ.html">MSG_MANAGER_RX_T</a> *pstMsgManagerRead, <a class="el" href="db__v2x_8h.html#a29f3cc9a2608a375609b7c7f6e1473be">DB_V2X_T</a> *pstDbV2x, void *pPayload)</td></tr>
-<tr class="separator:aa0f6f733dd74e27c134d8b83d5477c47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad535b4bbe2e5977d35e2ffdc327baea1"><td class="memItemLeft" align="right" valign="top"><a id="ad535b4bbe2e5977d35e2ffdc327baea1"></a>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_Transmit</b> (<a class="el" href="msg__manager_8h.html#a8d68590e6f69782f5eb6f9dc7cadae4a">MSG_MANAGER_TX_T</a> *pstMsgMgrTx, DB_V2X_T *pstDbV2x, void *pPayload)</td></tr>
+<tr class="separator:ad535b4bbe2e5977d35e2ffdc327baea1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31af41ccfdef77512bb42639532fc4e1"><td class="memItemLeft" align="right" valign="top"><a id="a31af41ccfdef77512bb42639532fc4e1"></a>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_Receive</b> (<a class="el" href="structMSG__MANAGER__RX__t.html">MSG_MANAGER_RX_T</a> *pstMsgMgrRx, DB_V2X_T *pstDbV2x, void *pPayload)</td></tr>
+<tr class="separator:a31af41ccfdef77512bb42639532fc4e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5d229ee0b2202ccec1cbbf573ab6450"><td class="memItemLeft" align="right" valign="top"><a id="ab5d229ee0b2202ccec1cbbf573ab6450"></a>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_SetLog</b> (<a class="el" href="structMSG__MANAGER__t.html">MSG_MANAGER_T</a> *pstMsgManager)</td></tr>
+<tr class="separator:ab5d229ee0b2202ccec1cbbf573ab6450"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa6e31d1acfa753cbdff738cb1d086d1a"><td class="memItemLeft" align="right" valign="top"><a id="aa6e31d1acfa753cbdff738cb1d086d1a"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_Open</b> (<a class="el" href="structMSG__MANAGER.html">MSG_MANAGER_T</a> *pstMsgManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_Open</b> (<a class="el" href="structMSG__MANAGER__t.html">MSG_MANAGER_T</a> *pstMsgManager)</td></tr>
 <tr class="separator:aa6e31d1acfa753cbdff738cb1d086d1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a319b876c8a8799e40a4bd63505aa9d"><td class="memItemLeft" align="right" valign="top"><a id="a3a319b876c8a8799e40a4bd63505aa9d"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_Close</b> (<a class="el" href="structMSG__MANAGER.html">MSG_MANAGER_T</a> *pstMsgManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_Close</b> (<a class="el" href="structMSG__MANAGER__t.html">MSG_MANAGER_T</a> *pstMsgManager)</td></tr>
 <tr class="separator:a3a319b876c8a8799e40a4bd63505aa9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa5926746e2ea7cab0bddcc4fe481ecb8"><td class="memItemLeft" align="right" valign="top"><a id="aa5926746e2ea7cab0bddcc4fe481ecb8"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_Start</b> (<a class="el" href="structMSG__MANAGER.html">MSG_MANAGER_T</a> *pstMsgManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_Start</b> (<a class="el" href="structMSG__MANAGER__t.html">MSG_MANAGER_T</a> *pstMsgManager)</td></tr>
 <tr class="separator:aa5926746e2ea7cab0bddcc4fe481ecb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a03c677d56b96ef44b3617e5a2511065c"><td class="memItemLeft" align="right" valign="top"><a id="a03c677d56b96ef44b3617e5a2511065c"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_Stop</b> (<a class="el" href="structMSG__MANAGER.html">MSG_MANAGER_T</a> *pstMsgManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_Stop</b> (<a class="el" href="structMSG__MANAGER__t.html">MSG_MANAGER_T</a> *pstMsgManager)</td></tr>
 <tr class="separator:a03c677d56b96ef44b3617e5a2511065c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a242dc1dae65f3790b1d4ded7c9c5ea50"><td class="memItemLeft" align="right" valign="top"><a id="a242dc1dae65f3790b1d4ded7c9c5ea50"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_Status</b> (<a class="el" href="structMSG__MANAGER.html">MSG_MANAGER_T</a> *pstMsgManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_Status</b> (<a class="el" href="structMSG__MANAGER__t.html">MSG_MANAGER_T</a> *pstMsgManager)</td></tr>
 <tr class="separator:a242dc1dae65f3790b1d4ded7c9c5ea50"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab95663d57eb65dd2203b98acc3bc5412"><td class="memItemLeft" align="right" valign="top"><a id="ab95663d57eb65dd2203b98acc3bc5412"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_Init</b> (<a class="el" href="structMSG__MANAGER.html">MSG_MANAGER_T</a> *pstMsgManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_Init</b> (<a class="el" href="structMSG__MANAGER__t.html">MSG_MANAGER_T</a> *pstMsgManager)</td></tr>
 <tr class="separator:ab95663d57eb65dd2203b98acc3bc5412"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a57d81cfd782262ab3ad66c2349cd5331"><td class="memItemLeft" align="right" valign="top"><a id="a57d81cfd782262ab3ad66c2349cd5331"></a>
-int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_DeInit</b> (<a class="el" href="structMSG__MANAGER.html">MSG_MANAGER_T</a> *pstMsgManager)</td></tr>
+int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>MSG_MANAGER_DeInit</b> (<a class="el" href="structMSG__MANAGER__t.html">MSG_MANAGER_T</a> *pstMsgManager)</td></tr>
 <tr class="separator:a57d81cfd782262ab3ad66c2349cd5331"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><dl class="section note"><dt>Note</dt><dd></dd></dl>
 <p>MSG Manager Header </p>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="a51852803585fd4ebb79c7ed1b1530fb8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51852803585fd4ebb79c7ed1b1530fb8">&#9670;&nbsp;</a></span>MSG_MANAGER_V2X_TX_POWER</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MSG_MANAGER_V2X_TX_POWER&#160;&#160;&#160;(20)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>V2X TX POWER </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">MSG_MANAGER_V2X_TX_POWER</td><td>DSRC (0 ~ 23, Korea 20), C-V2X (-30~23) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Typedef Documentation</h2>
+<a id="a09dd6c52b50a226bf12c9f7925d862fc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a09dd6c52b50a226bf12c9f7925d862fc">&#9670;&nbsp;</a></span>MSG_MANAGER_RX_EVENT_MSG_T</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structMSG__MANAGER__RX__EVENT__MSG__t.html">MSG_MANAGER_RX_EVENT_MSG_t</a> <a class="el" href="msg__manager_8h.html#a09dd6c52b50a226bf12c9f7925d862fc">MSG_MANAGER_RX_EVENT_MSG_T</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>MSG_MANAGER_RX_EVENT_MSG_T </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pstMsgManagerRx</td><td></td></tr>
+    <tr><td class="paramname">pstDbV2x</td><td></td></tr>
+    <tr><td class="paramname">pPayload</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac5f07cf288ddfacc45c2edb8fe6c1527"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5f07cf288ddfacc45c2edb8fe6c1527">&#9670;&nbsp;</a></span>MSG_MANAGER_TX_EVENT_MSG_T</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structMSG__MANAGER__TX__EVENT__MSG__t.html">MSG_MANAGER_TX_EVENT_MSG_t</a> <a class="el" href="msg__manager_8h.html#ac5f07cf288ddfacc45c2edb8fe6c1527">MSG_MANAGER_TX_EVENT_MSG_T</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>MSG_MANAGER_TX_EVENT_MSG_T </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pstMsgManagerTx</td><td></td></tr>
+    <tr><td class="paramname">pstDbV2x</td><td></td></tr>
+    <tr><td class="paramname">pPayload</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a8d68590e6f69782f5eb6f9dc7cadae4a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d68590e6f69782f5eb6f9dc7cadae4a">&#9670;&nbsp;</a></span>MSG_MANAGER_TX_T</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structMSG__MANAGER__TX__t.html">MSG_MANAGER_TX_t</a> <a class="el" href="msg__manager_8h.html#a8d68590e6f69782f5eb6f9dc7cadae4a">MSG_MANAGER_TX_T</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>MSG_MANAGER_TX_T </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ePayloadType</td><td></td></tr>
+    <tr><td class="paramname">eCommType</td><td></td></tr>
+    <tr><td class="paramname">eSignId</td><td></td></tr>
+    <tr><td class="paramname">eV2xFreq</td><td></td></tr>
+    <tr><td class="paramname">eV2xDataRate</td><td></td></tr>
+    <tr><td class="paramname">eV2xTimeSlot</td><td></td></tr>
+    <tr><td class="paramname">unPsid</td><td></td></tr>
+    <tr><td class="paramname">nTxPower</td><td></td></tr>
+    <tr><td class="paramname">unTxCount</td><td></td></tr>
+    <tr><td class="paramname">uchPeerMacAddr</td><td></td></tr>
+    <tr><td class="paramname">unTransmitterProfileId</td><td></td></tr>
+    <tr><td class="paramname">unPeerL2Id</td><td></td></tr>
+    <tr><td class="paramname">unReserved</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="a3fd5c9c405487ff15389948e2bf8c0d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fd5c9c405487ff15389948e2bf8c0d6">&#9670;&nbsp;</a></span>MSG_MANAGER_PAYLOAD_TYPE_E</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="msg__manager_8h.html#a3fd5c9c405487ff15389948e2bf8c0d6">MSG_MANAGER_PAYLOAD_TYPE_E</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>MSG_MANAGER_TX_PAYLOAD_TYPE_E </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">MSG_MANAGER_TX_PAYLOAD_TYPE_RAW</td><td></td></tr>
+    <tr><td class="paramname">MSG_MANAGER_TX_PAYLOAD_TYPE_ENCODED_J2735</td><td>ASN.1 encoded J2735 Msg </td></tr>
+    <tr><td class="paramname">MSG_MANAGER_TX_PAYLOAD_TYPE_ITSK00130</td><td>ITSK-00130 </td></tr>
+    <tr><td class="paramname">MSG_MANAGER_TX_PAYLOAD_TYPE_5GNRV2X</td><td>5G-NR-V2X data frame </td></tr>
+    <tr><td class="paramname">MSG_MANAGER_TX_PAYLOAD_TYPE_5GNRV2X_SS</td><td>5G-NR-V2X sensor sharing data frame </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a5934dfd8fa21232b980145d4a95d681a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5934dfd8fa21232b980145d4a95d681a">&#9670;&nbsp;</a></span>MSG_MANAGER_V2X_TIME_SLOT_E</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="msg__manager_8h.html#a5934dfd8fa21232b980145d4a95d681a">MSG_MANAGER_V2X_TIME_SLOT_E</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>MSG_MANAGER_V2X_TIME_SLOT_E (1609.3 - 7.3.2.2) </p>
+
+</div>
+</div>
+</div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

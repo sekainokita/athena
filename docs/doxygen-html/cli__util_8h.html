@@ -75,13 +75,15 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="type_8h_source.html">type.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="config_8h_source.html">config.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for cli_util.h:</div>
 <div class="dyncontent">
 <div class="center"><img src="cli__util_8h__incl.png" border="0" usemap="#src_2apps_2include_2cli__util_8h" alt=""/></div>
 <map name="src_2apps_2include_2cli__util_8h" id="src_2apps_2include_2cli__util_8h">
-<area shape="rect" title=" " alt="" coords="399,5,545,47"/>
+<area shape="rect" title=" " alt="" coords="444,5,591,47"/>
 <area shape="rect" href="type_8h.html" title=" " alt="" coords="441,95,503,121"/>
+<area shape="rect" href="config_8h.html" title=" " alt="" coords="527,95,601,121"/>
 <area shape="rect" title=" " alt="" coords="5,169,72,196"/>
 <area shape="rect" title=" " alt="" coords="97,169,167,196"/>
 <area shape="rect" title=" " alt="" coords="191,169,262,196"/>
@@ -99,13 +101,15 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="cli__util_8h__dep__incl.png" border="0" usemap="#src_2apps_2include_2cli__util_8hdep" alt=""/></div>
 <map name="src_2apps_2include_2cli__util_8hdep" id="src_2apps_2include_2cli__util_8hdep">
-<area shape="rect" title=" " alt="" coords="340,5,487,47"/>
-<area shape="rect" href="cli_8h.html" title=" " alt="" coords="334,95,493,121"/>
-<area shape="rect" href="cli_8c.html" title=" " alt="" coords="5,169,131,196"/>
-<area shape="rect" href="cli__cmd_8c.html" title=" " alt="" coords="155,169,315,196"/>
-<area shape="rect" href="cli__db_8c.html" title=" " alt="" coords="339,169,487,196"/>
-<area shape="rect" href="cli__msg_8c.html" title=" " alt="" coords="512,169,672,196"/>
-<area shape="rect" href="cli__util_8c.html" title=" " alt="" coords="697,169,850,196"/>
+<area shape="rect" title=" " alt="" coords="525,5,672,47"/>
+<area shape="rect" href="cli_8h.html" title=" " alt="" coords="423,102,582,129"/>
+<area shape="rect" href="msg__manager_8c.html" title=" " alt="" coords="606,95,786,136"/>
+<area shape="rect" href="cli_8c.html" title=" " alt="" coords="5,184,131,211"/>
+<area shape="rect" href="cli__cmd_8c.html" title=" " alt="" coords="155,184,315,211"/>
+<area shape="rect" href="cli__db_8c.html" title=" " alt="" coords="339,184,487,211"/>
+<area shape="rect" href="cli__msg_8c.html" title=" " alt="" coords="512,184,672,211"/>
+<area shape="rect" href="cli__platooning_8c.html" title=" " alt="" coords="697,184,898,211"/>
+<area shape="rect" href="cli__util_8c.html" title=" " alt="" coords="922,184,1075,211"/>
 </map>
 </div>
 </div>
@@ -139,6 +143,9 @@ typedef struct <a class="el" href="structCLI__UTIL__QUEUE__t.html">CLI_UTIL_QUEU
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a9229da5c69f6d4253fc7fc16639ca9e5"><td class="memItemLeft" align="right" valign="top"><a id="a9229da5c69f6d4253fc7fc16639ca9e5"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_UTIL_GetCrc32</b> (const uint8_t *pBuf, size_t unSize)</td></tr>
+<tr class="separator:a9229da5c69f6d4253fc7fc16639ca9e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a22891fa958cf62fa08ae7a019e0dd00a"><td class="memItemLeft" align="right" valign="top"><a id="a22891fa958cf62fa08ae7a019e0dd00a"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>CLI_UTIL_Enqueue</b> (<a class="el" href="structCLI__UTIL__QUEUE__t.html">CLI_UTIL_QUEUE_T</a> *, <a class="el" href="structCLI__UTIL__QUEUE__t.html">CLI_UTIL_QUEUE_T</a> *)</td></tr>
 <tr class="separator:a22891fa958cf62fa08ae7a019e0dd00a"><td class="memSeparator" colspan="2">&#160;</td></tr>

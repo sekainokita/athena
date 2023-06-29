@@ -112,6 +112,7 @@ typedef struct DB_MANAGER_WRITE_t {
     DB_MANAGER_FILE_TYPE_E      eFileType;
     DB_MANAGER_COMM_MSG_TYPE_E  eCommMsgType;
     DB_MANAGER_PROC_E           eProc;
+    uint32_t                    unCrc32;
     uint32_t                    unReserved;
 } DB_MANAGER_WRITE_T;
 

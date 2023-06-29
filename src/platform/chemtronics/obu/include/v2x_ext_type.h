@@ -47,7 +47,7 @@ __attribute__((__packed__)) Ext_WSResp_t;
 typedef struct _Ext_V2xMsg_t
 {
 	V2xPacketLength_t length;
-	uint8_t data[];
+	uint8_t data[0];
 }
 __attribute__((__packed__)) Ext_V2xMsg_t;
 
@@ -60,14 +60,16 @@ typedef struct _WAVE_Tx_Struct
 
 	uint8_t peer_mac_addr[MAC_EUI48_LEN]; /* if manual_flg is true,
 											 ignore */
-} __attribute__((__packed__)) WAVE_Tx_Struct;
+	uint8_t reserved2;
+}__attribute__((__packed__)) WAVE_Tx_Struct;
 
 typedef struct _CV2X_Tx_Struct
 {
 	/*CV2X*/
 	uint32_t transmitter_profile_id; /* Unsupport  RRC 설정 profile id ,  */
 	uint32_t peer_l2id;
-} __attribute__((__packed__)) CV2X_Tx_Struct;
+	uint8_t reserved2[4];
+}__attribute__((__packed__)) CV2X_Tx_Struct;
 
 typedef struct _Ext_V2X_TxPDU_t
 {
@@ -82,7 +84,7 @@ typedef struct _Ext_V2X_TxPDU_t
 	V2xSignerId_t e_signer_id;
 	V2xMsgPriority_t e_priority;
 	uint8_t channel_load;
-	uint8_t reserved;
+	uint8_t reserved1;
 	V2xTime_t expiry_time;
 
 	union
@@ -91,7 +93,6 @@ typedef struct _Ext_V2X_TxPDU_t
 		CV2X_Tx_Struct config_cv2x; // for CV2X
 	} __attribute__((__packed__)) u;
 
-	uint8_t reserved2;
 	uint8_t reserved3[8];
 	uint32_t crc;
 	Ext_V2xMsg_t v2x_msg;
