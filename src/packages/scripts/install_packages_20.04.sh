@@ -62,6 +62,7 @@ apt-get install -y gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer
 apt-get install -y libgstrtspserver-1.0-dev gstreamer1.0-rtsp
 apt-get install -y libpcap-dev
 apt-get install -y rdate telnet
+apt-get install -y sharutils
 
 pip3 install nvidia-pyindex
 pip3 install onnx-graphsurgeon
