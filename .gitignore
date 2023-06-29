@@ -2,5 +2,7 @@
 *.a
 *.log
 *.txt
+*.csv
+*.db
 *.pcap
 app-v2x
