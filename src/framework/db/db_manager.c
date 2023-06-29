@@ -75,7 +75,7 @@ static bool s_bDbMgrLog = OFF;
 
 /***************************** Function  *************************************/
 
-static int32_t P_DB_MANAGER_Write(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
+static int32_t P_DB_MANAGER_WriteTxt(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
     char *pchPayload = NULL;
@@ -242,10 +242,10 @@ static void *P_DB_MANAGER_Task(void *arg)
                             PrintDebug("DB_MANAGER_FILE_TYPE_TXT [%d]", stEventMsg.pstDbManagerWrite->eFileType);
                         }
 
-                        nRet = P_DB_MANAGER_Write(&stEventMsg);
+                        nRet = P_DB_MANAGER_WriteTxt(&stEventMsg);
                         if(nRet != FRAMEWORK_OK)
                         {
-                            PrintError("P_DB_MANAGER_Write() is failed! [unRet:%d]", nRet);
+                            PrintError("P_DB_MANAGER_WriteTxt() is failed! [unRet:%d]", nRet);
                         }
                         break;
                     }

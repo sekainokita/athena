@@ -525,7 +525,7 @@ static int32_t P_MSG_MANAGER_SendRxMsgToDbMgr(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
     stEventMsg.pstDbManagerWrite = &stDbManagerWrite;
     stEventMsg.pstDbV2x = pstEventMsg->pstDbV2x;
 
-    /* free at P_DB_MANAGER_Write() */
+    /* free at P_DB_MANAGER_WriteTxt() */
     stEventMsg.pPayload = malloc(pstEventMsg->pstDbV2x->ulPayloadLength);
     if(stEventMsg.pPayload == NULL)
     {
