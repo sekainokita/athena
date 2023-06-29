@@ -38,18 +38,20 @@ LIB_MSG = msg
 LIB_TIME = time
 LIB_FRAMEWORK = framework
 LIB_PLATFORM = platform
+LIB_DI = di
 
 # CFLAGS / LDFLAGS
 TARGET_CFLAGS = -I$(INC_PATH)
 TARGET_CFLAGS += -I$(APP_INC_PATH)
 TARGET_CFLAGS += -I$(FRAMEWORK_INC_PATH)
 TARGET_CFLAGS += -I$(PLATFORM_INC_PATH)
+TARGET_CFLAGS += -I$(DI_INC_PATH)
 TARGET_CFLAGS += -I$(LIB_PLAT_CHEM_OBU_INC_PATH)
 TARGET_CFLAGS += -D_GNU_SOURCE=1
 TARGET_CFLAGS += -std=gnu99 -g
 TARGET_CFLAGS += -Wall -Wextra -Wstrict-prototypes -O3 -fomit-frame-pointer -pipe
 
-TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_FRAMEWORK) -l$(LIB_PLATFORM)
+TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_FRAMEWORK) -l$(LIB_PLATFORM) -l$(LIB_DI)
 TARGET_LDFLAGS += -lrt -pthread
 # To add Library : -l$(LIB_DB) -l$(LIB_MSG) -l$(LIB_TIME)
 
@@ -123,6 +125,16 @@ lib-platform-distclean:
 
 .PHONY: lib-platform lib-platform-clean lib-platform-distclean
 
+lib-di:
+	@$(MAKE) -C $(LIB_DI_PATH) $(TARGET_CONFIGS) all
+
+lib-di-clean:
+	$(MAKE) -C $(LIB_DI_PATH) clean
+
+lib-di-distclean:
+	$(MAKE) -C $(LIB_DI_PATH) distclean
+
+.PHONY: lib-di lib-di-clean lib-di-distclean
 #
 # Application
 #
@@ -154,7 +166,7 @@ plat-chem-obu-distclean:
 #
 
 lib-all:lib-db lib-msg lib-time
-all: lib-platform lib-framework app lib-all
+all: lib-di lib-platform lib-framework app lib-all
 
 #
 # Clean
@@ -162,6 +174,6 @@ all: lib-platform lib-framework app lib-all
 
 clean: distclean
 
-distclean: lib-db-distclean lib-msg-distclean lib-time-distclean lib-platform-distclean lib-framework-distclean app-distclean
+distclean: lib-db-distclean lib-msg-distclean lib-time-distclean lib-di-distclean lib-platform-distclean lib-framework-distclean app-distclean
 	@$(RM) -f $(OUT_BIN_DIR)/* $(OUT_LIB_DIR)/*
 	@$(RM) -f *.txt *.csv *.db *.log

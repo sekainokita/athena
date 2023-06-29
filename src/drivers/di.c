@@ -33,7 +33,7 @@
 /******************************************************************************/
 /**
 *
-* @file db_manager.c
+* @file di.c
 *
 * This file contains a data format design
 *
@@ -49,108 +49,44 @@
 ******************************************************************************/
 
 /***************************** Include ***************************************/
-#include <stdio.h>
-#include "framework.h"
 #include "di.h"
-#include "svc_platooning.h"
 
-#include "app.h"
-#include "cli.h"
 /***************************** Definition ************************************/
-
 
 /***************************** Static Variable *******************************/
 
-static FRAMEWORK_T s_stFramework;
-static APP_T s_stApp;
-
-static DI_T s_stDi;
-
-static SVC_PLATOONING_T s_stSvcPlatooning;
-
 /***************************** Function  *************************************/
 
-int32_t APP_Init(APP_T *pstApp)
+void DI_SetLog(DI_T *pstDi, bool bOnOff)
 {
-    int32_t nRet = APP_ERROR;
+    int32_t nRet = DI_ERROR;
 
-    if(pstApp == NULL)
+    switch(pstDi->eDiLog)
     {
-        PrintError("pstApp == NULL!!");
-        return nRet;
+        case DI_LOG_ALL:
+            nRet = DI_OK;
+            PrintDebug("DI_LOG_ALL [%d], bOnOff [%d]", nRet, bOnOff);
+            break;
+
+        default:
+            PrintError("Unknown Log Type [%d]", pstDi->eDiLog);
+            break;
     }
-
-    PrintNotice("Init");
-
-    nRet = SVC_PLATOONING_Init(&s_stSvcPlatooning);
-    if (nRet != APP_OK)
-    {
-        PrintError("SVC_PLATOONING_Init() is failed! [unRet:%d]", nRet);
-        return nRet;
-    }
-
-    nRet = CLI_Init();
-    if (nRet != APP_OK)
-    {
-        PrintError("CLI_Init() is failed! [unRet:%d]", nRet);
-        return nRet;
-    }
-
-    return nRet;
 }
 
-FRAMEWORK_T* APP_GetFrameworkInstance(void)
+int32_t DI_Init(DI_T *pstDi)
 {
-    return &s_stFramework;
-}
+    int32_t nRet = DI_ERROR;
 
-APP_T* APP_GetAppInstance(void)
-{
-    return &s_stApp;
-}
-
-int main(int argc, char *argv[])
-{
-     ;
-    int32_t nRet = APP_ERROR;
-
-    UNUSED(argc);
-
-    if(argv == NULL)
+    if(pstDi == NULL)
     {
-        PrintError("argv == NULL!!");
+        PrintError("pstDi == NULL!!");
         return nRet;
     }
 
-    PrintDebug("Start the main");
+    nRet = DI_OK;
 
-    (void*)memset(&s_stFramework, 0x00, sizeof(FRAMEWORK_T));
-    (void*)memset(&s_stApp, 0x00, sizeof(APP_T));
-    (void*)memset(&s_stSvcPlatooning, 0x00, sizeof(SVC_PLATOONING_T));
-
-    PrintDebug("pstFramework [0x%p]", &s_stFramework);
-    PrintDebug("s_stApp [0x%p]", &s_stApp);
-
-    nRet = DI_Init(&s_stDi);
-    if (nRet != DI_OK)
-    {
-        PrintError("DI_Init() is failed! [nRet:%d]", nRet);
-        return nRet;
-    }
-
-    nRet = FRAMEWORK_Init(&s_stFramework);
-    if (nRet != FRAMEWORK_OK)
-    {
-        PrintError("FRAMEWORK_Init() is failed! [nRet:%d]", nRet);
-        return nRet;
-    }
-
-    nRet = APP_Init(&s_stApp);
-    if (nRet != APP_OK)
-    {
-        PrintError("APP_Init() is failed! [nRet:%d]", nRet);
-        return nRet;
-    }
+    PrintWarn("is successfully initialized.");
 
     return nRet;
 }
