@@ -123,6 +123,32 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                         PrintError("DI_GPS_Get() is failed! [nRet:%d]", nRet);
                         return nRet;
                     }
+
+                    PrintDebug("AccX            %.9f", pstDi->stDiGps.stDiGpsData.fAccX);
+                    PrintDebug("AccY            %.9f", pstDi->stDiGps.stDiGpsData.fAccY);
+                    PrintDebug("AccZ            %.9f", pstDi->stDiGps.stDiGpsData.fAccZ);
+                    PrintDebug("GyrX            %.9f", pstDi->stDiGps.stDiGpsData.fGyrX);
+                    PrintDebug("GyrY            %.9f", pstDi->stDiGps.stDiGpsData.fGyrY);
+                    PrintDebug("GyrZ            %.9f", pstDi->stDiGps.stDiGpsData.fGyrZ);
+
+                    PrintDebug("MagX            %.9f", pstDi->stDiGps.stDiGpsData.fMagX);
+                    PrintDebug("MagY            %.9f", pstDi->stDiGps.stDiGpsData.fMagY);
+                    PrintDebug("MagZ            %.9f", pstDi->stDiGps.stDiGpsData.fMagZ);
+
+                    PrintDebug("QuaternionW     %.9f", pstDi->stDiGps.stDiGpsData.fQuaternionW);
+                    PrintDebug("QuaternionX     %.9f", pstDi->stDiGps.stDiGpsData.fQuaternionX);
+                    PrintDebug("QuaternionY     %.9f", pstDi->stDiGps.stDiGpsData.fQuaternionY);
+                    PrintDebug("QuaternionZ     %.9f", pstDi->stDiGps.stDiGpsData.fQuaternionZ);
+
+                    PrintDebug("EulerRoll       %.9f", pstDi->stDiGps.stDiGpsData.fEulerRoll);
+                    PrintDebug("EulerPitch      %.9f", pstDi->stDiGps.stDiGpsData.fEulerPitch);
+                    PrintDebug("EulerYaw        %.9f", pstDi->stDiGps.stDiGpsData.fEulerYaw);
+                    PrintDebug("Latitude        %.9f", pstDi->stDiGps.stDiGpsData.fLatitude);
+                    PrintDebug("Longitude       %.9f", pstDi->stDiGps.stDiGpsData.fLongitude);
+                    PrintDebug("Altitude        %.9f", pstDi->stDiGps.stDiGpsData.fAltitude);
+                    PrintDebug("VelocityEast    %.9f", pstDi->stDiGps.stDiGpsData.fVelocityEast);
+                    PrintDebug("VelocityNorth   %.9f", pstDi->stDiGps.stDiGpsData.fVelocityNorth);
+                    PrintDebug("VelocityUp      %.9f", pstDi->stDiGps.stDiGpsData.fVelocityUp);
                 }
                 else
                 {

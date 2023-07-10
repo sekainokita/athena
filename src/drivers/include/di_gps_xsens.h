@@ -60,6 +60,28 @@
 */
 typedef struct DI_GPS_XSENS_t {
     bool                        bLogLevel;
+    float                       fAccX;
+    float                       fAccY;
+    float                       fAccZ;
+    float                       fGyrX;
+    float                       fGyrY;
+    float                       fGyrZ;
+    float                       fMagX;
+    float                       fMagY;
+    float                       fMagZ;
+    float                       fQuaternionW;
+    float                       fQuaternionX;
+    float                       fQuaternionY;
+    float                       fQuaternionZ;
+    float                       fEulerRoll;
+    float                       fEulerPitch;
+    float                       fEulerYaw;
+    float                       fLatitude;
+    float                       fLongitude;
+    float                       fAltitude;
+    float                       fVelocityEast;
+    float                       fVelocityNorth;
+    float                       fVelocityUp;
     uint32_t                    unReserved;
 } DI_GPS_XSENS_T;
 

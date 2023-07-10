@@ -69,12 +69,42 @@ typedef enum {
 } DI_GPS_STATUS_E;
 
 /**
+* @details DI_GPS_DATA_T
+* @param unReserved
+*/
+typedef struct DI_GPS_DATA_t {
+    float                       fAccX;
+    float                       fAccY;
+    float                       fAccZ;
+    float                       fGyrX;
+    float                       fGyrY;
+    float                       fGyrZ;
+    float                       fMagX;
+    float                       fMagY;
+    float                       fMagZ;
+    float                       fQuaternionW;
+    float                       fQuaternionX;
+    float                       fQuaternionY;
+    float                       fQuaternionZ;
+    float                       fEulerRoll;
+    float                       fEulerPitch;
+    float                       fEulerYaw;
+    float                       fLatitude;
+    float                       fLongitude;
+    float                       fAltitude;
+    float                       fVelocityEast;
+    float                       fVelocityNorth;
+    float                       fVelocityUp;
+} DI_GPS_DATA_T;
+
+/**
 * @details DI_GPS_T
 * @param unReserved
 */
 typedef struct DI_GPS_t {
     bool                        bLogLevel;
     DI_GPS_STATUS_E             eDiGpsStatus;
+    DI_GPS_DATA_T               stDiGpsData;
     uint32_t                    unReserved;
 } DI_GPS_T;
 

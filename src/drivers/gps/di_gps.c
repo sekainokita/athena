@@ -148,6 +148,32 @@ int32_t DI_GPS_Get(DI_GPS_T *pstDiGps)
             return nRet;
         }
 #endif
+        pstDiGps->stDiGpsData.fAccX = s_stDiGpsDev.fAccX;
+        pstDiGps->stDiGpsData.fAccY = s_stDiGpsDev.fAccY;
+        pstDiGps->stDiGpsData.fAccZ = s_stDiGpsDev.fAccZ;
+
+        pstDiGps->stDiGpsData.fGyrX = s_stDiGpsDev.fGyrX;
+        pstDiGps->stDiGpsData.fGyrY = s_stDiGpsDev.fGyrY;
+        pstDiGps->stDiGpsData.fGyrZ = s_stDiGpsDev.fGyrZ;
+
+        pstDiGps->stDiGpsData.fMagX = s_stDiGpsDev.fMagX;
+        pstDiGps->stDiGpsData.fMagY = s_stDiGpsDev.fMagY;
+        pstDiGps->stDiGpsData.fMagZ = s_stDiGpsDev.fMagZ;
+
+        pstDiGps->stDiGpsData.fQuaternionW = s_stDiGpsDev.fQuaternionW;
+        pstDiGps->stDiGpsData.fQuaternionX = s_stDiGpsDev.fQuaternionX;
+        pstDiGps->stDiGpsData.fQuaternionY = s_stDiGpsDev.fQuaternionY;
+        pstDiGps->stDiGpsData.fQuaternionZ = s_stDiGpsDev.fQuaternionZ;
+
+        pstDiGps->stDiGpsData.fEulerRoll = s_stDiGpsDev.fEulerRoll;
+        pstDiGps->stDiGpsData.fEulerPitch = s_stDiGpsDev.fEulerPitch;
+        pstDiGps->stDiGpsData.fEulerYaw = s_stDiGpsDev.fEulerYaw;
+        pstDiGps->stDiGpsData.fLatitude = s_stDiGpsDev.fLatitude;
+        pstDiGps->stDiGpsData.fLongitude = s_stDiGpsDev.fLongitude;
+        pstDiGps->stDiGpsData.fAltitude = s_stDiGpsDev.fAltitude;
+        pstDiGps->stDiGpsData.fVelocityEast = s_stDiGpsDev.fVelocityEast;
+        pstDiGps->stDiGpsData.fVelocityNorth = s_stDiGpsDev.fVelocityNorth;
+        pstDiGps->stDiGpsData.fVelocityUp = s_stDiGpsDev.fVelocityUp;
     }
     else
     {

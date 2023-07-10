@@ -66,6 +66,8 @@
 #include "type.h"
 
 /***************************** Definition ************************************/
+//#define DI_GPS_XSENS_DEBUG  (1)
+
 using namespace std;
 
 /***************************** Enum and Structure ****************************/
@@ -127,16 +129,8 @@ static CallbackHandler sh_CCallBack;
 
 /***************************** Function  *************************************/
 
-int32_t DI_GPS_XSENS_Get(DI_GPS_XSENS_T *pstDiGpsXsens)
+void P_DI_GPS_XSENS_GetAging(void)
 {
-    int32_t nRet = DI_ERROR;
-
-    if(pstDiGpsXsens == NULL)
-    {
-        PrintError("pstDiGpsXsens == NULL!!");
-        return nRet;
-    }
-
 	PrintTrace("\nMain loop. Recording data for 10 seconds.");
 
 	int64_t startTime = XsTime::timeStampNow();
@@ -203,8 +197,93 @@ int32_t DI_GPS_XSENS_Get(DI_GPS_XSENS_T *pstDiGpsXsens)
 		}
 		XsTime::msleep(0);
 	}
+}
 
-    nRet = DI_OK;
+int32_t DI_GPS_XSENS_Get(DI_GPS_XSENS_T *pstDiGpsXsens)
+{
+    int32_t nRet = DI_ERROR;
+
+    if(pstDiGpsXsens == NULL)
+    {
+        PrintError("pstDiGpsXsens == NULL!!");
+        return nRet;
+    }
+
+#if defined(DI_GPS_XSENS_DEBUG)
+    (void)P_DI_GPS_XSENS_GetAging();
+#else
+    if (sh_CCallBack.packetAvailable() == TRUE)
+    {
+        XsDataPacket packet = sh_CCallBack.getNextPacket();
+        if (packet.containsCalibratedData())
+        {
+            XsVector acc = packet.calibratedAcceleration();
+            cout << "\r" << "Acc X:" << acc[0] << ", Acc Y:" << acc[1] << ", Acc Z:" << acc[2];
+            pstDiGpsXsens->fAccX = acc[0];
+            pstDiGpsXsens->fAccY = acc[1];
+            pstDiGpsXsens->fAccZ = acc[2];
+
+            XsVector gyr = packet.calibratedGyroscopeData();
+            cout << " |Gyr X:" << gyr[0] << ", Gyr Y:" << gyr[1] << ", Gyr Z:" << gyr[2];
+            pstDiGpsXsens->fGyrX = gyr[0];
+            pstDiGpsXsens->fGyrY = gyr[1];
+            pstDiGpsXsens->fGyrZ = gyr[2];
+
+            XsVector mag = packet.calibratedMagneticField();
+            cout << " |Mag X:" << mag[0] << ", Mag Y:" << mag[1] << ", Mag Z:" << mag[2];
+            pstDiGpsXsens->fMagX = mag[0];
+            pstDiGpsXsens->fMagY = mag[1];
+            pstDiGpsXsens->fMagZ = mag[2];
+        }
+
+        if (packet.containsOrientation())
+        {
+            XsQuaternion quaternion = packet.orientationQuaternion();
+            cout << "\r" << "q0:" << quaternion.w() << ", q1:" << quaternion.x() << ", q2:" << quaternion.y() << ", q3:" << quaternion.z();
+            pstDiGpsXsens->fQuaternionW = quaternion.w();
+            pstDiGpsXsens->fQuaternionX = quaternion.x();
+            pstDiGpsXsens->fQuaternionY = quaternion.y();
+            pstDiGpsXsens->fQuaternionZ = quaternion.z();
+
+            XsEuler euler = packet.orientationEuler();
+            cout << " |Roll:" << euler.roll() << ", Pitch:" << euler.pitch() << ", Yaw:" << euler.yaw();
+
+            pstDiGpsXsens->fEulerRoll = euler.roll();
+            pstDiGpsXsens->fEulerPitch = euler.pitch();
+            pstDiGpsXsens->fEulerYaw = euler.yaw();
+        }
+
+        if (packet.containsLatitudeLongitude())
+        {
+            XsVector latLon = packet.latitudeLongitude();
+            cout << " |Lat:" << latLon[0] << ", Lon:" << latLon[1];
+            pstDiGpsXsens->fLatitude = latLon[0];
+            pstDiGpsXsens->fLongitude = latLon[1];
+        }
+
+        if (packet.containsAltitude())
+        {
+            cout << " |Alt:" << packet.altitude();
+            pstDiGpsXsens->fAltitude = packet.altitude();
+        }
+
+
+        if (packet.containsVelocity())
+        {
+            XsVector vel = packet.velocity(XDI_CoordSysEnu);
+            cout << " |E:" << vel[0] << ", N:" << vel[1] << ", U:" << vel[2];
+            pstDiGpsXsens->fVelocityEast = vel[0];
+            pstDiGpsXsens->fVelocityNorth = vel[1];
+            pstDiGpsXsens->fVelocityUp = vel[2];
+        }
+
+        nRet = DI_OK;
+    }
+    else
+    {
+        PrintError("sh_CCallBack.packetAvailable() is false!");
+    }
+#endif
 
     return nRet;
 }
