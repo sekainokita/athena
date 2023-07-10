@@ -163,14 +163,14 @@ static int32_t P_SVC_PLATOONING_Init(SVC_PLATOONING_T *pstSvcPlatooning)
         return nRet;
     }
 
-    if((s_SvcPlatooningTaskMsgKey = msgget(s_SvcPlatooningTaskMsgKey, IPC_CREAT|0666)) == APP_MSG_ERR)
+    if((s_nSvcPlatooningTaskMsgId = msgget(s_SvcPlatooningTaskMsgKey, IPC_CREAT|0666)) == APP_MSG_ERR)
     {
         PrintError("msgget() is failed!");
         return nRet;
     }
     else
     {
-        P_SVC_PLATOONING_PrintMsgInfo(s_SvcPlatooningTaskMsgKey);
+        P_SVC_PLATOONING_PrintMsgInfo(s_nSvcPlatooningTaskMsgId);
     }
 
     nRet = P_SVC_PLATOONING_CreateTask();

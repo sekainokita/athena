@@ -1,38 +1,55 @@
 
-//  Copyright (c) 2003-2022 Xsens Technologies B.V. or subsidiaries worldwide.
-//  All rights reserved.
-//  
-//  Redistribution and use in source and binary forms, with or without modification,
-//  are permitted provided that the following conditions are met:
-//  
-//  1.	Redistributions of source code must retain the above copyright notice,
-//  	this list of conditions, and the following disclaimer.
-//  
-//  2.	Redistributions in binary form must reproduce the above copyright notice,
-//  	this list of conditions, and the following disclaimer in the documentation
-//  	and/or other materials provided with the distribution.
-//  
-//  3.	Neither the names of the copyright holders nor the names of their contributors
-//  	may be used to endorse or promote products derived from this software without
-//  	specific prior written permission.
-//  
-//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-//  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-//  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
-//  THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-//  SPECIAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
-//  OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-//  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY OR
-//  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.THE LAWS OF THE NETHERLANDS 
-//  SHALL BE EXCLUSIVELY APPLICABLE AND ANY DISPUTES SHALL BE FINALLY SETTLED UNDER THE RULES 
-//  OF ARBITRATION OF THE INTERNATIONAL CHAMBER OF COMMERCE IN THE HAGUE BY ONE OR MORE 
-//  ARBITRATORS APPOINTED IN ACCORDANCE WITH SAID RULES.
-//  
+/******************************************************************************
+*
+* Copyright (C) 2023 - 2028 KETI, All rights reserved.
+*                           (Korea Electronics Technology Institute)
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* Use of the Software is limited solely to applications:
+* (a) running for Korean Government Project, or
+* (b) that interact with KETI project/platform.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+* KETI BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
+* OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*
+* Except as contained in this notice, the name of the KETI shall not be used
+* in advertising or otherwise to promote the sale, use or other dealings in
+* this Software without prior written authorization from KETI.
+*
+******************************************************************************/
+/******************************************************************************/
+/**
+*
+* @file di_gps_xsens.c
+*
+* This file contains a DI GPS for XSENS device
+*
+* @note
+*
+* V2X DI GPS XSENS Source File
+*
+* MODIFICATION HISTORY:
+* Ver   Who  Date     Changes
+* ----- ---- -------- ----------------------------------------------------
+* 1.00  bman  23.07.10 First release
+*
+******************************************************************************/
 
-//--------------------------------------------------------------------------------
-// Public Xsens device API C++ example MTi receive data.
-//--------------------------------------------------------------------------------
+/***************************** Include ***************************************/
 #include <xscontroller/xscontrol_def.h>
 #include <xscontroller/xsdevice_def.h>
 #include <xscontroller/xsscanner.h>
@@ -45,11 +62,13 @@
 #include <iomanip>
 #include <list>
 #include <string>
+#include "di_gps_xsens.h"
+#include "type.h"
 
-Journaller* gJournal = 0;
-
+/***************************** Definition ************************************/
 using namespace std;
 
+/***************************** Enum and Structure ****************************/
 class CallbackHandler : public XsCallback
 {
 public:
@@ -99,123 +118,35 @@ private:
 	list<XsDataPacket> m_packetBuffer;
 };
 
-//--------------------------------------------------------------------------------
-int main(void)
+/***************************** Static Variable *******************************/
+Journaller* gJournal = NULL;
+static XsControl* s_CXsControl = NULL;
+static XsDevice* s_pstXsDevice = NULL;
+static XsPortInfo s_mtPort;
+static CallbackHandler sh_CCallBack;
+
+/***************************** Function  *************************************/
+
+int32_t DI_GPS_XSENS_Get(DI_GPS_XSENS_T *pstDiGpsXsens)
 {
-	cout << "Creating XsControl object..." << endl;
-	XsControl* control = XsControl::construct();
-	assert(control != 0);
+    int32_t nRet = DI_ERROR;
 
-	// Lambda function for error handling
-	auto handleError = [=](string errorString)
-	{
-		control->destruct();
-		cout << errorString << endl;
-		cout << "Press [ENTER] to continue." << endl;
-		cin.get();
-		return -1;
-	};
+    if(pstDiGpsXsens == NULL)
+    {
+        PrintError("pstDiGpsXsens == NULL!!");
+        return nRet;
+    }
 
-	cout << "Scanning for devices..." << endl;
-	XsPortInfoArray portInfoArray = XsScanner::scanPorts();
-
-	// Find an MTi device
-	XsPortInfo mtPort;
-	for (auto const &portInfo : portInfoArray)
-	{
-		if (portInfo.deviceId().isMti() || portInfo.deviceId().isMtig())
-		{
-			mtPort = portInfo;
-			break;
-		}
-	}
-
-	if (mtPort.empty())
-		return handleError("No MTi device found. Aborting.");
-
-	cout << "Found a device with ID: " << mtPort.deviceId().toString().toStdString() << " @ port: " << mtPort.portName().toStdString() << ", baudrate: " << mtPort.baudrate() << endl;
-
-	cout << "Opening port..." << endl;
-	if (!control->openPort(mtPort.portName().toStdString(), mtPort.baudrate()))
-		return handleError("Could not open port. Aborting.");
-
-	// Get the device object
-	XsDevice* device = control->device(mtPort.deviceId());
-	assert(device != 0);
-
-	cout << "Device: " << device->productCode().toStdString() << ", with ID: " << device->deviceId().toString() << " opened." << endl;
-
-	// Create and attach callback handler to device
-	CallbackHandler callback;
-	device->addCallbackHandler(&callback);
-
-	// Put the device into configuration mode before configuring the device
-	cout << "Putting device into configuration mode..." << endl;
-	if (!device->gotoConfig())
-		return handleError("Could not put device into configuration mode. Aborting.");
-
-	cout << "Configuring the device..." << endl;
-
-	// Important for Public XDA!
-	// Call this function if you want to record a mtb file:
-	device->readEmtsAndDeviceConfiguration();
-
-	XsOutputConfigurationArray configArray;
-	configArray.push_back(XsOutputConfiguration(XDI_PacketCounter, 0));
-	configArray.push_back(XsOutputConfiguration(XDI_SampleTimeFine, 0));
-
-	if (device->deviceId().isImu())
-	{
-		configArray.push_back(XsOutputConfiguration(XDI_Acceleration, 100));
-		configArray.push_back(XsOutputConfiguration(XDI_RateOfTurn, 100));
-		configArray.push_back(XsOutputConfiguration(XDI_MagneticField, 100));
-	}
-	else if (device->deviceId().isVru() || device->deviceId().isAhrs())
-	{
-		configArray.push_back(XsOutputConfiguration(XDI_Quaternion, 100));
-	}
-	else if (device->deviceId().isGnss())
-	{
-		configArray.push_back(XsOutputConfiguration(XDI_Quaternion, 100));
-		configArray.push_back(XsOutputConfiguration(XDI_LatLon, 100));
-		configArray.push_back(XsOutputConfiguration(XDI_AltitudeEllipsoid, 100));
-		configArray.push_back(XsOutputConfiguration(XDI_VelocityXYZ, 100));
-	}
-	else
-	{
-		return handleError("Unknown device while configuring. Aborting.");
-	}
-
-	if (!device->setOutputConfiguration(configArray))
-		return handleError("Could not configure MTi device. Aborting.");
-
-	cout << "Creating a log file..." << endl;
-	string logFileName = "logfile.mtb";
-	if (device->createLogFile(logFileName) != XRV_OK)
-		return handleError("Failed to create a log file. Aborting.");
-	else
-		cout << "Created a log file: " << logFileName.c_str() << endl;
-
-	cout << "Putting device into measurement mode..." << endl;
-	if (!device->gotoMeasurement())
-		return handleError("Could not put device into measurement mode. Aborting.");
-
-	cout << "Starting recording..." << endl;
-	if (!device->startRecording())
-		return handleError("Failed to start recording. Aborting.");
-
-	cout << "\nMain loop. Recording data for 10 seconds." << endl;
-	cout << string(79, '-') << endl;
+	PrintTrace("\nMain loop. Recording data for 10 seconds.");
 
 	int64_t startTime = XsTime::timeStampNow();
 	while (XsTime::timeStampNow() - startTime <= 10000)
 	{
-		if (callback.packetAvailable())
+		if (sh_CCallBack.packetAvailable())
 		{
-			cout << setw(5) << fixed << setprecision(2);
+			cout << setw(5) << fixed << setprecision(5);
 
-			// Retrieve a packet
-			XsDataPacket packet = callback.getNextPacket();
+			XsDataPacket packet = sh_CCallBack.getNextPacket();
 			if (packet.containsCalibratedData())
 			{
 				XsVector acc = packet.calibratedAcceleration();
@@ -267,32 +198,182 @@ int main(void)
 					<< ", N:" << vel[1]
 					<< ", U:" << vel[2];
 			}
-			
+
 			cout << flush;
 		}
 		XsTime::msleep(0);
 	}
-	cout << "\n" << string(79, '-') << "\n";
-	cout << endl;
 
-	cout << "Stopping recording..." << endl;
-	if (!device->stopRecording())
-		return handleError("Failed to stop recording. Aborting.");
+    nRet = DI_OK;
 
-	cout << "Closing log file..." << endl;
-	if (!device->closeLogFile())
-		return handleError("Failed to close log file. Aborting.");
-
-	cout << "Closing port..." << endl;
-	control->closePort(mtPort.portName().toStdString());
-
-	cout << "Freeing XsControl object..." << endl;
-	control->destruct();
-
-	cout << "Successful exit." << endl;
-
-	cout << "Press [ENTER] to continue." << endl;
-	cin.get();
-
-	return 0;
+    return nRet;
 }
+
+int32_t DI_GPS_XSENS_Open(DI_GPS_XSENS_T *pstDiGpsXsens)
+{
+    int32_t nRet = DI_ERROR;
+
+    if(pstDiGpsXsens == NULL)
+    {
+        PrintError("pstDiGpsXsens == NULL!!");
+        return nRet;
+    }
+
+	PrintDebug("Scanning for devices...");
+	XsPortInfoArray portInfoArray = XsScanner::scanPorts();
+	for (auto const &portInfo : portInfoArray)
+	{
+		if (portInfo.deviceId().isMti() || portInfo.deviceId().isMtig())
+		{
+			s_mtPort = portInfo;
+			break;
+		}
+	}
+
+	if (s_mtPort.empty())
+    {
+        PrintError("s_mtPort.empty() is failed! No MTi device found!");
+        return nRet;
+    }
+
+	cout << "Found a device with ID: " << s_mtPort.deviceId().toString().toStdString() << " @ port: " << s_mtPort.portName().toStdString() << ", baudrate: " << s_mtPort.baudrate() << endl;
+
+	PrintDebug("Opening port...");
+	if (!s_CXsControl->openPort(s_mtPort.portName().toStdString(), s_mtPort.baudrate()))
+    {
+        PrintError("s_CXsControl->openPort() is failed! Could not open port!");
+        return nRet;
+
+    }
+
+	// Get the device object
+	s_pstXsDevice = s_CXsControl->device(s_mtPort.deviceId());
+	assert(s_pstXsDevice != 0);
+
+	cout << "Device: " << s_pstXsDevice->productCode().toStdString() << ", with ID: " << s_pstXsDevice->deviceId().toString() << " opened." << endl;
+
+	// Create and attach callback handler to device
+	s_pstXsDevice->addCallbackHandler(&sh_CCallBack);
+
+	// Put the device into configuration mode before configuring the device
+	PrintDebug("Putting device into configuration mode...");
+	if (!s_pstXsDevice->gotoConfig())
+    {
+        PrintError("device->gotoConfig() is failed! Could not put device into configuration mode!");
+        return nRet;
+    }
+
+	PrintDebug("Configuring the device...");
+
+	// Important for Public XDA!
+	// Call this function if you want to record a mtb file:
+	s_pstXsDevice->readEmtsAndDeviceConfiguration();
+
+	XsOutputConfigurationArray configArray;
+	configArray.push_back(XsOutputConfiguration(XDI_PacketCounter, 0));
+	configArray.push_back(XsOutputConfiguration(XDI_SampleTimeFine, 0));
+
+	if (s_pstXsDevice->deviceId().isImu())
+	{
+		configArray.push_back(XsOutputConfiguration(XDI_Acceleration, 100));
+		configArray.push_back(XsOutputConfiguration(XDI_RateOfTurn, 100));
+		configArray.push_back(XsOutputConfiguration(XDI_MagneticField, 100));
+	}
+	else if (s_pstXsDevice->deviceId().isVru() || s_pstXsDevice->deviceId().isAhrs())
+	{
+		configArray.push_back(XsOutputConfiguration(XDI_Quaternion, 100));
+	}
+	else if (s_pstXsDevice->deviceId().isGnss())
+	{
+		configArray.push_back(XsOutputConfiguration(XDI_Quaternion, 100));
+		configArray.push_back(XsOutputConfiguration(XDI_LatLon, 100));
+		configArray.push_back(XsOutputConfiguration(XDI_AltitudeEllipsoid, 100));
+		configArray.push_back(XsOutputConfiguration(XDI_VelocityXYZ, 100));
+	}
+	else
+	{
+        PrintError("Unknown device while configuring!");
+        return nRet;
+	}
+
+	if (!s_pstXsDevice->setOutputConfiguration(configArray))
+    {
+        PrintError("device->setOutputConfiguration() is failed! Could not configure MTi device!");
+        return nRet;
+    }
+
+	PrintDebug("Putting device into measurement mode...");
+	if (!s_pstXsDevice->gotoMeasurement())
+    {
+        PrintError("device->gotoMeasurement() is failed! Could not put device into measurement mode!");
+        return nRet;
+    }
+
+    nRet = DI_OK;
+
+    return nRet;
+}
+
+int32_t DI_GPS_XSENS_Close(DI_GPS_XSENS_T *pstDiGpsXsens)
+{
+    int32_t nRet = DI_ERROR;
+
+    if(pstDiGpsXsens == NULL)
+    {
+        PrintError("pstDiGpsXsens == NULL!!");
+        return nRet;
+    }
+
+	PrintDebug("Closing port...");
+	s_CXsControl->closePort(s_mtPort.portName().toStdString());
+
+    nRet = DI_OK;
+
+    return nRet;
+}
+
+int32_t DI_GPS_XSENS_Init(DI_GPS_XSENS_T *pstDiGpsXsens)
+{
+    int32_t nRet = DI_ERROR;
+
+    if(pstDiGpsXsens == NULL)
+    {
+        PrintError("pstDiGpsXsens == NULL!!");
+        return nRet;
+    }
+
+    s_CXsControl = XsControl::construct();
+    if(s_CXsControl == NULL)
+    {
+        PrintError("XsControl::construct() is failed! s_CXsControl is NULL!");
+        return nRet;
+    }
+    else
+    {
+        PrintDebug("Successfully created XsControl object");
+        nRet = DI_OK;
+    }
+
+	return nRet;
+}
+
+int32_t DI_GPS_XSENS_DeInit(DI_GPS_XSENS_T *pstDiGpsXsens)
+{
+    int32_t nRet = DI_ERROR;
+
+    if(pstDiGpsXsens == NULL)
+    {
+        PrintError("pstDiGpsXsens == NULL!!");
+        return nRet;
+    }
+
+	s_CXsControl->destruct();
+    s_CXsControl = NULL;
+
+    PrintDebug("Successfully destroyed XsControl object");
+
+    nRet = DI_OK;
+
+	return nRet;
+}
+

@@ -109,9 +109,13 @@ APP_T* APP_GetAppInstance(void)
     return &s_stApp;
 }
 
+DI_T* APP_GetDiInstance(void)
+{
+    return &s_stDi;
+}
+
 int main(int argc, char *argv[])
 {
-     ;
     int32_t nRet = APP_ERROR;
 
     UNUSED(argc);

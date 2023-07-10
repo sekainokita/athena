@@ -55,7 +55,6 @@
 /***************************** Definition ************************************/
 
 /***************************** Static Variable *******************************/
-static DI_GPS_T s_stDiGps;
 
 /***************************** Function  *************************************/
 
@@ -85,9 +84,9 @@ int32_t DI_Init(DI_T *pstDi)
         PrintError("pstDi == NULL!!");
         return nRet;
     }
-    (void*)memset(&s_stDiGps, 0x00, sizeof(DI_GPS_T));
+    (void*)memset(&pstDi->stDiGps, 0x00, sizeof(DI_GPS_T));
 
-    nRet = DI_GPS_Init(&s_stDiGps);
+    nRet = DI_GPS_Init(&pstDi->stDiGps);
     if(nRet != DI_OK)
     {
         PrintError("DI_GPS_Init() is failed! [unRet:%d]", nRet);

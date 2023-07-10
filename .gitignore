@@ -5,4 +5,5 @@
 *.csv
 *.db
 *.pcap
+*.mtb
 app-v2x

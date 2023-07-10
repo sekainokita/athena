@@ -49,10 +49,24 @@
 #include "type.h"
 #include "config.h"
 #include "di.h"
+#include "di_gps_xsens.h"
 
 /***************************** Definition ************************************/
 
 /***************************** Enum and Structure ****************************/
+/**
+* @details DI GPS Status
+* @param DI_GPS_STATUS_E
+*/
+typedef enum {
+    DI_GPS_STATUS_DEINITIALIZED                = 0,
+    DI_GPS_STATUS_INITIALIZED                  = 1,
+    DI_GPS_STATUS_CLOSED                       = 2,
+    DI_GPS_STATUS_OPENED                       = 3,
+    DI_GPS_STATUS_STARTED                      = 4,
+    DI_GPS_STATUS_STOPPED                      = 5,
+    DI_GPS_STATUS_MAX                          = 255,
+} DI_GPS_STATUS_E;
 
 /**
 * @details DI_GPS_T
@@ -60,6 +74,7 @@
 */
 typedef struct DI_GPS_t {
     bool                        bLogLevel;
+    DI_GPS_STATUS_E             eDiGpsStatus;
     uint32_t                    unReserved;
 } DI_GPS_T;
 
@@ -79,6 +94,5 @@ int32_t DI_GPS_Stop(DI_GPS_T *pstDiGps);
 void DI_GPS_Status(DI_GPS_T *pstDiGps);
 int32_t DI_GPS_Init(DI_GPS_T *pstDiGps);
 int32_t DI_GPS_DeInit(DI_GPS_T *pstDiGps);
-
 #endif	/* _DI_GPS_H_ */
 

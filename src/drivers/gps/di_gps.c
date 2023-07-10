@@ -51,6 +51,7 @@
 /***************************** Include ***************************************/
 #include "di.h"
 #include "di_gps.h"
+#include "di_gps_xsens.h"
 
 /***************************** Definition ************************************/
 
@@ -58,6 +59,7 @@
 
 /***************************** Static Variable *******************************/
 static bool s_bDiGpsLog = OFF;
+static DI_GPS_XSENS_T s_stDiGpsDev;
 
 /***************************** Function  *************************************/
 
@@ -71,7 +73,16 @@ static int32_t P_DI_GPS_Init(DI_GPS_T *pstDiGps)
         return nRet;
     }
 
-    nRet = DI_OK;
+#if defined(CONFIG_GPS_XSENS)
+    (void*)memset(&s_stDiGpsDev, 0x00, sizeof(DI_GPS_XSENS_T));
+
+    nRet = DI_GPS_XSENS_Init(&s_stDiGpsDev);
+    if(nRet != DI_OK)
+    {
+        PrintError("DI_GPS_XSENS_Init() is failed! [unRet:%d]", nRet);
+        return nRet;
+    }
+#endif
 
     return nRet;
 }
@@ -84,6 +95,17 @@ static int32_t P_DI_GPS_DeInit(DI_GPS_T *pstDiGps)
         PrintError("pstDiGps == NULL!!");
         return nRet;
     }
+
+#if defined(CONFIG_GPS_XSENS)
+    nRet = DI_GPS_XSENS_DeInit(&s_stDiGpsDev);
+    if(nRet != DI_OK)
+    {
+        PrintError("DI_GPS_XSENS_DeInit() is failed! [unRet:%d]", nRet);
+        return nRet;
+    }
+
+    (void*)memset(&s_stDiGpsDev, 0x00, sizeof(DI_GPS_XSENS_T));
+#endif
 
     return nRet;
 }
@@ -110,12 +132,26 @@ int32_t DI_GPS_Get(DI_GPS_T *pstDiGps)
 {
     int32_t nRet = DI_ERROR;
 
-    PrintWarn("TODO");
-
     if(pstDiGps == NULL)
     {
         PrintError("pstDiGps == NULL!!");
         return nRet;
+    }
+
+    if(pstDiGps->eDiGpsStatus >= DI_GPS_STATUS_OPENED)
+    {
+#if defined(CONFIG_GPS_XSENS)
+        nRet = DI_GPS_XSENS_Get(&s_stDiGpsDev);
+        if(nRet != DI_OK)
+        {
+            PrintError("DI_GPS_XSENS_Get() is failed! [unRet:%d]", nRet);
+            return nRet;
+        }
+#endif
+    }
+    else
+    {
+        PrintWarn("check the status of GPS [%d]", pstDiGps->eDiGpsStatus);
     }
 
     return nRet;
@@ -126,12 +162,32 @@ int32_t DI_GPS_Open(DI_GPS_T *pstDiGps)
 {
     int32_t nRet = DI_ERROR;
 
-    PrintWarn("TODO");
-
     if(pstDiGps == NULL)
     {
         PrintError("pstDiGps == NULL!!");
         return nRet;
+    }
+
+    if((pstDiGps->eDiGpsStatus == DI_GPS_STATUS_INITIALIZED) || (pstDiGps->eDiGpsStatus == DI_GPS_STATUS_CLOSED))
+    {
+#if defined(CONFIG_GPS_XSENS)
+        nRet = DI_GPS_XSENS_Open(&s_stDiGpsDev);
+        if(nRet != DI_OK)
+        {
+            PrintError("DI_GPS_XSENS_Open() is failed! [unRet:%d]", nRet);
+            return nRet;
+        }
+#endif
+        pstDiGps->eDiGpsStatus = DI_GPS_STATUS_OPENED;
+    }
+    else
+    {
+        PrintWarn("check the status of GPS [%d]", pstDiGps->eDiGpsStatus);
+
+        if(pstDiGps->eDiGpsStatus == DI_GPS_STATUS_OPENED)
+        {
+            PrintDebug("already DI_GPS_STATUS_OPENED");
+        }
     }
 
     return nRet;
@@ -141,12 +197,33 @@ int32_t DI_GPS_Close(DI_GPS_T *pstDiGps)
 {
     int32_t nRet = DI_ERROR;
 
-    PrintWarn("TODO");
-
     if(pstDiGps == NULL)
     {
         PrintError("pstDiGps == NULL!!");
         return nRet;
+    }
+
+    if(pstDiGps->eDiGpsStatus == DI_GPS_STATUS_OPENED)
+    {
+#if defined(CONFIG_GPS_XSENS)
+        nRet = DI_GPS_XSENS_Close(&s_stDiGpsDev);
+        if(nRet != DI_OK)
+        {
+            PrintError("DI_GPS_XSENS_Close() is failed! [unRet:%d]", nRet);
+            return nRet;
+        }
+#endif
+        pstDiGps->eDiGpsStatus = DI_GPS_STATUS_CLOSED;
+
+    }
+    else
+    {
+        PrintWarn("check the status of GPS [%d]", pstDiGps->eDiGpsStatus);
+
+        if(pstDiGps->eDiGpsStatus == DI_GPS_STATUS_CLOSED)
+        {
+            PrintDebug("already DI_GPS_STATUS_CLOSED");
+        }
     }
 
     return nRet;
@@ -214,6 +291,7 @@ int32_t DI_GPS_Init(DI_GPS_T *pstDiGps)
     }
     else
     {
+        pstDiGps->eDiGpsStatus = DI_GPS_STATUS_INITIALIZED;
         PrintWarn("is successfully initialized.");
     }
 
@@ -241,6 +319,7 @@ int32_t DI_GPS_DeInit(DI_GPS_T *pstDiGps)
     }
     else
     {
+        pstDiGps->eDiGpsStatus = DI_GPS_STATUS_DEINITIALIZED;
         PrintWarn("is successfully initialized.");
     }
 

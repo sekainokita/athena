@@ -74,6 +74,11 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
     }
     else
     {
+        DI_T *pstDi;
+
+        pstDi = APP_GetDiInstance();
+        PrintDebug("pstDi [0x%p]", pstDi);
+
         pcCmd = CLI_CMD_GetArg(pstCmd, CMD_0);
         if(IS_CMD(pcCmd, "test"))
         {
@@ -81,6 +86,48 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             {
                 pcCmd = CLI_CMD_GetArg(pstCmd, i);
                 PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
+            }
+        }
+        else if(IS_CMD(pcCmd, "gps"))
+        {
+            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+            if (pcCmd == NULL)
+            {
+                return CLI_CMD_Showusage(pstCmd);
+            }
+            else
+            {
+                if(IS_CMD(pcCmd, "open"))
+                {
+                    nRet = DI_GPS_Open(&pstDi->stDiGps);
+                    if (nRet != DI_OK)
+                    {
+                        PrintError("DI_GPS_Open() is failed! [nRet:%d]", nRet);
+                        return nRet;
+                    }
+                }
+                else if(IS_CMD(pcCmd, "close"))
+                {
+                    nRet = DI_GPS_Close(&pstDi->stDiGps);
+                    if (nRet != DI_OK)
+                    {
+                        PrintError("DI_GPS_Close() is failed! [nRet:%d]", nRet);
+                        return nRet;
+                    }
+                }
+                else if(IS_CMD(pcCmd, "get"))
+                {
+                    nRet = DI_GPS_Get(&pstDi->stDiGps);
+                    if (nRet != DI_OK)
+                    {
+                        PrintError("DI_GPS_Get() is failed! [nRet:%d]", nRet);
+                        return nRet;
+                    }
+                }
+                else
+                {
+                    return CLI_CMD_Showusage(pstCmd);
+                }
             }
         }
         else
@@ -104,7 +151,10 @@ int32_t CLI_DI_InitCmds(void)
                "Without any parameters, the 'di' show a description\n"
                "of available commands. For more details on a command, type and enter 'di'\n"
                "and the command name.\n\n"
-               "di test        test di command\n",
+               "di test        test di command\n"
+               "di gps open    open a GPS device\n"
+               "di gps close   close a GPS device\n"
+               "di gps get     get a GPS data\n",
                "");
     if(nRet != APP_OK)
     {

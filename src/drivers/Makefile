@@ -31,8 +31,6 @@
 #
 #******************************************************************************
 
-include ../build/path.mk
-
 TARGET = lib-di
 LIB_DI = libdi.a
 
@@ -50,16 +48,22 @@ OUT_LIB_DIR = ../build/output/lib
 	mkdir -p $(DI_OBJS_DIR)
 	mv *.o $(DI_OBJS_DIR)
 
-$(TARGET):$(OBJS)
+$(TARGET):$(OBJS) di_gps_xsens
 	@echo "Linking..."
-	@echo "Check SRCS:$(SRCS), OBJS:$(OBJS)"
+	@echo "Check DI_OBJS:$(DI_OBJS)"
 	@$(TARGET_AR) rcs $(LIB_DI) $(DI_OBJS)
 	@echo "Make and copy the common library..."
 	@mv $(LIB_DI) $(OUT_LIB_DIR)
 
+di_gps_xsens:
+	@echo "Enter di gps"
+	@$(MAKE) -C $(LIB_DI_GPS_PATH) all
+	@echo "Exit di gps"
+
 all: $(TARGET)
 
 clean:
+	@$(MAKE) -C $(LIB_DI_GPS_PATH) clean
 	@$(RM) -f $(DI_OBJS) $(OUT_LIB_DIR)/$(LIB_DI)
 	@$(RM) -rf $(DI_OBJS_DIR)
 

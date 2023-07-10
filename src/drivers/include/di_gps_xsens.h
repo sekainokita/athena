@@ -1,5 +1,5 @@
-#ifndef	_DI_H_
-#define	_DI_H_
+#ifndef	_DI_GPS_XSENS_H_
+#define	_DI_GPS_XSENS_H_
 
 /******************************************************************************
 *
@@ -36,11 +36,11 @@
 /******************************************************************************/
 /**
 *
-* @file di.h
+* @file di_gps.h
 *
 * @note
 *
-* V2X DI Header
+* DI GPS Header
 *
 ******************************************************************************/
 
@@ -48,29 +48,44 @@
 /***************************** Include ***************************************/
 #include "type.h"
 #include "config.h"
-#include "di_gps.h"
+#include "di.h"
 
 /***************************** Definition ************************************/
 
 /***************************** Enum and Structure ****************************/
 
-typedef enum {
-    DI_LOG_ALL                   = 0,
-    DI_LOG_GPS_ALL               = 10,
-    DI_LOG_CAMERA                = 11,
-    DI_LOG_VIDEO                 = 12,
-    DI_LOG_MAX                   = 0xFFFF
-} DI_LOG_E;
-
-typedef struct DI_t {
-    DI_LOG_E eDiLog;
-    DI_GPS_T stDiGps;
-    uint32_t unReserved;
-} DI_T;
+/**
+* @details DI_GPS_XSENS_T
+* @param unReserved
+*/
+typedef struct DI_GPS_XSENS_t {
+    bool                        bLogLevel;
+    uint32_t                    unReserved;
+} DI_GPS_XSENS_T;
 
 /***************************** Function Protype ******************************/
-void DI_SetLog(DI_T *pstDi, bool bOnOff);
-int32_t DI_Init(DI_T *pstDi);
+#ifdef __cplusplus
+    extern "C" {
+#endif
 
-#endif	/* _DI_H_ */
+int32_t DI_GPS_XSENS_Init(DI_GPS_XSENS_T *pstDiGpsXsens);
+int32_t DI_GPS_XSENS_DeInit(DI_GPS_XSENS_T *pstDiGpsXsens);
+
+int32_t DI_GPS_XSENS_SetLog(DI_GPS_XSENS_T *pstDiGpsXsens);
+int32_t DI_GPS_XSENS_Get(DI_GPS_XSENS_T *pstDiGpsXsens);
+
+int32_t DI_GPS_XSENS_Open(DI_GPS_XSENS_T *pstDiGpsXsens);
+int32_t DI_GPS_XSENS_Close(DI_GPS_XSENS_T *pstDiGpsXsens);
+int32_t DI_GPS_XSENS_Start(DI_GPS_XSENS_T *pstDiGpsXsens);
+int32_t DI_GPS_XSENS_Stop(DI_GPS_XSENS_T *pstDiGpsXsens);
+
+void DI_GPS_XSENS_Status(DI_GPS_XSENS_T *pstDiGpsXsens);
+int32_t DI_GPS_XSENS_Init(DI_GPS_XSENS_T *pstDiGpsXsens);
+int32_t DI_GPS_XSENS_DeInit(DI_GPS_XSENS_T *pstDiGpsXsens);
+
+#ifdef __cplusplus
+   }
+#endif
+
+#endif	/* _DI_GPS_XSENS_H_ */
 
