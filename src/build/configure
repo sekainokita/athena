@@ -33,6 +33,28 @@
 #
 #******************************************************************************
 
+BUILD_TOP_DIR=$(pwd)
+
+CONFIGS_DIR=${BUILD_TOP_DIR}/configs
+CONFIGS_FILE=.config
+
+UBUNTU_PLATFORM_CONFIG=ubuntu_20.04_defconfig
+NVIDIA_PLATFORM_CONFIG=nvidia_orin_defconfig
+XILINX_PLATFORM_CONFIG=xilinx_zcu216_defconfig
+
 echo "=========================================================="
 echo "Start Configuration"
 echo "=========================================================="
+
+if [ "ubuntu" = "$1" ]; then
+	echo "UBUNTU PLATFORM"
+    cp ${CONFIGS_DIR}/${UBUNTU_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+elif [ "nvidia" = "$1" ]; then
+	echo "NVIDIA PLATFORM"
+    cp ${CONFIGS_DIR}/${NVIDIA_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+elif [ "xilinx" = "$1" ]; then
+	echo "XILINX PLATFORM"
+    cp ${CONFIGS_DIR}/${XILINX_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+else
+	echo "CHECK THE PLATFORM"
+fi
