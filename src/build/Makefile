@@ -51,6 +51,7 @@ TARGET_CFLAGS += -Wall -Wextra -Wstrict-prototypes -O3 -fomit-frame-pointer -pip
 
 TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_FRAMEWORK) -l$(LIB_PLATFORM)
 TARGET_LDFLAGS += -lrt -pthread
+TARGET_LDFLAGS += -lsqlite3
 # To add Library : -l$(LIB_DB) -l$(LIB_MSG) -l$(LIB_TIME)
 
 TARGET_CC=gcc
