@@ -64,6 +64,7 @@ apt-get install -y libpcap-dev
 apt-get install -y rdate telnet
 apt-get install -y sharutils
 apt-get install -y libusb-1.0-0-dev
+apt-get install -y "^libxcb.*" libx11-xcb-dev libglu1-mesa-dev libxrender-dev
 
 pip3 install nvidia-pyindex
 pip3 install onnx-graphsurgeon
