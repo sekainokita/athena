@@ -1,0 +1,7 @@
+1. Download MT_Software_Suite_linux-x64_2022.0_b7085_r119802.tar.gz
+2. Get SDk
+$ ./mtsdk_linux-x64_2022.0.sh
+3. Build
+  /home/bman/work/mtsdk
+  make xda_public_cpp HAVE_LIBUSB=1
+

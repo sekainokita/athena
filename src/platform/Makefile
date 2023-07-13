@@ -31,8 +31,6 @@
 #
 #******************************************************************************
 
-include ../build/path.mk
-
 TARGET = lib-platform
 LIB_PLATFORM = libplatform.a
 

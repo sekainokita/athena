@@ -74,6 +74,9 @@
 #define PLATFORM_OK         0
 #define PLATFORM_ERROR      1
 
+#define DI_OK               0
+#define DI_ERROR            1
+
 #define APP_MSG_ERR         -1
 #define APP_OK              0
 #define APP_ERROR           1
@@ -95,37 +98,37 @@
 
 #define PrintError(fmt, args...) \
     do { \
-        printf(COLOR_RED "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
+        printf(COLOR_RED "[%s][%d] """ fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
     } while (0)
 
 #define PrintNotice(fmt, args...) \
     do { \
-        printf(COLOR_MAGENTA "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
+        printf(COLOR_MAGENTA "[%s][%d] """ fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
     } while (0)
 
 #define PrintWarn(fmt, args...) \
     do { \
-        printf(COLOR_YELLOW "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
+        printf(COLOR_YELLOW "[%s][%d] """ fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
     } while (0)
 
 #define PrintTrace(fmt, args...) \
     do { \
-        printf(COLOR_BLUE "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
+        printf(COLOR_BLUE "[%s][%d] """ fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
     } while (0)
 
 #define PrintEnter(fmt, args...) \
     do { \
-        printf(COLOR_GREEN "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
+        printf(COLOR_GREEN "[%s][%d] """ fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
     } while (0)
 
 #define PrintExit(fmt, args...) \
     do { \
-        printf(COLOR_CYAN "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
+        printf(COLOR_CYAN "[%s][%d] """ fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
     } while (0)
 
 #define PrintDebug(fmt, args...) \
     do { \
-        printf(COLOR_RESET "[%s][%d] """fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
+        printf(COLOR_RESET "[%s][%d] """ fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \
     } while (0)
 
 #define PrintInfo(fmt, args...) \

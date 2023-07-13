@@ -39,7 +39,7 @@
 *
 * @note
 *
-* V2X Data Format Source File
+* V2X Timer Manager Source File
 *
 * MODIFICATION HISTORY:
 * Ver   Who  Date     Changes

@@ -51,6 +51,7 @@
 /***************************** Include ***************************************/
 #include <stdio.h>
 #include "framework.h"
+#include "di.h"
 #include "svc_platooning.h"
 
 #include "app.h"
@@ -59,8 +60,11 @@
 
 
 /***************************** Static Variable *******************************/
+
 static FRAMEWORK_T s_stFramework;
 static APP_T s_stApp;
+
+static DI_T s_stDi;
 
 static SVC_PLATOONING_T s_stSvcPlatooning;
 
@@ -105,9 +109,13 @@ APP_T* APP_GetAppInstance(void)
     return &s_stApp;
 }
 
+DI_T* APP_GetDiInstance(void)
+{
+    return &s_stDi;
+}
+
 int main(int argc, char *argv[])
 {
-     ;
     int32_t nRet = APP_ERROR;
 
     UNUSED(argc);
@@ -126,6 +134,13 @@ int main(int argc, char *argv[])
 
     PrintDebug("pstFramework [0x%p]", &s_stFramework);
     PrintDebug("s_stApp [0x%p]", &s_stApp);
+
+    nRet = DI_Init(&s_stDi);
+    if (nRet != DI_OK)
+    {
+        PrintError("DI_Init() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
 
     nRet = FRAMEWORK_Init(&s_stFramework);
     if (nRet != FRAMEWORK_OK)

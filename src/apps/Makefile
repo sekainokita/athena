@@ -30,7 +30,6 @@
 # this Software without prior written authorization from KETI.
 #
 #******************************************************************************
-include ../build/path.mk
 
 TARGET = app
 
@@ -53,7 +52,7 @@ OUT_BIN_DIR = ../build/output/bin
 $(TARGET):$(OBJS)
 	@echo "Linking..."
 	@echo "Check SRCS:$(SRCS), OBJS:$(OBJS)"
-	$(CC) -o $@ $(APP_OBJS) $(CFLAGS) $(LDFLAGS) -lm
+	$(CC) -o $@ $(APP_OBJS) $(CFLAGS) $(LDFLAGS) $(LFLAGS) -lm
 	mv $(TARGET) $(APP_BIN)
 	cp -f $(APP_BIN) $(OUT_BIN_DIR)/$(APP_BIN)
 

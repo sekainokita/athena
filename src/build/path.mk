@@ -31,51 +31,68 @@
 #
 #******************************************************************************
 
-CUR_DIR = $(shell pwd)
+include .config
 
-TOP_DIR = $(CUR_DIR)/..
-APP_DIR = $(TOP_DIR)/apps
-BUILD_DIR = $(TOP_DIR)/build
-DRIVER_DIR = $(TOP_DIR)/drivers
-FRAMEWORK_DIR = $(TOP_DIR)/framework
-INCLUDE_DIR = $(TOP_DIR)/include
-PACKAGE_DIR = $(TOP_DIR)/packages
-PLATFORM_DIR = $(TOP_DIR)/platform
-TOOL_DIR = $(TOP_DIR)/tools
+export BUILD_TOP_DIR = $(shell pwd)
 
-OUT_DIR = $(BUILD_DIR)/output
-OUT_BIN_DIR = $(OUT_DIR)/bin
-OUT_LIB_DIR = $(OUT_DIR)/lib
+export TOP_DIR = $(BUILD_TOP_DIR)/..
+export APP_DIR = $(TOP_DIR)/apps
+export BUILD_DIR = $(TOP_DIR)/build
+export DI_DIR = $(TOP_DIR)/drivers
+export FRAMEWORK_DIR = $(TOP_DIR)/framework
+export INCLUDE_DIR = $(TOP_DIR)/include
+export PACKAGE_DIR = $(TOP_DIR)/packages
+export PLATFORM_DIR = $(TOP_DIR)/platform
+export TOOL_DIR = $(TOP_DIR)/tools
+
+export OUT_DIR = $(BUILD_DIR)/output
+export OUT_BIN_DIR = $(OUT_DIR)/bin
+export OUT_LIB_DIR = $(OUT_DIR)/lib
 
 # Source path
-LIB_DB_PATH = $(FRAMEWORK_DIR)/db
-LIB_MSG_PATH = $(FRAMEWORK_DIR)/msg
-LIB_TIME_PATH = $(FRAMEWORK_DIR)/time
-LIB_FRAMEWORK_PATH = $(FRAMEWORK_DIR)
-APP_PATH = $(APP_DIR)
-APP_CLI_PATH = $(APP_DIR)/cli
-APP_SVC_PATH = $(APP_DIR)/services
-APP_SVC_PLATOONING_PATH = $(APP_SVC_PATH)/platooning
+export LIB_DB_PATH = $(FRAMEWORK_DIR)/db
+export LIB_MSG_PATH = $(FRAMEWORK_DIR)/msg
+export LIB_TIME_PATH = $(FRAMEWORK_DIR)/time
+export LIB_FRAMEWORK_PATH = $(FRAMEWORK_DIR)
+export LIB_PLATFORM_PATH = $(PLATFORM_DIR)
+export LIB_DI_GPS_PATH = $(DI_DIR)/gps
+export LIB_DI_CAMERA_PATH = $(DI_DIR)/camera
+export LIB_DI_VIDEO_PATH = $(DI_DIR)/video
+export LIB_DI_PATH = $(DI_DIR)
+export APP_PATH = $(APP_DIR)
+export APP_CLI_PATH = $(APP_DIR)/cli
+export APP_SVC_PATH = $(APP_DIR)/services
+export APP_SVC_PLATOONING_PATH = $(APP_SVC_PATH)/platooning
 
 # Include path
-INC_PATH = $(TOP_DIR)/include
-APP_INC_PATH = $(APP_DIR)/include
-FRAMEWORK_INC_PATH = $(FRAMEWORK_DIR)/include
-PLATFORM_INC_PATH = $(PLATFORM_DIR)/include
-LIB_PATH = $(TOP_MAKE_DIR)/lib
+export INC_PATH = $(TOP_DIR)/include
+export APP_INC_PATH = $(APP_DIR)/include
+export FRAMEWORK_INC_PATH = $(FRAMEWORK_DIR)/include
+export PLATFORM_INC_PATH = $(PLATFORM_DIR)/include
+export DI_INC_PATH = $(DI_DIR)/include
+export LIB_PATH = $(TOP_MAKE_DIR)/lib
 
 # Objs
-FRAMEWORK_OBJS_DIR=$(FRAMEWORK_DIR)/objs
-FRAMEWORK_OBJS = $(FRAMEWORK_OBJS_DIR)/*.o
-PLATFORM_OBJS_DIR=$(PLATFORM_DIR)/objs
-PLATFORM_OBJS = $(PLATFORM_OBJS_DIR)/*.o
-APP_OBJS_DIR=$(APP_DIR)/objs
-APP_OBJS = $(APP_OBJS_DIR)/*.o
-
-# Platform path
-LIB_PLATFORM_PATH = $(PLATFORM_DIR)
+export FRAMEWORK_OBJS_DIR=$(FRAMEWORK_DIR)/objs
+export FRAMEWORK_OBJS = $(FRAMEWORK_OBJS_DIR)/*.o
+export PLATFORM_OBJS_DIR=$(PLATFORM_DIR)/objs
+export PLATFORM_OBJS = $(PLATFORM_OBJS_DIR)/*.o
+export DI_OBJS_DIR=$(DI_DIR)/objs
+export DI_OBJS = $(DI_OBJS_DIR)/*.o
+export APP_OBJS_DIR=$(APP_DIR)/objs
+export APP_OBJS = $(APP_OBJS_DIR)/*.o
 
 # Chemtronics
-LIB_PLAT_CHEM_PATH = $(PLATFORM_DIR)/chemtronics
-LIB_PLAT_CHEM_OBU_PATH = $(LIB_PLAT_CHEM_PATH)/obu
-LIB_PLAT_CHEM_OBU_INC_PATH = $(PLATFORM_DIR)/chemtronics/obu/include
+export LIB_PLAT_CHEM_PATH = $(PLATFORM_DIR)/chemtronics
+export LIB_PLAT_CHEM_OBU_PATH = $(LIB_PLAT_CHEM_PATH)/obu
+export LIB_PLAT_CHEM_OBU_INC_PATH = $(PLATFORM_DIR)/chemtronics/obu/include
+
+# XSENS
+export XSENS_MTI680G_SDK_PATH = $(PLATFORM_DIR)/movella/xsens/MTi-680g/mtsdk-2022.0-xda_public_cpp/xspublic
+export XSENS_MTI680G_AARCH64_LIB_PATH = $(PLATFORM_DIR)/movella/xsens/MTi-680g/lib/arm_aarch64
+export XSENS_MTI680G_X64_LIB_PATH = $(PLATFORM_DIR)/movella/xsens/MTi-680g/lib/ubuntu_x64
+ifeq ($(CONFIG_UBUNTU),y)
+export XSENS_MTI680G_LIB_PATH = $(XSENS_MTI680G_X64_LIB_PATH)
+else
+export XSENS_MTI680G_LIB_PATH = $(XSENS_MTI680G_AARCH64_LIB_PATH)
+endif

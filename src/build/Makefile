@@ -30,29 +30,49 @@
 # this Software without prior written authorization from KETI.
 #
 #******************************************************************************
-
 include path.mk
+include .config
 
 LIB_DB = db
 LIB_MSG = msg
 LIB_TIME = time
 LIB_FRAMEWORK = framework
 LIB_PLATFORM = platform
+LIB_DI = di
 
 # CFLAGS / LDFLAGS
 TARGET_CFLAGS = -I$(INC_PATH)
 TARGET_CFLAGS += -I$(APP_INC_PATH)
 TARGET_CFLAGS += -I$(FRAMEWORK_INC_PATH)
 TARGET_CFLAGS += -I$(PLATFORM_INC_PATH)
+TARGET_CFLAGS += -I$(DI_INC_PATH)
 TARGET_CFLAGS += -I$(LIB_PLAT_CHEM_OBU_INC_PATH)
 TARGET_CFLAGS += -D_GNU_SOURCE=1
 TARGET_CFLAGS += -std=gnu99 -g
 TARGET_CFLAGS += -Wall -Wextra -Wstrict-prototypes -O3 -fomit-frame-pointer -pipe
+TARGET_CFLAGS += -std=c11
+TARGET_CFLAGS += -DCONFIG_GPS_XSENS
 
-TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_FRAMEWORK) -l$(LIB_PLATFORM)
-TARGET_LDFLAGS += -lrt -pthread
+TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_FRAMEWORK) -l$(LIB_PLATFORM) -l$(LIB_DI)
+TARGET_LDFLAGS += -lrt -ldl
+TARGET_LDFLAGS += -pthread
+TARGET_LDFLAGS += -lstdc++
 TARGET_LDFLAGS += -lsqlite3
 # To add Library : -l$(LIB_DB) -l$(LIB_MSG) -l$(LIB_TIME)
+
+TARGET_CXXFLAGS = -I$(INC_PATH)
+TARGET_CXXFLAGS += -I$(APP_INC_PATH)
+TARGET_CXXFLAGS += -I$(FRAMEWORK_INC_PATH)
+TARGET_CXXFLAGS += -I$(PLATFORM_INC_PATH)
+TARGET_CXXFLAGS += -I$(DI_INC_PATH)
+TARGET_CXXFLAGS += -I$(LIB_PLAT_CHEM_OBU_INC_PATH)
+TARGET_CXXFLAGS += -D_GNU_SOURCE=1
+TARGET_CXXFLAGS += -std=c++11 -g
+TARGET_CXXFLAGS += -Wall -Wextra -O3 -fomit-frame-pointer -pipe
+TARGET_CXXFLAGS += -DCONFIG_GPS_XSENS
+
+TARGET_LFLAGS = -lpthread -lrt
+TARGET_LFLAGS += -L$(XSENS_MTI680G_LIB_PATH) -lxscontroller -lxscommon -lxstypes -ldl
 
 TARGET_CC=gcc
 TARGET_LD=ld
@@ -60,12 +80,15 @@ TARGET_AR=ar
 TARGET_RANLIB=ranlib
 
 TARGET_CONFIGS = \
+	BUILD_TOP="$(TOP_DIR)" \
 	CC="$(TARGET_CC)" \
 	LD="$(TARGET_LD)" \
 	AR="$(TARGET_AR)" \
 	RANLIB="$(TARGET_RANLIB)" \
 	CFLAGS="$(TARGET_CFLAGS)" \
-	LDFLAGS="$(TARGET_LDFLAGS)"
+	CXXFLAGS="$(TARGET_CXXFLAGS)" \
+	LDFLAGS="$(TARGET_LDFLAGS)" \
+	LFLAGS="$(TARGET_LFLAGS)"
 #
 # Library
 #
@@ -73,10 +96,10 @@ lib-db:
 	@$(MAKE) -C $(LIB_DB_PATH) $(TARGET_CONFIGS) all
 
 lib-db-clean:
-	$(MAKE) -C $(LIB_DB_PATH) clean
+	$(MAKE) -C $(LIB_DB_PATH) $(TARGET_CONFIGS) clean
 
 lib-db-distclean:
-	$(MAKE) -C $(LIB_DB_PATH) distclean
+	$(MAKE) -C $(LIB_DB_PATH) $(TARGET_CONFIGS) distclean
 
 .PHONY: lib-db lib-db-clean lib-db-distclean
 
@@ -84,10 +107,10 @@ lib-msg:
 	@$(MAKE) -C $(LIB_MSG_PATH) $(TARGET_CONFIGS) all
 
 lib-msg-clean:
-	$(MAKE) -C $(LIB_MSG_PATH) clean
+	$(MAKE) -C $(LIB_MSG_PATH) $(TARGET_CONFIGS) clean
 
 lib-msg-distclean:
-	$(MAKE) -C $(LIB_MSG_PATH) distclean
+	$(MAKE) -C $(LIB_MSG_PATH) $(TARGET_CONFIGS) distclean
 
 .PHONY: lib-msg lib-msg-clean lib-msg-distclean
 
@@ -95,10 +118,10 @@ lib-time:
 	@$(MAKE) -C $(LIB_TIME_PATH) $(TARGET_CONFIGS) all
 
 lib-time-clean:
-	$(MAKE) -C $(LIB_TIME_PATH) clean
+	$(MAKE) -C $(LIB_TIME_PATH) $(TARGET_CONFIGS) clean
 
 lib-time-distclean:
-	$(MAKE) -C $(LIB_TIME_PATH) distclean
+	$(MAKE) -C $(LIB_TIME_PATH) $(TARGET_CONFIGS) distclean
 
 .PHONY: lib-time lib-time-clean lib-time-distclean
 
@@ -106,10 +129,10 @@ lib-framework:
 	@$(MAKE) -C $(LIB_FRAMEWORK_PATH) $(TARGET_CONFIGS) all
 
 lib-framework-clean:
-	$(MAKE) -C $(LIB_FRAMEWORK_PATH) clean
+	$(MAKE) -C $(LIB_FRAMEWORK_PATH) $(TARGET_CONFIGS) clean
 
 lib-framework-distclean:
-	$(MAKE) -C $(LIB_FRAMEWORK_PATH) distclean
+	$(MAKE) -C $(LIB_FRAMEWORK_PATH) $(TARGET_CONFIGS) distclean
 
 .PHONY: lib-framework lib-framework-clean lib-framework-distclean
 
@@ -117,13 +140,23 @@ lib-platform:
 	@$(MAKE) -C $(LIB_PLATFORM_PATH) $(TARGET_CONFIGS) all
 
 lib-platform-clean:
-	$(MAKE) -C $(LIB_PLATFORM_PATH) clean
+	$(MAKE) -C $(LIB_PLATFORM_PATH) $(TARGET_CONFIGS) clean
 
 lib-platform-distclean:
-	$(MAKE) -C $(LIB_PLATFORM_PATH) distclean
+	$(MAKE) -C $(LIB_PLATFORM_PATH) $(TARGET_CONFIGS) distclean
 
 .PHONY: lib-platform lib-platform-clean lib-platform-distclean
 
+lib-di:
+	@$(MAKE) -C $(LIB_DI_PATH) $(TARGET_CONFIGS) all
+
+lib-di-clean:
+	$(MAKE) -C $(LIB_DI_PATH) $(TARGET_CONFIGS) clean
+
+lib-di-distclean:
+	$(MAKE) -C $(LIB_DI_PATH) $(TARGET_CONFIGS) distclean
+
+.PHONY: lib-di lib-di-clean lib-di-distclean
 #
 # Application
 #
@@ -131,10 +164,10 @@ app:
 	@$(MAKE) -C $(APP_PATH) $(TARGET_CONFIGS) all
 
 app-clean:
-	$(MAKE) -C $(APP_PATH) clean
+	$(MAKE) -C $(APP_PATH) $(TARGET_CONFIGS) clean
 
 app-distclean:
-	$(MAKE) -C $(APP_PATH) distclean
+	$(MAKE) -C $(APP_PATH) $(TARGET_CONFIGS) distclean
 
 .PHONY: app app-clean app-distclean
 
@@ -143,10 +176,10 @@ plat-chem-obu:
 	@$(MAKE) -C $(LIB_PLAT_CHEM_OBU_PATH) $(TARGET_CONFIGS) all
 
 plat-chem-obu-clean:
-	$(MAKE) -C $(LIB_PLAT_CHEM_OBU_PATH) clean
+	$(MAKE) -C $(LIB_PLAT_CHEM_OBU_PATH) $(TARGET_CONFIGS) clean
 
 plat-chem-obu-distclean:
-	$(MAKE) -C $(LIB_PLAT_CHEM_OBU_PATH) distclean
+	$(MAKE) -C $(LIB_PLAT_CHEM_OBU_PATH) $(TARGET_CONFIGS) distclean
 
 .PHONY: plat-chem-obu plat-chem-obu-clean plat-chem-obu-distclean
 
@@ -155,7 +188,7 @@ plat-chem-obu-distclean:
 #
 
 lib-all:lib-db lib-msg lib-time
-all: lib-platform lib-framework app lib-all
+all: lib-di lib-platform lib-framework app lib-all
 
 #
 # Clean
@@ -163,6 +196,6 @@ all: lib-platform lib-framework app lib-all
 
 clean: distclean
 
-distclean: lib-db-distclean lib-msg-distclean lib-time-distclean lib-platform-distclean lib-framework-distclean app-distclean
+distclean: lib-db-distclean lib-msg-distclean lib-time-distclean lib-di-distclean lib-platform-distclean lib-framework-distclean app-distclean
 	@$(RM) -f $(OUT_BIN_DIR)/* $(OUT_LIB_DIR)/*
 	@$(RM) -f *.txt *.csv *.db *.log

@@ -31,8 +31,6 @@
 #
 #******************************************************************************
 
-include ../build/path.mk
-
 TARGET = lib-framework
 LIB_FRAMEWORK = libframework.a
 
