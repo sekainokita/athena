@@ -200,7 +200,7 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                     sql_RxStatus = sqlite3_open(DB_MANAGER_SQL_RX_FILE, &sh_pDbMgrRxSqlMsg);
                     if (sql_RxStatus != SQLITE_OK)
                     {
-                        fprintf(stderr, "Can't open Tx database : %s\n", sqlite3_errmsg(sh_pDbMgrRxSqlMsg));
+                        fprintf(stderr, "Can't open Rx database : %s\n", sqlite3_errmsg(sh_pDbMgrRxSqlMsg));
                         sqlite3_close(sh_pDbMgrRxSqlMsg);
                         return sql_RxStatus;
                     }
