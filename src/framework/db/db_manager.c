@@ -54,6 +54,10 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+#include <sqlite3.h>
+#include <stdio.h>
+#include <stdlib.h>
+//#include <inttypes.h>
 
 /***************************** Definition ************************************/
 #define DB_MANAGER_TXT_TX_FILE     "db_v2x_tx_temp_writing.txt"
@@ -62,11 +66,17 @@
 #define DB_MANAGER_CSV_TX_FILE     "db_v2x_tx_temp_writing.csv"
 #define DB_MANAGER_CSV_RX_FILE     "db_v2x_rx_temp_writing.csv"
 
+#define DB_MANAGER_SQL_TX_FILE     "db_v2x_tx_temp_writing.db"
+#define DB_MANAGER_SQL_RX_FILE     "db_v2x_rx_temp_writing.db"
+
 /***************************** Enum and Structure ****************************/
 
 /***************************** Static Variable *******************************/
 FILE* sh_pDbMgrTxMsg;
 FILE* sh_pDbMgrRxMsg;
+sqlite3* sh_pDbMgrTxSqlMsg;
+sqlite3* sh_pDbMgrRxSqlMsg;
+
 static int s_nDbTaskMsgId, s_nMsgTxTaskMsgId, s_nMsgRxTaskMsgId;
 static key_t s_dbTaskMsgKey = FRAMEWORK_DB_TASK_MSG_KEY;
 static key_t s_MsgTxTaskMsgKey = FRAMEWORK_MSG_TX_TASK_MSG_KEY;
@@ -77,6 +87,226 @@ static pthread_t sh_DbMgrTask;
 static bool s_bDbMgrLog = OFF;
 
 /***************************** Function  *************************************/
+
+static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    char *pchPayload = NULL;
+
+    switch (pstEventMsg->pstDbManagerWrite->eCommMsgType)
+    {
+        case DB_MANAGER_COMM_MSG_TYPE_TX:
+        {
+            if (sh_pDbMgrTxSqlMsg != NULL)
+            {
+                pchPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
+                if(pchPayload == NULL)
+                {
+                    PrintError("malloc() is failed! [NULL]");
+                    return nRet;
+                }
+
+                memcpy(pchPayload, (char *)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
+
+                {
+                    char *ErrorMsg = NULL;
+                    int sql_TxStatus;
+
+                    // Connect Database
+                    sql_TxStatus = sqlite3_open(DB_MANAGER_SQL_TX_FILE, &sh_pDbMgrTxSqlMsg);
+                    if (sql_TxStatus != SQLITE_OK)
+                    {
+                        fprintf(stderr, "Can't open Tx database : %s\n", sqlite3_errmsg(sh_pDbMgrTxSqlMsg));
+                        sqlite3_close(sh_pDbMgrTxSqlMsg);
+                        return sql_TxStatus;
+                    }
+
+                    // Create Table 
+                    const char* TxCreate = "CREATE TABLE IF NOT EXISTS Txtable (eDeviceType INTEGER, eTeleCommType INTEGER, unDeviceId INTEGER, ulTimeStamp INTEGER,\
+                    eServiceId INTEGER, eActionType INTEGER, eRegionId INTEGER, ePayloadType INTEGER, eCommId INTEGER, usDbVer INTEGER, usHwVer INTEGER, usSwVer INTEGER,\
+                    ulPayloadLength INTEGER, unTotalpacketCrc32 INTEGER);";
+                    sql_TxStatus = sqlite3_exec(sh_pDbMgrTxSqlMsg, TxCreate, 0, 0, &ErrorMsg);
+                    if (sql_TxStatus != SQLITE_OK)
+                    {
+                        fprintf(stderr, "Txtable_CREATE_error : %s\n", ErrorMsg);
+                        sqlite3_free(ErrorMsg);
+                        sqlite3_close(sh_pDbMgrTxSqlMsg);
+                        return sql_TxStatus;
+                    }
+                    // Insert data (execpt cPayload)
+                    char* InsertTxData = (char *)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
+                    if (InsertTxData != NULL)
+                    {
+                        sprintf(InsertTxData,\
+                        "INSERT INTO Txtable(eDeviceType, eTeleCommType, unDeviceId, ulTimeStamp, eServiceId, eActionType, eRegionId, ePayloadType, eCommId, usDbVer, usHwVer,\
+                        usSwVer, ulPayloadLength, unTotalpacketCrc32)\
+                        VALUES (%d, %d, 0x%x, %ld, %d, %d, %d, %d, %d, %d.%d, 0x%x, 0x%x, %d, 0x%x)",\
+                        pstEventMsg->pstDbV2x->eDeviceType,\
+                        pstEventMsg->pstDbV2x->eTeleCommType,\
+                        pstEventMsg->pstDbV2x->unDeviceId,\
+                        pstEventMsg->pstDbV2x->ulTimeStamp,\
+                        pstEventMsg->pstDbV2x->eServiceId,\
+                        pstEventMsg->pstDbV2x->eActionType,\
+                        pstEventMsg->pstDbV2x->eRegionId,\
+                        pstEventMsg->pstDbV2x->ePayloadType,\
+                        pstEventMsg->pstDbV2x->eCommId,\
+                        pstEventMsg->pstDbV2x->usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, pstEventMsg->pstDbV2x->usDbVer & CLI_DB_V2X_MINOR_MASK,\
+                        pstEventMsg->pstDbV2x->usHwVer,\
+                        pstEventMsg->pstDbV2x->usSwVer,\
+                        pstEventMsg->pstDbV2x->ulPayloadLength,\
+                        pstEventMsg->pstDbManagerWrite->unCrc32);
+                    }
+                    
+                    sql_TxStatus = sqlite3_exec(sh_pDbMgrTxSqlMsg, InsertTxData, 0, 0, &ErrorMsg);
+                    if (sql_TxStatus != SQLITE_OK)
+                    {
+                        fprintf(stderr, "Txtable_INSERT_error : %s\n", ErrorMsg);
+                        sqlite3_free(ErrorMsg);
+                        sqlite3_close(sh_pDbMgrTxSqlMsg);
+                        return sql_TxStatus;
+                    }
+                    // Close Database Connection
+                    sqlite3_close(sh_pDbMgrTxSqlMsg);
+                    fflush(stdout);
+                    
+                    return 0;
+                }
+            }
+            else
+            {
+                PrintError("sh_pDbMgrTxSqlMsg is NULL!!, check whethter sh_pDbMgrTxSqlMsg is opened before.");
+            }
+
+            break;
+        }
+        case DB_MANAGER_COMM_MSG_TYPE_RX:
+        {
+            if (sh_pDbMgrRxSqlMsg != NULL)
+            {
+                pchPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
+                if(pchPayload == NULL)
+                {
+                    PrintError("malloc() is failed! [NULL]");
+                    return nRet;
+                }
+
+                memcpy(pchPayload, (char *)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
+
+                {
+                    char *ErrorMsg = NULL;
+                    int sql_RxStatus;
+
+                    // Connect Database
+                    sql_RxStatus = sqlite3_open(DB_MANAGER_SQL_RX_FILE, &sh_pDbMgrRxSqlMsg);
+                    if (sql_RxStatus != SQLITE_OK)
+                    {
+                        fprintf(stderr, "Can't open Tx database : %s\n", sqlite3_errmsg(sh_pDbMgrRxSqlMsg));
+                        sqlite3_close(sh_pDbMgrRxSqlMsg);
+                        return sql_RxStatus;
+                    }
+
+                    // Create Table 
+                    const char* RxCreate = "CREATE TABLE IF NOT EXISTS Rxtable (eDeviceType INTEGER, eTeleCommType INTEGER, unDeviceId INTEGER, ulTimeStamp INTEGER,\
+                    eServiceId INTEGER, eActionType INTEGER, eRegionId INTEGER, ePayloadType INTEGER, eCommId INTEGER, usDbVer INTEGER, usHwVer INTEGER, usSwVer INTEGER,\
+                    ulPayloadLength INTEGER, unTotalpacketCrc32 INTEGER);";
+                    sql_RxStatus = sqlite3_exec(sh_pDbMgrRxSqlMsg, RxCreate, 0, 0, &ErrorMsg);
+                    if (sql_RxStatus != SQLITE_OK)
+                    {
+                        fprintf(stderr, "Rxtable_CREATE_error : %s\n", ErrorMsg);
+                        sqlite3_free(ErrorMsg);
+                        sqlite3_close(sh_pDbMgrRxSqlMsg);
+                        return sql_RxStatus;
+                    }
+                    // Insert data (execpt cPayload)
+                    char* InsertRxData = (char *)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
+                    if (InsertRxData != NULL)
+                    {
+                        sprintf(InsertRxData,\
+                        "INSERT INTO Rxtable(eDeviceType, eTeleCommType, unDeviceId, ulTimeStamp, eServiceId, eActionType, eRegionId, ePayloadType, eCommId, usDbVer, usHwVer,\
+                        usSwVer, ulPayloadLength, unTotalpacketCrc32)\
+                        VALUES (%d, %d, 0x%x, %ld, %d, %d, %d, %d, %d, %d.%d, 0x%x, 0x%x, %d, 0x%x)",\
+                        pstEventMsg->pstDbV2x->eDeviceType,\
+                        pstEventMsg->pstDbV2x->eTeleCommType,\
+                        pstEventMsg->pstDbV2x->unDeviceId,\
+                        pstEventMsg->pstDbV2x->ulTimeStamp,\
+                        pstEventMsg->pstDbV2x->eServiceId,\
+                        pstEventMsg->pstDbV2x->eActionType,\
+                        pstEventMsg->pstDbV2x->eRegionId,\
+                        pstEventMsg->pstDbV2x->ePayloadType,\
+                        pstEventMsg->pstDbV2x->eCommId,\
+                        pstEventMsg->pstDbV2x->usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, pstEventMsg->pstDbV2x->usDbVer & CLI_DB_V2X_MINOR_MASK,\
+                        pstEventMsg->pstDbV2x->usHwVer,\
+                        pstEventMsg->pstDbV2x->usSwVer,\
+                        pstEventMsg->pstDbV2x->ulPayloadLength,\
+                        pstEventMsg->pstDbManagerWrite->unCrc32);
+                    }
+                    
+                    sql_RxStatus = sqlite3_exec(sh_pDbMgrRxSqlMsg, InsertRxData, 0, 0, &ErrorMsg);
+                    if (sql_RxStatus != SQLITE_OK)
+                    {
+                        fprintf(stderr, "Rxtable_INSERT_error : %s\n", ErrorMsg);
+                        sqlite3_free(ErrorMsg);
+                        sqlite3_close(sh_pDbMgrRxSqlMsg);
+                        return sql_RxStatus;
+                    }
+                    // Close Database Connection
+                    sqlite3_close(sh_pDbMgrRxSqlMsg);
+                    fflush(stdout);
+                    
+                    return 0;
+                }
+            }
+            else
+            {
+                PrintError("sh_pDbMgrRxSqlMsg is NULL!!, check whethter sh_pDbMgrRxSqlMsg is opened before.");
+            }
+
+            break;
+        }
+        default:
+            PrintError("unknown eCommMsgType [%d]", pstEventMsg->pstDbManagerWrite->eCommMsgType);
+            break;
+    }
+
+    return nRet;
+}
+
+static int32_t P_DB_MANAGER_OpenSqlite(DB_MANAGER_T *pstDbManager)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    UNUSED(pstDbManager);
+    
+    if(sh_pDbMgrTxSqlMsg == NULL)
+    {
+        int sql_TxStatus = sqlite3_open(DB_MANAGER_SQL_TX_FILE, &sh_pDbMgrTxSqlMsg);
+        if(sql_TxStatus != SQLITE_OK)
+        {
+            PrintError("Can't open Tx database!!");
+        }
+        else
+        {
+            PrintTrace("DB_MANAGER_SQL_TX_FILE[%s] is opened.", DB_MANAGER_SQL_TX_FILE);
+            nRet = FRAMEWORK_OK;
+        }
+        sqlite3_close(sh_pDbMgrTxSqlMsg);
+    }
+
+    if(sh_pDbMgrRxSqlMsg == NULL)
+    {
+        int sql_RxStatus = sqlite3_open(DB_MANAGER_SQL_RX_FILE, &sh_pDbMgrRxSqlMsg);
+        if(sql_RxStatus != SQLITE_OK)
+        {
+            PrintError("Can't open Rx database!!");
+        }
+        else
+        {
+            PrintTrace("DB_MANAGER_SQL_RX_FILE[%s] is opened.", DB_MANAGER_SQL_RX_FILE);
+            nRet = FRAMEWORK_OK;
+        }
+        sqlite3_close(sh_pDbMgrRxSqlMsg);
+    }
+    return nRet;
+}
 
 static int32_t P_DB_MANAGER_WriteTxt(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
 {
@@ -485,7 +715,11 @@ static void *P_DB_MANAGER_Task(void *arg)
                     case DB_MANAGER_FILE_TYPE_SQLITE:
                     {
                         PrintDebug("DB_MANAGER_FILE_TYPE_SQLITE [%d]", stEventMsg.pstDbManagerWrite->eFileType);
-                        PrintWarn("TODO");
+                        nRet = P_DB_MANAGER_WriteSqlite(&stEventMsg);
+                        if(nRet != FRAMEWORK_OK)
+                        {
+                            PrintError("P_DB_MANAGER_WriteSqlite() is failed! [unRet:%d]", nRet);
+                        }
                         break;
                     }
                     default:
@@ -647,6 +881,12 @@ int32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV
     if(pPayload == NULL)
     {
         PrintError("pPayload == NULL!!");
+        return nRet;
+    }
+
+    if(sh_pDbMgrTxSqlMsg == NULL)
+    {
+        PrintError("sh_pDbMgrTxSqlMsg == NULL!!, check DB_MANAGER_Open() is called.");
         return nRet;
     }
 
@@ -815,7 +1055,13 @@ int32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager)
 
         case DB_MANAGER_FILE_TYPE_SQLITE:
             PrintDebug("DB_MANAGER_FILE_TYPE_SQLITE [%d]", pstDbManager->eFileType);
-            PrintWarn("TODO");
+
+            nRet = P_DB_MANAGER_OpenSqlite(pstDbManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("P_DB_MANAGER_OpenSqlite() is failed! [nRet:%d]", nRet);
+                return nRet;
+            }
             break;
 
         default:
@@ -932,7 +1178,47 @@ int32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager)
 
         case DB_MANAGER_FILE_TYPE_SQLITE:
             PrintDebug("DB_MANAGER_FILE_TYPE_SQLITE [%d]", pstDbManager->eFileType);
-            PrintWarn("TODO");
+            if(sh_pDbMgrTxMsg != NULL)
+            {
+                nRet = fflush(sh_pDbMgrTxMsg);
+                if (nRet < 0)
+                {
+                    PrintError("fflush() is failed! [unRet:%d]", nRet);
+                }
+
+                nRet = fclose(sh_pDbMgrTxMsg);
+                if (nRet < 0)
+                {
+                    PrintError("fclose() is failed! [unRet:%d]", nRet);
+                }
+                else
+                {
+                    PrintTrace("DB_MANAGER_TX_FILE[%s] is closed.", DB_MANAGER_SQL_TX_FILE);
+                    sh_pDbMgrTxMsg = NULL;
+                    nRet = FRAMEWORK_OK;
+                }
+            }
+
+            if(sh_pDbMgrRxMsg != NULL)
+            {
+                nRet = fflush(sh_pDbMgrRxMsg);
+                if (nRet < 0)
+                {
+                    PrintError("fflush() is failed! [unRet:%d]", nRet);
+                }
+
+                nRet = fclose(sh_pDbMgrRxMsg);
+                if (nRet < 0)
+                {
+                    PrintError("fclose() is failed! [unRet:%d]", nRet);
+                }
+                else
+                {
+                    PrintTrace("DB_MANAGER_RX_FILE[%s] is closed.", DB_MANAGER_SQL_RX_FILE);
+                    sh_pDbMgrRxMsg = NULL;
+                    nRet = FRAMEWORK_OK;
+                }
+            }
             break;
 
         default:
