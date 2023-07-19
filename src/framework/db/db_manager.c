@@ -92,10 +92,20 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
     char *ErrorMsg = NULL;
     int sql_TxStatus;
     int sql_RxStatus;
-    const char* TxCreate;
-    const char* RxCreate;
+    const char* TxCreate = NULL;
+    const char* RxCreate = NULL;
     char *InsertTxData = (char *)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
+    if(InsertTxData == NULL)
+        {
+            PrintError("InsertTxData_malloc() is failed! [NULL]");
+            return nRet;
+        }
     char *InsertRxData = (char *)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
+    if(InsertRxData == NULL)
+        {
+            PrintError("InsertRxData_malloc() is failed! [NULL]");
+            return nRet;
+        }
 
     switch (pstEventMsg->pstDbManagerWrite->eCommMsgType)
     {
@@ -121,21 +131,28 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                     if(sql_TxStatus != SQLITE_OK)
                     {
                         PrintError("Can't close Tx database : %s\n", sqlite3_errmsg(sh_pDbMgrTxSqlMsg));
+                        nRet = FRAMEWORK_ERROR;
+                        return nRet;
                     }
                 }
                 // Create Table 
-                TxCreate = "CREATE TABLE IF NOT EXISTS Txtable (eDeviceType INTEGER, eTeleCommType INTEGER, unDeviceId INTEGER, ulTimeStamp INTEGER,\
-                eServiceId INTEGER, eActionType INTEGER, eRegionId INTEGER, ePayloadType INTEGER, eCommId INTEGER, usDbVer INTEGER, usHwVer INTEGER, usSwVer INTEGER,\
-                ulPayloadLength INTEGER, unTotalpacketCrc32 INTEGER)";
-                sql_TxStatus = sqlite3_exec(sh_pDbMgrTxSqlMsg, TxCreate, 0, 0, &ErrorMsg);
-                if (sql_TxStatus != SQLITE_OK)
+                if(TxCreate == NULL)
                 {
-                    PrintError("Can't create Txtable : %s\n", ErrorMsg);
-                    sqlite3_free(ErrorMsg);
-                    sql_TxStatus = sqlite3_close(sh_pDbMgrTxSqlMsg);
-                    if(sql_TxStatus != SQLITE_OK)
+                    TxCreate = "CREATE TABLE IF NOT EXISTS Txtable (eDeviceType INTEGER, eTeleCommType INTEGER, unDeviceId INTEGER, ulTimeStamp INTEGER,\
+                    eServiceId INTEGER, eActionType INTEGER, eRegionId INTEGER, ePayloadType INTEGER, eCommId INTEGER, usDbVer INTEGER, usHwVer INTEGER, usSwVer INTEGER,\
+                    ulPayloadLength INTEGER, unTotalpacketCrc32 INTEGER)";
+                    sql_TxStatus = sqlite3_exec(sh_pDbMgrTxSqlMsg, TxCreate, 0, 0, &ErrorMsg);
+                    if (sql_TxStatus != SQLITE_OK)
                     {
-                        PrintError("Can't close Tx database : %s\n", sqlite3_errmsg(sh_pDbMgrTxSqlMsg));
+                        PrintError("Can't create Txtable : %s\n", ErrorMsg);
+                        (void)sqlite3_free(ErrorMsg);
+                        sql_TxStatus = sqlite3_close(sh_pDbMgrTxSqlMsg);
+                        if(sql_TxStatus != SQLITE_OK)
+                        {
+                            PrintError("Can't close Tx database : %s\n", sqlite3_errmsg(sh_pDbMgrTxSqlMsg));
+                            nRet = FRAMEWORK_ERROR;
+                            return nRet;
+                        }
                     }
                 }
                 // Insert data (execpt cPayload)
@@ -164,11 +181,13 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                 if (sql_TxStatus != SQLITE_OK)
                 {
                     PrintError("Can't insert Txtable : %s\n", ErrorMsg);
-                    sqlite3_free(ErrorMsg);
+                    (void)sqlite3_free(ErrorMsg);
                     sql_TxStatus = sqlite3_close(sh_pDbMgrTxSqlMsg);
                     if(sql_TxStatus != SQLITE_OK)
                     {
                         PrintError("Can't close Tx database : %s\n", sqlite3_errmsg(sh_pDbMgrTxSqlMsg));
+                        nRet = FRAMEWORK_ERROR;
+                        return nRet;
                     }
                 }
                 // Close Database Connection
@@ -176,8 +195,11 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                 if(sql_TxStatus != SQLITE_OK)
                     {
                         PrintError("Can't close Tx database : %s\n", sqlite3_errmsg(sh_pDbMgrTxSqlMsg));
+                        nRet = FRAMEWORK_ERROR;
+                        return nRet;
                     }
                 nRet = FRAMEWORK_OK;
+                return nRet;
             }
             else
             {
@@ -208,21 +230,28 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                     if(sql_RxStatus != SQLITE_OK)
                     {
                         PrintError("Can't close Rx database : %s\n", sqlite3_errmsg(sh_pDbMgrRxSqlMsg));
+                        nRet = FRAMEWORK_ERROR;
+                        return nRet;
                     }
                 }
                 // Create Table 
-                RxCreate = "CREATE TABLE IF NOT EXISTS Rxtable (eDeviceType INTEGER, eTeleCommType INTEGER, unDeviceId INTEGER, ulTimeStamp INTEGER,\
-                eServiceId INTEGER, eActionType INTEGER, eRegionId INTEGER, ePayloadType INTEGER, eCommId INTEGER, usDbVer INTEGER, usHwVer INTEGER, usSwVer INTEGER,\
-                ulPayloadLength INTEGER, unTotalpacketCrc32 INTEGER)";
-                sql_RxStatus = sqlite3_exec(sh_pDbMgrRxSqlMsg, RxCreate, 0, 0, &ErrorMsg);
-                if (sql_RxStatus != SQLITE_OK)
+                if(RxCreate == NULL)
                 {
-                    PrintError("Can't create Rxtable : %s\n", ErrorMsg);
-                    sqlite3_free(ErrorMsg);
-                    sql_RxStatus = sqlite3_close(sh_pDbMgrRxSqlMsg);
-                    if(sql_RxStatus != SQLITE_OK)
+                    RxCreate = "CREATE TABLE IF NOT EXISTS Rxtable (eDeviceType INTEGER, eTeleCommType INTEGER, unDeviceId INTEGER, ulTimeStamp INTEGER,\
+                    eServiceId INTEGER, eActionType INTEGER, eRegionId INTEGER, ePayloadType INTEGER, eCommId INTEGER, usDbVer INTEGER, usHwVer INTEGER, usSwVer INTEGER,\
+                    ulPayloadLength INTEGER, unTotalpacketCrc32 INTEGER)";
+                    sql_RxStatus = sqlite3_exec(sh_pDbMgrRxSqlMsg, RxCreate, 0, 0, &ErrorMsg);
+                    if (sql_RxStatus != SQLITE_OK)
                     {
-                        PrintError("Can't close Rx database : %s\n", sqlite3_errmsg(sh_pDbMgrRxSqlMsg));
+                        PrintError("Can't create Rxtable : %s\n", ErrorMsg);
+                        (void)sqlite3_free(ErrorMsg);
+                        sql_RxStatus = sqlite3_close(sh_pDbMgrRxSqlMsg);
+                        if(sql_RxStatus != SQLITE_OK)
+                        {
+                            PrintError("Can't close Rx database : %s\n", sqlite3_errmsg(sh_pDbMgrRxSqlMsg));
+                            nRet = FRAMEWORK_ERROR;
+                            return nRet;
+                        }
                     }
                 }
                 // Insert data (execpt cPayload)
@@ -251,11 +280,13 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                 if (sql_RxStatus != SQLITE_OK)
                 {
                     PrintError("Can't insert Rxtable : %s\n", ErrorMsg);
-                    sqlite3_free(ErrorMsg);
+                    (void)sqlite3_free(ErrorMsg);
                     sql_RxStatus = sqlite3_close(sh_pDbMgrRxSqlMsg);
                     if(sql_RxStatus != SQLITE_OK)
                     {
                         PrintError("Can't close Rx database : %s\n", sqlite3_errmsg(sh_pDbMgrRxSqlMsg));
+                        nRet = FRAMEWORK_ERROR;
+                        return nRet;
                     }
                 }
                 // Close Database Connection
@@ -263,8 +294,11 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                 if(sql_RxStatus != SQLITE_OK)
                     {
                         PrintError("Can't close Rx database : %s\n", sqlite3_errmsg(sh_pDbMgrRxSqlMsg));
+                        nRet = FRAMEWORK_ERROR;
+                        return nRet;
                     }
                 nRet = FRAMEWORK_OK;
+                return nRet;
             }
             else
             {
@@ -335,7 +369,6 @@ static int32_t P_DB_MANAGER_OpenSqlite(DB_MANAGER_T *pstDbManager)
         }
         else
         {
-            PrintTrace("DB_MANAGER_SQL_TX_FILE[%s] is opened.", DB_MANAGER_SQL_TX_FILE);
             nRet = FRAMEWORK_OK;
         }
         sql_TxStatus = sqlite3_close(sh_pDbMgrTxSqlMsg);
@@ -354,7 +387,6 @@ static int32_t P_DB_MANAGER_OpenSqlite(DB_MANAGER_T *pstDbManager)
         }
         else
         {
-            PrintTrace("DB_MANAGER_SQL_RX_FILE[%s] is opened.", DB_MANAGER_SQL_RX_FILE);
             nRet = FRAMEWORK_OK;
         }
         sql_RxStatus = sqlite3_close(sh_pDbMgrRxSqlMsg);
