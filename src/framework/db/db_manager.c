@@ -177,9 +177,7 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                     {
                         PrintError("Can't close Tx database : %s\n", sqlite3_errmsg(sh_pDbMgrTxSqlMsg));
                     }
-                //return sql_TxStatus;
                 nRet = FRAMEWORK_OK;
-                return nRet;
             }
             else
             {
@@ -266,9 +264,7 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                     {
                         PrintError("Can't close Rx database : %s\n", sqlite3_errmsg(sh_pDbMgrRxSqlMsg));
                     }
-                //return sql_RxStatus;
                 nRet = FRAMEWORK_OK;
-                return nRet;
             }
             else
             {
