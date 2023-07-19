@@ -177,7 +177,9 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                     {
                         PrintError("Can't close Tx database : %s\n", sqlite3_errmsg(sh_pDbMgrTxSqlMsg));
                     }
-                return sql_TxStatus;
+                //return sql_TxStatus;
+                nRet = FRAMEWORK_OK;
+                return nRet;
             }
             else
             {
@@ -264,7 +266,9 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                     {
                         PrintError("Can't close Rx database : %s\n", sqlite3_errmsg(sh_pDbMgrRxSqlMsg));
                     }
-                return sql_RxStatus;
+                //return sql_RxStatus;
+                nRet = FRAMEWORK_OK;
+                return nRet;
             }
             else
             {
@@ -285,10 +289,12 @@ static int32_t P_DB_MANAGER_OpenSqlite(DB_MANAGER_T *pstDbManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
     UNUSED(pstDbManager);
+    int sql_TxStatus;
+    int sql_RxStatus;
     
     if(sh_pDbMgrTxSqlMsg == NULL)
     {
-        int sql_TxStatus = sqlite3_open(DB_MANAGER_SQL_TX_FILE, &sh_pDbMgrTxSqlMsg);
+        sql_TxStatus = sqlite3_open(DB_MANAGER_SQL_TX_FILE, &sh_pDbMgrTxSqlMsg);
         if(sql_TxStatus != SQLITE_OK)
         {
             PrintError("Can't open Tx database!!");
@@ -298,12 +304,16 @@ static int32_t P_DB_MANAGER_OpenSqlite(DB_MANAGER_T *pstDbManager)
             PrintTrace("DB_MANAGER_SQL_TX_FILE[%s] is opened.", DB_MANAGER_SQL_TX_FILE);
             nRet = FRAMEWORK_OK;
         }
-        sqlite3_close(sh_pDbMgrTxSqlMsg);
+        sql_TxStatus = sqlite3_close(sh_pDbMgrTxSqlMsg);
+        if(sql_TxStatus != SQLITE_OK)
+        {
+            PrintError("Can't close Tx database : %s\n", sqlite3_errmsg(sh_pDbMgrTxSqlMsg));
+        }
     }
 
     if(sh_pDbMgrRxSqlMsg == NULL)
     {
-        int sql_RxStatus = sqlite3_open(DB_MANAGER_SQL_RX_FILE, &sh_pDbMgrRxSqlMsg);
+        sql_RxStatus = sqlite3_open(DB_MANAGER_SQL_RX_FILE, &sh_pDbMgrRxSqlMsg);
         if(sql_RxStatus != SQLITE_OK)
         {
             PrintError("Can't open Rx database!!");
@@ -313,8 +323,51 @@ static int32_t P_DB_MANAGER_OpenSqlite(DB_MANAGER_T *pstDbManager)
             PrintTrace("DB_MANAGER_SQL_RX_FILE[%s] is opened.", DB_MANAGER_SQL_RX_FILE);
             nRet = FRAMEWORK_OK;
         }
-        sqlite3_close(sh_pDbMgrRxSqlMsg);
+        sql_RxStatus = sqlite3_close(sh_pDbMgrRxSqlMsg);
+        if(sql_RxStatus != SQLITE_OK)
+        {
+            PrintError("Can't close Rx database : %s\n", sqlite3_errmsg(sh_pDbMgrRxSqlMsg));
+        }
     }
+
+    if(sh_pDbMgrTxSqlMsg != NULL)
+    {
+        sql_TxStatus = sqlite3_open(DB_MANAGER_SQL_TX_FILE, &sh_pDbMgrTxSqlMsg);
+        if(sql_TxStatus != SQLITE_OK)
+        {
+            PrintError("Can't open Tx database!!");
+        }
+        else
+        {
+            PrintTrace("DB_MANAGER_SQL_TX_FILE[%s] is opened.", DB_MANAGER_SQL_TX_FILE);
+            nRet = FRAMEWORK_OK;
+        }
+        sql_TxStatus = sqlite3_close(sh_pDbMgrTxSqlMsg);
+        if(sql_TxStatus != SQLITE_OK)
+        {
+            PrintError("Can't close Tx database : %s\n", sqlite3_errmsg(sh_pDbMgrTxSqlMsg));
+        }
+    }
+
+    if(sh_pDbMgrRxSqlMsg != NULL)
+    {
+        sql_RxStatus = sqlite3_open(DB_MANAGER_SQL_RX_FILE, &sh_pDbMgrRxSqlMsg);
+        if(sql_RxStatus != SQLITE_OK)
+        {
+            PrintError("Can't open Rx database!!");
+        }
+        else
+        {
+            PrintTrace("DB_MANAGER_SQL_RX_FILE[%s] is opened.", DB_MANAGER_SQL_RX_FILE);
+            nRet = FRAMEWORK_OK;
+        }
+        sql_RxStatus = sqlite3_close(sh_pDbMgrRxSqlMsg);
+        if(sql_RxStatus != SQLITE_OK)
+        {
+            PrintError("Can't close Rx database : %s\n", sqlite3_errmsg(sh_pDbMgrRxSqlMsg));
+        }
+    }
+    
     return nRet;
 }
 
