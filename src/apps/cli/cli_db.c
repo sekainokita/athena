@@ -432,15 +432,15 @@ int32_t CLI_DB_InitCmds(void)
                "Without any parameters, the 'db' show a description\n"
                "of available commands. For more details on a command, type and enter 'db'\n"
                "and the command name.\n\n"
-               "db test        test db command\n"
-               "db v2x txt     save TXT file, test db v2x sample command (first, set CLI> db open)\n"
-               "db v2x csv     save CSV file, test db v2x sample command (first, set CLI> db open)\n"
+               "db test           test db command\n"
+               "db v2x txt        save TXT file, test db v2x sample command (first, set CLI> db open)\n"
+               "db v2x csv        save CSV file, test db v2x sample command (first, set CLI> db open)\n"
                "db v2x sqlite     save sqlte file, test db v2x sample command (first, set CLI> db open)\n"
-               "db open txt    open a db TXT file\n"
-               "db open csv    open a db CSV file\n"
+               "db open txt       open a db TXT file\n"
+               "db open csv       open a db CSV file\n"
                "db open sqlite    open a db sqlite file\n"               
-               "db close       close a db file\n"
-               "db time        get a current timestamp\n",
+               "db close          close a db file\n"
+               "db time           get a current timestamp\n",
                "");
     if(nRet != APP_OK)
     {
