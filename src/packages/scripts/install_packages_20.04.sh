@@ -69,7 +69,7 @@ apt-get install -y "^libxcb.*" libx11-xcb-dev libglu1-mesa-dev libxrender-dev
 apt-get install -y libclang-dev
 apt-get install -y automake cpufrequtils ethtool
 apt-get install -y g++ inetutils-tools libboost-all-dev
-apt-get install -y  libncurses5 libncurses5-dev
+apt-get install -y libncurses5 libncurses5-dev
 
 apt install -y libgmp-dev swig
 apt install -y python3-sphinx python3-lxml
