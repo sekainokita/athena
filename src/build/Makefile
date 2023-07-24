@@ -52,12 +52,17 @@ TARGET_CFLAGS += -std=gnu99 -g
 TARGET_CFLAGS += -Wall -Wextra -Wstrict-prototypes -O3 -fomit-frame-pointer -pipe
 TARGET_CFLAGS += -std=c11
 TARGET_CFLAGS += -DCONFIG_GPS_XSENS
+ifeq ($(CONFIG_SQLITE),y)
+TARGET_CFLAGS += -DCONFIG_SQLITE
+endif
 
 TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_FRAMEWORK) -l$(LIB_PLATFORM) -l$(LIB_DI)
 TARGET_LDFLAGS += -lrt -ldl
 TARGET_LDFLAGS += -pthread
 TARGET_LDFLAGS += -lstdc++
+ifeq ($(CONFIG_SQLITE),y)
 TARGET_LDFLAGS += -lsqlite3
+endif
 # To add Library : -l$(LIB_DB) -l$(LIB_MSG) -l$(LIB_TIME)
 
 TARGET_CXXFLAGS = -I$(INC_PATH)
@@ -70,6 +75,9 @@ TARGET_CXXFLAGS += -D_GNU_SOURCE=1
 TARGET_CXXFLAGS += -std=c++11 -g
 TARGET_CXXFLAGS += -Wall -Wextra -O3 -fomit-frame-pointer -pipe
 TARGET_CXXFLAGS += -DCONFIG_GPS_XSENS
+ifeq ($(CONFIG_SQLITE),y)
+TARGET_CXXFLAGS += -DCONFIG_SQLITE
+endif
 
 TARGET_LFLAGS = -lpthread -lrt
 TARGET_LFLAGS += -L$(XSENS_MTI680G_LIB_PATH) -lxscontroller -lxscommon -lxstypes -ldl

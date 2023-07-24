@@ -54,7 +54,9 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+#if defined(CONFIG_SQLITE)
 #include <sqlite3.h>
+#endif
 
 /***************************** Definition ************************************/
 #define DB_MANAGER_TXT_TX_FILE     "db_v2x_tx_temp_writing.txt"
@@ -63,16 +65,20 @@
 #define DB_MANAGER_CSV_TX_FILE     "db_v2x_tx_temp_writing.csv"
 #define DB_MANAGER_CSV_RX_FILE     "db_v2x_rx_temp_writing.csv"
 
+#if defined(CONFIG_SQLITE)
 #define DB_MANAGER_SQL_TX_FILE     "db_v2x_tx_temp_writing.db"
 #define DB_MANAGER_SQL_RX_FILE     "db_v2x_rx_temp_writing.db"
+#endif
 
 /***************************** Enum and Structure ****************************/
 
 /***************************** Static Variable *******************************/
 FILE* sh_pDbMgrTxMsg;
 FILE* sh_pDbMgrRxMsg;
+#if defined(CONFIG_SQLITE)
 sqlite3* sh_pDbMgrTxSqlMsg;
 sqlite3* sh_pDbMgrRxSqlMsg;
+#endif
 
 static int s_nDbTaskMsgId, s_nMsgTxTaskMsgId, s_nMsgRxTaskMsgId;
 static key_t s_dbTaskMsgKey = FRAMEWORK_DB_TASK_MSG_KEY;
@@ -85,6 +91,7 @@ static bool s_bDbMgrLog = OFF;
 
 /***************************** Function  *************************************/
 
+#if defined(CONFIG_SQLITE)
 static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -398,6 +405,7 @@ static int32_t P_DB_MANAGER_OpenSqlite(DB_MANAGER_T *pstDbManager)
     
     return nRet;
 }
+#endif
 
 static int32_t P_DB_MANAGER_WriteTxt(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
 {
@@ -803,6 +811,7 @@ static void *P_DB_MANAGER_Task(void *arg)
                         }
                         break;
                     }
+#if defined(CONFIG_SQLITE)
                     case DB_MANAGER_FILE_TYPE_SQLITE:
                     {
                         PrintDebug("DB_MANAGER_FILE_TYPE_SQLITE [%d]", stEventMsg.pstDbManagerWrite->eFileType);
@@ -813,6 +822,7 @@ static void *P_DB_MANAGER_Task(void *arg)
                         }
                         break;
                     }
+#endif
                     default:
                         PrintWarn("unknown file type [%d]", stEventMsg.pstDbManagerWrite->eFileType);
                         break;
@@ -975,11 +985,13 @@ int32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV
         return nRet;
     }
 
+#if defined(CONFIG_SQLITE)
     if(sh_pDbMgrTxSqlMsg == NULL)
     {
         PrintError("sh_pDbMgrTxSqlMsg == NULL!!, check DB_MANAGER_Open() is called.");
         return nRet;
     }
+#endif    
 
     if(sh_pDbMgrTxMsg == NULL)
     {
@@ -1027,6 +1039,14 @@ int32_t DB_MANAGER_Read(DB_MANAGER_READ_T *pstDbManagerRead, DB_V2X_T *pstDbV2x,
         PrintError("pPayload == NULL!!");
         return nRet;
     }
+
+#if defined(CONFIG_SQLITE)
+    if(sh_pDbMgrTxSqlMsg == NULL)
+    {
+        PrintError("sh_pDbMgrTxSqlMsg == NULL!!, check DB_MANAGER_Open() is called.");
+        return nRet;
+    }
+#endif
 
     if(sh_pDbMgrTxMsg == NULL)
     {
@@ -1144,6 +1164,7 @@ int32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager)
             }
             break;
 
+#if defined(CONFIG_SQLITE)
         case DB_MANAGER_FILE_TYPE_SQLITE:
             PrintDebug("DB_MANAGER_FILE_TYPE_SQLITE [%d]", pstDbManager->eFileType);
 
@@ -1154,6 +1175,7 @@ int32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager)
                 return nRet;
             }
             break;
+#endif
 
         default:
             PrintWarn("unknown file type [%d]", pstDbManager->eFileType);
@@ -1267,6 +1289,7 @@ int32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager)
             }
             break;
 
+#if defined(CONFIG_SQLITE)
         case DB_MANAGER_FILE_TYPE_SQLITE:
             PrintDebug("DB_MANAGER_FILE_TYPE_SQLITE [%d]", pstDbManager->eFileType);
             if(sh_pDbMgrTxMsg != NULL)
@@ -1311,6 +1334,7 @@ int32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager)
                 }
             }
             break;
+#endif
 
         default:
             PrintWarn("unknown file type [%d]", pstDbManager->eFileType);
