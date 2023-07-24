@@ -68,8 +68,19 @@ apt-get install -y libusb-1.0-0-dev libusb-1.0-0 libusb-dev
 apt-get install -y "^libxcb.*" libx11-xcb-dev libglu1-mesa-dev libxrender-dev
 apt-get install -y libclang-dev
 apt-get install -y automake cpufrequtils ethtool
-apt-get install -y g++ git inetutils-tools libboost-all-dev
+apt-get install -y g++ inetutils-tools libboost-all-dev
 apt-get install -y  libncurses5 libncurses5-dev
+
+apt install -y libgmp-dev swig
+apt install -y python3-sphinx python3-lxml
+apt install -y libfftw3-dev libsdl1.2-dev libgsl-dev
+apt install -y libqwt-qt5-dev libqt5opengl5-dev python3-pyqt5
+apt install -y liblog4cpp5-dev libzmq3-dev python3-yaml
+apt install -y python3-click python3-click-plugins
+apt install -y python3-zmq python3-scipy python3-pip python3-gi-cairo
+
+pip3 install git+https://github.com/pyqtgraph/pyqtgraph@develop
+pip3 install numpy scipy
 
 pip3 install nvidia-pyindex
 pip3 install onnx-graphsurgeon
