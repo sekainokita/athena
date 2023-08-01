@@ -49,7 +49,6 @@
 
 /***************************** Include ***************************************/
 #include "type.h"
-#include "config.h"
 
 /***************************** Definition ************************************/
 #define CLI_UTIL_InitQueue(q) (q)->q_prev = (q), (q)->q_next = (q)

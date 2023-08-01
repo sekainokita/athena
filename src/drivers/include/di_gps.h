@@ -47,7 +47,6 @@
 
 /***************************** Include ***************************************/
 #include "type.h"
-#include "config.h"
 #include "di.h"
 #include "di_gps_xsens.h"
 

@@ -47,7 +47,6 @@
 
 /***************************** Include ***************************************/
 #include "type.h"
-#include "config.h"
 #include "framework.h"
 #include "di.h"
 
