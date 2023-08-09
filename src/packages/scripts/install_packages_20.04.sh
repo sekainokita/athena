@@ -78,6 +78,7 @@ apt install -y libqwt-qt5-dev libqt5opengl5-dev python3-pyqt5
 apt install -y liblog4cpp5-dev libzmq3-dev python3-yaml
 apt install -y python3-click python3-click-plugins
 apt install -y python3-zmq python3-scipy python3-pip python3-gi-cairo
+apt install -y libsndfile1-dev
 
 pip3 install git+https://github.com/pyqtgraph/pyqtgraph@develop
 pip3 install numpy scipy
