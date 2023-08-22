@@ -63,6 +63,7 @@ export APP_PATH = $(APP_DIR)
 export APP_CLI_PATH = $(APP_DIR)/cli
 export APP_SVC_PATH = $(APP_DIR)/services
 export APP_SVC_PLATOONING_PATH = $(APP_SVC_PATH)/platooning
+export APP_SVC_CP_PATH = $(APP_SVC_PATH)/cp
 
 # Include path
 export INC_PATH = $(TOP_DIR)/include

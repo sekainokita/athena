@@ -33,7 +33,7 @@
 /******************************************************************************/
 /**
 *
-* @file db_manager.c
+* @file app.c
 *
 * This file contains a data format design
 *
@@ -53,6 +53,7 @@
 #include "framework.h"
 #include "di.h"
 #include "svc_platooning.h"
+#include "svc_cp.h"
 
 #include "app.h"
 #include "cli.h"
@@ -67,6 +68,8 @@ static APP_T s_stApp;
 static DI_T s_stDi;
 
 static SVC_PLATOONING_T s_stSvcPlatooning;
+
+static SVC_CP_T s_stSvcCp;
 
 /***************************** Function  *************************************/
 
@@ -86,6 +89,13 @@ int32_t APP_Init(APP_T *pstApp)
     if (nRet != APP_OK)
     {
         PrintError("SVC_PLATOONING_Init() is failed! [unRet:%d]", nRet);
+        return nRet;
+    }
+
+    nRet = SVC_CP_Init(&s_stSvcCp);
+    if (nRet != APP_OK)
+    {
+        PrintError("SVC_CP_Init() is failed! [unRet:%d]", nRet);
         return nRet;
     }
 
@@ -131,6 +141,7 @@ int main(int argc, char *argv[])
     (void*)memset(&s_stFramework, 0x00, sizeof(FRAMEWORK_T));
     (void*)memset(&s_stApp, 0x00, sizeof(APP_T));
     (void*)memset(&s_stSvcPlatooning, 0x00, sizeof(SVC_PLATOONING_T));
+    (void*)memset(&s_stSvcCp, 0x00, sizeof(SVC_CP_T));
 
     PrintDebug("pstFramework [0x%p]", &s_stFramework);
     PrintDebug("s_stApp [0x%p]", &s_stApp);

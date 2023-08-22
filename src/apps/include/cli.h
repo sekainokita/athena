@@ -53,6 +53,7 @@
 #include "cli_msg.h"
 #include "cli_db.h"
 #include "cli_platooning.h"
+#include "cli_cp.h"
 #include "cli_di.h"
 
 /***************************** Definition ************************************/
