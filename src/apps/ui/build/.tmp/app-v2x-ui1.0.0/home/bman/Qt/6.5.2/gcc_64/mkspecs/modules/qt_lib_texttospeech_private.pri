@@ -1,0 +1,14 @@
+QT.texttospeech_private.VERSION = 6.5.2
+QT.texttospeech_private.name = QtTextToSpeech
+QT.texttospeech_private.module =
+QT.texttospeech_private.libs = $$QT_MODULE_LIB_BASE
+QT.texttospeech_private.includes = $$QT_MODULE_INCLUDE_BASE/QtTextToSpeech/6.5.2 $$QT_MODULE_INCLUDE_BASE/QtTextToSpeech/6.5.2/QtTextToSpeech
+QT.texttospeech_private.frameworks = 
+QT.texttospeech_private.depends = core_private texttospeech
+QT.texttospeech_private.uses = 
+QT.texttospeech_private.module_config = v2 internal_module
+QT.texttospeech_private.enabled_features = 
+QT.texttospeech_private.disabled_features = flite flite_alsa
+QMAKE_LIBS_FLITE_ALSA = -lasound
+QMAKE_INCDIR_SPEECHD = /usr/include/speech-dispatcher /usr/include/glib-2.0 /usr/lib64/glib-2.0/include
+QMAKE_LIBS_SPEECHD = -lglib-2.0 -lspeechd
