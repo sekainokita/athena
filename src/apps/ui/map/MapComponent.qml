@@ -169,9 +169,9 @@ MapView {
 //! [coord]
     map.zoomLevel: (maximumZoomLevel - minimumZoomLevel)/2
     map.center {
-        // The Qt Company in Oslo
-        latitude: 59.9485
-        longitude: 10.7686
+        // KETI
+        latitude: 37.4064
+        longitude: 127.1021
     }
 //! [coord]
 
@@ -264,8 +264,8 @@ MapView {
         parent: view.map
         sourceItem: Rectangle { width: 14; height: 14; color: "#e41e25"; border.width: 2; border.color: "white"; smooth: true; radius: 7 }
         coordinate {
-            latitude: 59.9485
-            longitude: 10.7686
+            latitude: 37.4064
+            longitude: 127.1021
         }
         opacity: 1.0
         anchorPoint: Qt.point(sourceItem.width/2, sourceItem.height/2)
@@ -274,7 +274,7 @@ MapView {
     MapQuickItem {
         parent: view.map
         sourceItem: Text{
-            text: "The Qt Company"
+            text: "Korea Electronics Technology Institute"
             color:"#242424"
             font.bold: true
             styleColor: "#ECECEC"

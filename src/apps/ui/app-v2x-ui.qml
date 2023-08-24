@@ -61,7 +61,7 @@ ApplicationWindow {
             mapview.map.slidersExpanded = panelExpanded
         } else {
             // Use an integer ZL to enable nearest interpolation, if possible.
-            mapview.map.zoomLevel = Math.floor((mapview.map.maximumZoomLevel - mapview.map.minimumZoomLevel)/2)
+            mapview.map.zoomLevel = Math.floor((mapview.map.maximumZoomLevel))
             // defaulting to 45 degrees, if possible.
             mapview.map.fieldOfView = Math.min(Math.max(45.0, mapview.map.minimumFieldOfView), mapview.maximumFieldOfView)
         }
@@ -98,9 +98,9 @@ ApplicationWindow {
         }
     }
 
-    title: qsTr("app-v2x-ui")
-    height: 640
-    width: 360
+    title: qsTr("KETI Copyright - V2X Application GUI")
+    height: 1080
+    width: 1920
     visible: true
     menuBar: mainMenu
 
