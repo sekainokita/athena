@@ -82,6 +82,9 @@ static int32_t P_DI_GPS_Init(DI_GPS_T *pstDiGps)
         PrintError("DI_GPS_XSENS_Init() is failed! [unRet:%d]", nRet);
         return nRet;
     }
+#else
+    nRet = DI_OK;
+    PrintWarn("None of GPS devices are supported.");
 #endif
 
     return nRet;
@@ -105,6 +108,9 @@ static int32_t P_DI_GPS_DeInit(DI_GPS_T *pstDiGps)
     }
 
     (void*)memset(&s_stDiGpsDev, 0x00, sizeof(DI_GPS_XSENS_T));
+#else
+        nRet = DI_OK;
+        PrintWarn("None of GPS devices are supported.");
 #endif
 
     return nRet;
@@ -203,6 +209,9 @@ int32_t DI_GPS_Open(DI_GPS_T *pstDiGps)
             PrintError("DI_GPS_XSENS_Open() is failed! [unRet:%d]", nRet);
             return nRet;
         }
+#else
+        nRet = DI_OK;
+        PrintWarn("None of GPS devices are supported.");
 #endif
         pstDiGps->eDiGpsStatus = DI_GPS_STATUS_OPENED;
     }
@@ -238,6 +247,9 @@ int32_t DI_GPS_Close(DI_GPS_T *pstDiGps)
             PrintError("DI_GPS_XSENS_Close() is failed! [unRet:%d]", nRet);
             return nRet;
         }
+#else
+        nRet = DI_OK;
+        PrintWarn("None of GPS devices are supported.");
 #endif
         pstDiGps->eDiGpsStatus = DI_GPS_STATUS_CLOSED;
 

@@ -70,33 +70,36 @@ $(function() {
 <div class="contents">
 
 <p><code>#include &lt;<a class="el" href="db__v2x__status_8h_source.html">db_v2x_status.h</a>&gt;</code></p>
-<div class="dynheader">
-Collaboration diagram for DB_V2X_STATUS_RX_t:</div>
-<div class="dyncontent">
-<div class="center"><img src="structDB__V2X__STATUS__RX__t__coll__graph.png" border="0" usemap="#DB__V2X__STATUS__RX__t_coll__map" alt="Collaboration graph"/></div>
-<map name="DB__V2X__STATUS__RX__t_coll__map" id="DB__V2X__STATUS__RX__t_coll__map">
-<area shape="rect" title=" " alt="" coords="12,95,179,121"/>
-<area shape="rect" href="structDB__V2X__POSITION__RX__t.html" title=" " alt="" coords="5,5,185,32"/>
-</map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a624b03767444dca40beda5f6e57c98c8"><td class="memItemLeft" align="right" valign="top"><a id="a624b03767444dca40beda5f6e57c98c8"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulRxTimeStamp</b></td></tr>
-<tr class="separator:a624b03767444dca40beda5f6e57c98c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f83df113ef919d67ff5d13f4b90c71d"><td class="memItemLeft" align="right" valign="top"><a id="a5f83df113ef919d67ff5d13f4b90c71d"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulRxTimeStampL1</b></td></tr>
+<tr class="separator:a5f83df113ef919d67ff5d13f4b90c71d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a874201a8e337b34703584ab99907bbae"><td class="memItemLeft" align="right" valign="top"><a id="a874201a8e337b34703584ab99907bbae"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulRxTimeStampL2</b></td></tr>
+<tr class="separator:a874201a8e337b34703584ab99907bbae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6580c6235fedd7a0681a485956d123a7"><td class="memItemLeft" align="right" valign="top"><a id="a6580c6235fedd7a0681a485956d123a7"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulRxTimeStampL3</b></td></tr>
+<tr class="separator:a6580c6235fedd7a0681a485956d123a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0685076ede31ba6c8239577ba5164bdb"><td class="memItemLeft" align="right" valign="top"><a id="a0685076ede31ba6c8239577ba5164bdb"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulAvgLatencyL1</b></td></tr>
+<tr class="separator:a0685076ede31ba6c8239577ba5164bdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c48f2807c185e1a20d371b88fe4e109"><td class="memItemLeft" align="right" valign="top"><a id="a4c48f2807c185e1a20d371b88fe4e109"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulAvgLatencyL2</b></td></tr>
+<tr class="separator:a4c48f2807c185e1a20d371b88fe4e109"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0896aada5fbb0b73d3d0bae073103057"><td class="memItemLeft" align="right" valign="top"><a id="a0896aada5fbb0b73d3d0bae073103057"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulAvgLatencyL3</b></td></tr>
+<tr class="separator:a0896aada5fbb0b73d3d0bae073103057"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a04897fecac6fab4eee70442a8515bd18"><td class="memItemLeft" align="right" valign="top"><a id="a04897fecac6fab4eee70442a8515bd18"></a>
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>unTxDeviceId</b></td></tr>
 <tr class="separator:a04897fecac6fab4eee70442a8515bd18"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aedf27d4774bd9dbee9666a721231fb03"><td class="memItemLeft" align="right" valign="top"><a id="aedf27d4774bd9dbee9666a721231fb03"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulRxDeviceTimeStamp</b></td></tr>
-<tr class="separator:aedf27d4774bd9dbee9666a721231fb03"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad85ea8563d7527a22c4cd39831201833"><td class="memItemLeft" align="right" valign="top"><a id="ad85ea8563d7527a22c4cd39831201833"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulLatency</b></td></tr>
-<tr class="separator:ad85ea8563d7527a22c4cd39831201833"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c8a1092080a8e7ea21f9390d046c391"><td class="memItemLeft" align="right" valign="top"><a id="a4c8a1092080a8e7ea21f9390d046c391"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>unPdr</b></td></tr>
-<tr class="separator:a4c8a1092080a8e7ea21f9390d046c391"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad2cbd95bd5b239107b855bdd6352b72"><td class="memItemLeft" align="right" valign="top"><a id="aad2cbd95bd5b239107b855bdd6352b72"></a>
+uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>unRxVehicleSpeed</b></td></tr>
+<tr class="separator:aad2cbd95bd5b239107b855bdd6352b72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1e6e2c59a67a4bff346ff7dfd77c40d"><td class="memItemLeft" align="right" valign="top"><a id="ae1e6e2c59a67a4bff346ff7dfd77c40d"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>unTotalCommDevCnt</b></td></tr>
+<tr class="separator:ae1e6e2c59a67a4bff346ff7dfd77c40d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a391db596fda9d1f7f5c076aaff28406c"><td class="memItemLeft" align="right" valign="top"><a id="a391db596fda9d1f7f5c076aaff28406c"></a>
 uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>usRssi</b></td></tr>
 <tr class="separator:a391db596fda9d1f7f5c076aaff28406c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -104,20 +107,44 @@ uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>usRssi</b></td></
 <a class="el" href="db__v2x__status_8h.html#a64d550f6dbf64a0fcfd4c95b72513928">DB_V2X_STATUS_RSV_LEVEL_E</a>&#160;</td><td class="memItemRight" valign="bottom"><b>eRsvLevel</b></td></tr>
 <tr class="separator:a9a141369225c748cc4b2d19243d3067a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aecfabba4af724ec768a889290d264ddd"><td class="memItemLeft" align="right" valign="top"><a id="aecfabba4af724ec768a889290d264ddd"></a>
-<a class="el" href="db__v2x__status_8h.html#a8e3db4e09a9d61d00815c005459e3d7e">DB_V2X_POSITION_RX_T</a>&#160;</td><td class="memItemRight" valign="bottom"><b>stRxPosition</b></td></tr>
+DB_V2X_POSITION_RX_T&#160;</td><td class="memItemRight" valign="bottom"><b>stRxPosition</b></td></tr>
 <tr class="separator:aecfabba4af724ec768a889290d264ddd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5001b7338cb2076603e659d18364f38"><td class="memItemLeft" align="right" valign="top"><a id="ab5001b7338cb2076603e659d18364f38"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>ucErrIndicator</b></td></tr>
+<tr class="separator:ab5001b7338cb2076603e659d18364f38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdd65c1a200eec148836587c8af85d4c"><td class="memItemLeft" align="right" valign="top"><a id="afdd65c1a200eec148836587c8af85d4c"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulTotalPacketCnt</b></td></tr>
+<tr class="separator:afdd65c1a200eec148836587c8af85d4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb5261aa22dded6837a96960188b8207"><td class="memItemLeft" align="right" valign="top"><a id="aeb5261aa22dded6837a96960188b8207"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulTotalErrCnt</b></td></tr>
+<tr class="separator:aeb5261aa22dded6837a96960188b8207"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c8a1092080a8e7ea21f9390d046c391"><td class="memItemLeft" align="right" valign="top"><a id="a4c8a1092080a8e7ea21f9390d046c391"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>unPdr</b></td></tr>
+<tr class="separator:a4c8a1092080a8e7ea21f9390d046c391"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a900dbe360c25edf14a08118f9e7d825d"><td class="memItemLeft" align="right" valign="top"><a id="a900dbe360c25edf14a08118f9e7d825d"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>unPer</b></td></tr>
+<tr class="separator:a900dbe360c25edf14a08118f9e7d825d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>DB V2X Struct of Rx Status </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ulRxTimeStamp</td><td>The system time value at which the communication device received the message (need to change to future UTF time, C-ITS communication time compatibility) </td></tr>
+    <tr><td class="paramname">ulRxTimeStampL1</td><td>The system layer 1 time value at which the communication device transmitted the message (need to change to future UTF time, C-ITS communication time compatibility) </td></tr>
+    <tr><td class="paramname">ulRxTimeStampL2</td><td>The system layer 2 time value at which the OBU/RSU/Control Units transmitted the message (Optional, if the devices are separated from model IP) </td></tr>
+    <tr><td class="paramname">ulRxTimeStampL2</td><td>The system layer 3 time value at which the application device transmitted the message (Optional, if the devices are separated OBU/RSU) </td></tr>
+    <tr><td class="paramname">ulAvgLatencyL1</td><td>[L1] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second) </td></tr>
+    <tr><td class="paramname">ulAvgLatencyL2</td><td>[L2] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second) </td></tr>
+    <tr><td class="paramname">ulAvgLatencyL3</td><td>[L3] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second) </td></tr>
     <tr><td class="paramname">unTxDeviceId</td><td>The unique ID (Serial Number) of the transfer device </td></tr>
-    <tr><td class="paramname">ulRxDeviceTimeStamp</td><td>The system time value at which the OBU/RSU device received the message </td></tr>
-    <tr><td class="paramname">ulLatency</td><td>rTimestamp - tTimestamp = latency on communication modem device, status of synchronization to GPS Pulse Per Second (PPS) </td></tr>
-    <tr><td class="paramname">unPdr</td><td>Packet delivery ratio (PDR) </td></tr>
+    <tr><td class="paramname">unRxVehicleSpeed</td><td>Rx vehicle speed (Rx vehicle speed (if available), if not available, set the experimental value manually, default 60km/h) </td></tr>
+    <tr><td class="paramname">unTotalCommDevCnt</td><td>The total number of devices that are currently simultaneously connected and transmitting/receiving (the count number of all device IDs currently received and stored by the Rx device) </td></tr>
     <tr><td class="paramname">usRssi</td><td>Receive Signal Strength Indication, The total signal strength of the antenna at the time the message was received </td></tr>
     <tr><td class="paramname">eRsvLevel</td><td>Receive signal level, the level of the received signal strength of the mobile communication at the time the message is received (antenna signal) </td></tr>
     <tr><td class="paramname">stRxPosition</td><td>see DB_V2X_POSITION_RX_T </td></tr>
+    <tr><td class="paramname">ucErrIndicator</td><td>If an error occurs in the sequence in the Tx Continuity Counter transmitted to Tx, an error is displayed (ok : 0, error : 1) </td></tr>
+    <tr><td class="paramname">ulTotalPacketCnt</td><td>Total packets counts received from the same device </td></tr>
+    <tr><td class="paramname">ulTotalErrCnt</td><td>The number of txContinuityCounter error packets among packets received from the same device </td></tr>
+    <tr><td class="paramname">unPdr</td><td>Packet Delivery Ratio (PDR) </td></tr>
+    <tr><td class="paramname">unPer</td><td>Packet Error Ratio (PER) </td></tr>
   </table>
   </dd>
 </dl>

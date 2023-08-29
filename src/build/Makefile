@@ -51,7 +51,10 @@ TARGET_CFLAGS += -D_GNU_SOURCE=1
 TARGET_CFLAGS += -std=gnu99 -g
 TARGET_CFLAGS += -Wall -Wextra -Wstrict-prototypes -O3 -fomit-frame-pointer -pipe
 TARGET_CFLAGS += -std=c11
+
+ifeq ($(CONFIG_GPS_XSENS),y)
 TARGET_CFLAGS += -DCONFIG_GPS_XSENS
+endif
 ifeq ($(CONFIG_SQLITE),y)
 TARGET_CFLAGS += -DCONFIG_SQLITE
 endif
@@ -80,7 +83,10 @@ TARGET_CXXFLAGS += -DCONFIG_SQLITE
 endif
 
 TARGET_LFLAGS = -lpthread -lrt
+
+ifeq ($(CONFIG_GPS_XSENS),y)
 TARGET_LFLAGS += -L$(XSENS_MTI680G_LIB_PATH) -lxscontroller -lxscommon -lxstypes -ldl
+endif
 
 TARGET_CC=gcc
 TARGET_LD=ld

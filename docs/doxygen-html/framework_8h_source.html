@@ -107,57 +107,55 @@ $(function() {
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="comment">/******************************************************************************/</span></div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="comment">/***************************** Include ***************************************/</span></div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="type_8h.html">type.h</a>&quot;</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="config_8h.html">config.h</a>&quot;</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="msg__manager_8h.html">msg_manager.h</a>&quot;</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="db__manager_8h.html">db_manager.h</a>&quot;</span></div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="time__manager_8h.html">time_manager.h</a>&quot;</span></div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="comment">/***************************** Definition ************************************/</span></div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="preprocessor">#define FRAMEWORK_DB_TASK_MSG_KEY               (0x840919)</span></div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="preprocessor">#define FRAMEWORK_MSG_TX_TASK_MSG_KEY           (0x121202)</span></div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="preprocessor">#define FRAMEWORK_MSG_RX_TASK_MSG_KEY           (0x220916)</span></div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="preprocessor">#define FRAMEWORK_TIME_TASK_MSG_KEY             (0x230525)</span></div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="comment">//#define CONFIG_PTHREAD_JOINABLE                 (1)</span></div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="comment">/***************************** Enum and Structure ****************************/</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    FRAMEWORK_LOG_ALL                   = 0,</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    FRAMEWORK_LOG_MGR_ALL               = 10,</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    FRAMEWORK_LOG_MGR_MSG               = 11,</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    FRAMEWORK_LOG_MGR_DB                = 12,</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    FRAMEWORK_LOG_MGR_TIME              = 13,</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    FRAMEWORK_LOG_SVC_ALL               = 100,</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    FRAMEWORK_LOG_SVC_PLATOONING        = 101,</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    FRAMEWORK_LOG_MAX                   = 0xFFFF</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;} FRAMEWORK_LOG_E;</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
-<div class="line"><a name="l00076"></a><span class="lineno"><a class="line" href="structFRAMEWORK.html">   76</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structFRAMEWORK.html">FRAMEWORK</a> {</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    FRAMEWORK_LOG_E eFrameworkLog;</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    uint32_t unReserved;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;} <a class="code" href="structFRAMEWORK.html">FRAMEWORK_T</a>;</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="msg__manager_8h.html">msg_manager.h</a>&quot;</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="db__manager_8h.html">db_manager.h</a>&quot;</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="time__manager_8h.html">time_manager.h</a>&quot;</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="comment">/***************************** Definition ************************************/</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="preprocessor">#define FRAMEWORK_DB_TASK_MSG_KEY               (0x840919)</span></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="preprocessor">#define FRAMEWORK_MSG_TX_TASK_MSG_KEY           (0x121202)</span></div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="preprocessor">#define FRAMEWORK_MSG_RX_TASK_MSG_KEY           (0x220916)</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="preprocessor">#define FRAMEWORK_TIME_TASK_MSG_KEY             (0x230525)</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="comment">//#define CONFIG_PTHREAD_JOINABLE                 (1)</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="comment">/***************************** Enum and Structure ****************************/</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    FRAMEWORK_LOG_ALL                   = 0,</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    FRAMEWORK_LOG_MGR_ALL               = 10,</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    FRAMEWORK_LOG_MGR_MSG               = 11,</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    FRAMEWORK_LOG_MGR_DB                = 12,</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    FRAMEWORK_LOG_MGR_TIME              = 13,</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    FRAMEWORK_LOG_SVC_ALL               = 100,</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    FRAMEWORK_LOG_SVC_PLATOONING        = 101,</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    FRAMEWORK_LOG_MAX                   = 0xFFFF</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;} FRAMEWORK_LOG_E;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
+<div class="line"><a name="l00075"></a><span class="lineno"><a class="line" href="structFRAMEWORK.html">   75</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structFRAMEWORK.html">FRAMEWORK</a> {</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    FRAMEWORK_LOG_E eFrameworkLog;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    uint32_t unReserved;</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;} <a class="code" href="structFRAMEWORK.html">FRAMEWORK_T</a>;</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160; </div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="comment">/***************************** Function Protype ******************************/</span></div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="keywordtype">void</span> FRAMEWORK_SetLog(<a class="code" href="structFRAMEWORK.html">FRAMEWORK_T</a> *pstFramework, <span class="keywordtype">bool</span> bOnOff);</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;int32_t FRAMEWORK_Init(<a class="code" href="structFRAMEWORK.html">FRAMEWORK_T</a> *pstFramework);</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<a class="code" href="structMSG__MANAGER__t.html">MSG_MANAGER_T</a>* FRAMEWORK_GetMsgManagerInstance(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<a class="code" href="structDB__MANAGER__t.html">DB_MANAGER_T</a>* FRAMEWORK_GetDbManagerInstance(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a>* FRAMEWORK_GetTimeManagerInstance(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160; </div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">/* _FRAMEWORK_H_ */</span><span class="preprocessor"></span></div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160; </div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="comment">/***************************** Function Protype ******************************/</span></div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="keywordtype">void</span> FRAMEWORK_SetLog(<a class="code" href="structFRAMEWORK.html">FRAMEWORK_T</a> *pstFramework, <span class="keywordtype">bool</span> bOnOff);</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;int32_t FRAMEWORK_Init(<a class="code" href="structFRAMEWORK.html">FRAMEWORK_T</a> *pstFramework);</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<a class="code" href="structMSG__MANAGER__t.html">MSG_MANAGER_T</a>* FRAMEWORK_GetMsgManagerInstance(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<a class="code" href="structDB__MANAGER__t.html">DB_MANAGER_T</a>* FRAMEWORK_GetDbManagerInstance(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a>* FRAMEWORK_GetTimeManagerInstance(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160; </div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">/* _FRAMEWORK_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160; </div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="astructTIME__MANAGER__t_html"><div class="ttname"><a href="structTIME__MANAGER__t.html">TIME_MANAGER_t</a></div><div class="ttdef"><b>Definition:</b> time_manager.h:87</div></div>
+<div class="ttc" id="astructTIME__MANAGER__t_html"><div class="ttname"><a href="structTIME__MANAGER__t.html">TIME_MANAGER_t</a></div><div class="ttdef"><b>Definition:</b> time_manager.h:86</div></div>
 <div class="ttc" id="amsg__manager_8h_html"><div class="ttname"><a href="msg__manager_8h.html">msg_manager.h</a></div></div>
-<div class="ttc" id="astructMSG__MANAGER__t_html"><div class="ttname"><a href="structMSG__MANAGER__t.html">MSG_MANAGER_t</a></div><div class="ttdef"><b>Definition:</b> msg_manager.h:230</div></div>
+<div class="ttc" id="astructMSG__MANAGER__t_html"><div class="ttname"><a href="structMSG__MANAGER__t.html">MSG_MANAGER_t</a></div><div class="ttdef"><b>Definition:</b> msg_manager.h:229</div></div>
 <div class="ttc" id="atype_8h_html"><div class="ttname"><a href="type_8h.html">type.h</a></div></div>
-<div class="ttc" id="astructFRAMEWORK_html"><div class="ttname"><a href="structFRAMEWORK.html">FRAMEWORK</a></div><div class="ttdef"><b>Definition:</b> framework.h:76</div></div>
+<div class="ttc" id="astructFRAMEWORK_html"><div class="ttname"><a href="structFRAMEWORK.html">FRAMEWORK</a></div><div class="ttdef"><b>Definition:</b> framework.h:75</div></div>
 <div class="ttc" id="atime__manager_8h_html"><div class="ttname"><a href="time__manager_8h.html">time_manager.h</a></div></div>
 <div class="ttc" id="adb__manager_8h_html"><div class="ttname"><a href="db__manager_8h.html">db_manager.h</a></div></div>
-<div class="ttc" id="astructDB__MANAGER__t_html"><div class="ttname"><a href="structDB__MANAGER__t.html">DB_MANAGER_t</a></div><div class="ttdef"><b>Definition:</b> db_manager.h:147</div></div>
-<div class="ttc" id="aconfig_8h_html"><div class="ttname"><a href="config_8h.html">config.h</a></div></div>
+<div class="ttc" id="astructDB__MANAGER__t_html"><div class="ttname"><a href="structDB__MANAGER__t.html">DB_MANAGER_t</a></div><div class="ttdef"><b>Definition:</b> db_manager.h:146</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

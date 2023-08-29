@@ -121,72 +121,86 @@ $(function() {
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    DB_V2X_STATUS_RSV_LEVEL_MAX                 = 255</div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;} <a class="code" href="db__v2x__status_8h.html#a64d550f6dbf64a0fcfd4c95b72513928">DB_V2X_STATUS_RSV_LEVEL_E</a>;</div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
-<div class="line"><a name="l00079"></a><span class="lineno"><a class="line" href="db__v2x__status_8h.html#a072839d166b1272bf07c880259053ed2">   79</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    DB_V2X_STATUS_CHANNEL_UNKNOWN               = 0,</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    DB_V2X_STATUS_CHANNEL_5_855_5_865           = 172,</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    DB_V2X_STATUS_CHANNEL_5_865_5_875           = 174,</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    DB_V2X_STATUS_CHANNEL_5_875_5_885           = 176,</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    DB_V2X_STATUS_CHANNEL_5_885_5_895           = 178,</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    DB_V2X_STATUS_CHANNEL_5_895_5_905           = 180,</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    DB_V2X_STATUS_CHANNEL_5_905_5_915           = 182,</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    DB_V2X_STATUS_CHANNEL_5_915_5_925           = 184,</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    DB_V2X_STATUS_CHANNEL_MAX                   = 255</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;} <a class="code" href="db__v2x__status_8h.html#a072839d166b1272bf07c880259053ed2">DB_V2X_STATUS_CHANNEL_E</a>;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160; </div>
-<div class="line"><a name="l00095"></a><span class="lineno"><a class="line" href="db__v2x__status_8h.html#a5b0d10911ecaf4f34c696a01cfc6485f">   95</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    DB_V2X_STATUS_BANDWIDTH_UNKNOWN             = 0,</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    DB_V2X_STATUS_BANDWIDTH_10MHZ               = 1,</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    DB_V2X_STATUS_BANDWIDTH_20MHZ               = 2,</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    DB_V2X_STATUS_BANDWIDTH_30MHZ               = 3,</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    DB_V2X_STATUS_BANDWIDTH_MAX                 = 255</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;} <a class="code" href="db__v2x__status_8h.html#a5b0d10911ecaf4f34c696a01cfc6485f">DB_V2X_STATUS_BANDWIDTH_E</a>;</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160; </div>
-<div class="line"><a name="l00109"></a><span class="lineno"><a class="line" href="structDB__V2X__POSITION__RX__t.html">  109</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structDB__V2X__POSITION__RX__t.html">DB_V2X_POSITION_RX_t</a> {</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    uint16_t                                    usCommDistance;</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    int32_t                                     nRxLatitude;</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    int32_t                                     nRxLongitude;</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;} <a class="code" href="db__v2x__status_8h.html#a8e3db4e09a9d61d00815c005459e3d7e">DB_V2X_POSITION_RX_T</a>;</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160; </div>
-<div class="line"><a name="l00126"></a><span class="lineno"><a class="line" href="structDB__V2X__STATUS__RX__t.html">  126</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structDB__V2X__STATUS__RX__t.html">DB_V2X_STATUS_RX_t</a> {</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    uint64_t                                    ulRxTimeStamp;</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    uint32_t                                    unTxDeviceId;</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    uint64_t                                    ulRxDeviceTimeStamp;</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;    uint64_t                                    ulLatency;</div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;    uint32_t                                    unPdr;</div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;    uint16_t                                    usRssi;</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;    <a class="code" href="db__v2x__status_8h.html#a64d550f6dbf64a0fcfd4c95b72513928">DB_V2X_STATUS_RSV_LEVEL_E</a>                   eRsvLevel;</div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;    <a class="code" href="structDB__V2X__POSITION__RX__t.html">DB_V2X_POSITION_RX_T</a>                        stRxPosition;</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;} <a class="code" href="db__v2x__status_8h.html#a9bd7fade8e5eba619303a0197e081d2e">DB_V2X_STATUS_RX_T</a>;</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160; </div>
-<div class="line"><a name="l00142"></a><span class="lineno"><a class="line" href="structDB__V2X__POSITION__TX__t.html">  142</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structDB__V2X__POSITION__TX__t.html">DB_V2X_POSITION_TX_t</a> {</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;    int32_t                                     nTxLatitude;</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;    int32_t                                     nTxLongitude;</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;} <a class="code" href="db__v2x__status_8h.html#ad3e33551b7d72041fe47857225450078">DB_V2X_POSITION_TX_T</a>;</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160; </div>
-<div class="line"><a name="l00156"></a><span class="lineno"><a class="line" href="structDB__V2X__STATUS__TX__t.html">  156</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structDB__V2X__STATUS__TX__t.html">DB_V2X_STATUS_TX_t</a> {</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;    uint64_t                                    ulTxTimeStamp;</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;    uint32_t                                    unRxDeviceId;</div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;    <a class="code" href="db__v2x__status_8h.html#a072839d166b1272bf07c880259053ed2">DB_V2X_STATUS_CHANNEL_E</a>                     eChannel;</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;    int16_t                                     sPower;</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;    <a class="code" href="db__v2x__status_8h.html#a5b0d10911ecaf4f34c696a01cfc6485f">DB_V2X_STATUS_BANDWIDTH_E</a>                   eBandwidth;</div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;    <a class="code" href="structDB__V2X__POSITION__TX__t.html">DB_V2X_POSITION_TX_T</a>                        stTxPosition;</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;} <a class="code" href="db__v2x__status_8h.html#ac56e1fd25c08b9494a8a94ca7bb08325">DB_V2X_STATUS_TX_T</a>;</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;<span class="comment">/***************************** Function Protype ******************************/</span></div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160; </div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">/* _DB_V2X_STATUS_H_ */</span><span class="preprocessor"></span></div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160; </div>
+<div class="line"><a name="l00085"></a><span class="lineno"><a class="line" href="db__v2x__status_8h.html#a072839d166b1272bf07c880259053ed2">   85</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    DB_V2X_STATUS_CHANNEL_UNKNOWN               = 0,</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    DB_V2X_STATUS_CHANNEL_5_855_5_865           = 172,</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    DB_V2X_STATUS_CHANNEL_5_865_5_875           = 174,</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    DB_V2X_STATUS_CHANNEL_5_875_5_885           = 176,</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    DB_V2X_STATUS_CHANNEL_5_885_5_895           = 178,</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    DB_V2X_STATUS_CHANNEL_5_895_5_905           = 180,</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    DB_V2X_STATUS_CHANNEL_5_905_5_915           = 182,</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    DB_V2X_STATUS_CHANNEL_5_915_5_925           = 184,</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    DB_V2X_STATUS_CHANNEL_MAX                   = 255</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;} <a class="code" href="db__v2x__status_8h.html#a072839d166b1272bf07c880259053ed2">DB_V2X_STATUS_CHANNEL_E</a>;</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160; </div>
+<div class="line"><a name="l00101"></a><span class="lineno"><a class="line" href="db__v2x__status_8h.html#a5b0d10911ecaf4f34c696a01cfc6485f">  101</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    DB_V2X_STATUS_BANDWIDTH_UNKNOWN             = 0,</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    DB_V2X_STATUS_BANDWIDTH_10MHZ               = 1,</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    DB_V2X_STATUS_BANDWIDTH_20MHZ               = 2,</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    DB_V2X_STATUS_BANDWIDTH_30MHZ               = 3,</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    DB_V2X_STATUS_BANDWIDTH_MAX                 = 255</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;} <a class="code" href="db__v2x__status_8h.html#a5b0d10911ecaf4f34c696a01cfc6485f">DB_V2X_STATUS_BANDWIDTH_E</a>;</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160; </div>
+<div class="line"><a name="l00117"></a><span class="lineno"><a class="line" href="structDB__V2X__POSITION__RX__t.html">  117</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structDB__V2X__POSITION__RX__t.html">DB_V2X_POSITION_RX_t</a> {</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    uint16_t                                    usCommDistance;</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    int32_t                                     nRxLatitude;</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    int32_t                                     nRxLongitude;</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;    int32_t                                     nRxAttitude;</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;} <a class="code" href="db__v2x__status_8h.html#aedd6b58d113aa36820788598700e77cd">__attribute__</a>((__packed__)) DB_V2X_POSITION_RX_T;</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160; </div>
+<div class="line"><a name="l00144"></a><span class="lineno"><a class="line" href="structDB__V2X__STATUS__RX__t.html">  144</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structDB__V2X__STATUS__RX__t.html">DB_V2X_STATUS_RX_t</a> {</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;    uint64_t                                    ulRxTimeStampL1;</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;    uint64_t                                    ulRxTimeStampL2;</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;    uint64_t                                    ulRxTimeStampL3;</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;    uint64_t                                    ulAvgLatencyL1;</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;    uint64_t                                    ulAvgLatencyL2;</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;    uint64_t                                    ulAvgLatencyL3;</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;    uint32_t                                    unTxDeviceId;</div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;    uint16_t                                    unRxVehicleSpeed;</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    uint32_t                                    unTotalCommDevCnt;</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;    uint16_t                                    usRssi;</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;    <a class="code" href="db__v2x__status_8h.html#a64d550f6dbf64a0fcfd4c95b72513928">DB_V2X_STATUS_RSV_LEVEL_E</a>                   eRsvLevel;</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;    DB_V2X_POSITION_RX_T                        stRxPosition;</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;    uint8_t                                     ucErrIndicator;</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;    uint64_t                                    ulTotalPacketCnt;</div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;    uint64_t                                    ulTotalErrCnt;</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;    uint32_t                                    unPdr;</div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;    uint32_t                                    unPer;</div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;} <a class="code" href="db__v2x__status_8h.html#aedd6b58d113aa36820788598700e77cd">__attribute__</a>((__packed__)) DB_V2X_STATUS_RX_T;</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160; </div>
+<div class="line"><a name="l00170"></a><span class="lineno"><a class="line" href="structDB__V2X__POSITION__TX__t.html">  170</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structDB__V2X__POSITION__TX__t.html">DB_V2X_POSITION_TX_t</a> {</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;    int32_t                                     nTxLatitude;</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;    int32_t                                     nTxLongitude;</div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;    int32_t                                     nTxAttitude;</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;} <a class="code" href="db__v2x__status_8h.html#aedd6b58d113aa36820788598700e77cd">__attribute__</a>((__packed__)) DB_V2X_POSITION_TX_T;</div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160; </div>
+<div class="line"><a name="l00191"></a><span class="lineno"><a class="line" href="structDB__V2X__STATUS__TX__t.html">  191</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structDB__V2X__STATUS__TX__t.html">DB_V2X_STATUS_TX_t</a> {</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;    uint64_t                                    ulTxTimeStampL1;</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;    uint64_t                                    ulTxTimeStampL2;</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;    uint64_t                                    ulTxTimeStampL3;</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;    uint32_t                                    unRxDeviceId;</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;    <a class="code" href="db__v2x__status_8h.html#a072839d166b1272bf07c880259053ed2">DB_V2X_STATUS_CHANNEL_E</a>                     eChannel;</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;    int16_t                                     sPower;</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;    <a class="code" href="db__v2x__status_8h.html#a5b0d10911ecaf4f34c696a01cfc6485f">DB_V2X_STATUS_BANDWIDTH_E</a>                   eBandwidth;</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;    uint16_t                                    usTxRatio;</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;    DB_V2X_POSITION_TX_T                        stTxPosition;</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;    uint32_t                                    unSeqNum;</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;    uint32_t                                    unContCnt;</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;    uint32_t                                    unTxVehicleSpeed;</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;} <a class="code" href="db__v2x__status_8h.html#aedd6b58d113aa36820788598700e77cd">__attribute__</a>((__packed__)) DB_V2X_STATUS_TX_T;</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;<span class="comment">/***************************** Function Protype ******************************/</span></div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160; </div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">/* _DB_V2X_STATUS_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160; </div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="astructDB__V2X__STATUS__TX__t_html"><div class="ttname"><a href="structDB__V2X__STATUS__TX__t.html">DB_V2X_STATUS_TX_t</a></div><div class="ttdef"><b>Definition:</b> db_v2x_status.h:156</div></div>
-<div class="ttc" id="adb__v2x__status_8h_html_a072839d166b1272bf07c880259053ed2"><div class="ttname"><a href="db__v2x__status_8h.html#a072839d166b1272bf07c880259053ed2">DB_V2X_STATUS_CHANNEL_E</a></div><div class="ttdeci">DB_V2X_STATUS_CHANNEL_E</div><div class="ttdef"><b>Definition:</b> db_v2x_status.h:79</div></div>
-<div class="ttc" id="adb__v2x__status_8h_html_ac56e1fd25c08b9494a8a94ca7bb08325"><div class="ttname"><a href="db__v2x__status_8h.html#ac56e1fd25c08b9494a8a94ca7bb08325">DB_V2X_STATUS_TX_T</a></div><div class="ttdeci">struct DB_V2X_STATUS_TX_t DB_V2X_STATUS_TX_T</div></div>
-<div class="ttc" id="adb__v2x__status_8h_html_ad3e33551b7d72041fe47857225450078"><div class="ttname"><a href="db__v2x__status_8h.html#ad3e33551b7d72041fe47857225450078">DB_V2X_POSITION_TX_T</a></div><div class="ttdeci">struct DB_V2X_POSITION_TX_t DB_V2X_POSITION_TX_T</div></div>
-<div class="ttc" id="astructDB__V2X__STATUS__RX__t_html"><div class="ttname"><a href="structDB__V2X__STATUS__RX__t.html">DB_V2X_STATUS_RX_t</a></div><div class="ttdef"><b>Definition:</b> db_v2x_status.h:126</div></div>
-<div class="ttc" id="astructDB__V2X__POSITION__RX__t_html"><div class="ttname"><a href="structDB__V2X__POSITION__RX__t.html">DB_V2X_POSITION_RX_t</a></div><div class="ttdef"><b>Definition:</b> db_v2x_status.h:109</div></div>
+<div class="ttc" id="astructDB__V2X__STATUS__TX__t_html"><div class="ttname"><a href="structDB__V2X__STATUS__TX__t.html">DB_V2X_STATUS_TX_t</a></div><div class="ttdef"><b>Definition:</b> db_v2x_status.h:191</div></div>
+<div class="ttc" id="adb__v2x__status_8h_html_a072839d166b1272bf07c880259053ed2"><div class="ttname"><a href="db__v2x__status_8h.html#a072839d166b1272bf07c880259053ed2">DB_V2X_STATUS_CHANNEL_E</a></div><div class="ttdeci">DB_V2X_STATUS_CHANNEL_E</div><div class="ttdef"><b>Definition:</b> db_v2x_status.h:85</div></div>
+<div class="ttc" id="astructDB__V2X__STATUS__RX__t_html"><div class="ttname"><a href="structDB__V2X__STATUS__RX__t.html">DB_V2X_STATUS_RX_t</a></div><div class="ttdef"><b>Definition:</b> db_v2x_status.h:144</div></div>
+<div class="ttc" id="astructDB__V2X__POSITION__RX__t_html"><div class="ttname"><a href="structDB__V2X__POSITION__RX__t.html">DB_V2X_POSITION_RX_t</a></div><div class="ttdef"><b>Definition:</b> db_v2x_status.h:117</div></div>
+<div class="ttc" id="adb__v2x__status_8h_html_aedd6b58d113aa36820788598700e77cd"><div class="ttname"><a href="db__v2x__status_8h.html#aedd6b58d113aa36820788598700e77cd">__attribute__</a></div><div class="ttdeci">struct DB_V2X_POSITION_RX_t __attribute__((__packed__)) DB_V2X_POSITION_RX_T</div></div>
 <div class="ttc" id="adb__v2x__status_8h_html_a64d550f6dbf64a0fcfd4c95b72513928"><div class="ttname"><a href="db__v2x__status_8h.html#a64d550f6dbf64a0fcfd4c95b72513928">DB_V2X_STATUS_RSV_LEVEL_E</a></div><div class="ttdeci">DB_V2X_STATUS_RSV_LEVEL_E</div><div class="ttdef"><b>Definition:</b> db_v2x_status.h:65</div></div>
-<div class="ttc" id="adb__v2x__status_8h_html_a8e3db4e09a9d61d00815c005459e3d7e"><div class="ttname"><a href="db__v2x__status_8h.html#a8e3db4e09a9d61d00815c005459e3d7e">DB_V2X_POSITION_RX_T</a></div><div class="ttdeci">struct DB_V2X_POSITION_RX_t DB_V2X_POSITION_RX_T</div></div>
-<div class="ttc" id="astructDB__V2X__POSITION__TX__t_html"><div class="ttname"><a href="structDB__V2X__POSITION__TX__t.html">DB_V2X_POSITION_TX_t</a></div><div class="ttdef"><b>Definition:</b> db_v2x_status.h:142</div></div>
-<div class="ttc" id="adb__v2x__status_8h_html_a9bd7fade8e5eba619303a0197e081d2e"><div class="ttname"><a href="db__v2x__status_8h.html#a9bd7fade8e5eba619303a0197e081d2e">DB_V2X_STATUS_RX_T</a></div><div class="ttdeci">struct DB_V2X_STATUS_RX_t DB_V2X_STATUS_RX_T</div></div>
-<div class="ttc" id="adb__v2x__status_8h_html_a5b0d10911ecaf4f34c696a01cfc6485f"><div class="ttname"><a href="db__v2x__status_8h.html#a5b0d10911ecaf4f34c696a01cfc6485f">DB_V2X_STATUS_BANDWIDTH_E</a></div><div class="ttdeci">DB_V2X_STATUS_BANDWIDTH_E</div><div class="ttdef"><b>Definition:</b> db_v2x_status.h:95</div></div>
+<div class="ttc" id="astructDB__V2X__POSITION__TX__t_html"><div class="ttname"><a href="structDB__V2X__POSITION__TX__t.html">DB_V2X_POSITION_TX_t</a></div><div class="ttdef"><b>Definition:</b> db_v2x_status.h:170</div></div>
+<div class="ttc" id="adb__v2x__status_8h_html_a5b0d10911ecaf4f34c696a01cfc6485f"><div class="ttname"><a href="db__v2x__status_8h.html#a5b0d10911ecaf4f34c696a01cfc6485f">DB_V2X_STATUS_BANDWIDTH_E</a></div><div class="ttdeci">DB_V2X_STATUS_BANDWIDTH_E</div><div class="ttdef"><b>Definition:</b> db_v2x_status.h:101</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

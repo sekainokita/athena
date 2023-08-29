@@ -75,31 +75,33 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="type_8h_source.html">type.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="config_8h_source.html">config.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="framework_8h_source.html">framework.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="di_8h_source.html">di.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for app.h:</div>
 <div class="dyncontent">
 <div class="center"><img src="app_8h__incl.png" border="0" usemap="#src_2apps_2include_2app_8h" alt=""/></div>
 <map name="src_2apps_2include_2app_8h" id="src_2apps_2include_2app_8h">
-<area shape="rect" title=" " alt="" coords="639,5,806,32"/>
-<area shape="rect" href="type_8h.html" title=" " alt="" coords="499,229,562,256"/>
-<area shape="rect" href="config_8h.html" title=" " alt="" coords="838,229,911,256"/>
-<area shape="rect" href="framework_8h.html" title=" " alt="" coords="670,80,775,107"/>
-<area shape="rect" title=" " alt="" coords="5,304,72,331"/>
-<area shape="rect" title=" " alt="" coords="911,304,982,331"/>
-<area shape="rect" title=" " alt="" coords="97,304,167,331"/>
-<area shape="rect" title=" " alt="" coords="192,304,267,331"/>
-<area shape="rect" title=" " alt="" coords="291,304,362,331"/>
-<area shape="rect" title=" " alt="" coords="387,304,469,331"/>
-<area shape="rect" title=" " alt="" coords="493,304,568,331"/>
-<area shape="rect" title=" " alt="" coords="593,304,679,331"/>
-<area shape="rect" title=" " alt="" coords="703,304,787,331"/>
-<area shape="rect" title=" " alt="" coords="812,304,887,331"/>
-<area shape="rect" href="msg__manager_8h.html" title=" " alt="" coords="811,155,938,181"/>
-<area shape="rect" href="db__manager_8h.html" title=" " alt="" coords="520,155,635,181"/>
-<area shape="rect" href="time__manager_8h.html" title=" " alt="" coords="659,155,787,181"/>
-<area shape="rect" href="db__v2x_8h.html" title=" " alt="" coords="707,229,789,256"/>
+<area shape="rect" title=" " alt="" coords="429,5,596,32"/>
+<area shape="rect" href="type_8h.html" title=" " alt="" coords="481,304,544,331"/>
+<area shape="rect" href="framework_8h.html" title=" " alt="" coords="315,155,420,181"/>
+<area shape="rect" href="di_8h.html" title=" " alt="" coords="565,80,612,107"/>
+<area shape="rect" title=" " alt="" coords="787,379,854,405"/>
+<area shape="rect" title=" " alt="" coords="73,379,144,405"/>
+<area shape="rect" title=" " alt="" coords="879,379,949,405"/>
+<area shape="rect" title=" " alt="" coords="974,379,1049,405"/>
+<area shape="rect" title=" " alt="" coords="168,379,239,405"/>
+<area shape="rect" title=" " alt="" coords="263,379,346,405"/>
+<area shape="rect" title=" " alt="" coords="370,379,445,405"/>
+<area shape="rect" title=" " alt="" coords="469,379,556,405"/>
+<area shape="rect" title=" " alt="" coords="580,379,664,405"/>
+<area shape="rect" title=" " alt="" coords="689,379,763,405"/>
+<area shape="rect" href="msg__manager_8h.html" title=" " alt="" coords="159,229,285,256"/>
+<area shape="rect" href="db__manager_8h.html" title=" " alt="" coords="310,229,425,256"/>
+<area shape="rect" href="time__manager_8h.html" title=" " alt="" coords="5,229,135,256"/>
+<area shape="rect" href="db__v2x_8h.html" title=" " alt="" coords="124,304,205,331"/>
+<area shape="rect" href="di__gps_8h.html" title=" " alt="" coords="551,155,627,181"/>
+<area shape="rect" href="di__gps__xsens_8h_source.html" title=" " alt="" coords="601,229,723,256"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -107,10 +109,13 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="app_8h__dep__incl.png" border="0" usemap="#src_2apps_2include_2app_8hdep" alt=""/></div>
 <map name="src_2apps_2include_2app_8hdep" id="src_2apps_2include_2app_8hdep">
-<area shape="rect" title=" " alt="" coords="175,5,341,32"/>
-<area shape="rect" href="cli__db_8c.html" title=" " alt="" coords="5,80,153,107"/>
-<area shape="rect" href="cli__msg_8c.html" title=" " alt="" coords="178,80,338,107"/>
-<area shape="rect" href="cli__platooning_8c.html" title=" " alt="" coords="363,80,564,107"/>
+<area shape="rect" title=" " alt="" coords="391,5,558,32"/>
+<area shape="rect" href="app_8c.html" title=" " alt="" coords="5,80,120,107"/>
+<area shape="rect" href="cli__cp_8c.html" title=" " alt="" coords="144,80,291,107"/>
+<area shape="rect" href="cli__db_8c.html" title=" " alt="" coords="315,80,463,107"/>
+<area shape="rect" href="cli__di_8c.html" title=" " alt="" coords="488,80,632,107"/>
+<area shape="rect" href="cli__msg_8c.html" title=" " alt="" coords="656,80,816,107"/>
+<area shape="rect" href="cli__platooning_8c.html" title=" " alt="" coords="841,80,1042,107"/>
 </map>
 </div>
 </div>
@@ -141,6 +146,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ad1b6dcceec5b2a85a6103ffc9996c568"><td class="memItemLeft" align="right" valign="top"><a id="ad1b6dcceec5b2a85a6103ffc9996c568"></a>
 <a class="el" href="structAPP.html">APP_T</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>APP_GetAppInstance</b> (void)</td></tr>
 <tr class="separator:ad1b6dcceec5b2a85a6103ffc9996c568"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0e5a47e190801c278ed3c6bfe31a85b"><td class="memItemLeft" align="right" valign="top"><a id="aa0e5a47e190801c278ed3c6bfe31a85b"></a>
+<a class="el" href="structDI__t.html">DI_T</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>APP_GetDiInstance</b> (void)</td></tr>
+<tr class="separator:aa0e5a47e190801c278ed3c6bfe31a85b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a582bb72e2e9e3b19fc83cb0d2b8f6b5d"><td class="memItemLeft" align="right" valign="top"><a id="a582bb72e2e9e3b19fc83cb0d2b8f6b5d"></a>
 int32_t&#160;</td><td class="memItemRight" valign="bottom"><b>APP_Init</b> (<a class="el" href="structAPP.html">APP_T</a> *pstApp)</td></tr>
 <tr class="separator:a582bb72e2e9e3b19fc83cb0d2b8f6b5d"><td class="memSeparator" colspan="2">&#160;</td></tr>

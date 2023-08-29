@@ -107,71 +107,69 @@ $(function() {
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="comment">/******************************************************************************/</span></div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="comment">/***************************** Include ***************************************/</span></div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="type_8h.html">type.h</a>&quot;</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="config_8h.html">config.h</a>&quot;</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="db__v2x_8h.html">db_v2x.h</a>&quot;</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="comment">/***************************** Definition ************************************/</span></div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="preprocessor">#define TIME_MGR_TEST_TIMESTAMP              2023032314344766828</span></div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="preprocessor">#define USLEEP_US                            (1)</span></div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="preprocessor">#define USLEEP_MS                            (USLEEP_US*1000)</span></div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="preprocessor">#define USLEEP_S                             (USLEEP_MS*USLEEP_MS)</span></div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="comment">/***************************** Enum and Structure ****************************/</span></div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
-<div class="line"><a name="l00066"></a><span class="lineno"><a class="line" href="structTIME__MANAGER__SETTING__t.html">   66</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structTIME__MANAGER__SETTING__t.html">TIME_MANAGER_SETTING_t</a> {</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    uint32_t                     unReserved;</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;} <a class="code" href="time__manager_8h.html#a84530be93f11d95be6494ab8822f01a9">TIME_MANAGER_SETTING_T</a>;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
-<div class="line"><a name="l00074"></a><span class="lineno"><a class="line" href="structTIME__MANAGER__EVENT__MSG__t.html">   74</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structTIME__MANAGER__EVENT__MSG__t.html">TIME_MANAGER_EVENT_MSG_t</a> {</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    <a class="code" href="structTIME__MANAGER__SETTING__t.html">TIME_MANAGER_SETTING_T</a>      *pstTimeMgrSetting;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;} <a class="code" href="time__manager_8h.html#a7a4f57d932704e18385a21a3cf9c51e3">TIME_MANAGER_EVENT_MSG_T</a>;</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
-<div class="line"><a name="l00078"></a><span class="lineno"><a class="line" href="structTIME__MANAGER__LATENCY__t.html">   78</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structTIME__MANAGER__LATENCY__t.html">TIME_MANAGER_LATENCY_t</a> {</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    uint64_t                    ulTime_s;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    uint64_t                    ulTime_ms;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;} <a class="code" href="structTIME__MANAGER__LATENCY__t.html">TIME_MANAGER_LATENCY_T</a>;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
-<div class="line"><a name="l00087"></a><span class="lineno"><a class="line" href="structTIME__MANAGER__t.html">   87</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_t</a> {</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <a class="code" href="structTIME__MANAGER__LATENCY__t.html">TIME_MANAGER_LATENCY_T</a>      stLatency;</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    uint64_t                    ulTimeStamp;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <span class="keywordtype">bool</span>                        bLogLevel;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    uint32_t                    unReserved;</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;} <a class="code" href="time__manager_8h.html#a3e2d71cd70181d7d35c2f4e53fdc3104">TIME_MANAGER_T</a>;</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="comment">/***************************** Function Protype ******************************/</span></div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160; </div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;int32_t TIME_MANAGER_Init(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;int32_t TIME_MANAGER_DeInit(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160; </div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;int32_t TIME_MANAGER_SetLog(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;int32_t TIME_MANAGER_Get(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160; </div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;int32_t TIME_MANAGER_Open(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;int32_t TIME_MANAGER_Close(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;int32_t TIME_MANAGER_Start(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;int32_t TIME_MANAGER_Stop(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160; </div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;<span class="keywordtype">void</span> TIME_MANAGER_Status(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;int32_t TIME_MANAGER_Init(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;int32_t TIME_MANAGER_DeInit(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160; </div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;<span class="keywordtype">void</span> TIME_MANAGER_CheckLatencyTime(<span class="keywordtype">char</span> *pStr, <a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;<span class="keywordtype">void</span> TIME_MANAGER_CheckLatencyBegin(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;<span class="keywordtype">void</span> TIME_MANAGER_CheckLatencyEnd(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160; </div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">/* _TIME_MANAGER_H_ */</span><span class="preprocessor"></span></div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160; </div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="db__v2x_8h.html">db_v2x.h</a>&quot;</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="comment">/***************************** Definition ************************************/</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="preprocessor">#define TIME_MGR_TEST_TIMESTAMP              2023032314344766828</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="preprocessor">#define USLEEP_US                            (1)</span></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="preprocessor">#define USLEEP_MS                            (USLEEP_US*1000)</span></div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="preprocessor">#define USLEEP_S                             (USLEEP_MS*USLEEP_MS)</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="comment">/***************************** Enum and Structure ****************************/</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
+<div class="line"><a name="l00065"></a><span class="lineno"><a class="line" href="structTIME__MANAGER__SETTING__t.html">   65</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structTIME__MANAGER__SETTING__t.html">TIME_MANAGER_SETTING_t</a> {</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    uint32_t                     unReserved;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;} <a class="code" href="time__manager_8h.html#a84530be93f11d95be6494ab8822f01a9">TIME_MANAGER_SETTING_T</a>;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
+<div class="line"><a name="l00073"></a><span class="lineno"><a class="line" href="structTIME__MANAGER__EVENT__MSG__t.html">   73</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structTIME__MANAGER__EVENT__MSG__t.html">TIME_MANAGER_EVENT_MSG_t</a> {</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    <a class="code" href="structTIME__MANAGER__SETTING__t.html">TIME_MANAGER_SETTING_T</a>      *pstTimeMgrSetting;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;} <a class="code" href="time__manager_8h.html#a7a4f57d932704e18385a21a3cf9c51e3">TIME_MANAGER_EVENT_MSG_T</a>;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
+<div class="line"><a name="l00077"></a><span class="lineno"><a class="line" href="structTIME__MANAGER__LATENCY__t.html">   77</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structTIME__MANAGER__LATENCY__t.html">TIME_MANAGER_LATENCY_t</a> {</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    uint64_t                    ulTime_s;</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    uint64_t                    ulTime_ms;</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;} <a class="code" href="structTIME__MANAGER__LATENCY__t.html">TIME_MANAGER_LATENCY_T</a>;</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
+<div class="line"><a name="l00086"></a><span class="lineno"><a class="line" href="structTIME__MANAGER__t.html">   86</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_t</a> {</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <a class="code" href="structTIME__MANAGER__LATENCY__t.html">TIME_MANAGER_LATENCY_T</a>      stLatency;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    uint64_t                    ulTimeStamp;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    <span class="keywordtype">bool</span>                        bLogLevel;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    uint32_t                    unReserved;</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;} <a class="code" href="time__manager_8h.html#a3e2d71cd70181d7d35c2f4e53fdc3104">TIME_MANAGER_T</a>;</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160; </div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;<span class="comment">/***************************** Function Protype ******************************/</span></div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160; </div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;int32_t TIME_MANAGER_Init(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;int32_t TIME_MANAGER_DeInit(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160; </div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;int32_t TIME_MANAGER_SetLog(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;int32_t TIME_MANAGER_Get(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160; </div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;int32_t TIME_MANAGER_Open(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;int32_t TIME_MANAGER_Close(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;int32_t TIME_MANAGER_Start(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;int32_t TIME_MANAGER_Stop(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160; </div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="keywordtype">void</span> TIME_MANAGER_Status(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;int32_t TIME_MANAGER_Init(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;int32_t TIME_MANAGER_DeInit(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160; </div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;<span class="keywordtype">void</span> TIME_MANAGER_CheckLatencyTime(<span class="keywordtype">char</span> *pStr, <a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;<span class="keywordtype">void</span> TIME_MANAGER_CheckLatencyBegin(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;<span class="keywordtype">void</span> TIME_MANAGER_CheckLatencyEnd(<a class="code" href="structTIME__MANAGER__t.html">TIME_MANAGER_T</a> *pstTimeMgr);</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160; </div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">/* _TIME_MANAGER_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160; </div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="atime__manager_8h_html_a7a4f57d932704e18385a21a3cf9c51e3"><div class="ttname"><a href="time__manager_8h.html#a7a4f57d932704e18385a21a3cf9c51e3">TIME_MANAGER_EVENT_MSG_T</a></div><div class="ttdeci">struct TIME_MANAGER_EVENT_MSG_t TIME_MANAGER_EVENT_MSG_T</div></div>
-<div class="ttc" id="astructTIME__MANAGER__t_html"><div class="ttname"><a href="structTIME__MANAGER__t.html">TIME_MANAGER_t</a></div><div class="ttdef"><b>Definition:</b> time_manager.h:87</div></div>
-<div class="ttc" id="astructTIME__MANAGER__SETTING__t_html"><div class="ttname"><a href="structTIME__MANAGER__SETTING__t.html">TIME_MANAGER_SETTING_t</a></div><div class="ttdef"><b>Definition:</b> time_manager.h:66</div></div>
-<div class="ttc" id="astructTIME__MANAGER__LATENCY__t_html"><div class="ttname"><a href="structTIME__MANAGER__LATENCY__t.html">TIME_MANAGER_LATENCY_t</a></div><div class="ttdef"><b>Definition:</b> time_manager.h:78</div></div>
+<div class="ttc" id="astructTIME__MANAGER__t_html"><div class="ttname"><a href="structTIME__MANAGER__t.html">TIME_MANAGER_t</a></div><div class="ttdef"><b>Definition:</b> time_manager.h:86</div></div>
+<div class="ttc" id="astructTIME__MANAGER__SETTING__t_html"><div class="ttname"><a href="structTIME__MANAGER__SETTING__t.html">TIME_MANAGER_SETTING_t</a></div><div class="ttdef"><b>Definition:</b> time_manager.h:65</div></div>
+<div class="ttc" id="astructTIME__MANAGER__LATENCY__t_html"><div class="ttname"><a href="structTIME__MANAGER__LATENCY__t.html">TIME_MANAGER_LATENCY_t</a></div><div class="ttdef"><b>Definition:</b> time_manager.h:77</div></div>
 <div class="ttc" id="atype_8h_html"><div class="ttname"><a href="type_8h.html">type.h</a></div></div>
 <div class="ttc" id="atime__manager_8h_html_a3e2d71cd70181d7d35c2f4e53fdc3104"><div class="ttname"><a href="time__manager_8h.html#a3e2d71cd70181d7d35c2f4e53fdc3104">TIME_MANAGER_T</a></div><div class="ttdeci">struct TIME_MANAGER_t TIME_MANAGER_T</div></div>
 <div class="ttc" id="adb__v2x_8h_html"><div class="ttname"><a href="db__v2x_8h.html">db_v2x.h</a></div></div>
-<div class="ttc" id="aconfig_8h_html"><div class="ttname"><a href="config_8h.html">config.h</a></div></div>
-<div class="ttc" id="astructTIME__MANAGER__EVENT__MSG__t_html"><div class="ttname"><a href="structTIME__MANAGER__EVENT__MSG__t.html">TIME_MANAGER_EVENT_MSG_t</a></div><div class="ttdef"><b>Definition:</b> time_manager.h:74</div></div>
+<div class="ttc" id="astructTIME__MANAGER__EVENT__MSG__t_html"><div class="ttname"><a href="structTIME__MANAGER__EVENT__MSG__t.html">TIME_MANAGER_EVENT_MSG_t</a></div><div class="ttdef"><b>Definition:</b> time_manager.h:73</div></div>
 <div class="ttc" id="atime__manager_8h_html_a84530be93f11d95be6494ab8822f01a9"><div class="ttname"><a href="time__manager_8h.html#a84530be93f11d95be6494ab8822f01a9">TIME_MANAGER_SETTING_T</a></div><div class="ttdeci">struct TIME_MANAGER_SETTING_t TIME_MANAGER_SETTING_T</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

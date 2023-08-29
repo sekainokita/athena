@@ -107,8 +107,8 @@ $(function() {
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="comment">/******************************************************************************/</span></div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="comment">/***************************** Include ***************************************/</span></div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="type_8h.html">type.h</a>&quot;</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="config_8h.html">config.h</a>&quot;</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="framework_8h.html">framework.h</a>&quot;</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="framework_8h.html">framework.h</a>&quot;</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="di_8h.html">di.h</a>&quot;</span></div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="comment">/***************************** Definition ************************************/</span></div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="preprocessor">#define APP_VER     0x1</span></div>
@@ -122,18 +122,20 @@ $(function() {
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="comment">/***************************** Function Protype ******************************/</span></div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<a class="code" href="structFRAMEWORK.html">FRAMEWORK_T</a>* APP_GetFrameworkInstance(<span class="keywordtype">void</span>);</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<a class="code" href="structAPP.html">APP_T</a>* APP_GetAppInstance(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;int32_t APP_Init(<a class="code" href="structAPP.html">APP_T</a> *pstApp);</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">/* _APP_H_ */</span><span class="preprocessor"></span></div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<a class="code" href="structDI__t.html">DI_T</a>* APP_GetDiInstance(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;int32_t APP_Init(<a class="code" href="structAPP.html">APP_T</a> *pstApp);</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">/* _APP_H_ */</span><span class="preprocessor"></span></div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="astructAPP_html"><div class="ttname"><a href="structAPP.html">APP</a></div><div class="ttdef"><b>Definition:</b> app.h:57</div></div>
 <div class="ttc" id="aframework_8h_html"><div class="ttname"><a href="framework_8h.html">framework.h</a></div></div>
+<div class="ttc" id="astructDI__t_html"><div class="ttname"><a href="structDI__t.html">DI_t</a></div><div class="ttdef"><b>Definition:</b> di.h:64</div></div>
 <div class="ttc" id="atype_8h_html"><div class="ttname"><a href="type_8h.html">type.h</a></div></div>
-<div class="ttc" id="astructFRAMEWORK_html"><div class="ttname"><a href="structFRAMEWORK.html">FRAMEWORK</a></div><div class="ttdef"><b>Definition:</b> framework.h:76</div></div>
-<div class="ttc" id="aconfig_8h_html"><div class="ttname"><a href="config_8h.html">config.h</a></div></div>
+<div class="ttc" id="adi_8h_html"><div class="ttname"><a href="di_8h.html">di.h</a></div></div>
+<div class="ttc" id="astructFRAMEWORK_html"><div class="ttname"><a href="structFRAMEWORK.html">FRAMEWORK</a></div><div class="ttdef"><b>Definition:</b> framework.h:75</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

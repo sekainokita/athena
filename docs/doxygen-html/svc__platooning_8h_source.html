@@ -107,49 +107,47 @@ $(function() {
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="comment">/******************************************************************************/</span></div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="comment">/***************************** Include ***************************************/</span></div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="type_8h.html">type.h</a>&quot;</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="config_8h.html">config.h</a>&quot;</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="db__v2x_8h.html">db_v2x.h</a>&quot;</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="comment">/***************************** Definition ************************************/</span></div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="preprocessor">#define SVC_PLATOONING_TASK_MSG_KEY               (0x230531)</span></div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="comment">/***************************** Enum and Structure ****************************/</span></div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
-<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="structSVC__PLATOONING__SETTING__t.html">   62</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structSVC__PLATOONING__SETTING__t.html">SVC_PLATOONING_SETTING_t</a> {</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    uint32_t                     unReserved;</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;} <a class="code" href="structSVC__PLATOONING__SETTING__t.html">SVC_PLATOONING_SETTING_T</a>;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
-<div class="line"><a name="l00070"></a><span class="lineno"><a class="line" href="structSVC__PLATOONING__EVENT__MSG__t.html">   70</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structSVC__PLATOONING__EVENT__MSG__t.html">SVC_PLATOONING_EVENT_MSG_t</a> {</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    <a class="code" href="structSVC__PLATOONING__SETTING__t.html">SVC_PLATOONING_SETTING_T</a>      *pstSvcPlatooningSetting;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;} <a class="code" href="structSVC__PLATOONING__EVENT__MSG__t.html">SVC_PLATOONING_EVENT_MSG_T</a>;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
-<div class="line"><a name="l00079"></a><span class="lineno"><a class="line" href="structSVC__PLATOONING__t.html">   79</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_t</a> {</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    <span class="keywordtype">bool</span>                    bLogLevel;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    uint32_t                unReserved;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;} <a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a>;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160; </div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="comment">/***************************** Function Protype ******************************/</span></div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;int32_t SVC_PLATOONING_SetLog(<a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a> *pstSvcPlatooning);</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160; </div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;int32_t SVC_PLATOONING_Open(<a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a> *pstSvcPlatooning);</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;int32_t SVC_PLATOONING_Close(<a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a> *pstSvcPlatooning);</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;int32_t SVC_PLATOONING_Start(<a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a> *pstSvcPlatooning);</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;int32_t SVC_PLATOONING_Stop(<a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a> *pstSvcPlatooning);</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;int32_t SVC_PLATOONING_Status(<a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a> *pstSvcPlatooning);</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;int32_t SVC_PLATOONING_Init(<a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a> *pstSvcPlatooning);</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;int32_t SVC_PLATOONING_DeInit(<a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a> *pstSvcPlatooning);</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160; </div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">/* _SVC_PLATOONING_H_ */</span><span class="preprocessor"></span></div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160; </div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="db__v2x_8h.html">db_v2x.h</a>&quot;</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="comment">/***************************** Definition ************************************/</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="preprocessor">#define SVC_PLATOONING_TASK_MSG_KEY               (0x230531)</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="comment">/***************************** Enum and Structure ****************************/</span></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
+<div class="line"><a name="l00061"></a><span class="lineno"><a class="line" href="structSVC__PLATOONING__SETTING__t.html">   61</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structSVC__PLATOONING__SETTING__t.html">SVC_PLATOONING_SETTING_t</a> {</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    uint32_t                     unReserved;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;} <a class="code" href="structSVC__PLATOONING__SETTING__t.html">SVC_PLATOONING_SETTING_T</a>;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
+<div class="line"><a name="l00069"></a><span class="lineno"><a class="line" href="structSVC__PLATOONING__EVENT__MSG__t.html">   69</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structSVC__PLATOONING__EVENT__MSG__t.html">SVC_PLATOONING_EVENT_MSG_t</a> {</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <a class="code" href="structSVC__PLATOONING__SETTING__t.html">SVC_PLATOONING_SETTING_T</a>      *pstSvcPlatooningSetting;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;} <a class="code" href="structSVC__PLATOONING__EVENT__MSG__t.html">SVC_PLATOONING_EVENT_MSG_T</a>;</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160; </div>
+<div class="line"><a name="l00078"></a><span class="lineno"><a class="line" href="structSVC__PLATOONING__t.html">   78</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_t</a> {</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keywordtype">bool</span>                    bLogLevel;</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    uint32_t                unReserved;</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;} <a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a>;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="comment">/***************************** Function Protype ******************************/</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;int32_t SVC_PLATOONING_SetLog(<a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a> *pstSvcPlatooning);</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;int32_t SVC_PLATOONING_Open(<a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a> *pstSvcPlatooning);</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;int32_t SVC_PLATOONING_Close(<a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a> *pstSvcPlatooning);</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;int32_t SVC_PLATOONING_Start(<a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a> *pstSvcPlatooning);</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;int32_t SVC_PLATOONING_Stop(<a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a> *pstSvcPlatooning);</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;int32_t SVC_PLATOONING_Status(<a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a> *pstSvcPlatooning);</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160; </div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;int32_t SVC_PLATOONING_Init(<a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a> *pstSvcPlatooning);</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;int32_t SVC_PLATOONING_DeInit(<a class="code" href="structSVC__PLATOONING__t.html">SVC_PLATOONING_T</a> *pstSvcPlatooning);</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160; </div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">/* _SVC_PLATOONING_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160; </div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="atype_8h_html"><div class="ttname"><a href="type_8h.html">type.h</a></div></div>
 <div class="ttc" id="adb__v2x_8h_html"><div class="ttname"><a href="db__v2x_8h.html">db_v2x.h</a></div></div>
-<div class="ttc" id="astructSVC__PLATOONING__EVENT__MSG__t_html"><div class="ttname"><a href="structSVC__PLATOONING__EVENT__MSG__t.html">SVC_PLATOONING_EVENT_MSG_t</a></div><div class="ttdef"><b>Definition:</b> svc_platooning.h:70</div></div>
-<div class="ttc" id="aconfig_8h_html"><div class="ttname"><a href="config_8h.html">config.h</a></div></div>
-<div class="ttc" id="astructSVC__PLATOONING__t_html"><div class="ttname"><a href="structSVC__PLATOONING__t.html">SVC_PLATOONING_t</a></div><div class="ttdef"><b>Definition:</b> svc_platooning.h:79</div></div>
-<div class="ttc" id="astructSVC__PLATOONING__SETTING__t_html"><div class="ttname"><a href="structSVC__PLATOONING__SETTING__t.html">SVC_PLATOONING_SETTING_t</a></div><div class="ttdef"><b>Definition:</b> svc_platooning.h:62</div></div>
+<div class="ttc" id="astructSVC__PLATOONING__EVENT__MSG__t_html"><div class="ttname"><a href="structSVC__PLATOONING__EVENT__MSG__t.html">SVC_PLATOONING_EVENT_MSG_t</a></div><div class="ttdef"><b>Definition:</b> svc_platooning.h:69</div></div>
+<div class="ttc" id="astructSVC__PLATOONING__t_html"><div class="ttname"><a href="structSVC__PLATOONING__t.html">SVC_PLATOONING_t</a></div><div class="ttdef"><b>Definition:</b> svc_platooning.h:78</div></div>
+<div class="ttc" id="astructSVC__PLATOONING__SETTING__t_html"><div class="ttname"><a href="structSVC__PLATOONING__SETTING__t.html">SVC_PLATOONING_SETTING_t</a></div><div class="ttdef"><b>Definition:</b> svc_platooning.h:61</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">
