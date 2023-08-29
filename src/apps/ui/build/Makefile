@@ -41,6 +41,7 @@ DISTDIR = /home/bman/work/v2x/src/apps/ui/build/.tmp/app-v2x-ui1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-rpath,/home/bman/Qt/6.5.2/gcc_64/lib -Wl,-rpath-link,/home/bman/Qt/6.5.2/gcc_64/lib
 LIBS          = $(SUBLIBS) /home/bman/Qt/6.5.2/gcc_64/lib/libQt6Location.so /home/bman/Qt/6.5.2/gcc_64/lib/libQt6PositioningQuick.so /home/bman/Qt/6.5.2/gcc_64/lib/libQt6QuickShapes.so /home/bman/Qt/6.5.2/gcc_64/lib/libQt6Quick.so /home/bman/Qt/6.5.2/gcc_64/lib/libQt6OpenGL.so /home/bman/Qt/6.5.2/gcc_64/lib/libQt6Gui.so /home/bman/Qt/6.5.2/gcc_64/lib/libQt6QmlModels.so /home/bman/Qt/6.5.2/gcc_64/lib/libQt6Qml.so /home/bman/Qt/6.5.2/gcc_64/lib/libQt6Network.so /home/bman/Qt/6.5.2/gcc_64/lib/libQt6Positioning.so -pthread /home/bman/Qt/6.5.2/gcc_64/lib/libQt6Core.so -lpthread -lxkbcommon -lGL   
+LIBS	      += -L/home/bman/work/v2x/src/build/output/lib -ldi
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
