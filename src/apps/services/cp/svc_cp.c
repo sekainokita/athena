@@ -69,8 +69,9 @@ static int s_nSvcCpTaskMsgId;
 static key_t s_SvcCpTaskMsgKey = SVC_CP_TASK_MSG_KEY;
 
 static pthread_t sh_SvcCpTask;
+static pthread_t sh_SvcCpTaskTx;
 
-static bool s_bSvcCpLog = OFF;
+static SVC_CP_T s_stSvcCp;
 
 /***************************** Function  *************************************/
 
@@ -83,8 +84,8 @@ int32_t P_SVC_CP_SetSettings(SVC_CP_T *pstSvcCp)
         PrintError("pstSvcCp is NULL!!");
     }
 
+    memcpy(&s_stSvcCp, pstSvcCp, sizeof(SVC_CP_T));
     nRet = APP_OK;
-    PrintDebug("TODO");
 
     return nRet;
 }
@@ -98,8 +99,8 @@ int32_t P_SVC_CP_GetSettings(SVC_CP_T *pstSvcCp)
         PrintError("pstSvcCp is NULL!!");
     }
 
+    memcpy(pstSvcCp, &s_stSvcCp, sizeof(SVC_CP_T));
     nRet = APP_OK;
-    PrintDebug("TODO");
 
     return nRet;
 }
@@ -177,17 +178,16 @@ static int32_t P_SVC_CP_Start(SVC_CP_EVENT_MSG_T *stEventMsg)
 {
     int32_t nRet = APP_ERROR;
 
-    if ((stEventMsg->eSvcCpStatus == SVC_CP_STATUS_STOP) || (stEventMsg->eSvcCpStatus == SVC_CP_STATUS_IDLE))
+    if ((s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_STOP) || (s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_IDLE))
     {
-        stEventMsg->eSvcCpStatus = SVC_CP_STATUS_START;
-        PrintDebug("eSvcCpStatus starts now");
+        s_stSvcCp.eSvcCpStatus = SVC_CP_STATUS_START;
+        PrintTrace("eSvcCpStatus starts now [%d]", s_stSvcCp.eSvcCpStatus);
 
-        if(stEventMsg->eSvcCpStatus == SVC_CP_STATUS_START)
+        if(s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_START)
         {
             nRet = APP_OK;
         }
     }
-
     else
     {
         PrintWarn("unknown status type");
@@ -200,17 +200,16 @@ static int32_t P_SVC_CP_Stop(SVC_CP_EVENT_MSG_T *stEventMsg)
 {
     int32_t nRet = APP_ERROR;
 
-    if((stEventMsg->eSvcCpStatus == SVC_CP_STATUS_START) || (stEventMsg->eSvcCpStatus == SVC_CP_STATUS_IDLE))
+    if(s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_START)
     {
-        stEventMsg->eSvcCpStatus = SVC_CP_STATUS_STOP;
-        PrintDebug("eSvcCpStatus stops now.");
+        s_stSvcCp.eSvcCpStatus = SVC_CP_STATUS_STOP;
+        PrintTrace("eSvcCpStatus stops now [%d]", s_stSvcCp.eSvcCpStatus);
 
-        if(stEventMsg->eSvcCpStatus == SVC_CP_STATUS_STOP)
+        if(s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_STOP)
         {
             nRet = APP_OK;
         }
     }
-
     else
     {
         PrintWarn("unknown status type");
@@ -220,14 +219,38 @@ static int32_t P_SVC_CP_Stop(SVC_CP_EVENT_MSG_T *stEventMsg)
 
 }
 
+static void *P_SVC_CP_TaskTx(void *arg)
+{
+    UNUSED(arg);
+
+    while (1)
+    {
+        if(s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_START)
+        {
+            PrintError("s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_START!");
+            usleep(1000*1000);
+        }
+        else
+        {
+            if(s_stSvcCp.bLogLevel == TRUE)
+            {
+                PrintError("s_stSvcCp.eSvcCpStatus [%d]", s_stSvcCp.eSvcCpStatus);
+            }
+            usleep(1000);
+        }
+    }
+
+    return NULL;
+}
+
 static void *P_SVC_CP_Task(void *arg)
 {
     SVC_CP_EVENT_MSG_T stEventMsg;
     int32_t nRet = APP_ERROR;
-    memset(&stEventMsg, 0, sizeof(SVC_CP_EVENT_MSG_T));
 
     UNUSED(arg);
-    UNUSED(nRet);
+
+    memset(&stEventMsg, 0, sizeof(SVC_CP_EVENT_MSG_T));
 
     while (1)
     {
@@ -241,28 +264,20 @@ static void *P_SVC_CP_Task(void *arg)
             {
                 case SVC_CP_EVENT_START:
                 {
-                    if(s_bSvcCpLog == ON)
+                    nRet = P_SVC_CP_Start(&stEventMsg);
+                    if (nRet != APP_OK)
                     {
-                        PrintDebug("SVC_CP_EVENT_START [%d]", stEventMsg.eEventType);
-                        nRet = P_SVC_CP_Start(&stEventMsg);
-                        if (nRet != APP_OK)
-                        {
-                            PrintError("SVC_CP_Start() is failed! [unRet:%d]", nRet);
-                        }
+                        PrintError("SVC_CP_Start() is failed! [unRet:%d]", nRet);
                     }
                     break;
                 }
 
                 case SVC_CP_EVENT_STOP:
                 {
-                    if(s_bSvcCpLog == ON)
+                    nRet = P_SVC_CP_Stop(&stEventMsg);
+                    if (nRet != APP_OK)
                     {
-                        PrintDebug("SVC_CP_EVENT_STOP [%d]", stEventMsg.eEventType);
-                        nRet = P_SVC_CP_Stop(&stEventMsg);
-                        if (nRet != APP_OK)
-                        {
-                            PrintError("SVC_CP_Stop() is failed! [unRet:%d]", nRet);
-                        }
+                        PrintError("SVC_CP_Stop() is failed! [unRet:%d]", nRet);
                     }
                     break;
                 }
@@ -316,6 +331,17 @@ int32_t P_SVC_CP_CreateTask(void)
         nRet = APP_OK;
     }
 
+    nRet = pthread_create(&sh_SvcCpTaskTx, &attr, P_SVC_CP_TaskTx, NULL);
+    if (nRet != APP_OK)
+    {
+        PrintError("pthread_join() is failed!! (P_SVC_CP_TaskTx) [nRet:%d]", nRet);
+    }
+    else
+    {
+        PrintTrace("P_SVC_CP_TaskTx() is successfully created.");
+        nRet = APP_OK;
+    }
+
 #if defined(CONFIG_PTHREAD_JOINABLE)
     nRet = pthread_join(sh_SvcCpTask, NULL);
     if (nRet != APP_OK)
@@ -362,6 +388,7 @@ static int32_t P_SVC_CP_Init(SVC_CP_T *pstSvcCp)
     (void*)memset(&pstSvcCp->stMsgManagerRx, 0x00, sizeof(MSG_MANAGER_RX_T));
     (void*)memset(&pstSvcCp->stDbV2x, 0x00, sizeof(DB_V2X_T));
     (void*)memset(&pstSvcCp->stDbV2xStatusTx, 0x00, sizeof(DB_V2X_STATUS_TX_T));
+    (void*)memset(&s_stSvcCp, 0x00, sizeof(SVC_CP_T));
 
     nRet = P_SVC_CP_SetDefaultSettings(pstSvcCp);
     if(nRet != APP_OK)
@@ -492,8 +519,8 @@ int32_t SVC_CP_SetLog(SVC_CP_T *pstSvcCp)
         return nRet;
     }
 
-    s_bSvcCpLog = pstSvcCp->bLogLevel;
-    PrintTrace("SET:s_bSvcCpLog [%s]", s_bSvcCpLog == ON ? "ON" : "OFF");
+    s_stSvcCp.bLogLevel = pstSvcCp->bLogLevel;
+    PrintTrace("SET:s_stSvcCp.bLogLevel [%s]", s_stSvcCp.bLogLevel == ON ? "ON" : "OFF");
 
     nRet = APP_OK;
 
@@ -533,13 +560,24 @@ int32_t SVC_CP_Close(SVC_CP_T *pstSvcCp)
 int32_t SVC_CP_Start(SVC_CP_T *pstSvcCp)
 {
     int32_t nRet = APP_ERROR;
-
-    PrintWarn("TODO");
+    SVC_CP_EVENT_MSG_T stEventMsg;
 
     if(pstSvcCp == NULL)
     {
         PrintError("pstSvcCp == NULL!!");
         return nRet;
+    }
+
+    stEventMsg.eEventType = SVC_CP_EVENT_START;
+
+    if(msgsnd(s_nSvcCpTaskMsgId, &stEventMsg, sizeof(SVC_CP_EVENT_MSG_T), IPC_NOWAIT) == APP_MSG_ERR)
+    {
+        PrintError("msgsnd() is failed!!");
+        return nRet;
+    }
+    else
+    {
+        nRet = APP_OK;
     }
 
     return nRet;
@@ -548,13 +586,24 @@ int32_t SVC_CP_Start(SVC_CP_T *pstSvcCp)
 int32_t SVC_CP_Stop(SVC_CP_T *pstSvcCp)
 {
     int32_t nRet = APP_ERROR;
-
-    PrintWarn("TODO");
+    SVC_CP_EVENT_MSG_T stEventMsg;
 
     if(pstSvcCp == NULL)
     {
         PrintError("pstSvcCp == NULL!!");
         return nRet;
+    }
+
+    stEventMsg.eEventType = SVC_CP_EVENT_STOP;
+
+    if(msgsnd(s_nSvcCpTaskMsgId, &stEventMsg, sizeof(SVC_CP_EVENT_MSG_T), IPC_NOWAIT) == APP_MSG_ERR)
+    {
+        PrintError("msgsnd() is failed!!");
+        return nRet;
+    }
+    else
+    {
+        nRet = APP_OK;
     }
 
     return nRet;
@@ -596,8 +645,8 @@ int32_t SVC_CP_Init(SVC_CP_T *pstSvcCp)
         PrintWarn("is successfully initialized.");
     }
 
-    s_bSvcCpLog = pstSvcCp->bLogLevel;
-    PrintDebug("s_bSvcCpLog [%s]", s_bSvcCpLog == ON ? "ON" : "OFF");
+    s_stSvcCp.bLogLevel = pstSvcCp->bLogLevel;
+    PrintDebug("s_stSvcCp.bLogLevel [%s]", s_stSvcCp.bLogLevel == ON ? "ON" : "OFF");
 
     return nRet;
 }

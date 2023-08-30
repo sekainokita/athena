@@ -56,6 +56,42 @@
 
 /***************************** Function Protype ******************************/
 
+static int P_CLI_CP_StartV2xStatusScenario(void)
+{
+    int32_t nRet = APP_OK;
+    SVC_CP_T *pstSvcCp;
+    pstSvcCp = APP_GetSvcCpInstance();
+
+    nRet = SVC_CP_SetSettings(pstSvcCp);
+    if(nRet != APP_OK)
+    {
+        PrintError("SVC_CP_Start() is failed! [nRet:%d]", nRet);
+    }
+
+    nRet = SVC_CP_Start(pstSvcCp);
+    if(nRet != APP_OK)
+    {
+        PrintError("SVC_CP_Start() is failed! [nRet:%d]", nRet);
+    }
+
+    return nRet;
+}
+
+static int P_CLI_CP_StopV2xStatusScenario(void)
+{
+    int32_t nRet = APP_OK;
+    SVC_CP_T *pstSvcCp;
+    pstSvcCp = APP_GetSvcCpInstance();
+
+    nRet = SVC_CP_Stop(pstSvcCp);
+    if(nRet != APP_OK)
+    {
+        PrintError("SVC_CP_Start() is failed! [nRet:%d]", nRet);
+    }
+
+    return nRet;
+}
+
 static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
 {
     int32_t nRet = APP_OK;
@@ -213,6 +249,22 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     PrintTrace("Start V2X Tx/Rx Communication of Platooning");
 
                     PrintTrace("Save DB");
+                }
+                else if(IS_CMD(pcCmd, "start"))
+                {
+                    nRet = P_CLI_CP_StartV2xStatusScenario();
+                    if(nRet != APP_OK)
+                    {
+                        PrintError("P_CLI_CP_StartV2xStatusScenario() is failed![nRet:%d]", nRet);
+                    }
+                }
+                else if(IS_CMD(pcCmd, "stop"))
+                {
+                    nRet = P_CLI_CP_StopV2xStatusScenario();
+                    if(nRet != APP_OK)
+                    {
+                        PrintError("P_CLI_CP_StopV2xStatusScenario() is failed![nRet:%d]", nRet);
+                    }
                 }
                 else if(IS_CMD(pcCmd, "status"))
                 {

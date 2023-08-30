@@ -51,7 +51,7 @@
 #include "db_v2x_status.h"
 
 /***************************** Definition ************************************/
-#define SVC_CP_TASK_MSG_KEY               (0x230531)
+#define SVC_CP_TASK_MSG_KEY               (0x230830)
 #define SVC_CP_DEFAULT_ETH_DEV            "eth1"
 /***************************** Enum and Structure ****************************/
 
@@ -96,9 +96,8 @@ typedef struct SVC_CP_SETTING_t {
 * @param eStatusType
 */
 typedef struct SVC_CP_EVENT_MSG_t {
-    SVC_CP_STATUS_E         eSvcCpStatus;
     SVC_CP_EVENT_E          eEventType;
-    SVC_CP_SETTING_T      *pstSvcCpSetting;
+    SVC_CP_SETTING_T        *pstSvcCpSetting;
 } SVC_CP_EVENT_MSG_T;
 
 /**
