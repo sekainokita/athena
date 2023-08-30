@@ -177,6 +177,7 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
 static int32_t P_SVC_CP_Start(SVC_CP_EVENT_MSG_T *stEventMsg)
 {
     int32_t nRet = APP_ERROR;
+    UNUSED(stEventMsg);
 
     if ((s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_STOP) || (s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_IDLE))
     {
@@ -199,6 +200,7 @@ static int32_t P_SVC_CP_Start(SVC_CP_EVENT_MSG_T *stEventMsg)
 static int32_t P_SVC_CP_Stop(SVC_CP_EVENT_MSG_T *stEventMsg)
 {
     int32_t nRet = APP_ERROR;
+    UNUSED(stEventMsg);
 
     if(s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_START)
     {
@@ -222,13 +224,68 @@ static int32_t P_SVC_CP_Stop(SVC_CP_EVENT_MSG_T *stEventMsg)
 static void *P_SVC_CP_TaskTx(void *arg)
 {
     UNUSED(arg);
+    TIME_MANAGER_T *pstTimeManager;
+    char *pchPayload = NULL;
+    int32_t nRet = APP_ERROR;
+    int32_t nFrameWorkRet = FRAMEWORK_ERROR;
+    bool bMsgTx = FALSE;
 
     while (1)
     {
         if(s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_START)
         {
-            PrintError("s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_START!");
-            usleep(1000*1000);
+            s_stSvcCp.stDbV2x.ulPayloadLength = sizeof(s_stSvcCp.stDbV2xStatusTx);
+
+            pchPayload = (char*)malloc(sizeof(char)*s_stSvcCp.stDbV2x.ulPayloadLength);
+            if(pchPayload == NULL)
+            {
+                PrintError("malloc() is failed! [NULL]");
+                return nRet;
+            }
+
+            (void*)memset(pchPayload, 0x00, sizeof(sizeof(char)*s_stSvcCp.stDbV2x.ulPayloadLength));
+
+            pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
+            nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
+            if(nFrameWorkRet != FRAMEWORK_OK)
+            {
+                PrintError("TIME_MANAGER_Get() is failed! [nRet:%d]", nFrameWorkRet);
+            }
+            else
+            {
+                s_stSvcCp.stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
+
+                s_stSvcCp.stDbV2xStatusTx.ulTxTimeStampL1 = 19840919;
+                s_stSvcCp.stDbV2xStatusTx.ulTxTimeStampL2 = 19850501;
+                s_stSvcCp.stDbV2xStatusTx.ulTxTimeStampL3 = pstTimeManager->ulTimeStamp;
+            }
+
+            memcpy(pchPayload, (char*)&s_stSvcCp.stDbV2xStatusTx, sizeof(char)*s_stSvcCp.stDbV2x.ulPayloadLength);
+
+            s_stSvcCp.stDbV2x.ulReserved = 0;
+
+            if(bMsgTx == TRUE)
+            {
+                nFrameWorkRet = MSG_MANAGER_Transmit(&s_stSvcCp.stMsgManagerTx, &s_stSvcCp.stDbV2x, (char*)pchPayload);
+                if(nFrameWorkRet != FRAMEWORK_OK)
+                {
+                    PrintError("MSG_MANAGER_Transmit() is failed! [nRet:%d]", nFrameWorkRet);
+                }
+                else
+                {
+                    PrintDebug("Tx Success, Counts[%u], Delay[%d ms]", s_stSvcCp.stMsgManagerTx.unTxCount, s_stSvcCp.stMsgManagerTx.unTxDelay);
+                }
+            }
+            else
+            {
+                nFrameWorkRet = DB_MANAGER_Write(&s_stSvcCp.stDbManagerWrite, &s_stSvcCp.stDbV2x, (char*)pchPayload);
+                if(nFrameWorkRet != FRAMEWORK_OK)
+                {
+                    PrintError("DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
+                }
+            }
+
+            usleep((s_stSvcCp.stMsgManagerTx.unTxDelay * USLEEP_MS));
         }
         else
         {
@@ -530,14 +587,37 @@ int32_t SVC_CP_SetLog(SVC_CP_T *pstSvcCp)
 int32_t SVC_CP_Open(SVC_CP_T *pstSvcCp)
 {
     int32_t nRet = APP_ERROR;
-
-    PrintWarn("TODO");
+    int32_t nFrameWorkRet = FRAMEWORK_ERROR;
+    DB_MANAGER_T *pstDbManager;
+    MSG_MANAGER_T *pstMsgManager;
 
     if(pstSvcCp == NULL)
     {
         PrintError("pstSvcCp == NULL!!");
         return nRet;
     }
+
+    pstDbManager = FRAMEWORK_GetDbManagerInstance();
+    pstDbManager->eFileType = pstSvcCp->stDbManagerWrite.eFileType;
+
+    nFrameWorkRet = DB_MANAGER_Open(pstDbManager);
+    if(nFrameWorkRet != FRAMEWORK_OK)
+    {
+        PrintError("DB_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
+        return nRet;
+    }
+
+    pstMsgManager = FRAMEWORK_GetMsgManagerInstance();
+    pstMsgManager->pchIfaceName = pstSvcCp->pchIfaceName;
+
+    nFrameWorkRet = MSG_MANAGER_Open(pstMsgManager);
+    if(nFrameWorkRet != FRAMEWORK_OK)
+    {
+        PrintError("MSG_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
+        return nRet;
+    }
+
+    nRet = nFrameWorkRet;
 
     return nRet;
 }

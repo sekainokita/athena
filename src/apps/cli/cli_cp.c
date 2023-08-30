@@ -62,10 +62,16 @@ static int P_CLI_CP_StartV2xStatusScenario(void)
     SVC_CP_T *pstSvcCp;
     pstSvcCp = APP_GetSvcCpInstance();
 
+    nRet = SVC_CP_Open(pstSvcCp);
+    if(nRet != APP_OK)
+    {
+        PrintError("SVC_CP_Open() is failed! [nRet:%d]", nRet);
+    }
+
     nRet = SVC_CP_SetSettings(pstSvcCp);
     if(nRet != APP_OK)
     {
-        PrintError("SVC_CP_Start() is failed! [nRet:%d]", nRet);
+        PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
     }
 
     nRet = SVC_CP_Start(pstSvcCp);
