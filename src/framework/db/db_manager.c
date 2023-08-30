@@ -803,7 +803,11 @@ static void *P_DB_MANAGER_Task(void *arg)
                     }
                     case DB_MANAGER_FILE_TYPE_CSV:
                     {
-                        PrintDebug("DB_MANAGER_FILE_TYPE_CSV [%d]", stEventMsg.pstDbManagerWrite->eFileType);
+                        if (s_bDbMgrLog == ON)
+                        {
+                            PrintDebug("DB_MANAGER_FILE_TYPE_CSV [%d]", stEventMsg.pstDbManagerWrite->eFileType);
+                        }
+
                         nRet = P_DB_MANAGER_WriteCsv(&stEventMsg);
                         if(nRet != FRAMEWORK_OK)
                         {
@@ -814,7 +818,11 @@ static void *P_DB_MANAGER_Task(void *arg)
 #if defined(CONFIG_SQLITE)
                     case DB_MANAGER_FILE_TYPE_SQLITE:
                     {
-                        PrintDebug("DB_MANAGER_FILE_TYPE_SQLITE [%d]", stEventMsg.pstDbManagerWrite->eFileType);
+                        if (s_bDbMgrLog == ON)
+                        {
+                            PrintDebug("DB_MANAGER_FILE_TYPE_SQLITE [%d]", stEventMsg.pstDbManagerWrite->eFileType);
+                        }
+
                         nRet = P_DB_MANAGER_WriteSqlite(&stEventMsg);
                         if(nRet != FRAMEWORK_OK)
                         {
