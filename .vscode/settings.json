@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "db_v2x.h": "c",
+        "db_manager.h": "c"
+    }
+}

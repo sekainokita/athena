@@ -55,6 +55,32 @@
 /***************************** Enum and Structure ****************************/
 
 /**
+* @details SVC_CP_EVENT_E
+* @param SVC_CP_EVENT_START
+* @param SVC_CP_EVENT_STOP
+*/
+typedef enum {
+    SVC_CP_EVENT_UNKNOWN                    = 0x0000,
+    SVC_CP_EVENT_START                      = 0x0001,
+    SVC_CP_EVENT_STOP                       = 0x0002,
+    SVC_CP_EVENT_UNDEFINED_1,
+    SVC_CP_EVENT_UNDEFINED_2,
+    SVC_CP_EVENT_MAX                        = 0xFFFF
+} SVC_CP_EVENT_E;
+
+/**
+* @details SVC_CP_STATUS_E
+* @param SVC_CP_STATUS_START
+* @param SVC_CP_STATUS_STOP
+*/
+typedef enum {
+    SVC_CP_STATUS_IDLE                       = 0x0000,
+    SVC_CP_STATUS_START                      = 0x0001,
+    SVC_CP_STATUS_STOP                       = 0x0002,
+    SVC_CP_STATUS_MAX                        = 0xFFFF
+} SVC_CP_STATUS_E;
+
+/**
 * @details SVC_CP_SETTING_T
 * @param unReserved
 */
@@ -65,8 +91,12 @@ typedef struct SVC_CP_SETTING_t {
 /**
 * @details SVC_CP_EVENT_MSG_T
 * @param pstTimeMgrSetting
+* @param eEventType
+* @param eStatusType
 */
 typedef struct SVC_CP_EVENT_MSG_t {
+    SVC_CP_STATUS_E         eSvcCpStatus;
+    SVC_CP_EVENT_E          eEventType;
     SVC_CP_SETTING_T      *pstSvcCpSetting;
 } SVC_CP_EVENT_MSG_T;
 
@@ -77,6 +107,7 @@ typedef struct SVC_CP_EVENT_MSG_t {
 */
 typedef struct SVC_CP_t {
     bool                    bLogLevel;
+    SVC_CP_STATUS_E         eSvcCpStatus;
     DB_MANAGER_WRITE_T      stDbManagerWrite;
     MSG_MANAGER_TX_T        stMsgManagerTx;
     MSG_MANAGER_RX_T        stMsgManagerRx;

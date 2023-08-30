@@ -328,7 +328,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             {
                 if(IS_CMD(pcCmd,"csv"))
                 {
-                    for(int a=0; a < 244; a++)
+                    for(int nCount=0; nCount < CLI_DB_V2X_DEFAULT_BYTE_LEN; nCount++)
                     {
                         TIME_MANAGER_T *pstTimeManager;
 
@@ -384,8 +384,8 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
                         for(int i=0; i < CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; i++)
                         {
-                            cPayload[i] = a;
-                            printf("[%d:%d] ", a, cPayload[i]);
+                            cPayload[i] = nCount;
+                            printf("[%d:%d] ", nCount, cPayload[i]);
                         }
                         printf("\r\n");
 

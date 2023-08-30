@@ -158,6 +158,52 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
 
     return nRet;
 }
+static int32_t P_SVC_CP_Start(SVC_CP_EVENT_MSG_T *stEventMsg)
+{
+    int32_t nRet = APP_ERROR;
+
+    if ((stEventMsg->eSvcCpStatus == SVC_CP_STATUS_STOP) || (stEventMsg->eSvcCpStatus == SVC_CP_STATUS_IDLE))
+    {
+        stEventMsg->eSvcCpStatus = SVC_CP_STATUS_START;
+        PrintDebug("eSvcCpStatus starts now");
+        
+        if(stEventMsg->eSvcCpStatus == SVC_CP_STATUS_START)
+        {
+            nRet = APP_OK;
+        }
+    }
+    
+    else
+    {
+        PrintWarn("unknown status type");
+    }
+
+    return nRet;
+}
+
+static int32_t P_SVC_CP_Stop(SVC_CP_EVENT_MSG_T *stEventMsg)
+{
+    int32_t nRet = APP_ERROR;
+
+    if((stEventMsg->eSvcCpStatus == SVC_CP_STATUS_START) || (stEventMsg->eSvcCpStatus == SVC_CP_STATUS_IDLE))
+    {
+        stEventMsg->eSvcCpStatus = SVC_CP_STATUS_STOP;
+        PrintDebug("eSvcCpStatus stops now.");
+        
+        if(stEventMsg->eSvcCpStatus == SVC_CP_STATUS_STOP)
+        {
+            nRet = APP_OK;
+        }
+    }
+
+    else
+    {
+        PrintWarn("unknown status type");
+    }
+    
+    return nRet;
+
+}
 
 static void *P_SVC_CP_Task(void *arg)
 {
@@ -176,8 +222,40 @@ static void *P_SVC_CP_Task(void *arg)
         }
         else
         {
-            PrintError("TODO");
-            nRet = APP_OK;
+            switch(stEventMsg.eEventType)
+            {
+                case SVC_CP_EVENT_START:
+                {
+                    if(s_bSvcCpLog == ON)
+                    {
+                        PrintDebug("SVC_CP_EVENT_START [%d]", stEventMsg.eEventType);
+                        nRet = P_SVC_CP_Start(&stEventMsg);
+                        if (nRet != APP_OK)
+                        {
+                            PrintError("SVC_CP_Start() is failed! [unRet:%d]", nRet);
+                        }
+                    }
+                    break;
+                }
+
+                case SVC_CP_EVENT_STOP:
+                {
+                    if(s_bSvcCpLog == ON)
+                    {
+                        PrintDebug("SVC_CP_EVENT_STOP [%d]", stEventMsg.eEventType);
+                        nRet = P_SVC_CP_Stop(&stEventMsg);
+                        if (nRet != APP_OK)
+                        {
+                            PrintError("SVC_CP_Stop() is failed! [unRet:%d]", nRet);
+                        }
+                    }
+                    break;
+                }
+                    
+                default:
+                    PrintWarn("unknown event type [%d]", stEventMsg.eEventType);
+                    break;
+            }
         }
 
         usleep(1000);

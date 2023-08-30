@@ -55,6 +55,7 @@
 #define CLI_DB_V2X_DEFAULT_HW_VER                 0x0001 // OBU rel. 230518
 #define CLI_DB_V2X_DEFAULT_SW_VER                 0x0001 // OBU rel. 230523
 #define CLI_DB_V2X_DEFAULT_PAYLOAD_LEN            1024
+#define CLI_DB_V2X_DEFAULT_BYTE_LEN               254
 
 /***************************** Enum and Structure ****************************/
 
