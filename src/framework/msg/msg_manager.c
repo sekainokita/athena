@@ -348,7 +348,7 @@ static int32_t P_MSG_MANAGER_SendTxMsgToDbMgr(MSG_MANAGER_TX_EVENT_MSG_T *pstEve
 static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
-    uint32_t unDbV2xPacketLength = sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength + sizeof(pstEventMsg->pstDbV2x->ulPacketCrc32);
+    uint32_t unDbV2xPacketLength = sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength + sizeof(pstEventMsg->pstDbV2x->ulReserved);
     uint32_t unDbV2xCrcCalcuatedLength = sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength;
     uint32_t unV2xTxPduLength = sizeof(Ext_V2X_TxPDU_t) + unDbV2xPacketLength;
     ssize_t nRetSendSize = 0;
@@ -413,7 +413,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     pstDbV2x->usHwVer = htons(pstEventMsg->pstDbV2x->usHwVer);
     pstDbV2x->usSwVer = htons(pstEventMsg->pstDbV2x->usSwVer);
     pstDbV2x->ulPayloadLength = htonl(pstEventMsg->pstDbV2x->ulPayloadLength);
-    pstDbV2x->ulPacketCrc32 = htonl(pstEventMsg->pstDbV2x->ulPacketCrc32);
+    pstDbV2x->ulReserved = htonl(pstEventMsg->pstDbV2x->ulReserved);
 
     pchDbV2xCrc = malloc(unDbV2xPacketLength);
     if(pchDbV2xCrc == NULL)
@@ -682,7 +682,7 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
                 PrintDebug("db_v2x_tmp_p->usHwVer[%d]", ntohs(pstDbV2x->usHwVer));
                 PrintDebug("db_v2x_tmp_p->usSwVer[%d]", ntohs(pstDbV2x->usSwVer));
                 PrintDebug("db_v2x_tmp_p->ulPayloadLength[%d]", ntohl(pstDbV2x->ulPayloadLength));
-                PrintDebug("db_v2x_tmp_p->ulPacketCrc32[0x%x]", ntohl(pstDbV2x->ulPacketCrc32));
+                PrintDebug("db_v2x_tmp_p->ulReserved[0x%x]", ntohl(pstDbV2x->ulReserved));
 
                 PrintDebug("received CRC:ulDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32);
                 PrintDebug("calcuated CRC:ulCompDbV2xTotalPacketCrc32[0x%x]", ulCompDbV2xTotalPacketCrc32);
@@ -711,7 +711,7 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             pstEventMsg->pstDbV2x->usHwVer = ntohs(pstDbV2x->usHwVer);
             pstEventMsg->pstDbV2x->usSwVer = ntohs(pstDbV2x->usSwVer);
             pstEventMsg->pstDbV2x->ulPayloadLength = ntohl(pstDbV2x->ulPayloadLength);
-            pstEventMsg->pstDbV2x->ulPacketCrc32 = ntohl(pstDbV2x->ulPacketCrc32);
+            pstEventMsg->pstDbV2x->ulReserved = ntohl(pstDbV2x->ulReserved);
 
             nRet = P_MSG_MANAGER_SendRxMsgToDbMgr(pstEventMsg, ulDbV2xTotalPacketCrc32);
             if (nRet != FRAMEWORK_OK)
@@ -864,7 +864,7 @@ void *MSG_MANAGER_TxTask(void *arg)
     db_v2x_tmp_p->usHwVer = 0;
     db_v2x_tmp_p->usSwVer = 0;
     db_v2x_tmp_p->ulPayloadLength = SAMPLE_V2X_MSG_LEN;
-    db_v2x_tmp_p->ulPacketCrc32 = 0;
+    db_v2x_tmp_p->ulReserved = 0;
 
     memcpy(v2x_tx_pdu_p->v2x_msg.data, db_v2x_tmp_p, db_v2x_tmp_size);
 

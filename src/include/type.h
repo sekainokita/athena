@@ -92,7 +92,7 @@
 #define UNUSED(x)           (void)(x)
 
 #define TRUE                true
-#define FALSE               FALSE
+#define FALSE               false
 #define ON                  true
 #define OFF                 false
 

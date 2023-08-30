@@ -50,11 +50,6 @@
 
 /***************************** Include ***************************************/
 #include <stdio.h>
-#include "framework.h"
-#include "di.h"
-#include "svc_platooning.h"
-#include "svc_cp.h"
-
 #include "app.h"
 #include "cli.h"
 /***************************** Definition ************************************/
@@ -64,11 +59,8 @@
 
 static FRAMEWORK_T s_stFramework;
 static APP_T s_stApp;
-
 static DI_T s_stDi;
-
 static SVC_PLATOONING_T s_stSvcPlatooning;
-
 static SVC_CP_T s_stSvcCp;
 
 /***************************** Function  *************************************/
@@ -122,6 +114,16 @@ APP_T* APP_GetAppInstance(void)
 DI_T* APP_GetDiInstance(void)
 {
     return &s_stDi;
+}
+
+SVC_CP_T* APP_GetSvcCpInstance(void)
+{
+    return &s_stSvcCp;
+}
+
+SVC_PLATOONING_T* APP_GetSvcPlatooningInstance(void)
+{
+    return &s_stSvcPlatooning;
 }
 
 int main(int argc, char *argv[])

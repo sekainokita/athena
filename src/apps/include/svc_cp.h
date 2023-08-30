@@ -77,6 +77,10 @@ typedef struct SVC_CP_EVENT_MSG_t {
 */
 typedef struct SVC_CP_t {
     bool                    bLogLevel;
+    DB_MANAGER_WRITE_T      stDbManagerWrite;
+    MSG_MANAGER_TX_T        stMsgManagerTx;
+    MSG_MANAGER_RX_T        stMsgManagerRx;
+    DB_V2X_T                stDbV2x;
     uint32_t                unReserved;
 } SVC_CP_T;
 
@@ -89,6 +93,11 @@ int32_t SVC_CP_Close(SVC_CP_T *pstSvcCp);
 int32_t SVC_CP_Start(SVC_CP_T *pstSvcCp);
 int32_t SVC_CP_Stop(SVC_CP_T *pstSvcCp);
 int32_t SVC_CP_Status(SVC_CP_T *pstSvcCp);
+
+void SVC_CP_ShowSettings(SVC_CP_T *pstSvcCp);
+
+int32_t SVC_CP_SetSettings(SVC_CP_T *pstSvcCp);
+int32_t SVC_CP_GetSettings(SVC_CP_T *pstSvcCp);
 
 int32_t SVC_CP_Init(SVC_CP_T *pstSvcCp);
 int32_t SVC_CP_DeInit(SVC_CP_T *pstSvcCp);

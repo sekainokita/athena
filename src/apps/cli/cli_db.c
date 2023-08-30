@@ -130,7 +130,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
                     stDbV2x.usSwVer = CLI_DB_V2X_DEFAULT_SW_VER;
                     stDbV2x.ulPayloadLength = sizeof(cPayload);
-                    stDbV2x.ulPacketCrc32 = 0;
+                    stDbV2x.ulReserved = 0;
 
                     PrintTrace("========================================================");
                     PrintDebug("eFileType[%d]", stDbManagerWrite.eFileType);
@@ -158,9 +158,9 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     }
                     printf("\r\n");
 
-                    stDbV2x.ulPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, stDbV2x.ulPayloadLength);
+                    stDbV2x.ulReserved = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, stDbV2x.ulPayloadLength);
 
-                    PrintDebug("ulPayloadCrc32[0x%x]", stDbV2x.ulPacketCrc32);
+                    PrintDebug("ulReserved[0x%x]", stDbV2x.ulReserved);
                     PrintTrace("========================================================");
 
                     nFrameWorkRet = DB_MANAGER_Write(&stDbManagerWrite, &stDbV2x, (char*)&cPayload);
@@ -201,7 +201,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
                     stDbV2x.usSwVer = CLI_DB_V2X_DEFAULT_SW_VER;
                     stDbV2x.ulPayloadLength = sizeof(cPayload);
-                    stDbV2x.ulPacketCrc32 = 0;
+                    stDbV2x.ulReserved = 0;
 
                     PrintTrace("========================================================");
                     PrintDebug("eFileType[%d]", stDbManagerWrite.eFileType);
@@ -229,9 +229,9 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     }
                     printf("\r\n");
 
-                    stDbV2x.ulPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, stDbV2x.ulPayloadLength);
+                    stDbV2x.ulReserved = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, stDbV2x.ulPayloadLength);
 
-                    PrintDebug("ulPayloadCrc32[0x%x]", stDbV2x.ulPacketCrc32);
+                    PrintDebug("ulReserved[0x%x]", stDbV2x.ulReserved);
                     PrintTrace("========================================================");
 
                     nFrameWorkRet = DB_MANAGER_Write(&stDbManagerWrite, &stDbV2x, (char*)&cPayload);
@@ -272,7 +272,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
                     stDbV2x.usSwVer = CLI_DB_V2X_DEFAULT_SW_VER;
                     stDbV2x.ulPayloadLength = sizeof(cPayload);
-                    stDbV2x.ulPacketCrc32 = 0;
+                    stDbV2x.ulReserved = 0;
 
                     PrintTrace("========================================================");
                     PrintDebug("eFileType[%d]", stDbManagerWrite.eFileType);
@@ -300,9 +300,9 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     }
                     printf("\r\n");
 
-                    stDbV2x.ulPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, stDbV2x.ulPayloadLength);
+                    stDbV2x.ulReserved = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, stDbV2x.ulPayloadLength);
 
-                    PrintDebug("ulPayloadCrc32[0x%x]", stDbV2x.ulPacketCrc32);
+                    PrintDebug("ulReserved[0x%x]", stDbV2x.ulReserved);
                     PrintTrace("========================================================");
 
                     nFrameWorkRet = DB_MANAGER_Write(&stDbManagerWrite, &stDbV2x, (char*)&cPayload);
@@ -310,7 +310,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     {
                         PrintError("DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
                     }
-                }                
+                }
                 else
                 {
                     return CLI_CMD_Showusage(pstCmd);
@@ -360,7 +360,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                         stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
                         stDbV2x.usSwVer = CLI_DB_V2X_DEFAULT_SW_VER;
                         stDbV2x.ulPayloadLength = sizeof(cPayload);
-                        stDbV2x.ulPacketCrc32 = 0;
+                        stDbV2x.ulReserved = 0;
 
                         PrintTrace("========================================================");
                         PrintDebug("eFileType[%d]", stDbManagerWrite.eFileType);
@@ -389,9 +389,9 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                         }
                         printf("\r\n");
 
-                        stDbV2x.ulPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, stDbV2x.ulPayloadLength);
+                        stDbV2x.ulReserved = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, stDbV2x.ulPayloadLength);
 
-                        PrintDebug("ulPayloadCrc32[0x%x]", stDbV2x.ulPacketCrc32);
+                        PrintDebug("ulReserved[0x%x]", stDbV2x.ulReserved);
                         PrintTrace("========================================================");
 
                         nFrameWorkRet = DB_MANAGER_Write(&stDbManagerWrite, &stDbV2x, (char*)&cPayload);
@@ -400,7 +400,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                             PrintError("DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
                         }
                     }
-                }                
+                }
                 else
                 {
                     return CLI_CMD_Showusage(pstCmd);
@@ -460,7 +460,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     {
                         PrintError("DB_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
                     }
-                }                
+                }
                 else
                 {
                     return CLI_CMD_Showusage(pstCmd);
@@ -529,7 +529,7 @@ int32_t CLI_DB_InitCmds(void)
                "db v2xC csv       save CSV file, Sequentially test db v2x sample command (first, set CLI> db open)\n"
                "db open txt       open a db TXT file\n"
                "db open csv       open a db CSV file\n"
-               "db open sqlite    open a db sqlite file\n"               
+               "db open sqlite    open a db sqlite file\n"
                "db close          close a db file\n"
                "db time           get a current timestamp\n",
                "");

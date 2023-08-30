@@ -439,7 +439,7 @@ void *v2x_tx_cmd_process(void *arg)
 	db_v2x_tmp_p->usSwVer = 0;
 	db_v2x_tmp_p->ulPayloadLength = SAMPLE_V2X_MSG_LEN;
 #if defined(CONFIG_KETI_PLATFORM)
-	db_v2x_tmp_p->ulPacketCrc32 = 0;
+	db_v2x_tmp_p->ulReserved = 0;
 #else
 	db_v2x_tmp_p->ulPayloadCrc32 = 0;
 #endif

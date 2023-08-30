@@ -349,7 +349,7 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 {
                     cPayload[i] = rand();
                 }
-                s_stDbV2x.ulPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, s_stDbV2x.ulPayloadLength);
+                s_stDbV2x.ulReserved = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, s_stDbV2x.ulPayloadLength);
 
 #if defined(CONFIG_CLI_MSG_DEBUG)
                 (void)P_CLI_MSG_ShowTxSettings();
@@ -365,7 +365,7 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 }
                 printf("\r\n");
 
-                PrintDebug("ulPayloadCrc32[0x%x]", s_stDbV2x.ulPacketCrc32);
+                PrintDebug("ulReserved[0x%x]", s_stDbV2x.ulReserved);
                 PrintTrace("========================================================");
 #endif
 
@@ -408,7 +408,7 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 {
                     cPayload[i] = unTxCount;
                 }
-                s_stDbV2x.ulPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, s_stDbV2x.ulPayloadLength);
+                s_stDbV2x.ulReserved = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, s_stDbV2x.ulPayloadLength);
 
 #if defined(CONFIG_CLI_MSG_DEBUG)
                 (void)P_CLI_MSG_ShowTxSettings();
@@ -424,7 +424,7 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 }
                 printf("\r\n");
 
-                PrintDebug("ulPayloadCrc32[0x%x]", s_stDbV2x.ulPacketCrc32);
+                PrintDebug("ulReserved[0x%x]", s_stDbV2x.ulReserved);
                 PrintTrace("========================================================");
 #endif
 

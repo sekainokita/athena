@@ -191,8 +191,8 @@ typedef enum {
     DB_V2X_PAYLOAD_TYPE_SAE_J2735_RSA           = 0x0007,
     /* SAE J3224 (11 ~ 200) */
     DB_V2X_PAYLOAD_TYPE_SAE_J3224_SDSM          = 0x0008,
-    /* STANDARDS (101 ~ 200) */
-    DB_V2X_PAYLOAD_TYPE_STANDARD_UNDEFINED_0    = 0x0065,
+    /* STANDARDS AND COMMON (101 ~ 200) */
+    DB_V2X_PAYLOAD_TYPE_V2X_STATUS              = 0x0065,
     DB_V2X_PAYLOAD_TYPE_STANDARD_UNDEFINED_1    = 0x0066,
     DB_V2X_PAYLOAD_TYPE_STANDARD_UNDEFINED_2    = 0x0067,
     DB_V2X_PAYLOAD_TYPE_STANDARD_UNDEFINED_3    = 0x0068,
@@ -267,7 +267,7 @@ typedef struct DB_V2X_t {
     uint16_t                                    usHwVer;
     uint16_t                                    usSwVer;
     uint32_t                                    ulPayloadLength;
-    uint32_t                                    ulPacketCrc32;
+    uint32_t                                    ulReserved;
 } __attribute__((__packed__)) DB_V2X_T;
 
 /***************************** Function Protype ******************************/
