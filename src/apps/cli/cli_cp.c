@@ -46,6 +46,7 @@
 #include "cli.h"
 #include "app.h"
 #include "db_v2x.h"
+#include "db_v2x_status.h"
 #include "db_manager.h"
 #include "framework.h"
 
@@ -59,28 +60,17 @@ static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
 {
     int32_t nRet = APP_OK;
     int nFrameWorkRet = FRAMEWORK_ERROR;
-    char cPayload[CLI_DB_V2X_DEFAULT_PAYLOAD_LEN];
     TIME_MANAGER_T *pstTimeManager;
     DB_MANAGER_T *pstDbManager;
     MSG_MANAGER_T *pstMsgManager;
     SVC_CP_T *pstSvcCp;
-    int i = 0;
+    char *pchPayload = NULL;
 
     pstSvcCp = APP_GetSvcCpInstance();
 
     pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
 
     (void)TIME_MANAGER_CheckLatencyBegin(pstTimeManager);
-
-    nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
-    if(nFrameWorkRet != FRAMEWORK_OK)
-    {
-        PrintError("TIME_MANAGER_Get() is failed! [nRet:%d]", nFrameWorkRet);
-    }
-    else
-    {
-        pstSvcCp->stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
-    }
 
     pstDbManager = FRAMEWORK_GetDbManagerInstance();
     PrintDebug("pstDbManager[0x%p]", pstDbManager);
@@ -109,11 +99,31 @@ static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
         }
     }
 
-    pstSvcCp->stDbV2x.ulPayloadLength = CLI_DB_V2X_DEFAULT_PAYLOAD_LEN;
-    for(i = 0; i < (int)pstSvcCp->stDbV2x.ulPayloadLength; i++)
+    pstSvcCp->stDbV2x.ulPayloadLength = sizeof(pstSvcCp->stDbV2xStatusTx);
+
+    pchPayload = (char*)malloc(sizeof(char)*pstSvcCp->stDbV2x.ulPayloadLength);
+    if(pchPayload == NULL)
     {
-        cPayload[i] = rand();
+        PrintError("malloc() is failed! [NULL]");
+        return nRet;
     }
+
+    nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
+    if(nFrameWorkRet != FRAMEWORK_OK)
+    {
+        PrintError("TIME_MANAGER_Get() is failed! [nRet:%d]", nFrameWorkRet);
+    }
+    else
+    {
+        pstSvcCp->stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
+
+        pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL1 = 0;
+        pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL2 = 0;
+        pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL3 = pstTimeManager->ulTimeStamp;
+    }
+
+    memcpy(pchPayload, (char *)&pstSvcCp->stDbV2xStatusTx, sizeof(pstSvcCp->stDbV2xStatusTx));
+
     pstSvcCp->stDbV2x.ulReserved = 0;
 
     if (bLogOnOff == TRUE)
@@ -123,21 +133,13 @@ static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
         PrintTrace("========================================================");
         PrintDebug("ulTimeStamp[%ld]", pstSvcCp->stDbV2x.ulTimeStamp);
         PrintDebug("ulPayloadLength[%d]", pstSvcCp->stDbV2x.ulPayloadLength);
-        PrintDebug("cPayload");
-        for(i = 0; i < CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; i++)
-        {
-            cPayload[i] = rand();
-            printf("[%d:%d] ", i, cPayload[i]);
-        }
-        printf("\r\n");
-
         PrintDebug("ulReserved[0x%x]", pstSvcCp->stDbV2x.ulReserved);
         PrintTrace("========================================================");
     }
 
     if(bMsgTx == TRUE)
     {
-        nFrameWorkRet = MSG_MANAGER_Transmit(&pstSvcCp->stMsgManagerTx, &pstSvcCp->stDbV2x, (char*)&cPayload);
+        nFrameWorkRet = MSG_MANAGER_Transmit(&pstSvcCp->stMsgManagerTx, &pstSvcCp->stDbV2x, (char*)pchPayload);
         if(nFrameWorkRet != FRAMEWORK_OK)
         {
             PrintError("MSG_MANAGER_Transmit() is failed! [nRet:%d]", nFrameWorkRet);
@@ -149,7 +151,7 @@ static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
     }
     else
     {
-        nFrameWorkRet = DB_MANAGER_Write(&pstSvcCp->stDbManagerWrite, &pstSvcCp->stDbV2x, (char*)&cPayload);
+        nFrameWorkRet = DB_MANAGER_Write(&pstSvcCp->stDbManagerWrite, &pstSvcCp->stDbV2x, (char*)pchPayload);
         if(nFrameWorkRet != FRAMEWORK_OK)
         {
             PrintError("DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
@@ -158,6 +160,8 @@ static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
 
     (void)TIME_MANAGER_CheckLatencyEnd(pstTimeManager);
     (void)TIME_MANAGER_CheckLatencyTime("Tx Total Time", pstTimeManager);
+
+    free(pchPayload);
 
     return nRet;
 }
@@ -218,7 +222,7 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                             pcCmd = CLI_CMD_GetArg(pstCmd, CMD_3);
                             if (pcCmd != NULL)
                             {
-                                bLogOnOff = FALSE;
+                                bLogOnOff = TRUE;
 
                                 if(IS_CMD(pcCmd, "msg"))
                                 {

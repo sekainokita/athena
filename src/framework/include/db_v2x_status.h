@@ -63,7 +63,7 @@
 * @param DB_V2X_STATUS_RSV_LEVEL_E
 */
 typedef enum {
-    DB_V2X_STATUS_RSV_LEVEL_UNKNOWN             = DB_V2X_STATUS_RSV_LEVEL_MAX,
+    DB_V2X_STATUS_RSV_LEVEL_UNKNOWN             = 255,
     DB_V2X_STATUS_RSV_LEVEL_NO_SIGNAL           = 0,
     DB_V2X_STATUS_RSV_LEVEL_1                   = 1,
     DB_V2X_STATUS_RSV_LEVEL_2                   = 2,

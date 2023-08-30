@@ -128,7 +128,7 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
     pstSvcCp->stMsgManagerTx.unPsid = DB_V2X_PSID;
     pstSvcCp->stMsgManagerTx.nTxPower = MSG_MANAGER_V2X_TX_POWER;
     pstSvcCp->stMsgManagerTx.unTxCount = 10;
-    pstSvcCp->stMsgManagerTx.unTxDelay = 0;
+    pstSvcCp->stMsgManagerTx.unTxDelay = 100;
 
     for(int i = 0; i < MSG_MANAGER_MAC_LENGTH; i++)
     {
@@ -144,13 +144,28 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
     pstSvcCp->stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
     pstSvcCp->stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
     pstSvcCp->stDbV2x.eRegionId = DB_V2X_REGION_ID_SEONGNAM;
-    pstSvcCp->stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_PLATOONING;
+    pstSvcCp->stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_V2X_STATUS;
     pstSvcCp->stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
     pstSvcCp->stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
     pstSvcCp->stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
     pstSvcCp->stDbV2x.usSwVer = CLI_DB_V2X_DEFAULT_SW_VER;
 
     pstSvcCp->pchIfaceName = SVC_CP_DEFAULT_ETH_DEV;
+    pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL1 = 0;
+    pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL2 = 0;
+    pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL3 = 0;
+    pstSvcCp->stDbV2xStatusTx.unRxDeviceId = 0;
+    pstSvcCp->stDbV2xStatusTx.eChannel = DB_V2X_STATUS_CHANNEL_5_895_5_905;
+    pstSvcCp->stDbV2xStatusTx.sPower = MSG_MANAGER_V2X_TX_POWER;
+    pstSvcCp->stDbV2xStatusTx.eBandwidth = DB_V2X_STATUS_BANDWIDTH_20MHZ;
+    pstSvcCp->stDbV2xStatusTx.usTxRatio = pstSvcCp->stMsgManagerTx.unTxDelay;
+    pstSvcCp->stDbV2xStatusTx.stTxPosition.nTxLatitude = 0;
+    pstSvcCp->stDbV2xStatusTx.stTxPosition.nTxLongitude = 0;
+    pstSvcCp->stDbV2xStatusTx.stTxPosition.nTxAttitude = 0;
+
+    pstSvcCp->stDbV2xStatusTx.unSeqNum = 0;
+    pstSvcCp->stDbV2xStatusTx.unContCnt = 0;
+    pstSvcCp->stDbV2xStatusTx.unTxVehicleSpeed = 60;
 
     nRet = APP_OK;
 
@@ -166,13 +181,13 @@ static int32_t P_SVC_CP_Start(SVC_CP_EVENT_MSG_T *stEventMsg)
     {
         stEventMsg->eSvcCpStatus = SVC_CP_STATUS_START;
         PrintDebug("eSvcCpStatus starts now");
-        
+
         if(stEventMsg->eSvcCpStatus == SVC_CP_STATUS_START)
         {
             nRet = APP_OK;
         }
     }
-    
+
     else
     {
         PrintWarn("unknown status type");
@@ -189,7 +204,7 @@ static int32_t P_SVC_CP_Stop(SVC_CP_EVENT_MSG_T *stEventMsg)
     {
         stEventMsg->eSvcCpStatus = SVC_CP_STATUS_STOP;
         PrintDebug("eSvcCpStatus stops now.");
-        
+
         if(stEventMsg->eSvcCpStatus == SVC_CP_STATUS_STOP)
         {
             nRet = APP_OK;
@@ -200,7 +215,7 @@ static int32_t P_SVC_CP_Stop(SVC_CP_EVENT_MSG_T *stEventMsg)
     {
         PrintWarn("unknown status type");
     }
-    
+
     return nRet;
 
 }
@@ -251,7 +266,7 @@ static void *P_SVC_CP_Task(void *arg)
                     }
                     break;
                 }
-                    
+
                 default:
                     PrintWarn("unknown event type [%d]", stEventMsg.eEventType);
                     break;
@@ -346,6 +361,7 @@ static int32_t P_SVC_CP_Init(SVC_CP_T *pstSvcCp)
     (void*)memset(&pstSvcCp->stMsgManagerTx, 0x00, sizeof(MSG_MANAGER_TX_T));
     (void*)memset(&pstSvcCp->stMsgManagerRx, 0x00, sizeof(MSG_MANAGER_RX_T));
     (void*)memset(&pstSvcCp->stDbV2x, 0x00, sizeof(DB_V2X_T));
+    (void*)memset(&pstSvcCp->stDbV2xStatusTx, 0x00, sizeof(DB_V2X_STATUS_TX_T));
 
     nRet = P_SVC_CP_SetDefaultSettings(pstSvcCp);
     if(nRet != APP_OK)
@@ -407,6 +423,24 @@ void SVC_CP_ShowSettings(SVC_CP_T *pstSvcCp)
 
     PrintWarn("Device Info>");
     PrintDebug("Ethernet Interface [%s]", pstSvcCp->pchIfaceName);
+
+    PrintWarn("V2X Status Tx Info>");
+    PrintDebug(" ulTxTimeStampL1 [%ld]", pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL1);
+    PrintDebug(" ulTxTimeStampL2 [%ld]", pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL2);
+    PrintDebug(" ulTxTimeStampL3 [%ld]", pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL3);
+    PrintDebug(" unRxDeviceId [%d]", pstSvcCp->stDbV2xStatusTx.unRxDeviceId);
+    PrintDebug(" eChannel [%d]", pstSvcCp->stDbV2xStatusTx.eChannel);
+    PrintDebug(" sPower [%d]", pstSvcCp->stDbV2xStatusTx.sPower);
+    PrintDebug(" eBandwidth [%d]", pstSvcCp->stDbV2xStatusTx.eBandwidth);
+    PrintDebug(" eChannel [%d]", pstSvcCp->stDbV2xStatusTx.eChannel);
+    PrintDebug(" usTxRatio [%d]", pstSvcCp->stDbV2xStatusTx.usTxRatio);
+    PrintDebug(" nTxLatitude [%d]", pstSvcCp->stDbV2xStatusTx.stTxPosition.nTxLatitude);
+    PrintDebug(" nTxLongitude [%d]", pstSvcCp->stDbV2xStatusTx.stTxPosition.nTxLongitude);
+    PrintDebug(" nTxAttitude [%d]", pstSvcCp->stDbV2xStatusTx.stTxPosition.nTxAttitude);
+    PrintDebug(" unSeqNum [%d]", pstSvcCp->stDbV2xStatusTx.unSeqNum);
+    PrintDebug(" unContCnt [%d]", pstSvcCp->stDbV2xStatusTx.unContCnt);
+    PrintDebug(" unTxVehicleSpeed [%d]", pstSvcCp->stDbV2xStatusTx.unTxVehicleSpeed);
+
     PrintTrace("========================================================");
 }
 

@@ -48,6 +48,7 @@
 /***************************** Include ***************************************/
 #include "type.h"
 #include "db_v2x.h"
+#include "db_v2x_status.h"
 
 /***************************** Definition ************************************/
 #define SVC_CP_TASK_MSG_KEY               (0x230531)
@@ -112,6 +113,7 @@ typedef struct SVC_CP_t {
     MSG_MANAGER_TX_T        stMsgManagerTx;
     MSG_MANAGER_RX_T        stMsgManagerRx;
     DB_V2X_T                stDbV2x;
+    DB_V2X_STATUS_TX_T      stDbV2xStatusTx;
     char                    *pchIfaceName;
     uint32_t                unReserved;
 } SVC_CP_T;

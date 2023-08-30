@@ -124,7 +124,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
                     stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
                     stDbV2x.eRegionId = DB_V2X_REGION_ID_SEONGNAM;
-                    stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_PLATOONING;
+                    stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_PLATOONING_THROUGHPUT;
                     stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
                     stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
                     stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
@@ -195,7 +195,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
                     stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
                     stDbV2x.eRegionId = DB_V2X_REGION_ID_SEONGNAM;
-                    stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_PLATOONING;
+                    stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_PLATOONING_THROUGHPUT;
                     stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
                     stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
                     stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
@@ -266,7 +266,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
                     stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
                     stDbV2x.eRegionId = DB_V2X_REGION_ID_SEONGNAM;
-                    stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_PLATOONING;
+                    stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_PLATOONING_THROUGHPUT;
                     stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
                     stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
                     stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
@@ -354,7 +354,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                         stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
                         stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
                         stDbV2x.eRegionId = DB_V2X_REGION_ID_SEONGNAM;
-                        stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_PLATOONING;
+                        stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_PLATOONING_THROUGHPUT;
                         stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
                         stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
                         stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
