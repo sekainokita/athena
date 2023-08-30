@@ -150,9 +150,11 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
     pstSvcCp->stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
     pstSvcCp->stDbV2x.usSwVer = CLI_DB_V2X_DEFAULT_SW_VER;
 
+    pstSvcCp->pchIfaceName = SVC_CP_DEFAULT_ETH_DEV;
+
     nRet = APP_OK;
 
-    PrintDebug("P_SVC_CP_SetDefaultSettings() set is finished.");
+    PrintDebug("P_SVC_CP_SetDefaultSettings() set is finished.[eth:%s]", pstSvcCp->pchIfaceName);
 
     return nRet;
 }
@@ -324,6 +326,9 @@ void SVC_CP_ShowSettings(SVC_CP_T *pstSvcCp)
     PrintDebug(" usDbVer[%d.%d]", pstSvcCp->stDbV2x.usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, pstSvcCp->stDbV2x.usDbVer & CLI_DB_V2X_MINOR_MASK);
     PrintDebug(" usHwVer[0x%x]", pstSvcCp->stDbV2x.usHwVer);
     PrintDebug(" usSwVer[0x%x]", pstSvcCp->stDbV2x.usSwVer);
+
+    PrintWarn("Device Info>");
+    PrintDebug("Ethernet Interface [%s]", pstSvcCp->pchIfaceName);
     PrintTrace("========================================================");
 }
 

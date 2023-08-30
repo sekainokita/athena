@@ -51,7 +51,7 @@
 
 /***************************** Definition ************************************/
 #define SVC_CP_TASK_MSG_KEY               (0x230531)
-
+#define SVC_CP_DEFAULT_ETH_DEV            "eth1"
 /***************************** Enum and Structure ****************************/
 
 /**
@@ -81,6 +81,7 @@ typedef struct SVC_CP_t {
     MSG_MANAGER_TX_T        stMsgManagerTx;
     MSG_MANAGER_RX_T        stMsgManagerRx;
     DB_V2X_T                stDbV2x;
+    char                    *pchIfaceName;
     uint32_t                unReserved;
 } SVC_CP_T;
 

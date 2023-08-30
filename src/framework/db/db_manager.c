@@ -128,7 +128,7 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                 }
 
                 memcpy(pchPayload, (char *)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
-                
+
                 // Connect Database
                 sql_TxStatus = sqlite3_open(DB_MANAGER_SQL_TX_FILE, &sh_pDbMgrTxSqlMsg);
                 if (sql_TxStatus != SQLITE_OK)
@@ -142,7 +142,7 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                         return nRet;
                     }
                 }
-                // Create Table 
+                // Create Table
                 if(TxCreate == NULL)
                 {
                     TxCreate = "CREATE TABLE IF NOT EXISTS Txtable (eDeviceType INTEGER, eTeleCommType INTEGER, unDeviceId INTEGER, ulTimeStamp INTEGER,\
@@ -227,7 +227,7 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                 }
 
                 memcpy(pchPayload, (char *)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
-                
+
                 // Connect Database
                 sql_RxStatus = sqlite3_open(DB_MANAGER_SQL_RX_FILE, &sh_pDbMgrRxSqlMsg);
                 if (sql_RxStatus != SQLITE_OK)
@@ -241,7 +241,7 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                         return nRet;
                     }
                 }
-                // Create Table 
+                // Create Table
                 if(RxCreate == NULL)
                 {
                     RxCreate = "CREATE TABLE IF NOT EXISTS Rxtable (eDeviceType INTEGER, eTeleCommType INTEGER, unDeviceId INTEGER, ulTimeStamp INTEGER,\
@@ -328,7 +328,7 @@ static int32_t P_DB_MANAGER_OpenSqlite(DB_MANAGER_T *pstDbManager)
     UNUSED(pstDbManager);
     int sql_TxStatus;
     int sql_RxStatus;
-    
+
     if(sh_pDbMgrTxSqlMsg == NULL)
     {
         sql_TxStatus = sqlite3_open(DB_MANAGER_SQL_TX_FILE, &sh_pDbMgrTxSqlMsg);
@@ -402,7 +402,7 @@ static int32_t P_DB_MANAGER_OpenSqlite(DB_MANAGER_T *pstDbManager)
             PrintError("Can't close Rx database : %s\n", sqlite3_errmsg(sh_pDbMgrRxSqlMsg));
         }
     }
-    
+
     return nRet;
 }
 #endif
@@ -986,14 +986,14 @@ int32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV
     }
 
 #if defined(CONFIG_SQLITE)
-    if(sh_pDbMgrTxSqlMsg == NULL)
+    if((pstDbManagerWrite->eFileType == DB_MANAGER_FILE_TYPE_SQLITE) && (sh_pDbMgrTxSqlMsg == NULL))
     {
         PrintError("sh_pDbMgrTxSqlMsg == NULL!!, check DB_MANAGER_Open() is called.");
         return nRet;
     }
-#endif    
+#endif
 
-    if(sh_pDbMgrTxMsg == NULL)
+    if((pstDbManagerWrite->eFileType == DB_MANAGER_FILE_TYPE_CSV) && (sh_pDbMgrTxMsg == NULL))
     {
         PrintError("sh_pDbMgrTxMsg == NULL!!, check DB_MANAGER_Open() is called.");
         return nRet;

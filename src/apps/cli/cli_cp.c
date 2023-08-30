@@ -62,8 +62,9 @@ static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
     char cPayload[CLI_DB_V2X_DEFAULT_PAYLOAD_LEN];
     TIME_MANAGER_T *pstTimeManager;
     DB_MANAGER_T *pstDbManager;
-    int i = 0;
+    MSG_MANAGER_T *pstMsgManager;
     SVC_CP_T *pstSvcCp;
+    int i = 0;
 
     pstSvcCp = APP_GetSvcCpInstance();
 
@@ -92,12 +93,28 @@ static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
         PrintError("DB_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
     }
 
+    if(bMsgTx == TRUE)
+    {
+        pstMsgManager = FRAMEWORK_GetMsgManagerInstance();
+        PrintDebug("pstMsgManager[0x%p]", pstMsgManager);
+
+        pstMsgManager->pchIfaceName = pstSvcCp->pchIfaceName;
+
+        PrintTrace("pstMsgManager->pchIfaceName[%s]", pstMsgManager->pchIfaceName);
+
+        nFrameWorkRet = MSG_MANAGER_Open(pstMsgManager);
+        if(nFrameWorkRet != FRAMEWORK_OK)
+        {
+            PrintError("MSG_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
+        }
+    }
+
     pstSvcCp->stDbV2x.ulPayloadLength = CLI_DB_V2X_DEFAULT_PAYLOAD_LEN;
     for(i = 0; i < (int)pstSvcCp->stDbV2x.ulPayloadLength; i++)
     {
         cPayload[i] = rand();
     }
-    pstSvcCp->stDbV2x.ulReserved = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, pstSvcCp->stDbV2x.ulPayloadLength);
+    pstSvcCp->stDbV2x.ulReserved = 0;
 
     if (bLogOnOff == TRUE)
     {
@@ -198,11 +215,31 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     {
                         if(IS_CMD(pcCmd, "start"))
                         {
-                            bMsgTx = FALSE;
-                            nRet = P_CLI_CP_StartV2xStatus(bMsgTx, bLogOnOff);
-                            if(nRet != APP_OK)
+                            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_3);
+                            if (pcCmd != NULL)
                             {
-                                PrintError("P_CLI_CP_StartV2xStatus() is failed![nRet:%d]", nRet);
+                                bLogOnOff = FALSE;
+
+                                if(IS_CMD(pcCmd, "msg"))
+                                {
+                                    bMsgTx = TRUE;
+                                }
+                                else if(IS_CMD(pcCmd, "db"))
+                                {
+                                    bMsgTx = FALSE;
+                                }
+
+                                PrintTrace("bMsgTx[%d], bLogOnOff[%d]", bMsgTx, bLogOnOff);
+
+                                nRet = P_CLI_CP_StartV2xStatus(bMsgTx, bLogOnOff);
+                                if(nRet != APP_OK)
+                                {
+                                    PrintError("P_CLI_CP_StartV2xStatus() is failed![nRet:%d]", nRet);
+                                }
+                            }
+                            else
+                            {
+                                return CLI_CMD_Showusage(pstCmd);
                             }
                         }
                         else
