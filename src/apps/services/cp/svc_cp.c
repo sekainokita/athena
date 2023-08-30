@@ -285,6 +285,11 @@ static void *P_SVC_CP_TaskTx(void *arg)
                 }
             }
 
+            if(pchPayload != NULL)
+            {
+                free(pchPayload);
+            }
+
             usleep((s_stSvcCp.stMsgManagerTx.unTxDelay * USLEEP_MS));
         }
         else
