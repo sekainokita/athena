@@ -189,6 +189,8 @@ typedef struct DB_V2X_POSITION_TX_t {
 * @param unTxVehicleSpeed                       Tx vehicle speed (Tx vehicle speed (if available), if not available, set the experimental value manually, default 60km/h)
 */
 typedef struct DB_V2X_STATUS_TX_t {
+    uint64_t                                    ulReserved0;
+    uint64_t                                    ulReserved1;
     uint64_t                                    ulTxTimeStampL1;
     uint64_t                                    ulTxTimeStampL2;
     uint64_t                                    ulTxTimeStampL3;

@@ -108,6 +108,8 @@ static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
         return nRet;
     }
 
+    (void*)memset(pchPayload, 0x00, sizeof(sizeof(char)*pstSvcCp->stDbV2x.ulPayloadLength));
+
     nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
     if(nFrameWorkRet != FRAMEWORK_OK)
     {
@@ -117,12 +119,12 @@ static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
     {
         pstSvcCp->stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
 
-        pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL1 = 0;
-        pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL2 = 0;
+        pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL1 = 19840919;
+        pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL2 = 19850501;
         pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL3 = pstTimeManager->ulTimeStamp;
     }
 
-    memcpy(pchPayload, (char *)&pstSvcCp->stDbV2xStatusTx, sizeof(pstSvcCp->stDbV2xStatusTx));
+    memcpy(pchPayload, (char*)&pstSvcCp->stDbV2xStatusTx, sizeof(char)*pstSvcCp->stDbV2x.ulPayloadLength);
 
     pstSvcCp->stDbV2x.ulReserved = 0;
 
@@ -287,11 +289,12 @@ int32_t CLI_CP_InitCmds(void)
                "Without any parameters, the 'cp' show a description\n"
                "of available commands. For more details on a command, type and enter 'cp'\n"
                "and the command name.\n\n"
-               "cp test           test cp command\n"
+               "cp test                   test cp command\n"
                "cp sce [OPTIONS]\n"
-               "  base            start a base Communication Performance scenario\n"
-               "       status start    start a test sample of V2X status data\n"
-               "cp info           get a status Communication Performance\n",
+               "       base               start a base Communication Performance scenario\n"
+               "       status start msg   start a test sample of V2X status data of msg tx\n"
+               "       status start db    start a test sample of V2X status data of db\n"
+               "cp info                   get a status Communication Performance\n",
                "");
     if(nRet != APP_OK)
     {
