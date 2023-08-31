@@ -501,7 +501,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             nFrameWorkRet = DB_MANAGER_MakeDbFile(pstDbManager);
             if(nFrameWorkRet != FRAMEWORK_OK)
             {
-                PrintError("v() is failed! [nRet:%d]", nFrameWorkRet);
+                PrintError("DB_MANAGER_MakeDbFile() is failed! [nRet:%d]", nFrameWorkRet);
             }
         }
         else if(IS_CMD(pcCmd, "time"))

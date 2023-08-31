@@ -1438,6 +1438,20 @@ int32_t DB_MANAGER_MakeDbFile(DB_MANAGER_T *pstDbManager)
     char chSysCallStr[DB_MGR_SYSTEM_CALL_MAX_LENGTH];
     int nCharCnt = 0;
 
+    if(pstDbManager == NULL)
+    {
+        PrintError("pstDbManager == NULL!!");
+        return nRet;
+    }
+
+    sprintf(chSysCallStr, "mkdir -p %s", DB_V2X_FOLDER_DIR);
+    nRet = system("mkdir -p v2x-db");
+    if(nRet < FRAMEWORK_OK)
+    {
+        PrintError("system() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
     nCharCnt = sprintf(chFileName, "%s_", pstDbManager->stDbFile.pchTxRxType);
     nCharCnt += sprintf(chFileName+nCharCnt, "%s_", pstDbManager->stDbFile.pchDeviceType);
     nCharCnt += sprintf(chFileName+nCharCnt, "%s_", pstDbManager->stDbFile.pchDeviceId);
@@ -1451,11 +1465,11 @@ int32_t DB_MANAGER_MakeDbFile(DB_MANAGER_T *pstDbManager)
             nCharCnt += sprintf(chFileName+nCharCnt, "%s", "txt");
             if(strcmp("Tx", pstDbManager->stDbFile.pchTxRxType) == 0)
             {
-                sprintf(chSysCallStr, "cp %s %s", DB_MANAGER_TXT_TX_FILE, chFileName);
+                sprintf(chSysCallStr, "cp %s %s/%s", DB_MANAGER_TXT_TX_FILE, DB_V2X_FOLDER_DIR, chFileName);
             }
             else if(strcmp("Rx", pstDbManager->stDbFile.pchTxRxType) == 0)
             {
-                sprintf(chSysCallStr, "cp %s %s", DB_MANAGER_TXT_RX_FILE, chFileName);
+                sprintf(chSysCallStr, "cp %s %s/%s", DB_MANAGER_TXT_RX_FILE, DB_V2X_FOLDER_DIR, chFileName);
             }
             else
             {
@@ -1468,11 +1482,11 @@ int32_t DB_MANAGER_MakeDbFile(DB_MANAGER_T *pstDbManager)
             nCharCnt += sprintf(chFileName+nCharCnt, "%s", "csv");
             if(strcmp("Tx", pstDbManager->stDbFile.pchTxRxType) == 0)
             {
-                sprintf(chSysCallStr, "cp %s %s", DB_MANAGER_CSV_TX_FILE, chFileName);
+                sprintf(chSysCallStr, "cp %s %s/%s", DB_MANAGER_CSV_TX_FILE, DB_V2X_FOLDER_DIR, chFileName);
             }
             else if(strcmp("Rx", pstDbManager->stDbFile.pchTxRxType) == 0)
             {
-                sprintf(chSysCallStr, "cp %s %s", DB_MANAGER_CSV_RX_FILE, chFileName);
+                sprintf(chSysCallStr, "cp %s %s/%s", DB_MANAGER_CSV_RX_FILE, DB_V2X_FOLDER_DIR, chFileName);
             }
             else
             {
@@ -1485,11 +1499,11 @@ int32_t DB_MANAGER_MakeDbFile(DB_MANAGER_T *pstDbManager)
             nCharCnt += sprintf(chFileName+nCharCnt, "%s", "db");
             if(strcmp("Tx", pstDbManager->stDbFile.pchTxRxType) == 0)
             {
-                sprintf(chSysCallStr, "cp %s %s", DB_MANAGER_SQL_TX_FILE, chFileName);
+                sprintf(chSysCallStr, "cp %s %s/%s", DB_MANAGER_SQL_TX_FILE, DB_V2X_FOLDER_DIR, chFileName);
             }
             else if(strcmp("Rx", pstDbManager->stDbFile.pchTxRxType) == 0)
             {
-                sprintf(chSysCallStr, "cp %s %s", DB_MANAGER_SQL_RX_FILE, chFileName);
+                sprintf(chSysCallStr, "cp %s %s/%s", DB_MANAGER_SQL_RX_FILE, DB_V2X_FOLDER_DIR, chFileName);
             }
             else
             {
@@ -1503,7 +1517,7 @@ int32_t DB_MANAGER_MakeDbFile(DB_MANAGER_T *pstDbManager)
             break;
     }
 
-    PrintTrace("[nCharCnt:%d][%s] is successfully made!", nCharCnt, chFileName);
+    PrintTrace("[nCharCnt:%d][%s/%s] is successfully made!", nCharCnt, DB_V2X_FOLDER_DIR, chFileName);
     PrintDebug("%s", chSysCallStr);
 
     nRet = system(chSysCallStr);
@@ -1672,7 +1686,83 @@ int32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager)
 
     }
 
+    return nRet;
+}
 
+int32_t DB_MANAGER_RemoveTempFile(DB_MANAGER_T *pstDbManager)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    char chSysCallStr[DB_MGR_SYSTEM_CALL_MAX_LENGTH];
+
+    if(pstDbManager == NULL)
+    {
+        PrintError("pstDbManager == NULL!!");
+        return nRet;
+    }
+
+    switch(pstDbManager->eFileType)
+    {
+        case DB_MANAGER_FILE_TYPE_TXT:
+            if(strcmp("Tx", pstDbManager->stDbFile.pchTxRxType) == 0)
+            {
+                sprintf(chSysCallStr, "rm -rf %s", DB_MANAGER_TXT_TX_FILE);
+            }
+            else if(strcmp("Rx", pstDbManager->stDbFile.pchTxRxType) == 0)
+            {
+                sprintf(chSysCallStr, "rm -rf %s", DB_MANAGER_TXT_RX_FILE);
+            }
+            else
+            {
+                PrintError("unknown type [%s]", pstDbManager->stDbFile.pchTxRxType);
+                return nRet;
+            }
+            break;
+
+        case DB_MANAGER_FILE_TYPE_CSV:
+            if(strcmp("Tx", pstDbManager->stDbFile.pchTxRxType) == 0)
+            {
+                sprintf(chSysCallStr, "rm -rf %s", DB_MANAGER_CSV_TX_FILE);
+            }
+            else if(strcmp("Rx", pstDbManager->stDbFile.pchTxRxType) == 0)
+            {
+                sprintf(chSysCallStr, "rm -rf %s", DB_MANAGER_CSV_RX_FILE);
+            }
+            else
+            {
+                PrintError("unknown type [%s]", pstDbManager->stDbFile.pchTxRxType);
+                return nRet;
+            }
+            break;
+
+        case DB_MANAGER_FILE_TYPE_SQLITE:
+            if(strcmp("Tx", pstDbManager->stDbFile.pchTxRxType) == 0)
+            {
+                sprintf(chSysCallStr, "rm -rf %s", DB_MANAGER_SQL_TX_FILE);
+            }
+            else if(strcmp("Rx", pstDbManager->stDbFile.pchTxRxType) == 0)
+            {
+                sprintf(chSysCallStr, "rm -rf %s", DB_MANAGER_SQL_RX_FILE);
+            }
+            else
+            {
+                PrintError("unknown type [%s]", pstDbManager->stDbFile.pchTxRxType);
+                return nRet;
+            }
+            break;
+
+        default:
+            PrintError("unknown file type [%d]", pstDbManager->eFileType);
+            break;
+    }
+
+    PrintDebug("%s", chSysCallStr);
+
+    nRet = system(chSysCallStr);
+    if(nRet < FRAMEWORK_OK)
+    {
+        PrintError("system() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
 
     return nRet;
 }

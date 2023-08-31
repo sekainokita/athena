@@ -67,6 +67,8 @@
 #define DB_MGR_DEFAULT_END_TIME                   "2309011011"
 #define DB_MGR_DEFAULT_TOTAL_TIME                 "1h"
 
+#define DB_V2X_FOLDER_DIR                         "v2x-db"
+
 /***************************** Enum and Structure ****************************/
 
 /**
@@ -177,6 +179,8 @@ int32_t DB_MANAGER_Read(DB_MANAGER_READ_T *pstDbManagerRead, DB_V2X_T *pstDbV2x,
 int32_t DB_MANAGER_Converter(DB_MANAGER_READ_T *pstDbManagerRead, DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void *pPayload);
 
 int32_t DB_MANAGER_SetLog(DB_MANAGER_T *pstDbManager);
+
+int32_t DB_MANAGER_RemoveTempFile(DB_MANAGER_T *pstDbManager);
 
 int32_t DB_MANAGER_MakeDbFile(DB_MANAGER_T *pstDbManager);
 int32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager);

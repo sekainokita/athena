@@ -806,6 +806,28 @@ int32_t SVC_CP_Close(SVC_CP_T *pstSvcCp)
     if(nRet != FRAMEWORK_OK)
     {
         PrintError("DB_MANAGER_Close() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    pstDbManager->stDbFile.pchTxRxType = DB_MGR_DEFAULT_COMM_TYPE;
+    pstDbManager->stDbFile.pchDeviceType = DB_MGR_DEFAULT_DEV_TYPE;
+    pstDbManager->stDbFile.pchDeviceId = DB_MGR_DEFAULT_COMM_DEV_ID;
+    pstDbManager->stDbFile.pchStartTime = DB_MGR_DEFAULT_START_TIME;
+    pstDbManager->stDbFile.pchEndTime = DB_MGR_DEFAULT_END_TIME;
+    pstDbManager->stDbFile.pchTotalTime = DB_MGR_DEFAULT_TOTAL_TIME;
+
+    nRet = DB_MANAGER_MakeDbFile(pstDbManager);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("DB_MANAGER_MakeDbFile() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    nRet = DB_MANAGER_RemoveTempFile(pstDbManager);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("DB_MANAGER_RemoveTempFile() is failed! [nRet:%d]", nRet);
+        return nRet;
     }
 
     return nRet;
