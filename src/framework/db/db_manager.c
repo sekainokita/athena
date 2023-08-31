@@ -1431,20 +1431,6 @@ int32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager)
     return nRet;
 }
 
-#if 0
-#define DB_MANAGER_TXT_TX_FILE     "db_v2x_tx_temp_writing.txt"
-#define DB_MANAGER_TXT_RX_FILE     "db_v2x_rx_temp_writing.txt"
-
-#define      "db_v2x_tx_temp_writing.csv"
-#define DB_MANAGER_CSV_RX_FILE     "db_v2x_rx_temp_writing.csv"
-
-#if defined(CONFIG_SQLITE)
-#define DB_MANAGER_SQL_TX_FILE     "db_v2x_tx_temp_writing.db"
-#define DB_MANAGER_SQL_RX_FILE     "db_v2x_rx_temp_writing.db"
-
-#endif
-#endif
-
 int32_t DB_MANAGER_MakeDbFile(DB_MANAGER_T *pstDbManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -1463,6 +1449,19 @@ int32_t DB_MANAGER_MakeDbFile(DB_MANAGER_T *pstDbManager)
     {
         case DB_MANAGER_FILE_TYPE_TXT:
             nCharCnt += sprintf(chFileName+nCharCnt, "%s", "txt");
+            if(strcmp("Tx", pstDbManager->stDbFile.pchTxRxType) == 0)
+            {
+                sprintf(chSysCallStr, "cp %s %s", DB_MANAGER_TXT_TX_FILE, chFileName);
+            }
+            else if(strcmp("Rx", pstDbManager->stDbFile.pchTxRxType) == 0)
+            {
+                sprintf(chSysCallStr, "cp %s %s", DB_MANAGER_TXT_RX_FILE, chFileName);
+            }
+            else
+            {
+                PrintError("unknown type [%s]", pstDbManager->stDbFile.pchTxRxType);
+                return nRet;
+            }
             break;
 
         case DB_MANAGER_FILE_TYPE_CSV:
@@ -1484,6 +1483,19 @@ int32_t DB_MANAGER_MakeDbFile(DB_MANAGER_T *pstDbManager)
 
         case DB_MANAGER_FILE_TYPE_SQLITE:
             nCharCnt += sprintf(chFileName+nCharCnt, "%s", "db");
+            if(strcmp("Tx", pstDbManager->stDbFile.pchTxRxType) == 0)
+            {
+                sprintf(chSysCallStr, "cp %s %s", DB_MANAGER_SQL_TX_FILE, chFileName);
+            }
+            else if(strcmp("Rx", pstDbManager->stDbFile.pchTxRxType) == 0)
+            {
+                sprintf(chSysCallStr, "cp %s %s", DB_MANAGER_SQL_RX_FILE, chFileName);
+            }
+            else
+            {
+                PrintError("unknown type [%s]", pstDbManager->stDbFile.pchTxRxType);
+                return nRet;
+            }
             break;
 
         default:
