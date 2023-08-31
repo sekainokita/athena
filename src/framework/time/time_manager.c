@@ -71,6 +71,7 @@ static key_t s_timeTaskMsgKey = FRAMEWORK_TIME_TASK_MSG_KEY;
 
 static pthread_t sh_TimeMgrTask;
 static struct timespec stCurTime, stCheckBeginTime, stCheckEndTime;
+static struct timespec stDbTxStartTime, stDbTxEndTime, stDbRxStartTime, stDbRxEndTime;
 
 static bool s_bTimeMgrLog = OFF;
 
@@ -310,6 +311,8 @@ int32_t TIME_MANAGER_Get(TIME_MANAGER_T *pstTimeMgr)
     sprintf(chTimeTempNsStr, "%09li", stCurTime.tv_nsec);
     strcat(chTimeTempStr, chTimeTempNsStr);
     strncpy(chTimestampStr, chTimeTempStr, TIME_MANAGER_TIME_MAX_SIZE);
+    chTimestampStr[49] = '\0';
+
     lValue = atol(chTimestampStr);
     pstTimeMgr->ulTimeStamp = lValue;
 
@@ -451,6 +454,87 @@ void TIME_MANAGER_CheckLatencyEnd(TIME_MANAGER_T *pstTimeMgr)
 
     pstTimeMgr->stLatency.ulTime_s = (stCheckEndTime.tv_sec - stCheckBeginTime.tv_sec);
     pstTimeMgr->stLatency.ulTime_ms = ((stCheckEndTime.tv_nsec - stCheckBeginTime.tv_nsec)/(1000*1000));
+}
+
+int32_t TIME_MANAGER_SetDbTxBegin(TIME_MANAGER_T *pstTimeMgr)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    UNUSED(nRet);
+
+    if(pstTimeMgr == NULL)
+    {
+        PrintError("pstTimeMgr == NULL!!");
+    }
+
+    nRet = clock_gettime(CLOCK_REALTIME, &stDbTxStartTime);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("clock_gettime() is failed! [nRet:%d]", nRet);
+    }
+
+    return nRet;
+}
+
+int32_t TIME_MANAGER_SetDbTxEnd(TIME_MANAGER_T *pstTimeMgr)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    if(pstTimeMgr == NULL)
+    {
+        PrintError("pstTimeMgr == NULL!!");
+    }
+
+    nRet = clock_gettime(CLOCK_REALTIME, &stDbTxEndTime);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("clock_gettime() is failed! [nRet:%d]", nRet);
+    }
+
+    pstTimeMgr->unDbTxTotalTime = (stDbTxEndTime.tv_sec - stDbTxStartTime.tv_sec);
+
+    return nRet;
+}
+
+
+int32_t TIME_MANAGER_SetDbRxBegin(TIME_MANAGER_T *pstTimeMgr)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    UNUSED(nRet);
+
+    if(pstTimeMgr == NULL)
+    {
+        PrintError("pstTimeMgr == NULL!!");
+    }
+
+    nRet = clock_gettime(CLOCK_REALTIME, &stDbRxStartTime);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("clock_gettime() is failed! [nRet:%d]", nRet);
+    }
+
+    return nRet;
+}
+
+int32_t TIME_MANAGER_SetDbRxEnd(TIME_MANAGER_T *pstTimeMgr)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    if(pstTimeMgr == NULL)
+    {
+        PrintError("pstTimeMgr == NULL!!");
+    }
+
+    nRet = clock_gettime(CLOCK_REALTIME, &stDbRxEndTime);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("clock_gettime() is failed! [nRet:%d]", nRet);
+    }
+
+    pstTimeMgr->unDbTxTotalTime = (stDbRxEndTime.tv_sec - stDbRxStartTime.tv_sec);
+
+    return nRet;
 }
 
 int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeMgr)

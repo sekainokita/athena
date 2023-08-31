@@ -75,6 +75,13 @@ static pthread_t sh_SvcCpTaskTx;
 
 static SVC_CP_T s_stSvcCp;
 
+static char s_chStrBufTxRxType[SVC_CP_STR_BUF_LEN];
+static char s_chStrBufDevType[SVC_CP_STR_BUF_LEN];
+static char s_chStrBufDevId[SVC_CP_STR_BUF_LEN];
+static char s_chStrBufStartTime[SVC_CP_STR_BUF_LEN];
+static char s_chStrBufEndTime[SVC_CP_STR_BUF_LEN];
+static char s_chStrBufTotalTime[SVC_CP_STR_BUF_LEN];
+
 /***************************** Function  *************************************/
 
 int32_t P_SVC_CP_SetSettings(SVC_CP_T *pstSvcCp)
@@ -173,7 +180,7 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
     pstSvcCp->pchDeviceName = DB_MGR_DEFAULT_COMM_DEV_ID;
     pstSvcCp->ulDbStartTime = 0;
     pstSvcCp->ulDbEndTime = 0;
-    pstSvcCp->ulDbTotalWrittenTime = 0;
+    pstSvcCp->unDbTotalWrittenTime = 0;
 
     nRet = APP_OK;
 
@@ -205,6 +212,12 @@ static int32_t P_SVC_CP_Start(SVC_CP_EVENT_MSG_T *stEventMsg)
         else
         {
             s_stSvcCp.ulDbStartTime = pstTimeManager->ulTimeStamp;
+        }
+
+        nRet = TIME_MANAGER_SetDbTxBegin(pstTimeManager);
+        if(nRet != FRAMEWORK_OK)
+        {
+            PrintError("TIME_MANAGER_SetDbTxBegin() is failed! [nRet:%d]", nRet);
         }
 
         PrintTrace("eSvcCpStatus[%d] STARTs NOW [Time:%ld]", s_stSvcCp.eSvcCpStatus, s_stSvcCp.ulDbStartTime);
@@ -248,7 +261,15 @@ static int32_t P_SVC_CP_Stop(SVC_CP_EVENT_MSG_T *stEventMsg)
             s_stSvcCp.ulDbEndTime = pstTimeManager->ulTimeStamp;
         }
 
-        PrintTrace("eSvcCpStatus[%d] STOPs NOW [Time:%ld]", s_stSvcCp.eSvcCpStatus, s_stSvcCp.ulDbEndTime);
+        nRet = TIME_MANAGER_SetDbTxEnd(pstTimeManager);
+        if(nRet != FRAMEWORK_OK)
+        {
+            PrintError("TIME_MANAGER_SetDbTxBegin() is failed! [nRet:%d]", nRet);
+        }
+
+        s_stSvcCp.unDbTotalWrittenTime = pstTimeManager->unDbTxTotalTime;
+
+        PrintTrace("eSvcCpStatus[%d] STOPs NOW [Time:%ld], unDbTotalWrittenTime[%d seconds]", s_stSvcCp.eSvcCpStatus, s_stSvcCp.ulDbEndTime, s_stSvcCp.unDbTotalWrittenTime);
 
         if(s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_STOP)
         {
@@ -269,7 +290,7 @@ int32_t P_SVC_CP_RestartDb(void)
     int32_t nRet = APP_ERROR;
     DB_MANAGER_T *pstDbManager;
 
-    PrintWarn("Finish to write DB Files, start time[%ld], end time[%ld], total written time[%ld]", s_stSvcCp.ulDbStartTime, s_stSvcCp.ulDbEndTime, s_stSvcCp.ulDbTotalWrittenTime);
+    PrintWarn("Finish to write DB Files, start time[%ld], end time[%ld], total written time[%d]", s_stSvcCp.ulDbStartTime, s_stSvcCp.ulDbEndTime, s_stSvcCp.unDbTotalWrittenTime);
 
     pstDbManager = FRAMEWORK_GetDbManagerInstance();
     if(pstDbManager == NULL)
@@ -629,7 +650,7 @@ void SVC_CP_ShowSettings(SVC_CP_T *pstSvcCp)
     PrintDebug("pchDeviceName [%s]", pstSvcCp->pchDeviceName);
     PrintDebug("ulDbStartTime [%ld]", pstSvcCp->ulDbStartTime);
     PrintDebug("ulDbEndTime [%ld]", pstSvcCp->ulDbEndTime);
-    PrintDebug("ulDbTotalWrittenTime [%ld]", pstSvcCp->ulDbTotalWrittenTime);
+    PrintDebug("unDbTotalWrittenTime [%d]", pstSvcCp->unDbTotalWrittenTime);
 
     PrintWarn("V2X Status Tx Info>");
     PrintDebug(" ulTxTimeStampL1 [%ld]", pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL1);
@@ -774,6 +795,10 @@ int32_t SVC_CP_Close(SVC_CP_T *pstSvcCp)
     int32_t nRet = APP_ERROR;
     DI_T *pstDi;
     DB_MANAGER_T *pstDbManager;
+    char chTempDate[SVC_CP_DATE_LEN+1];
+    char chTempHour[SVC_CP_HOUR_LEN+1];
+    char chTempMin[SVC_CP_MIN_LEN+1];
+    char chTempSec[SVC_CP_SEC_LEN+1];
 
     if(pstSvcCp == NULL)
     {
@@ -809,12 +834,53 @@ int32_t SVC_CP_Close(SVC_CP_T *pstSvcCp)
         return nRet;
     }
 
-    pstDbManager->stDbFile.pchTxRxType = DB_MGR_DEFAULT_COMM_TYPE;
-    pstDbManager->stDbFile.pchDeviceType = DB_MGR_DEFAULT_DEV_TYPE;
-    pstDbManager->stDbFile.pchDeviceId = DB_MGR_DEFAULT_COMM_DEV_ID;
-    pstDbManager->stDbFile.pchStartTime = DB_MGR_DEFAULT_START_TIME;
-    pstDbManager->stDbFile.pchEndTime = DB_MGR_DEFAULT_END_TIME;
-    pstDbManager->stDbFile.pchTotalTime = DB_MGR_DEFAULT_TOTAL_TIME;
+    sprintf(s_chStrBufTxRxType, "%s", "Tx");
+    pstDbManager->stDbFile.pchTxRxType = s_chStrBufTxRxType;
+    if(s_stSvcCp.stDbV2x.eDeviceType == DB_V2X_DEVICE_TYPE_OBU)
+    {
+        sprintf(s_chStrBufDevType, "%s", "OBU");
+    }
+    else if(s_stSvcCp.stDbV2x.eDeviceType == DB_V2X_DEVICE_TYPE_RSU)
+    {
+        sprintf(s_chStrBufDevType, "%s", "RSU");
+    }
+    else
+    {
+        sprintf(s_chStrBufDevType, "%s", "UNKNOWN");
+        PrintError("unknown device type[%d]", s_stSvcCp.stDbV2x.eDeviceType);
+    }
+    pstDbManager->stDbFile.pchDeviceType = s_chStrBufDevType;
+
+    sprintf(s_chStrBufDevId, "%s%s", DB_V2X_DEVICE_ID_PREFIX, s_stSvcCp.pchDeviceName);
+    pstDbManager->stDbFile.pchDeviceId = s_chStrBufDevId;
+
+    sprintf(s_chStrBufStartTime, "%ld", s_stSvcCp.ulDbStartTime);
+    strncpy(chTempDate, s_chStrBufStartTime, SVC_CP_DATE_LEN);
+    chTempDate[SVC_CP_DATE_LEN] = '\0';
+    strncpy(chTempHour, s_chStrBufStartTime + SVC_CP_DATE_LEN, SVC_CP_HOUR_LEN);
+    chTempHour[SVC_CP_HOUR_LEN] = '\0';
+    strncpy(chTempMin, s_chStrBufStartTime + SVC_CP_DATE_LEN + SVC_CP_HOUR_LEN, SVC_CP_MIN_LEN);
+    chTempMin[SVC_CP_MIN_LEN] = '\0';
+    strncpy(chTempSec, s_chStrBufStartTime + SVC_CP_DATE_LEN + SVC_CP_HOUR_LEN + SVC_CP_MIN_LEN, SVC_CP_SEC_LEN);
+    chTempSec[SVC_CP_SEC_LEN] = '\0';
+    sprintf(s_chStrBufStartTime, "%s-%s-%s-%s", chTempDate, chTempHour, chTempMin, chTempSec);
+    pstDbManager->stDbFile.pchStartTime = s_chStrBufStartTime;
+
+    sprintf(s_chStrBufEndTime, "%ld", s_stSvcCp.ulDbEndTime);
+    strncpy(chTempDate, s_chStrBufEndTime, SVC_CP_DATE_LEN);
+    chTempDate[SVC_CP_DATE_LEN] = '\0';
+    strncpy(chTempHour, s_chStrBufEndTime + SVC_CP_DATE_LEN, SVC_CP_HOUR_LEN);
+    chTempHour[SVC_CP_HOUR_LEN] = '\0';
+    strncpy(chTempMin, s_chStrBufEndTime + SVC_CP_DATE_LEN + SVC_CP_HOUR_LEN, SVC_CP_MIN_LEN);
+    chTempMin[SVC_CP_MIN_LEN] = '\0';
+    strncpy(chTempSec, s_chStrBufEndTime + SVC_CP_DATE_LEN + SVC_CP_HOUR_LEN + SVC_CP_MIN_LEN, SVC_CP_SEC_LEN);
+    chTempSec[SVC_CP_SEC_LEN] = '\0';
+
+    sprintf(s_chStrBufEndTime, "%s-%s-%s-%s", chTempDate, chTempHour, chTempMin, chTempSec);
+    pstDbManager->stDbFile.pchEndTime = s_chStrBufEndTime;
+
+    sprintf(s_chStrBufTotalTime, "%d%s", s_stSvcCp.unDbTotalWrittenTime, "secs");
+    pstDbManager->stDbFile.pchTotalTime = s_chStrBufTotalTime;
 
     nRet = DB_MANAGER_MakeDbFile(pstDbManager);
     if(nRet != FRAMEWORK_OK)

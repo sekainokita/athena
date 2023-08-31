@@ -69,6 +69,12 @@
 
 #define DB_V2X_FOLDER_DIR                         "v2x-db"
 
+#if defined(CONFIG_PLATFORM_OBU_CHEMTRONICS)
+#define DB_V2X_DEVICE_ID_PREFIX                   "CKCOX"
+#else
+#define DB_V2X_DEVICE_ID_PREFIX                   "UNKNOWN"
+#endif
+
 /***************************** Enum and Structure ****************************/
 
 /**

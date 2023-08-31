@@ -87,6 +87,8 @@ typedef struct TIME_MANAGER_t {
     TIME_MANAGER_LATENCY_T      stLatency;
     uint64_t                    ulTimeStamp;
     bool                        bLogLevel;
+    uint32_t                    unDbTxTotalTime;
+    uint32_t                    unDbRxTotalTime;
     uint32_t                    unReserved;
 } TIME_MANAGER_T;
 
@@ -106,6 +108,12 @@ int32_t TIME_MANAGER_Stop(TIME_MANAGER_T *pstTimeMgr);
 void TIME_MANAGER_Status(TIME_MANAGER_T *pstTimeMgr);
 int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeMgr);
 int32_t TIME_MANAGER_DeInit(TIME_MANAGER_T *pstTimeMgr);
+
+int32_t TIME_MANAGER_SetDbTxBegin(TIME_MANAGER_T *pstTimeMgr);
+int32_t TIME_MANAGER_SetDbTxEnd(TIME_MANAGER_T *pstTimeMgr);
+
+int32_t TIME_MANAGER_SetDbRxBegin(TIME_MANAGER_T *pstTimeMgr);
+int32_t TIME_MANAGER_SetDbRxEnd(TIME_MANAGER_T *pstTimeMgr);
 
 void TIME_MANAGER_CheckLatencyTime(char *pStr, TIME_MANAGER_T *pstTimeMgr);
 void TIME_MANAGER_CheckLatencyBegin(TIME_MANAGER_T *pstTimeMgr);
