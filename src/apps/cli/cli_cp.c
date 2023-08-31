@@ -213,7 +213,7 @@ static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
     (void)TIME_MANAGER_CheckLatencyEnd(pstTimeManager);
     (void)TIME_MANAGER_CheckLatencyTime("Tx Total Time", pstTimeManager);
 
-    free(pchPayload);
+    /* free(pchPayload) is free at the P_MSG_MANAGER_SendTxMsg() */
 
     return nRet;
 }

@@ -342,6 +342,7 @@ static void *P_SVC_CP_TaskTx(void *arg)
 
                 s_stSvcCp.stDbV2xStatusTx.ulTxTimeStampL1 = 19840919;
                 s_stSvcCp.stDbV2xStatusTx.ulTxTimeStampL2 = 19850501;
+                /* Set the application timestamp before sending */
                 s_stSvcCp.stDbV2xStatusTx.ulTxTimeStampL3 = pstTimeManager->ulTimeStamp;
             }
 
@@ -351,6 +352,7 @@ static void *P_SVC_CP_TaskTx(void *arg)
                 PrintError("pstDi is NULL!");
             }
 
+            /* Set the GPS values */
             nRet = DI_GPS_Get(&pstDi->stDiGps);
             if (nRet != DI_OK)
             {
@@ -381,10 +383,25 @@ static void *P_SVC_CP_TaskTx(void *arg)
                 }
             }
 
-            if(pchPayload != NULL)
+            /* free(pchPayload) is free at the P_MSG_MANAGER_SendTxMsg() */
+
+            if(s_stSvcCp.stDbV2xStatusTx.unSeqNum == DB_V2X_STATUS_SEQ_NUM_MAX)
             {
-                free(pchPayload);
+                /* Reset the sequence number */
+                s_stSvcCp.stDbV2xStatusTx.unSeqNum = 0;
             }
+
+            if(s_stSvcCp.stDbV2xStatusTx.unContCnt == DB_V2X_STATUS_CONT_CNT_MAX)
+            {
+                /* Reset the continuity counter */
+                s_stSvcCp.stDbV2xStatusTx.unContCnt = 0;
+            }
+
+            /* Increase the sequence number */
+            s_stSvcCp.stDbV2xStatusTx.unSeqNum++;
+
+            /* Increase the continuity counter */
+            s_stSvcCp.stDbV2xStatusTx.unContCnt++;
 
             usleep((s_stSvcCp.stMsgManagerTx.unTxDelay * USLEEP_MS));
         }

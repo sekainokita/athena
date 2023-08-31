@@ -57,6 +57,9 @@
 
 /***************************** Definition ************************************/
 
+#define DB_V2X_STATUS_SEQ_NUM_MAX               4294967295 /* maximum value of uint32 */
+#define DB_V2X_STATUS_CONT_CNT_MAX              100
+
 /***************************** Enum and Structure ****************************/
 /**
 * @details DB V2X Receive Level

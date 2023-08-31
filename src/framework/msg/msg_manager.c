@@ -432,6 +432,15 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     memcpy(pstV2xTxPdu->v2x_msg.data + sizeof(DB_V2X_T), pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
     memcpy(pstV2xTxPdu->v2x_msg.data + sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength, &ulDbV2xTotalPacketCrc32, sizeof(uint32_t));
 
+    /* free the allocated payload */
+    if(pstEventMsg->pPayload != NULL)
+    {
+        if (pstEventMsg->pstDbV2x->ePayloadType != DB_V2X_PAYLOAD_TYPE_PLATOONING_THROUGHPUT)
+        {
+            free(pstEventMsg->pPayload);
+        }
+    }
+
     if(s_bMsgMgrLog == ON)
     {
         printf("\nV2X TX PDU>>\n"
@@ -1061,6 +1070,7 @@ int32_t P_MSG_MANAGER_CreateObuTask(void)
 int32_t MSG_MANAGER_Transmit(MSG_MANAGER_TX_T *pstMsgMgrTx, DB_V2X_T *pstDbV2x, void *pPayload)
 {
     int32_t nRet = FRAMEWORK_ERROR;
+    MSG_MANAGER_TX_EVENT_MSG_T stEventMsg;
 
     if(pstMsgMgrTx == NULL)
     {
@@ -1079,7 +1089,6 @@ int32_t MSG_MANAGER_Transmit(MSG_MANAGER_TX_T *pstMsgMgrTx, DB_V2X_T *pstDbV2x, 
         PrintError("pPayload == NULL!!");
         return nRet;
     }
-    MSG_MANAGER_TX_EVENT_MSG_T stEventMsg;
 
     stEventMsg.pstMsgManagerTx = pstMsgMgrTx;
     stEventMsg.pstDbV2x = pstDbV2x;
