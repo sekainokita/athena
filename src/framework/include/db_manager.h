@@ -57,6 +57,16 @@
 #define CLI_DB_V2X_DEFAULT_PAYLOAD_LEN            1024
 #define CLI_DB_V2X_DEFAULT_BYTE_LEN               254
 
+#define DB_MGR_FILE_MAX_LENGTH                    100
+#define DB_MGR_SYSTEM_CALL_MAX_LENGTH             200
+
+#define DB_MGR_DEFAULT_COMM_TYPE                  "Tx"
+#define DB_MGR_DEFAULT_DEV_TYPE                   "OBU"
+#define DB_MGR_DEFAULT_COMM_DEV_ID                "KETIV2X01"
+#define DB_MGR_DEFAULT_START_TIME                 "2309010911"
+#define DB_MGR_DEFAULT_END_TIME                   "2309011011"
+#define DB_MGR_DEFAULT_TOTAL_TIME                 "1h"
+
 /***************************** Enum and Structure ****************************/
 
 /**
@@ -139,12 +149,22 @@ typedef struct DB_MANAGER_EVENT_MSG_t {
     void                    *pPayload;
 } DB_MANAGER_EVENT_MSG_T;
 
+typedef struct DB_MANAGER_FILE_t {
+    char                    *pchTxRxType;
+    char                    *pchDeviceType;
+    char                    *pchDeviceId;
+    char                    *pchStartTime;
+    char                    *pchEndTime;
+    char                    *pchTotalTime;
+} DB_MANAGER_FILE_T;
+
 /**
 * @details DB_MANAGER_T
 * @param eFileType
 * @param unReserved
 */
 typedef struct DB_MANAGER_t {
+    DB_MANAGER_FILE_T       stDbFile;
     DB_MANAGER_FILE_TYPE_E  eFileType;
     bool                    bLogLevel;
     uint32_t                unReserved;
@@ -158,6 +178,7 @@ int32_t DB_MANAGER_Converter(DB_MANAGER_READ_T *pstDbManagerRead, DB_MANAGER_WRI
 
 int32_t DB_MANAGER_SetLog(DB_MANAGER_T *pstDbManager);
 
+int32_t DB_MANAGER_MakeDbFile(DB_MANAGER_T *pstDbManager);
 int32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager);
 int32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager);
 int32_t DB_MANAGER_Start(DB_MANAGER_T *pstDbManager);

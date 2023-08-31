@@ -484,6 +484,26 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintError("DB_MANAGER_Close() is failed! [nRet:%d]", nFrameWorkRet);
             }
         }
+        else if(IS_CMD(pcCmd, "make"))
+        {
+            DB_MANAGER_T *pstDbManager;
+
+            pstDbManager = FRAMEWORK_GetDbManagerInstance();
+            PrintDebug("pstDbManager[0x%p]", pstDbManager);
+
+            pstDbManager->stDbFile.pchTxRxType = DB_MGR_DEFAULT_COMM_TYPE;
+            pstDbManager->stDbFile.pchDeviceType = DB_MGR_DEFAULT_DEV_TYPE;
+            pstDbManager->stDbFile.pchDeviceId = DB_MGR_DEFAULT_COMM_DEV_ID;
+            pstDbManager->stDbFile.pchStartTime = DB_MGR_DEFAULT_START_TIME;
+            pstDbManager->stDbFile.pchEndTime = DB_MGR_DEFAULT_END_TIME;
+            pstDbManager->stDbFile.pchTotalTime = DB_MGR_DEFAULT_TOTAL_TIME;
+
+            nFrameWorkRet = DB_MANAGER_MakeDbFile(pstDbManager);
+            if(nFrameWorkRet != FRAMEWORK_OK)
+            {
+                PrintError("v() is failed! [nRet:%d]", nFrameWorkRet);
+            }
+        }
         else if(IS_CMD(pcCmd, "time"))
         {
             TIME_MANAGER_T *pstTimeManager;
@@ -531,6 +551,7 @@ int32_t CLI_DB_InitCmds(void)
                "db open csv       open a db CSV file\n"
                "db open sqlite    open a db sqlite file\n"
                "db close          close a db file\n"
+               "db make           make a db file (copy the default db file to specified db file)\n"
                "db time           get a current timestamp\n",
                "");
     if(nRet != APP_OK)

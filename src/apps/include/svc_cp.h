@@ -59,6 +59,8 @@
 
 #define SVC_CP_GPS_VALUE_CONVERT            (1000000)
 
+#define SVC_CP_DEFAULT_TOTAL_DB_WRITE_TIME  (1000*1000*30) /* 1 hours */
+
 /***************************** Enum and Structure ****************************/
 
 /**
@@ -111,6 +113,10 @@ typedef struct SVC_CP_t {
     DB_V2X_T                stDbV2x;
     DB_V2X_STATUS_TX_T      stDbV2xStatusTx;
     char                    *pchIfaceName;
+    char                    *pchDeviceName;
+    uint64_t                ulDbStartTime;
+    uint64_t                ulDbEndTime;
+    uint64_t                ulDbTotalWrittenTime;
     uint32_t                unReserved;
 } SVC_CP_T;
 

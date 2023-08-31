@@ -170,6 +170,11 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
     pstSvcCp->stDbV2xStatusTx.unContCnt = 0;
     pstSvcCp->stDbV2xStatusTx.unTxVehicleSpeed = 60;
 
+    pstSvcCp->pchDeviceName = DB_MGR_DEFAULT_COMM_DEV_ID;
+    pstSvcCp->ulDbStartTime = 0;
+    pstSvcCp->ulDbEndTime = 0;
+    pstSvcCp->ulDbTotalWrittenTime = 0;
+
     nRet = APP_OK;
 
     PrintDebug("P_SVC_CP_SetDefaultSettings() set is finished.[eth:%s]", pstSvcCp->pchIfaceName);
@@ -179,12 +184,30 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
 static int32_t P_SVC_CP_Start(SVC_CP_EVENT_MSG_T *stEventMsg)
 {
     int32_t nRet = APP_ERROR;
+    TIME_MANAGER_T *pstTimeManager;
     UNUSED(stEventMsg);
 
     if ((s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_STOP) || (s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_IDLE))
     {
         s_stSvcCp.eSvcCpStatus = SVC_CP_STATUS_START;
-        PrintTrace("eSvcCpStatus starts now [%d]", s_stSvcCp.eSvcCpStatus);
+
+        pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
+        if(pstTimeManager == NULL)
+        {
+            PrintError("pstTimeManager is NULL!");
+        }
+
+        nRet = TIME_MANAGER_Get(pstTimeManager);
+        if(nRet != FRAMEWORK_OK)
+        {
+            PrintError("TIME_MANAGER_Get() is failed! [nRet:%d]", nRet);
+        }
+        else
+        {
+            s_stSvcCp.ulDbStartTime = pstTimeManager->ulTimeStamp;
+        }
+
+        PrintTrace("eSvcCpStatus[%d] STARTs NOW [Time:%ld]", s_stSvcCp.eSvcCpStatus, s_stSvcCp.ulDbStartTime);
 
         if(s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_START)
         {
@@ -202,12 +225,30 @@ static int32_t P_SVC_CP_Start(SVC_CP_EVENT_MSG_T *stEventMsg)
 static int32_t P_SVC_CP_Stop(SVC_CP_EVENT_MSG_T *stEventMsg)
 {
     int32_t nRet = APP_ERROR;
+    TIME_MANAGER_T *pstTimeManager;
     UNUSED(stEventMsg);
 
     if(s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_START)
     {
         s_stSvcCp.eSvcCpStatus = SVC_CP_STATUS_STOP;
-        PrintTrace("eSvcCpStatus stops now [%d]", s_stSvcCp.eSvcCpStatus);
+
+        pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
+        if(pstTimeManager == NULL)
+        {
+            PrintError("pstTimeManager is NULL!");
+        }
+
+        nRet = TIME_MANAGER_Get(pstTimeManager);
+        if(nRet != FRAMEWORK_OK)
+        {
+            PrintError("TIME_MANAGER_Get() is failed! [nRet:%d]", nRet);
+        }
+        else
+        {
+            s_stSvcCp.ulDbEndTime = pstTimeManager->ulTimeStamp;
+        }
+
+        PrintTrace("eSvcCpStatus[%d] STOPs NOW [Time:%ld]", s_stSvcCp.eSvcCpStatus, s_stSvcCp.ulDbEndTime);
 
         if(s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_STOP)
         {
@@ -221,6 +262,42 @@ static int32_t P_SVC_CP_Stop(SVC_CP_EVENT_MSG_T *stEventMsg)
 
     return nRet;
 
+}
+
+int32_t P_SVC_CP_RestartDb(void)
+{
+    int32_t nRet = APP_ERROR;
+    DB_MANAGER_T *pstDbManager;
+
+    PrintWarn("Finish to write DB Files, start time[%ld], end time[%ld], total written time[%ld]", s_stSvcCp.ulDbStartTime, s_stSvcCp.ulDbEndTime, s_stSvcCp.ulDbTotalWrittenTime);
+
+    pstDbManager = FRAMEWORK_GetDbManagerInstance();
+    if(pstDbManager == NULL)
+    {
+        PrintError("pstDbManager is NULL!");
+    }
+
+    PrintDebug("Close the default temp DB file");
+    nRet = DB_MANAGER_Close(pstDbManager);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("DB_MANAGER_Close() is failed! [nRet:%d]", nRet);
+    }
+
+//    PrintWarn("Copy the default DB file as [%s]", );
+
+    PrintDebug("Reopen the default temp DB file");
+    pstDbManager->eFileType = s_stSvcCp.stDbManagerWrite.eFileType;
+    nRet = DB_MANAGER_Open(pstDbManager);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("DB_MANAGER_Open() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    PrintDebug("Restart to write the DB file");
+
+    return nRet;
 }
 
 static void *P_SVC_CP_TaskTx(void *arg)
@@ -531,6 +608,11 @@ void SVC_CP_ShowSettings(SVC_CP_T *pstSvcCp)
 
     PrintWarn("Device Info>");
     PrintDebug("Ethernet Interface [%s]", pstSvcCp->pchIfaceName);
+
+    PrintDebug("pchDeviceName [%s]", pstSvcCp->pchDeviceName);
+    PrintDebug("ulDbStartTime [%ld]", pstSvcCp->ulDbStartTime);
+    PrintDebug("ulDbEndTime [%ld]", pstSvcCp->ulDbEndTime);
+    PrintDebug("ulDbTotalWrittenTime [%ld]", pstSvcCp->ulDbTotalWrittenTime);
 
     PrintWarn("V2X Status Tx Info>");
     PrintDebug(" ulTxTimeStampL1 [%ld]", pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL1);

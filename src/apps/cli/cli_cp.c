@@ -62,6 +62,8 @@ static int P_CLI_CP_StartV2xStatusScenario(void)
     SVC_CP_T *pstSvcCp;
     pstSvcCp = APP_GetSvcCpInstance();
 
+    (void)SVC_CP_ShowSettings(pstSvcCp);
+
     nRet = SVC_CP_Open(pstSvcCp);
     if(nRet != APP_OK)
     {
@@ -356,6 +358,8 @@ int32_t CLI_CP_InitCmds(void)
                "cp test                   test cp command\n"
                "cp sce [OPTIONS]\n"
                "       base               start a base Communication Performance scenario\n"
+               "       start              start V2X scenario\n"
+               "       stop               stop V2X scenario\n"
                "       status start msg   start a test sample of V2X status data of msg tx\n"
                "       status start db    start a test sample of V2X status data of db\n"
                "cp info                   get a status Communication Performance\n",

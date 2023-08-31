@@ -109,6 +109,7 @@ int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
 
     (void*)memset(&s_stMsgManager, 0x00, sizeof(MSG_MANAGER_T));
     (void*)memset(&s_stDbManager, 0x00, sizeof(DB_MANAGER_T));
+    (void*)memset(&s_stDbManager.stDbFile, 0x00, sizeof(DB_MANAGER_FILE_T));
     (void*)memset(&s_stTimeManager, 0x00, sizeof(TIME_MANAGER_T));
 
     PrintWarn("is successfully initialized.");
