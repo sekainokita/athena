@@ -51,7 +51,7 @@
 #include "db_v2x_status.h"
 
 /***************************** Definition ************************************/
-#define SVC_CP_TASK_MSG_KEY               (0x230830)
+#define SVC_CP_TASK_MSG_KEY               (0x2319)
 #define SVC_CP_DEFAULT_ETH_DEV            "eth1"
 /***************************** Enum and Structure ****************************/
 

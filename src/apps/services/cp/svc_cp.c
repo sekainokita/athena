@@ -240,7 +240,7 @@ static void *P_SVC_CP_TaskTx(void *arg)
             if(pchPayload == NULL)
             {
                 PrintError("malloc() is failed! [NULL]");
-                return nRet;
+                break;
             }
 
             (void*)memset(pchPayload, 0x00, sizeof(sizeof(char)*s_stSvcCp.stDbV2x.ulPayloadLength));
@@ -655,9 +655,10 @@ int32_t SVC_CP_Start(SVC_CP_T *pstSvcCp)
 
     stEventMsg.eEventType = SVC_CP_EVENT_START;
 
-    if(msgsnd(s_nSvcCpTaskMsgId, &stEventMsg, sizeof(SVC_CP_EVENT_MSG_T), IPC_NOWAIT) == APP_MSG_ERR)
+    nRet = msgsnd(s_nSvcCpTaskMsgId, &stEventMsg, sizeof(SVC_CP_EVENT_MSG_T), IPC_NOWAIT);
+    if(nRet < 0)
     {
-        PrintError("msgsnd() is failed!!");
+        PrintError("msgsnd() is failed!!, [nRet:%d]", nRet);
         return nRet;
     }
     else
