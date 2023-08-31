@@ -55,6 +55,8 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+#include "app.h"
+#include "di.h"
 
 /***************************** Definition ************************************/
 
@@ -226,9 +228,10 @@ static void *P_SVC_CP_TaskTx(void *arg)
     UNUSED(arg);
     TIME_MANAGER_T *pstTimeManager;
     char *pchPayload = NULL;
-    int32_t nRet = APP_ERROR;
     int32_t nFrameWorkRet = FRAMEWORK_ERROR;
-    bool bMsgTx = FALSE;
+    bool bMsgTx = TRUE;
+    DI_T *pstDi;
+    int32_t nRet = APP_ERROR;
 
     while (1)
     {
@@ -246,6 +249,11 @@ static void *P_SVC_CP_TaskTx(void *arg)
             (void*)memset(pchPayload, 0x00, sizeof(sizeof(char)*s_stSvcCp.stDbV2x.ulPayloadLength));
 
             pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
+            if(pstTimeManager == NULL)
+            {
+                PrintError("pstTimeManager is NULL!");
+            }
+
             nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
             if(nFrameWorkRet != FRAMEWORK_OK)
             {
@@ -260,6 +268,21 @@ static void *P_SVC_CP_TaskTx(void *arg)
                 s_stSvcCp.stDbV2xStatusTx.ulTxTimeStampL3 = pstTimeManager->ulTimeStamp;
             }
 
+            pstDi = APP_GetDiInstance();
+            if(pstDi == NULL)
+            {
+                PrintError("pstDi is NULL!");
+            }
+
+            nRet = DI_GPS_Get(&pstDi->stDiGps);
+            if (nRet != DI_OK)
+            {
+                PrintError("DI_GPS_Get() is failed! [nRet:%d]", nRet);
+            }
+            s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLatitude * SVC_CP_GPS_VALUE_CONVERT);
+            s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLongitude * SVC_CP_GPS_VALUE_CONVERT);
+            s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxAttitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fAltitude * SVC_CP_GPS_VALUE_CONVERT);
+
             memcpy(pchPayload, (char*)&s_stSvcCp.stDbV2xStatusTx, sizeof(char)*s_stSvcCp.stDbV2x.ulPayloadLength);
 
             s_stSvcCp.stDbV2x.ulReserved = 0;
@@ -270,10 +293,6 @@ static void *P_SVC_CP_TaskTx(void *arg)
                 if(nFrameWorkRet != FRAMEWORK_OK)
                 {
                     PrintError("MSG_MANAGER_Transmit() is failed! [nRet:%d]", nFrameWorkRet);
-                }
-                else
-                {
-                    PrintDebug("Tx Success, Counts[%u], Delay[%d ms]", s_stSvcCp.stMsgManagerTx.unTxCount, s_stSvcCp.stMsgManagerTx.unTxDelay);
                 }
             }
             else
@@ -595,6 +614,8 @@ int32_t SVC_CP_Open(SVC_CP_T *pstSvcCp)
     int32_t nFrameWorkRet = FRAMEWORK_ERROR;
     DB_MANAGER_T *pstDbManager;
     MSG_MANAGER_T *pstMsgManager;
+    DI_T *pstDi;
+    uint32_t nRetryCnt = 0;
 
     if(pstSvcCp == NULL)
     {
@@ -622,6 +643,28 @@ int32_t SVC_CP_Open(SVC_CP_T *pstSvcCp)
         return nRet;
     }
 
+    pstDi = APP_GetDiInstance();
+    if (pstDi == NULL)
+    {
+        PrintError("APP_GetDiInstance() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    for(nRetryCnt = 0; nRetryCnt < SVC_CP_GPS_OPEN_RETRY_CNT; nRetryCnt++)
+    {
+        nRet = DI_GPS_Open(&pstDi->stDiGps);
+        if (nRet != DI_OK)
+        {
+            PrintError("DI_GPS_Open() is failed! [nRet:%d], nRetryCnt[%d/%d], retry after [%d us]", nRet, nRetryCnt, SVC_CP_GPS_OPEN_RETRY_CNT, SVC_CP_GPS_OPEN_RETRY_DELAY * USLEEP_MS);
+            usleep(SVC_CP_GPS_OPEN_RETRY_DELAY * USLEEP_MS);
+        }
+        else
+        {
+            PrintTrace("DI_GPS_Open() is successfully opened");
+            break;
+        }
+    }
+
     nRet = nFrameWorkRet;
 
     return nRet;
@@ -630,13 +673,40 @@ int32_t SVC_CP_Open(SVC_CP_T *pstSvcCp)
 int32_t SVC_CP_Close(SVC_CP_T *pstSvcCp)
 {
     int32_t nRet = APP_ERROR;
-
-    PrintWarn("TODO");
+    DI_T *pstDi;
+    DB_MANAGER_T *pstDbManager;
 
     if(pstSvcCp == NULL)
     {
         PrintError("pstSvcCp == NULL!!");
         return nRet;
+    }
+
+    pstDi = APP_GetDiInstance();
+    if (pstDi == NULL)
+    {
+        PrintError("APP_GetDiInstance() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    nRet = DI_GPS_Close(&pstDi->stDiGps);
+    if (nRet != DI_OK)
+    {
+        PrintError("DI_GPS_Close() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    pstDbManager = FRAMEWORK_GetDbManagerInstance();
+    if (pstDbManager == NULL)
+    {
+        PrintError("FRAMEWORK_GetDbManagerInstance() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    nRet = DB_MANAGER_Close(pstDbManager);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("DB_MANAGER_Close() is failed! [nRet:%d]", nRet);
     }
 
     return nRet;
@@ -652,6 +722,8 @@ int32_t SVC_CP_Start(SVC_CP_T *pstSvcCp)
         PrintError("pstSvcCp == NULL!!");
         return nRet;
     }
+
+    (void*)memset(&stEventMsg, 0x00, sizeof(SVC_CP_EVENT_MSG_T));
 
     stEventMsg.eEventType = SVC_CP_EVENT_START;
 
@@ -680,13 +752,17 @@ int32_t SVC_CP_Stop(SVC_CP_T *pstSvcCp)
         return nRet;
     }
 
+    (void*)memset(&stEventMsg, 0x00, sizeof(SVC_CP_EVENT_MSG_T));
+
     stEventMsg.eEventType = SVC_CP_EVENT_STOP;
 
-    if(msgsnd(s_nSvcCpTaskMsgId, &stEventMsg, sizeof(SVC_CP_EVENT_MSG_T), IPC_NOWAIT) == APP_MSG_ERR)
+    nRet = msgsnd(s_nSvcCpTaskMsgId, &stEventMsg, sizeof(SVC_CP_EVENT_MSG_T), IPC_NOWAIT);
+    if(nRet < 0)
     {
-        PrintError("msgsnd() is failed!!");
+        PrintError("msgsnd() is failed!!, [nRet:%d]", nRet);
         return nRet;
     }
+
     else
     {
         nRet = APP_OK;

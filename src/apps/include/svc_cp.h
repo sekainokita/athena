@@ -51,8 +51,14 @@
 #include "db_v2x_status.h"
 
 /***************************** Definition ************************************/
-#define SVC_CP_TASK_MSG_KEY               (0x2319)
-#define SVC_CP_DEFAULT_ETH_DEV            "eth1"
+#define SVC_CP_TASK_MSG_KEY                 (0x2319)
+#define SVC_CP_DEFAULT_ETH_DEV              "eth1"
+
+#define SVC_CP_GPS_OPEN_RETRY_CNT           (10)
+#define SVC_CP_GPS_OPEN_RETRY_DELAY         (1000)
+
+#define SVC_CP_GPS_VALUE_CONVERT            (1000000)
+
 /***************************** Enum and Structure ****************************/
 
 /**
@@ -82,14 +88,6 @@ typedef enum {
 } SVC_CP_STATUS_E;
 
 /**
-* @details SVC_CP_SETTING_T
-* @param unReserved
-*/
-typedef struct SVC_CP_SETTING_t {
-    uint32_t                     unReserved;
-} SVC_CP_SETTING_T;
-
-/**
 * @details SVC_CP_EVENT_MSG_T
 * @param pstTimeMgrSetting
 * @param eEventType
@@ -97,7 +95,6 @@ typedef struct SVC_CP_SETTING_t {
 */
 typedef struct SVC_CP_EVENT_MSG_t {
     SVC_CP_EVENT_E          eEventType;
-    SVC_CP_SETTING_T        *pstSvcCpSetting;
 } SVC_CP_EVENT_MSG_T;
 
 /**

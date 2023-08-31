@@ -126,6 +126,7 @@ static XsControl* s_CXsControl = NULL;
 static XsDevice* s_pstXsDevice = NULL;
 static XsPortInfo s_mtPort;
 static CallbackHandler sh_CCallBack;
+//#define DI_GPS_XSENS_DEBUG      (1)
 
 /***************************** Function  *************************************/
 
@@ -148,12 +149,10 @@ void P_DI_GPS_XSENS_GetAging(void)
 					<< "Acc X:" << acc[0]
 					<< ", Acc Y:" << acc[1]
 					<< ", Acc Z:" << acc[2];
-
 				XsVector gyr = packet.calibratedGyroscopeData();
 				cout << " |Gyr X:" << gyr[0]
 					<< ", Gyr Y:" << gyr[1]
 					<< ", Gyr Z:" << gyr[2];
-
 				XsVector mag = packet.calibratedMagneticField();
 				cout << " |Mag X:" << mag[0]
 					<< ", Mag Y:" << mag[1]
@@ -183,7 +182,9 @@ void P_DI_GPS_XSENS_GetAging(void)
 			}
 
 			if (packet.containsAltitude())
+            {
 				cout << " |Alt:" << packet.altitude();
+            }
 
 			if (packet.containsVelocity())
 			{
@@ -218,19 +219,25 @@ int32_t DI_GPS_XSENS_Get(DI_GPS_XSENS_T *pstDiGpsXsens)
         if (packet.containsCalibratedData())
         {
             XsVector acc = packet.calibratedAcceleration();
+#if defined(DI_GPS_XSENS_DEBUG)
             cout << "\r" << "Acc X:" << acc[0] << ", Acc Y:" << acc[1] << ", Acc Z:" << acc[2];
+#endif
             pstDiGpsXsens->fAccX = acc[0];
             pstDiGpsXsens->fAccY = acc[1];
             pstDiGpsXsens->fAccZ = acc[2];
 
             XsVector gyr = packet.calibratedGyroscopeData();
+#if defined(DI_GPS_XSENS_DEBUG)
             cout << " |Gyr X:" << gyr[0] << ", Gyr Y:" << gyr[1] << ", Gyr Z:" << gyr[2];
+#endif
             pstDiGpsXsens->fGyrX = gyr[0];
             pstDiGpsXsens->fGyrY = gyr[1];
             pstDiGpsXsens->fGyrZ = gyr[2];
 
             XsVector mag = packet.calibratedMagneticField();
+#if defined(DI_GPS_XSENS_DEBUG)
             cout << " |Mag X:" << mag[0] << ", Mag Y:" << mag[1] << ", Mag Z:" << mag[2];
+#endif
             pstDiGpsXsens->fMagX = mag[0];
             pstDiGpsXsens->fMagY = mag[1];
             pstDiGpsXsens->fMagZ = mag[2];
@@ -239,15 +246,18 @@ int32_t DI_GPS_XSENS_Get(DI_GPS_XSENS_T *pstDiGpsXsens)
         if (packet.containsOrientation())
         {
             XsQuaternion quaternion = packet.orientationQuaternion();
+#if defined(DI_GPS_XSENS_DEBUG)
             cout << "\r" << "q0:" << quaternion.w() << ", q1:" << quaternion.x() << ", q2:" << quaternion.y() << ", q3:" << quaternion.z();
+#endif
             pstDiGpsXsens->fQuaternionW = quaternion.w();
             pstDiGpsXsens->fQuaternionX = quaternion.x();
             pstDiGpsXsens->fQuaternionY = quaternion.y();
             pstDiGpsXsens->fQuaternionZ = quaternion.z();
 
             XsEuler euler = packet.orientationEuler();
+#if defined(DI_GPS_XSENS_DEBUG)
             cout << " |Roll:" << euler.roll() << ", Pitch:" << euler.pitch() << ", Yaw:" << euler.yaw();
-
+#endif
             pstDiGpsXsens->fEulerRoll = euler.roll();
             pstDiGpsXsens->fEulerPitch = euler.pitch();
             pstDiGpsXsens->fEulerYaw = euler.yaw();
@@ -256,14 +266,18 @@ int32_t DI_GPS_XSENS_Get(DI_GPS_XSENS_T *pstDiGpsXsens)
         if (packet.containsLatitudeLongitude())
         {
             XsVector latLon = packet.latitudeLongitude();
+#if defined(DI_GPS_XSENS_DEBUG)
             cout << " |Lat:" << latLon[0] << ", Lon:" << latLon[1];
+#endif
             pstDiGpsXsens->fLatitude = latLon[0];
             pstDiGpsXsens->fLongitude = latLon[1];
         }
 
         if (packet.containsAltitude())
         {
+#if defined(DI_GPS_XSENS_DEBUG)
             cout << " |Alt:" << packet.altitude();
+#endif
             pstDiGpsXsens->fAltitude = packet.altitude();
         }
 
@@ -271,7 +285,9 @@ int32_t DI_GPS_XSENS_Get(DI_GPS_XSENS_T *pstDiGpsXsens)
         if (packet.containsVelocity())
         {
             XsVector vel = packet.velocity(XDI_CoordSysEnu);
+#if defined(DI_GPS_XSENS_DEBUG)
             cout << " |E:" << vel[0] << ", N:" << vel[1] << ", U:" << vel[2];
+#endif
             pstDiGpsXsens->fVelocityEast = vel[0];
             pstDiGpsXsens->fVelocityNorth = vel[1];
             pstDiGpsXsens->fVelocityUp = vel[2];

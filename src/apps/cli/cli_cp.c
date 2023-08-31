@@ -95,6 +95,12 @@ static int P_CLI_CP_StopV2xStatusScenario(void)
         PrintError("SVC_CP_Start() is failed! [nRet:%d]", nRet);
     }
 
+    nRet = SVC_CP_Close(pstSvcCp);
+    if(nRet != APP_OK)
+    {
+        PrintError("SVC_CP_Close() is failed! [nRet:%d]", nRet);
+    }
+
     return nRet;
 }
 
