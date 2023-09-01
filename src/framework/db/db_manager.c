@@ -812,7 +812,6 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusTx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.eChannel);
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.sPower);
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.eBandwidth);
-    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.eChannel);
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.usTxRatio);
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.stTxPosition.nTxLatitude);
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.stTxPosition.nTxLongitude);
@@ -876,7 +875,6 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.eChannel);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.sPower);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.eBandwidth);
-    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.eChannel);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.usTxRatio);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.stTxPosition.nTxLatitude);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.stTxPosition.nTxLongitude);
