@@ -627,7 +627,7 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             if(pstV2xRxPdu == NULL)
             {
                 PrintError("malloc() is failed! [NULL]");
-                return nRet;
+                goto RxError;
             }
 
             memset(pstV2xRxPdu, 0, sizeof(Ext_V2X_RxPDU_t));
@@ -637,7 +637,7 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             if(pstDbV2x == NULL)
             {
                 PrintError("malloc() is failed! [NULL]");
-                return nRet;
+                goto RxError;
             }
 
             memset(pstDbV2x, 0, pstV2xRxPdu->v2x_msg.length);
@@ -647,7 +647,7 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             if(pstEventMsg->pPayload == NULL)
             {
                 PrintError("malloc() is failed! [NULL]");
-                return nRet;
+                goto RxError;
             }
 
             memcpy(pstEventMsg->pPayload, pstV2xRxPdu->v2x_msg.data + sizeof(DB_V2X_T), pstEventMsg->pstDbV2x->ulPayloadLength);
@@ -659,13 +659,11 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             if(ulDbV2xTotalPacketCrc32 != ulCompDbV2xTotalPacketCrc32)
             {
                 PrintError("CRC32 does not matched!! check Get:ulDbV2xTotalPacketCrc32[0x%x] != Calculate:ulCompDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32, ulCompDbV2xTotalPacketCrc32);
-                nRet = FRAMEWORK_ERROR;
 
                 nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
                 if(nRet != FRAMEWORK_ERROR)
                 {
                     PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
-                    return nRet;
                 }
 
                 stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
@@ -675,25 +673,9 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
                 if(nRet != FRAMEWORK_ERROR)
                 {
                     PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
-                    return nRet;
                 }
 
-                if(pstV2xRxPdu != NULL)
-                {
-                    free(pstV2xRxPdu);
-                }
-
-                if(pstDbV2x != NULL)
-                {
-                    free(pstDbV2x);
-                }
-
-                if(pstEventMsg->pPayload != NULL)
-                {
-                    free(pstEventMsg->pPayload);
-                }
-
-                return nRet;
+                goto RxError;
             }
 
             if(s_bMsgMgrLog == ON)
@@ -749,6 +731,7 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             if(pstEventMsg == NULL)
             {
                 PrintError("pstEventMsg is NULL");
+                goto RxError;
             }
 
             pstEventMsg->pstDbV2x->eDeviceType = ntohs(pstDbV2x->eDeviceType);
@@ -770,22 +753,26 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             if (nRet != FRAMEWORK_OK)
             {
                 PrintError("P_MSG_MANAGER_SendTxMsgToDbMgr() is faild! [nRet:%d]", nRet);
+                goto RxError;
             }
 
-            if(pstV2xRxPdu != NULL)
-            {
-                free(pstV2xRxPdu);
-            }
+            RxError:
+                if(pstV2xRxPdu != NULL)
+                {
+                    free(pstV2xRxPdu);
+                }
 
-            if(pstDbV2x != NULL)
-            {
-                free(pstDbV2x);
-            }
+                if(pstDbV2x != NULL)
+                {
+                    free(pstDbV2x);
+                }
 
-            if(pstEventMsg->pPayload != NULL)
-            {
-                free(pstEventMsg->pPayload);
-            }
+                if(pstEventMsg->pPayload != NULL)
+                {
+                    free(pstEventMsg->pPayload);
+                }
+
+                continue;
         }
     }
 
