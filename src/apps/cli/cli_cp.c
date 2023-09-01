@@ -56,7 +56,7 @@
 
 /***************************** Function Protype ******************************/
 
-static int P_CLI_CP_StartV2xStatusScenario(void)
+static int P_CLI_CP_ReadyV2xStatusScenario(void)
 {
     int32_t nRet = APP_OK;
     SVC_CP_T *pstSvcCp;
@@ -75,6 +75,15 @@ static int P_CLI_CP_StartV2xStatusScenario(void)
     {
         PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
     }
+
+    return nRet;
+}
+
+static int P_CLI_CP_StartV2xStatusScenario(void)
+{
+    int32_t nRet = APP_OK;
+    SVC_CP_T *pstSvcCp;
+    pstSvcCp = APP_GetSvcCpInstance();
 
     nRet = SVC_CP_Start(pstSvcCp);
     if(nRet != APP_OK)
@@ -264,6 +273,14 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
                     PrintTrace("Save DB");
                 }
+                else if(IS_CMD(pcCmd, "ready"))
+                {
+                    nRet = P_CLI_CP_ReadyV2xStatusScenario();
+                    if(nRet != APP_OK)
+                    {
+                        PrintError("P_CLI_CP_ReadyV2xStatusScenario() is failed![nRet:%d]", nRet);
+                    }
+                }
                 else if(IS_CMD(pcCmd, "start"))
                 {
                     nRet = P_CLI_CP_StartV2xStatusScenario();
@@ -358,7 +375,8 @@ int32_t CLI_CP_InitCmds(void)
                "cp test                   test cp command\n"
                "cp sce [OPTIONS]\n"
                "       base               start a base Communication Performance scenario\n"
-               "       start              start V2X scenario\n"
+               "       ready              ready V2X scenario\n"
+               "       start              start V2X scenario (should be set cp sce ready first)\n"
                "       stop               stop V2X scenario\n"
                "       status start msg   start a test sample of V2X status data of msg tx\n"
                "       status start db    start a test sample of V2X status data of db\n"
