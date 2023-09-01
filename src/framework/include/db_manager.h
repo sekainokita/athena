@@ -48,6 +48,7 @@
 /***************************** Include ***************************************/
 #include "type.h"
 #include "db_v2x.h"
+#include "db_v2x_status.h"
 
 /***************************** Definition ************************************/
 #define CLI_DB_V2X_DEFAULT_DEVICE_ID              0x23040015
@@ -166,6 +167,17 @@ typedef struct DB_MANAGER_FILE_t {
     char                    *pchTotalTime;
 } DB_MANAGER_FILE_T;
 
+
+/**
+* @details DB_MANAGER_V2X_STATUS_t
+* @param eFileType
+* @param unReserved
+*/
+typedef struct DB_MANAGER_V2X_STATUS_t {
+    DB_V2X_STATUS_RX_T      stV2xStatusRx;
+} DB_MANAGER_V2X_STATUS_T;
+
+
 /**
 * @details DB_MANAGER_T
 * @param eFileType
@@ -197,6 +209,8 @@ int32_t DB_MANAGER_Status(DB_MANAGER_T *pstDbManager);
 
 int32_t DB_MANAGER_Init(DB_MANAGER_T *pstDbManager);
 int32_t DB_MANAGER_DeInit(DB_MANAGER_T *pstDbManager);
+int32_t DB_MANAGER_SetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus);
+int32_t DB_MANAGER_GetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus);
 
 #endif	/* _DB_MANAGER_H_ */
 

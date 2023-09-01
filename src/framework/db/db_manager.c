@@ -90,6 +90,8 @@ static pthread_t sh_DbMgrTask;
 
 static bool s_bDbMgrLog = OFF;
 
+static DB_MANAGER_V2X_STATUS_T s_stDbV2xStatusRx;
+
 /***************************** Function  *************************************/
 
 #if defined(CONFIG_SQLITE)
@@ -462,6 +464,15 @@ static int32_t P_DB_MANAGER_WriteTxt(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                 {
                     free(pchPayload);
                 }
+
+                if(pstEventMsg->pPayload != NULL)
+                {
+                    if(s_bDbMgrLog == ON)
+                    {
+                        PrintDebug("free [%p] allocated at P_MSG_MANAGER_SendRxMsgToDbMgr()", pstEventMsg->pPayload);
+                    }
+                    free(pstEventMsg->pPayload);
+                }
             }
             else
             {
@@ -684,6 +695,15 @@ static int32_t P_DB_MANAGER_WriteCsvPlatooningThroughput(DB_MANAGER_EVENT_MSG_T 
                 {
                     free(pchPayload);
                 }
+
+                if(pstEventMsg->pPayload != NULL)
+                {
+                    if(s_bDbMgrLog == ON)
+                    {
+                        PrintDebug("free [%p] allocated at P_MSG_MANAGER_SendRxMsgToDbMgr()", pstEventMsg->pPayload);
+                    }
+                    free(pstEventMsg->pPayload);
+                }
             }
             else
             {
@@ -832,6 +852,15 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusTx(DB_MANAGER_EVENT_MSG_T *pstEvent
     if(pchPayload != NULL)
     {
         free(pchPayload);
+    }
+
+    if(pstEventMsg->pPayload != NULL)
+    {
+        if(s_bDbMgrLog == ON)
+        {
+            PrintDebug("free [%p] allocated at P_MSG_MANAGER_SendRxMsgToDbMgr()", pstEventMsg->pPayload);
+        }
+        free(pstEventMsg->pPayload);
     }
 
     return nRet;
@@ -1190,8 +1219,13 @@ static int32_t P_DB_MANAGER_Init(DB_MANAGER_T *pstDbManager)
         PrintError("P_DB_MANAGER_CreateTask() is failed! [nRet:%d]", nRet);
     }
 
+    memset(&s_stDbV2xStatusRx, 0, sizeof(DB_MANAGER_V2X_STATUS_T));
+    memset(&s_stDbV2xStatusRx.stV2xStatusRx, 0, sizeof(DB_V2X_STATUS_RX_T));
+    memset(&s_stDbV2xStatusRx.stV2xStatusRx.stRxPosition, 0, sizeof(DB_V2X_POSITION_RX_T));
+
     return nRet;
 }
+
 static int32_t P_DB_MANAGER_DeInit(DB_MANAGER_T *pstDbManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -1202,8 +1236,120 @@ static int32_t P_DB_MANAGER_DeInit(DB_MANAGER_T *pstDbManager)
         return nRet;
     }
 
+    memset(&s_stDbV2xStatusRx, 0, sizeof(DB_MANAGER_V2X_STATUS_T));
+    memset(&s_stDbV2xStatusRx.stV2xStatusRx, 0, sizeof(DB_V2X_STATUS_RX_T));
+    memset(&s_stDbV2xStatusRx.stV2xStatusRx.stRxPosition, 0, sizeof(DB_V2X_POSITION_RX_T));
+
     return nRet;
 }
+
+int32_t P_DB_MANAGER_ResetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
+{
+    int32_t nRet = APP_ERROR;
+
+    if(pstDbV2xStatus == NULL)
+    {
+        PrintError("pstDbV2xStatus is NULL!!");
+    }
+
+    memset(&s_stDbV2xStatusRx, 0, sizeof(DB_MANAGER_V2X_STATUS_T));
+    memset(&s_stDbV2xStatusRx.stV2xStatusRx, 0, sizeof(DB_V2X_STATUS_RX_T));
+    memset(&s_stDbV2xStatusRx.stV2xStatusRx.stRxPosition, 0, sizeof(DB_V2X_POSITION_RX_T));
+
+    memcpy(pstDbV2xStatus, &s_stDbV2xStatusRx, sizeof(DB_MANAGER_V2X_STATUS_T));
+
+    nRet = APP_OK;
+
+    return nRet;
+}
+
+int32_t P_DB_MANAGER_SetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
+{
+    int32_t nRet = APP_ERROR;
+
+    if(pstDbV2xStatus == NULL)
+    {
+        PrintError("pstDbV2xStatus is NULL!!");
+    }
+
+    memcpy(&s_stDbV2xStatusRx, pstDbV2xStatus, sizeof(DB_MANAGER_V2X_STATUS_T));
+    nRet = APP_OK;
+
+    return nRet;
+}
+
+int32_t P_DB_MANAGER_GetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
+{
+    int32_t nRet = APP_ERROR;
+
+    if(pstDbV2xStatus == NULL)
+    {
+        PrintError("pstDbV2xStatus is NULL!!");
+    }
+
+    memcpy(pstDbV2xStatus, &s_stDbV2xStatusRx, sizeof(DB_MANAGER_V2X_STATUS_T));
+    nRet = APP_OK;
+
+    return nRet;
+}
+
+int32_t DB_MANAGER_SetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
+{
+    int32_t nRet = APP_ERROR;
+
+    if(pstDbV2xStatus == NULL)
+    {
+        PrintError("pstDbV2xStatus == NULL!!");
+        return nRet;
+    }
+
+    nRet = P_DB_MANAGER_SetV2xStatus(pstDbV2xStatus);
+    if(nRet != APP_OK)
+    {
+        PrintError("P_DB_MANAGER_SetV2xStatus() is failed! [nRet:%d]", nRet);
+    }
+
+    return nRet;
+}
+
+int32_t DB_MANAGER_GetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
+{
+    int32_t nRet = APP_ERROR;
+
+    if(pstDbV2xStatus == NULL)
+    {
+        PrintError("pstDbV2xStatus == NULL!!");
+        return nRet;
+    }
+
+    nRet = P_DB_MANAGER_GetV2xStatus(pstDbV2xStatus);
+    if(nRet != APP_OK)
+    {
+        PrintError("P_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+    }
+
+    return nRet;
+}
+
+int32_t DB_MANAGER_ResetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
+{
+    int32_t nRet = APP_ERROR;
+
+    if(pstDbV2xStatus == NULL)
+    {
+        PrintError("pstDbV2xStatus == NULL!!");
+        return nRet;
+    }
+
+    nRet = P_DB_MANAGER_ResetV2xStatus(pstDbV2xStatus);
+    if(nRet != APP_OK)
+    {
+        PrintError("P_DB_MANAGER_ResetV2xStatus() is failed! [nRet:%d]", nRet);
+    }
+
+    return nRet;
+}
+
 
 int32_t DB_MANAGER_Write(DB_MANAGER_WRITE_T *pstDbManagerWrite, DB_V2X_T *pstDbV2x, void *pPayload)
 {
