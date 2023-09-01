@@ -96,6 +96,7 @@ static pthread_t sh_msgMgrTxTask;
 static pthread_t sh_msgMgrRxTask;
 
 static bool s_bMsgMgrLog = OFF;
+static bool s_bFirstPacket = FALSE;
 
 /***************************** Function  *************************************/
 
@@ -658,20 +659,28 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
                         ulCompDbV2xTotalPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)&pstV2xRxPdu->v2x_msg.data[0], sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength);
                         if(ulDbV2xTotalPacketCrc32 != ulCompDbV2xTotalPacketCrc32)
                         {
-                            PrintError("CRC32 does not matched!! check Get:ulDbV2xTotalPacketCrc32[0x%x] != Calculate:ulCompDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32, ulCompDbV2xTotalPacketCrc32);
-                            nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
-                            if(nRet != FRAMEWORK_ERROR)
+                            if(s_bFirstPacket == TRUE)
                             {
-                                PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                s_bFirstPacket = FALSE;
+                                PrintWarn("set s_bFirstPacket [%d]", s_bFirstPacket);
                             }
-
-                            stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
-                            PrintWarn("increase ulTotalErrCnt [from %ld to %ld]", (stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
-
-                            nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
-                            if(nRet != FRAMEWORK_ERROR)
+                            else
                             {
-                                PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                PrintError("CRC32 does not matched!! check Get:ulDbV2xTotalPacketCrc32[0x%x] != Calculate:ulCompDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32, ulCompDbV2xTotalPacketCrc32);
+                                nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                                if(nRet != FRAMEWORK_ERROR)
+                                {
+                                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                }
+
+                                stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
+                                PrintWarn("increase ulTotalErrCnt [from %ld to %ld]", (stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
+
+                                nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                                if(nRet != FRAMEWORK_ERROR)
+                                {
+                                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                }
                             }
                         }
 
@@ -1184,8 +1193,6 @@ int32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
-    PrintWarn("TODO");
-
     if(pstMsgManager == NULL)
     {
         PrintError("pstMsgManager == NULL!!");
@@ -1214,6 +1221,9 @@ int32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager)
         return nRet;
     }
 #endif
+
+    s_bFirstPacket = TRUE;
+
     return nRet;
 }
 
