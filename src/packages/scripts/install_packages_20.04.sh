@@ -79,6 +79,7 @@ apt install -y liblog4cpp5-dev libzmq3-dev python3-yaml
 apt install -y python3-click python3-click-plugins
 apt install -y python3-zmq python3-scipy python3-pip python3-gi-cairo
 apt install -y libsndfile1-dev
+apt install -y libsqlite3-dev sqlite3
 
 add-apt-repository -y ppa:gnuradio/gnuradio-releases # Necessary to add repository for GNU Radio
 apt-get update
