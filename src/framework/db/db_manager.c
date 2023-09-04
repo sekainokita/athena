@@ -49,8 +49,6 @@
 ******************************************************************************/
 
 /***************************** Include ***************************************/
-#include "framework.h"
-#include "db_manager.h"
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
@@ -58,6 +56,11 @@
 #include <sqlite3.h>
 #endif
 #include "db_v2x_status.h"
+#include "framework.h"
+#include "db_manager.h"
+#include "di.h"
+#include "app.h"
+#include "svc_cp.h"
 
 /***************************** Definition ************************************/
 
@@ -97,6 +100,81 @@ static DB_MANAGER_V2X_STATUS_T s_stDbV2xStatusRx;
 
 /***************************** Function  *************************************/
 
+static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB_V2X_STATUS_TX_T *pstDbV2xStatusTx, DB_V2X_STATUS_RX_T *pstDbV2xStatusRx)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    TIME_MANAGER_T *pstTimeManager;
+    DI_T *pstDi;
+
+    if(pstDbV2xStatusTx == NULL)
+    {
+        PrintError("pstDbV2xStatusTx is NULL!");
+        return nRet;
+    }
+
+    if(pstDbV2xStatusRx == NULL)
+    {
+        PrintError("pstDbV2xStatusRx is NULL!");
+        return nRet;
+    }
+
+    pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
+    if(pstTimeManager == NULL)
+    {
+        PrintError("pstTimeManager is NULL!");
+    }
+
+    /* Todo, when the device ready to share its timestamp */
+    pstDbV2xStatusRx->ulRxTimeStampL1 = 19840919;
+    pstDbV2xStatusRx->ulRxTimeStampL2 = 19850501;
+
+    nRet = TIME_MANAGER_Get(pstTimeManager);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("TIME_MANAGER_Get() is failed! [nRet:%d]", nRet);
+        pstDbV2xStatusRx->ulRxTimeStampL3 = 0;
+    }
+    else
+    {
+        pstDbV2xStatusRx->ulRxTimeStampL3 = pstTimeManager->ulTimeStamp;
+    }
+
+    pstDbV2xStatusRx->ulAvgLatencyL1 = pstDbV2xStatusRx->ulRxTimeStampL1 - pstDbV2xStatusTx->ulTxTimeStampL1;
+    pstDbV2xStatusRx->ulAvgLatencyL2 = pstDbV2xStatusRx->ulRxTimeStampL2 - pstDbV2xStatusTx->ulTxTimeStampL2;
+    pstDbV2xStatusRx->ulAvgLatencyL3 = pstDbV2xStatusRx->ulRxTimeStampL3 - pstDbV2xStatusTx->ulTxTimeStampL3;
+    pstDbV2xStatusRx->unTxDeviceId = pstEventMsg->pstDbV2x->unDeviceId;
+    pstDbV2xStatusRx->unRxVehicleSpeed = DB_MGR_DEFAULT_VEHICLE_SPEED;
+    pstDbV2xStatusRx->unTotalCommDevCnt = DB_MGR_DEFAULT_COMM_DEV_CNT;
+    pstDbV2xStatusRx->usRssi = 0;
+    pstDbV2xStatusRx->eRsvLevel = 0;
+
+    pstDi = APP_GetDiInstance();
+    if(pstDi == NULL)
+    {
+        PrintError("pstDi is NULL!");
+    }
+
+    /* Set the GPS values */
+    nRet = DI_GPS_Get(&pstDi->stDiGps);
+    if (nRet != DI_OK)
+    {
+        PrintError("DI_GPS_Get() is failed! [nRet:%d]", nRet);
+    }
+
+    pstDbV2xStatusRx->stRxPosition.usCommDistance = 255;
+
+    pstDbV2xStatusRx->stRxPosition.nRxLatitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLatitude * SVC_CP_GPS_VALUE_CONVERT);
+    pstDbV2xStatusRx->stRxPosition.nRxLongitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLongitude * SVC_CP_GPS_VALUE_CONVERT);
+    pstDbV2xStatusRx->stRxPosition.nRxAttitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fAltitude * SVC_CP_GPS_VALUE_CONVERT);
+    pstDbV2xStatusRx->ucErrIndicator = 0;
+    pstDbV2xStatusRx->ulTotalPacketCnt++;
+    pstDbV2xStatusRx->ulTotalErrCnt = 0;
+    pstDbV2xStatusRx->unPdr = 0;
+    pstDbV2xStatusRx->unPer = 0;
+
+    return nRet;
+}
+
 #if defined(CONFIG_SQLITE)
 static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
 {
@@ -107,6 +185,13 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
     int sql_RxStatus;
     const char* TxCreate = NULL;
     const char* RxCreate = NULL;
+
+    if(pstEventMsg == NULL)
+    {
+        PrintError("pstEventMsg is NULL!");
+        return nRet;
+    }
+
     char *InsertTxData = (char *)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
     if(InsertTxData == NULL)
         {
@@ -331,9 +416,16 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
 static int32_t P_DB_MANAGER_OpenSqlite(DB_MANAGER_T *pstDbManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
-    UNUSED(pstDbManager);
     int sql_TxStatus;
     int sql_RxStatus;
+
+    UNUSED(pstDbManager);
+
+    if(pstDbManager == NULL)
+    {
+        PrintError("pstDbManager is NULL!");
+        return nRet;
+    }
 
     if(sh_pDbMgrTxSqlMsg == NULL)
     {
@@ -417,6 +509,12 @@ static int32_t P_DB_MANAGER_WriteTxt(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
     char *pchPayload = NULL;
+
+    if(pstEventMsg == NULL)
+    {
+        PrintError("pstEventMsg is NULL!");
+        return nRet;
+    }
 
     switch(pstEventMsg->pstDbManagerWrite->eCommMsgType)
     {
@@ -560,6 +658,12 @@ static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
+    if(pstDbManager == NULL)
+    {
+        PrintError("pstDbManager is NULL!");
+        return nRet;
+    }
+
     UNUSED(pstDbManager);
 
     if(sh_pDbMgrTxMsg == NULL)
@@ -649,6 +753,12 @@ static int32_t P_DB_MANAGER_WriteCsvPlatooningThroughput(DB_MANAGER_EVENT_MSG_T 
 {
     int32_t nRet = FRAMEWORK_ERROR;
     char *pchPayload = NULL;
+
+    if(pstEventMsg == NULL)
+    {
+        PrintError("pstEventMsg is NULL!");
+        return nRet;
+    }
 
     switch(pstEventMsg->pstDbManagerWrite->eCommMsgType)
     {
@@ -790,6 +900,12 @@ static int32_t P_DB_MANAGER_WriteCsvPlatooning(DB_MANAGER_EVENT_MSG_T *pstEventM
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
+    if(pstEventMsg == NULL)
+    {
+        PrintError("pstEventMsg is NULL!");
+        return nRet;
+    }
+
     UNUSED(pstEventMsg);
     PrintTrace("TODO : DB_V2X_PAYLOAD_TYPE_PLATOONING");
     nRet = FRAMEWORK_OK;
@@ -802,6 +918,12 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusTx(DB_MANAGER_EVENT_MSG_T *pstEvent
     int32_t nRet = FRAMEWORK_ERROR;
     char *pchPayload = NULL;
     DB_V2X_STATUS_TX_T stDbV2xStatusTx;
+
+    if(pstEventMsg == NULL)
+    {
+        PrintError("pstEventMsg is NULL!");
+        return nRet;
+    }
 
     pchPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
     if(pchPayload == NULL)
@@ -874,6 +996,17 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     int32_t nRet = FRAMEWORK_ERROR;
     char *pchPayload = NULL;
     DB_V2X_STATUS_TX_T stDbV2xStatusTx;
+    DB_V2X_STATUS_RX_T stDbV2xStatusRx;
+    DI_T *pstDi;
+
+    if(pstEventMsg == NULL)
+    {
+        PrintError("pstEventMsg is NULL!");
+        return nRet;
+    }
+
+    memset(&stDbV2xStatusTx, 0, sizeof(DB_V2X_STATUS_TX_T));
+    memset(&stDbV2xStatusRx, 0, sizeof(DB_V2X_STATUS_RX_T));
 
     pchPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
     if(pchPayload == NULL)
@@ -915,7 +1048,53 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.unContCnt);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.unTxVehicleSpeed);
 
-    fprintf(sh_pDbMgrRxMsg, "0x%x", pstEventMsg->pstDbManagerWrite->unCrc32);
+    fprintf(sh_pDbMgrRxMsg, "0x%x,", pstEventMsg->pstDbManagerWrite->unCrc32);
+
+    nRet = P_DB_MANAGER_UpdateStatus(pstEventMsg, &stDbV2xStatusTx, &stDbV2xStatusRx);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_UpdateStatus() is failed! [unRet:%d]", nRet);
+    }
+
+    if(s_bDbMgrLog == ON)
+    {
+        PrintDebug("[%ld]-[%ld]=[%ld]", stDbV2xStatusRx.ulRxTimeStampL3, stDbV2xStatusTx.ulTxTimeStampL3, stDbV2xStatusRx.ulRxTimeStampL3-stDbV2xStatusTx.ulTxTimeStampL3);
+    }
+
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulRxTimeStampL1);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulRxTimeStampL2);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulRxTimeStampL3);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulAvgLatencyL1);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulAvgLatencyL2);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulAvgLatencyL3);
+    fprintf(sh_pDbMgrRxMsg, "0x%x,", stDbV2xStatusRx.unTxDeviceId);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unRxVehicleSpeed);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unTotalCommDevCnt);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.usRssi);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.eRsvLevel);
+
+    pstDi = APP_GetDiInstance();
+    if(pstDi == NULL)
+    {
+        PrintError("pstDi is NULL!");
+    }
+
+    /* Set the GPS values */
+    nRet = DI_GPS_Get(&pstDi->stDiGps);
+    if (nRet != DI_OK)
+    {
+        PrintError("DI_GPS_Get() is failed! [nRet:%d]", nRet);
+    }
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stRxPosition.usCommDistance);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stRxPosition.nRxLatitude);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stRxPosition.nRxLongitude);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stRxPosition.nRxAttitude);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.ucErrIndicator);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulTotalPacketCnt);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulTotalErrCnt);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unPdr);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unPer);
+
     fprintf(sh_pDbMgrRxMsg, "\r\n");
 
     nRet = fflush(sh_pDbMgrRxMsg);
@@ -944,6 +1123,12 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
 static int32_t P_DB_MANAGER_WriteCsvV2xStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
+
+    if(pstEventMsg == NULL)
+    {
+        PrintError("pstEventMsg is NULL!");
+        return nRet;
+    }
 
     switch(pstEventMsg->pstDbManagerWrite->eCommMsgType)
     {
@@ -991,6 +1176,12 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatus(DB_MANAGER_EVENT_MSG_T *pstEventMs
 static int32_t P_DB_MANAGER_WriteCsv(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
+
+    if(pstEventMsg == NULL)
+    {
+        PrintError("pstEventMsg is NULL!");
+        return nRet;
+    }
 
     switch(pstEventMsg->pstDbV2x->ePayloadType)
     {

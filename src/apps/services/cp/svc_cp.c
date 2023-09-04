@@ -175,7 +175,7 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
 
     pstSvcCp->stDbV2xStatusTx.unSeqNum = 0;
     pstSvcCp->stDbV2xStatusTx.unContCnt = 0;
-    pstSvcCp->stDbV2xStatusTx.unTxVehicleSpeed = 60;
+    pstSvcCp->stDbV2xStatusTx.unTxVehicleSpeed = DB_MGR_DEFAULT_VEHICLE_SPEED;
 
     pstSvcCp->pchDeviceName = DB_MGR_DEFAULT_COMM_DEV_ID;
     pstSvcCp->ulDbStartTime = 0;
@@ -352,6 +352,10 @@ static void *P_SVC_CP_TaskTx(void *arg)
                 PrintError("pstTimeManager is NULL!");
             }
 
+            /* Todo, when the device ready to share its timestamp */
+            s_stSvcCp.stDbV2xStatusTx.ulTxTimeStampL1 = 19840919;
+            s_stSvcCp.stDbV2xStatusTx.ulTxTimeStampL2 = 19850501;
+
             nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
             if(nFrameWorkRet != FRAMEWORK_OK)
             {
@@ -361,8 +365,6 @@ static void *P_SVC_CP_TaskTx(void *arg)
             {
                 s_stSvcCp.stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
 
-                s_stSvcCp.stDbV2xStatusTx.ulTxTimeStampL1 = 19840919;
-                s_stSvcCp.stDbV2xStatusTx.ulTxTimeStampL2 = 19850501;
                 /* Set the application timestamp before sending */
                 s_stSvcCp.stDbV2xStatusTx.ulTxTimeStampL3 = pstTimeManager->ulTimeStamp;
             }

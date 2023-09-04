@@ -61,6 +61,9 @@
 #define DB_MGR_FILE_MAX_LENGTH                    100
 #define DB_MGR_SYSTEM_CALL_MAX_LENGTH             200
 
+#define DB_MGR_DEFAULT_VEHICLE_SPEED              60
+#define DB_MGR_DEFAULT_COMM_DEV_CNT               1
+
 #define DB_MGR_DEFAULT_COMM_TYPE                  "Tx"
 #define DB_MGR_DEFAULT_DEV_TYPE                   "OBU"
 #define DB_MGR_DEFAULT_COMM_DEV_ID                "KETIV2X01"

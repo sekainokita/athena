@@ -63,6 +63,7 @@
 #include "framework.h"
 #include "msg_manager.h"
 #include "db_manager.h"
+#include "time_manager.h"
 
 #include "v2x_defs.h"
 #include "v2x_ext_type.h"
@@ -363,6 +364,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     uint32_t unV2xTxPduLength = sizeof(Ext_V2X_TxPDU_t) + unDbV2xPacketLength;
     ssize_t nRetSendSize = 0;
     uint32_t ulTempDbV2xTotalPacketCrc32 = 0, ulDbV2xTotalPacketCrc32 = 0;
+    TIME_MANAGER_T *pstTimeManager;
 
     Ext_V2X_TxPDU_t *pstV2xTxPdu = NULL;
     DB_V2X_T *pstDbV2x = NULL;
@@ -453,6 +455,23 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
 
     if(s_bMsgMgrLog == ON)
     {
+        pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
+        if(pstTimeManager == NULL)
+        {
+            PrintError("pstTimeManager is NULL!");
+        }
+
+        nRet = TIME_MANAGER_Get(pstTimeManager);
+        if(nRet != FRAMEWORK_OK)
+        {
+            PrintError("TIME_MANAGER_Get() is failed! [nRet:%d]", nRet);
+        }
+        else
+        {
+            /* The average delay between svc and send() is about 10 us, so use the timestamp of svc */
+            PrintDebug("[%ld]-[%ld]=[%ld]", pstTimeManager->ulTimeStamp, pstEventMsg->pstDbV2x->ulTimeStamp, pstTimeManager->ulTimeStamp-pstEventMsg->pstDbV2x->ulTimeStamp);
+        }
+
         printf("\nV2X TX PDU>>\n"
         "  magic_num        : 0x%04X\n"
         "  ver              : 0x%04X\n"
