@@ -834,19 +834,20 @@ int32_t SVC_CP_Close(SVC_CP_T *pstSvcCp)
         return nRet;
     }
 
-    sprintf(s_chStrBufTxRxType, "%s", "Tx");
+    /* Tx */
+    sprintf(s_chStrBufTxRxType, "%s", SVC_CP_DB_TX);
     pstDbManager->stDbFile.pchTxRxType = s_chStrBufTxRxType;
     if(s_stSvcCp.stDbV2x.eDeviceType == DB_V2X_DEVICE_TYPE_OBU)
     {
-        sprintf(s_chStrBufDevType, "%s", "OBU");
+        sprintf(s_chStrBufDevType, "%s", SVC_CP_DEV_OBU);
     }
     else if(s_stSvcCp.stDbV2x.eDeviceType == DB_V2X_DEVICE_TYPE_RSU)
     {
-        sprintf(s_chStrBufDevType, "%s", "RSU");
+        sprintf(s_chStrBufDevType, "%s", SVC_CP_DEV_RSU);
     }
     else
     {
-        sprintf(s_chStrBufDevType, "%s", "UNKNOWN");
+        sprintf(s_chStrBufDevType, "%s", SVC_CP_DEV_UNKNOWN);
         PrintError("unknown device type[%d]", s_stSvcCp.stDbV2x.eDeviceType);
     }
     pstDbManager->stDbFile.pchDeviceType = s_chStrBufDevType;
@@ -881,6 +882,24 @@ int32_t SVC_CP_Close(SVC_CP_T *pstSvcCp)
 
     sprintf(s_chStrBufTotalTime, "%d%s", s_stSvcCp.unDbTotalWrittenTime, "secs");
     pstDbManager->stDbFile.pchTotalTime = s_chStrBufTotalTime;
+
+    nRet = DB_MANAGER_MakeDbFile(pstDbManager);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("DB_MANAGER_MakeDbFile() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    nRet = DB_MANAGER_RemoveTempFile(pstDbManager);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("DB_MANAGER_RemoveTempFile() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    /* Rx */
+    sprintf(s_chStrBufTxRxType, "%s", SVC_CP_DB_RX);
+    pstDbManager->stDbFile.pchTxRxType = s_chStrBufTxRxType;
 
     nRet = DB_MANAGER_MakeDbFile(pstDbManager);
     if(nRet != FRAMEWORK_OK)

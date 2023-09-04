@@ -65,6 +65,11 @@
 #define SVC_CP_HOUR_LEN                     (2)
 #define SVC_CP_MIN_LEN                      (2)
 #define SVC_CP_SEC_LEN                      (2)
+#define SVC_CP_DB_TX                        "Tx"
+#define SVC_CP_DB_RX                        "Rx"
+#define SVC_CP_DEV_OBU                      "OBU"
+#define SVC_CP_DEV_RSU                      "RSU"
+#define SVC_CP_DEV_UNKNOWN                  "UNKNOWN"
 
 /***************************** Enum and Structure ****************************/
 
