@@ -681,7 +681,7 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
                             if(s_bFirstPacket == TRUE)
                             {
                                 s_bFirstPacket = FALSE;
-                                PrintWarn("set s_bFirstPacket [%d]", s_bFirstPacket);
+                                PrintWarn("Successfully received the first packet from the other device, set s_bFirstPacket [%d]", s_bFirstPacket);
                             }
                             else
                             {

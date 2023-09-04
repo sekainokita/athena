@@ -424,6 +424,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     PrintDebug("pstDbManager[0x%p]", pstDbManager);
 
                     pstDbManager->eFileType = DB_MANAGER_FILE_TYPE_TXT;
+                    pstDbManager->eSvcType = DB_MANAGER_SVC_TYPE_BASE;
 
                     nFrameWorkRet = DB_MANAGER_Open(pstDbManager);
                     if(nFrameWorkRet != FRAMEWORK_OK)
@@ -439,6 +440,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     PrintDebug("pstDbManager[0x%p]", pstDbManager);
 
                     pstDbManager->eFileType = DB_MANAGER_FILE_TYPE_CSV;
+                    pstDbManager->eSvcType = DB_MANAGER_SVC_TYPE_BASE;
 
                     nFrameWorkRet = DB_MANAGER_Open(pstDbManager);
                     if(nFrameWorkRet != FRAMEWORK_OK)
@@ -454,6 +456,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     PrintDebug("pstDbManager[0x%p]", pstDbManager);
 
                     pstDbManager->eFileType = DB_MANAGER_FILE_TYPE_SQLITE;
+                    pstDbManager->eSvcType = DB_MANAGER_SVC_TYPE_BASE;
 
                     nFrameWorkRet = DB_MANAGER_Open(pstDbManager);
                     if(nFrameWorkRet != FRAMEWORK_OK)

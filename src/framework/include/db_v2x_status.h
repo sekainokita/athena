@@ -129,9 +129,9 @@ typedef struct DB_V2X_POSITION_RX_t {
 * @param ulRxTimeStampL1                        The system layer 1 time value at which the communication device transmitted the message (need to change to future UTF time, C-ITS communication time compatibility)
 * @param ulRxTimeStampL2                        The system layer 2 time value at which the OBU/RSU/Control Units transmitted the message (Optional, if the devices are separated from model IP)
 * @param ulRxTimeStampL2                        The system layer 3 time value at which the application device transmitted the message (Optional, if the devices are separated OBU/RSU)
-* @param ulAvgLatencyL1                         [L1] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second)
-* @param ulAvgLatencyL2                         [L2] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second)
-* @param ulAvgLatencyL3                         [L3] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second)
+* @param ulLatencyL1                            [L1] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second)
+* @param ulLatencyL2                            [L2] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second)
+* @param ulLatencyL3                            [L3] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second)
 * @param unTxDeviceId                           The unique ID (Serial Number) of the transfer device
 * @param unRxVehicleSpeed                       Rx vehicle speed (Rx vehicle speed (if available), if not available, set the experimental value manually, default 60km/h)
 * @param unTotalCommDevCnt                      The total number of devices that are currently simultaneously connected and transmitting/receiving (the count number of all device IDs currently received and stored by the Rx device)
@@ -148,9 +148,9 @@ typedef struct DB_V2X_STATUS_RX_t {
     uint64_t                                    ulRxTimeStampL1;
     uint64_t                                    ulRxTimeStampL2;
     uint64_t                                    ulRxTimeStampL3;
-    uint64_t                                    ulAvgLatencyL1;
-    uint64_t                                    ulAvgLatencyL2;
-    uint64_t                                    ulAvgLatencyL3;
+    uint64_t                                    ulLatencyL1;
+    uint64_t                                    ulLatencyL2;
+    uint64_t                                    ulLatencyL3;
     uint32_t                                    unTxDeviceId;
     uint16_t                                    unRxVehicleSpeed;
     uint32_t                                    unTotalCommDevCnt;

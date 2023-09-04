@@ -309,6 +309,7 @@ int32_t P_SVC_CP_RestartDb(void)
 
     PrintDebug("Reopen the default temp DB file");
     pstDbManager->eFileType = s_stSvcCp.stDbManagerWrite.eFileType;
+    pstDbManager->eSvcType = DB_MANAGER_SVC_TYPE_V2X_STATUS;
     nRet = DB_MANAGER_Open(pstDbManager);
     if(nRet != FRAMEWORK_OK)
     {
@@ -747,6 +748,7 @@ int32_t SVC_CP_Open(SVC_CP_T *pstSvcCp)
 
     pstDbManager = FRAMEWORK_GetDbManagerInstance();
     pstDbManager->eFileType = pstSvcCp->stDbManagerWrite.eFileType;
+    pstDbManager->eSvcType = DB_MANAGER_SVC_TYPE_V2X_STATUS;
 
     nFrameWorkRet = DB_MANAGER_Open(pstDbManager);
     if(nFrameWorkRet != FRAMEWORK_OK)

@@ -135,6 +135,7 @@ static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
     PrintDebug("pstDbManager[0x%p]", pstDbManager);
 
     pstDbManager->eFileType = DB_MANAGER_FILE_TYPE_CSV;
+    pstDbManager->eSvcType = DB_MANAGER_SVC_TYPE_V2X_STATUS;
 
     nFrameWorkRet = DB_MANAGER_Open(pstDbManager);
     if(nFrameWorkRet != FRAMEWORK_OK)

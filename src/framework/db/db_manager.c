@@ -139,9 +139,9 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
         pstDbV2xStatusRx->ulRxTimeStampL3 = pstTimeManager->ulTimeStamp;
     }
 
-    pstDbV2xStatusRx->ulAvgLatencyL1 = pstDbV2xStatusRx->ulRxTimeStampL1 - pstDbV2xStatusTx->ulTxTimeStampL1;
-    pstDbV2xStatusRx->ulAvgLatencyL2 = pstDbV2xStatusRx->ulRxTimeStampL2 - pstDbV2xStatusTx->ulTxTimeStampL2;
-    pstDbV2xStatusRx->ulAvgLatencyL3 = pstDbV2xStatusRx->ulRxTimeStampL3 - pstDbV2xStatusTx->ulTxTimeStampL3;
+    pstDbV2xStatusRx->ulLatencyL1 = pstDbV2xStatusRx->ulRxTimeStampL1 - pstDbV2xStatusTx->ulTxTimeStampL1;
+    pstDbV2xStatusRx->ulLatencyL2 = pstDbV2xStatusRx->ulRxTimeStampL2 - pstDbV2xStatusTx->ulTxTimeStampL2;
+    pstDbV2xStatusRx->ulLatencyL3 = pstDbV2xStatusRx->ulRxTimeStampL3 - pstDbV2xStatusTx->ulTxTimeStampL3;
     pstDbV2xStatusRx->unTxDeviceId = pstEventMsg->pstDbV2x->unDeviceId;
     pstDbV2xStatusRx->unRxVehicleSpeed = DB_MGR_DEFAULT_VEHICLE_SPEED;
     pstDbV2xStatusRx->unTotalCommDevCnt = DB_MGR_DEFAULT_COMM_DEV_CNT;
@@ -709,8 +709,36 @@ static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
         fprintf(sh_pDbMgrTxMsg, "usHwVer,");
         fprintf(sh_pDbMgrTxMsg, "usSwVer,");
         fprintf(sh_pDbMgrTxMsg, "ulPayloadLength,");
-        fprintf(sh_pDbMgrTxMsg, "cPayload,");
-        fprintf(sh_pDbMgrTxMsg, "unTotalPacketCrc32");
+
+        if(pstDbManager->eSvcType == DB_MANAGER_SVC_TYPE_V2X_STATUS)
+        {
+            fprintf(sh_pDbMgrTxMsg, "ulTxTimeStampL1,");
+            fprintf(sh_pDbMgrTxMsg, "ulTxTimeStampL2,");
+            fprintf(sh_pDbMgrTxMsg, "ulTxTimeStampL3,");
+            fprintf(sh_pDbMgrTxMsg, "unRxDeviceId,");
+            fprintf(sh_pDbMgrTxMsg, "eChannel,");
+            fprintf(sh_pDbMgrTxMsg, "sPower,");
+            fprintf(sh_pDbMgrTxMsg, "eBandwidth,");
+            fprintf(sh_pDbMgrTxMsg, "usTxRatio,");
+            fprintf(sh_pDbMgrTxMsg, "nTxLatitude,");
+            fprintf(sh_pDbMgrTxMsg, "nTxLongitude,");
+            fprintf(sh_pDbMgrTxMsg, "nTxAttitude,");
+            fprintf(sh_pDbMgrTxMsg, "unSeqNum,");
+            fprintf(sh_pDbMgrTxMsg, "unContCnt,");
+            fprintf(sh_pDbMgrTxMsg, "unTxVehicleSpeed,");
+            fprintf(sh_pDbMgrTxMsg, "unTotalPacketCrc32");
+        }
+        else if(pstDbManager->eSvcType == DB_MANAGER_SVC_TYPE_BASE)
+        {
+            fprintf(sh_pDbMgrRxMsg, "cPayload,");
+            fprintf(sh_pDbMgrTxMsg, "unTotalPacketCrc32");
+        }
+        else
+        {
+            PrintError("unknown eSvcType[nRet:%d]", pstDbManager->eSvcType);
+            return nRet;
+        }
+
         fprintf(sh_pDbMgrTxMsg, "\r\n");
     }
 
@@ -735,8 +763,59 @@ static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
         fprintf(sh_pDbMgrRxMsg, "usHwVer,");
         fprintf(sh_pDbMgrRxMsg, "usSwVer,");
         fprintf(sh_pDbMgrRxMsg, "ulPayloadLength,");
-        fprintf(sh_pDbMgrRxMsg, "cPayload,");
-        fprintf(sh_pDbMgrRxMsg, "unTotalPacketCrc32");
+
+        if(pstDbManager->eSvcType == DB_MANAGER_SVC_TYPE_V2X_STATUS)
+        {
+            /* Tx */
+            fprintf(sh_pDbMgrRxMsg, "ulTxTimeStampL1,");
+            fprintf(sh_pDbMgrRxMsg, "ulTxTimeStampL2,");
+            fprintf(sh_pDbMgrRxMsg, "ulTxTimeStampL3,");
+            fprintf(sh_pDbMgrRxMsg, "unRxDeviceId,");
+            fprintf(sh_pDbMgrRxMsg, "eChannel,");
+            fprintf(sh_pDbMgrRxMsg, "sPower,");
+            fprintf(sh_pDbMgrRxMsg, "eBandwidth,");
+            fprintf(sh_pDbMgrRxMsg, "usTxRatio,");
+            fprintf(sh_pDbMgrRxMsg, "nTxLatitude,");
+            fprintf(sh_pDbMgrRxMsg, "nTxLongitude,");
+            fprintf(sh_pDbMgrRxMsg, "nTxAttitude,");
+            fprintf(sh_pDbMgrRxMsg, "unSeqNum,");
+            fprintf(sh_pDbMgrRxMsg, "unContCnt,");
+            fprintf(sh_pDbMgrRxMsg, "unTxVehicleSpeed,");
+            fprintf(sh_pDbMgrRxMsg, "unTotalPacketCrc32,");
+
+            /* Rx */
+            fprintf(sh_pDbMgrRxMsg, "ulRxTimeStampL1,");
+            fprintf(sh_pDbMgrRxMsg, "ulRxTimeStampL2,");
+            fprintf(sh_pDbMgrRxMsg, "ulRxTimeStampL3,");
+            fprintf(sh_pDbMgrRxMsg, "ulLatencyL1(us),");
+            fprintf(sh_pDbMgrRxMsg, "ulLatencyL2(us),");
+            fprintf(sh_pDbMgrRxMsg, "ulLatencyL3(us),");
+            fprintf(sh_pDbMgrRxMsg, "unTxDeviceId,");
+            fprintf(sh_pDbMgrRxMsg, "unRxVehicleSpeed,");
+            fprintf(sh_pDbMgrRxMsg, "unTotalCommDevCnt,");
+            fprintf(sh_pDbMgrRxMsg, "usRssi,");
+            fprintf(sh_pDbMgrRxMsg, "eRsvLevel,");
+            fprintf(sh_pDbMgrRxMsg, "usCommDistance,");
+            fprintf(sh_pDbMgrRxMsg, "nRxLatitude,");
+            fprintf(sh_pDbMgrRxMsg, "nRxLongitude,");
+            fprintf(sh_pDbMgrRxMsg, "nRxAttitude,");
+            fprintf(sh_pDbMgrRxMsg, "ucErrIndicator,");
+            fprintf(sh_pDbMgrRxMsg, "ulTotalPacketCnt,");
+            fprintf(sh_pDbMgrRxMsg, "ulTotalErrCnt,");
+            fprintf(sh_pDbMgrRxMsg, "unPdr,");
+            fprintf(sh_pDbMgrRxMsg, "unPer,");
+        }
+        else if(pstDbManager->eSvcType == DB_MANAGER_SVC_TYPE_BASE)
+        {
+            fprintf(sh_pDbMgrRxMsg, "cPayload,");
+            fprintf(sh_pDbMgrRxMsg, "unTotalPacketCrc32");
+        }
+        else
+        {
+            PrintError("unknown eSvcType[nRet:%d]", pstDbManager->eSvcType);
+            return nRet;
+        }
+
         fprintf(sh_pDbMgrRxMsg, "\r\n");
     }
 
@@ -1064,9 +1143,9 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulRxTimeStampL1);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulRxTimeStampL2);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulRxTimeStampL3);
-    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulAvgLatencyL1);
-    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulAvgLatencyL2);
-    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulAvgLatencyL3);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulLatencyL1);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulLatencyL2);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulLatencyL3);
     fprintf(sh_pDbMgrRxMsg, "0x%x,", stDbV2xStatusRx.unTxDeviceId);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unRxVehicleSpeed);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unTotalCommDevCnt);

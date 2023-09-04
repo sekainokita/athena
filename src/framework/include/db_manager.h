@@ -99,6 +99,16 @@ typedef enum {
 } DB_MANAGER_FILE_TYPE_E;
 
 /**
+* @details DB_MANAGER_SVC_TYPE_E
+*/
+typedef enum {
+    DB_MANAGER_SVC_TYPE_BASE                      = 0,
+    DB_MANAGER_SVC_TYPE_V2X_STATUS                = 1,
+    DB_MANAGER_SVC_TYPE_PLATOONING                = 2,
+    DB_MANAGER_SVC_TYPE_MAX                       = 255
+} DB_MANAGER_SVC_TYPE_E;
+
+/**
 * @details DB_MANAGER_COMM_MSG_TYPE_E
 * @param DB_MANAGER_COMM_MSG_TYPE_TX
 * @param DB_MANAGER_COMM_MSG_TYPE_RX
@@ -189,6 +199,7 @@ typedef struct DB_MANAGER_V2X_STATUS_t {
 typedef struct DB_MANAGER_t {
     DB_MANAGER_FILE_T       stDbFile;
     DB_MANAGER_FILE_TYPE_E  eFileType;
+    DB_MANAGER_SVC_TYPE_E   eSvcType;
     bool                    bLogLevel;
     uint32_t                unReserved;
 } DB_MANAGER_T;
