@@ -60,15 +60,18 @@
 #include "db_v2x_status.h"
 
 /***************************** Definition ************************************/
-#define DB_MANAGER_TXT_TX_FILE     "db_v2x_tx_temp_writing.txt"
-#define DB_MANAGER_TXT_RX_FILE     "db_v2x_rx_temp_writing.txt"
 
-#define DB_MANAGER_CSV_TX_FILE     "db_v2x_tx_temp_writing.csv"
-#define DB_MANAGER_CSV_RX_FILE     "db_v2x_rx_temp_writing.csv"
+#define DB_MANAGER_DB_TEMP_PATH    "/tmp/"
+
+#define DB_MANAGER_TXT_TX_FILE     DB_MANAGER_DB_TEMP_PATH"db_v2x_tx_temp_writing.txt"
+#define DB_MANAGER_TXT_RX_FILE     DB_MANAGER_DB_TEMP_PATH"db_v2x_rx_temp_writing.txt"
+
+#define DB_MANAGER_CSV_TX_FILE     DB_MANAGER_DB_TEMP_PATH"db_v2x_tx_temp_writing.csv"
+#define DB_MANAGER_CSV_RX_FILE     DB_MANAGER_DB_TEMP_PATH"db_v2x_rx_temp_writing.csv"
 
 #if defined(CONFIG_SQLITE)
-#define DB_MANAGER_SQL_TX_FILE     "db_v2x_tx_temp_writing.db"
-#define DB_MANAGER_SQL_RX_FILE     "db_v2x_rx_temp_writing.db"
+#define DB_MANAGER_SQL_TX_FILE     DB_MANAGER_DB_TEMP_PATH"db_v2x_tx_temp_writing.db"
+#define DB_MANAGER_SQL_RX_FILE     DB_MANAGER_DB_TEMP_PATH"db_v2x_rx_temp_writing.db"
 #endif
 
 /***************************** Enum and Structure ****************************/
