@@ -98,6 +98,9 @@ static bool s_bDbMgrLog = OFF;
 
 static DB_MANAGER_V2X_STATUS_T s_stDbV2xStatusRx;
 
+static int32_t P_DB_MANAGER_SetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus);
+static int32_t P_DB_MANAGER_GetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus);
+
 /***************************** Function  *************************************/
 
 static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB_V2X_STATUS_TX_T *pstDbV2xStatusTx, DB_V2X_STATUS_RX_T *pstDbV2xStatusRx)
@@ -105,6 +108,8 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     int32_t nRet = FRAMEWORK_ERROR;
     TIME_MANAGER_T *pstTimeManager;
     DI_T *pstDi;
+    DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
+    float fTemp = 0.0f;
 
     if(pstDbV2xStatusTx == NULL)
     {
@@ -166,11 +171,30 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusRx->stRxPosition.nRxLatitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLatitude * SVC_CP_GPS_VALUE_CONVERT);
     pstDbV2xStatusRx->stRxPosition.nRxLongitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLongitude * SVC_CP_GPS_VALUE_CONVERT);
     pstDbV2xStatusRx->stRxPosition.nRxAttitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fAltitude * SVC_CP_GPS_VALUE_CONVERT);
-    pstDbV2xStatusRx->ucErrIndicator = 0;
-    pstDbV2xStatusRx->ulTotalPacketCnt++;
-    pstDbV2xStatusRx->ulTotalErrCnt = 0;
-    pstDbV2xStatusRx->unPdr = 0;
-    pstDbV2xStatusRx->unPer = 0;
+
+    nRet = P_DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+    }
+
+    pstDbV2xStatusRx->ucErrIndicator = stDbV2xStatus.stV2xStatusRx.ucErrIndicator;
+    pstDbV2xStatusRx->ulTotalPacketCnt = stDbV2xStatus.stV2xStatusRx.ulTotalPacketCnt;
+    pstDbV2xStatusRx->ulTotalErrCnt = stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt;
+
+    fTemp = (float)pstDbV2xStatusRx->ulTotalPacketCnt/(float)pstDbV2xStatusTx->unSeqNum;
+    pstDbV2xStatusRx->unPdr = (uint32_t)(fTemp*100*100); /* divide /100 at the writing db */
+
+    fTemp = (float)pstDbV2xStatusRx->ulTotalErrCnt/(float)pstDbV2xStatusTx->unSeqNum;
+    pstDbV2xStatusRx->unPer = (uint32_t)(fTemp*100*100); /* divide /100 at the writing db */
+
+    /* Reset the err indicator */
+    stDbV2xStatus.stV2xStatusRx.ucErrIndicator = FALSE;
+    nRet = P_DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+    }
 
     return nRet;
 }
@@ -802,8 +826,8 @@ static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
             fprintf(sh_pDbMgrRxMsg, "ucErrIndicator,");
             fprintf(sh_pDbMgrRxMsg, "ulTotalPacketCnt,");
             fprintf(sh_pDbMgrRxMsg, "ulTotalErrCnt,");
-            fprintf(sh_pDbMgrRxMsg, "unPdr,");
-            fprintf(sh_pDbMgrRxMsg, "unPer,");
+            fprintf(sh_pDbMgrRxMsg, "unPdr(percent),");
+            fprintf(sh_pDbMgrRxMsg, "unPer(percent)");
         }
         else if(pstDbManager->eSvcType == DB_MANAGER_SVC_TYPE_BASE)
         {
@@ -1077,6 +1101,7 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     DB_V2X_STATUS_TX_T stDbV2xStatusTx;
     DB_V2X_STATUS_RX_T stDbV2xStatusRx;
     DI_T *pstDi;
+    float fTemp;
 
     if(pstEventMsg == NULL)
     {
@@ -1171,8 +1196,10 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.ucErrIndicator);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulTotalPacketCnt);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulTotalErrCnt);
-    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unPdr);
-    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unPer);
+    fTemp = (float)stDbV2xStatusRx.unPdr / 100.0f;
+    fprintf(sh_pDbMgrRxMsg, "%.2f,", fTemp);
+    fTemp = (float)stDbV2xStatusRx.unPer / 100.0f;
+    fprintf(sh_pDbMgrRxMsg, "%.2f,", fTemp);
 
     fprintf(sh_pDbMgrRxMsg, "\r\n");
 
@@ -1516,9 +1543,9 @@ static int32_t P_DB_MANAGER_DeInit(DB_MANAGER_T *pstDbManager)
     return nRet;
 }
 
-int32_t P_DB_MANAGER_ResetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
+static int32_t P_DB_MANAGER_ResetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
 {
-    int32_t nRet = APP_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     if(pstDbV2xStatus == NULL)
     {
@@ -1531,14 +1558,14 @@ int32_t P_DB_MANAGER_ResetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
 
     memcpy(pstDbV2xStatus, &s_stDbV2xStatusRx, sizeof(DB_MANAGER_V2X_STATUS_T));
 
-    nRet = APP_OK;
+    nRet = FRAMEWORK_OK;
 
     return nRet;
 }
 
-int32_t P_DB_MANAGER_SetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
+static int32_t P_DB_MANAGER_SetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
 {
-    int32_t nRet = APP_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     if(pstDbV2xStatus == NULL)
     {
@@ -1546,14 +1573,14 @@ int32_t P_DB_MANAGER_SetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
     }
 
     memcpy(&s_stDbV2xStatusRx, pstDbV2xStatus, sizeof(DB_MANAGER_V2X_STATUS_T));
-    nRet = APP_OK;
+    nRet = FRAMEWORK_OK;
 
     return nRet;
 }
 
-int32_t P_DB_MANAGER_GetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
+static int32_t P_DB_MANAGER_GetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
 {
-    int32_t nRet = APP_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     if(pstDbV2xStatus == NULL)
     {
@@ -1561,14 +1588,14 @@ int32_t P_DB_MANAGER_GetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
     }
 
     memcpy(pstDbV2xStatus, &s_stDbV2xStatusRx, sizeof(DB_MANAGER_V2X_STATUS_T));
-    nRet = APP_OK;
+    nRet = FRAMEWORK_OK;
 
     return nRet;
 }
 
 int32_t DB_MANAGER_SetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
 {
-    int32_t nRet = APP_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     if(pstDbV2xStatus == NULL)
     {
@@ -1577,7 +1604,7 @@ int32_t DB_MANAGER_SetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
     }
 
     nRet = P_DB_MANAGER_SetV2xStatus(pstDbV2xStatus);
-    if(nRet != APP_OK)
+    if(nRet != FRAMEWORK_OK)
     {
         PrintError("P_DB_MANAGER_SetV2xStatus() is failed! [nRet:%d]", nRet);
     }
@@ -1587,7 +1614,7 @@ int32_t DB_MANAGER_SetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
 
 int32_t DB_MANAGER_GetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
 {
-    int32_t nRet = APP_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     if(pstDbV2xStatus == NULL)
     {
@@ -1596,7 +1623,7 @@ int32_t DB_MANAGER_GetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
     }
 
     nRet = P_DB_MANAGER_GetV2xStatus(pstDbV2xStatus);
-    if(nRet != APP_OK)
+    if(nRet != FRAMEWORK_OK)
     {
         PrintError("P_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
     }
@@ -1606,7 +1633,7 @@ int32_t DB_MANAGER_GetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
 
 int32_t DB_MANAGER_ResetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
 {
-    int32_t nRet = APP_ERROR;
+    int32_t nRet = FRAMEWORK_ERROR;
 
     if(pstDbV2xStatus == NULL)
     {
@@ -1615,7 +1642,7 @@ int32_t DB_MANAGER_ResetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
     }
 
     nRet = P_DB_MANAGER_ResetV2xStatus(pstDbV2xStatus);
-    if(nRet != APP_OK)
+    if(nRet != FRAMEWORK_OK)
     {
         PrintError("P_DB_MANAGER_ResetV2xStatus() is failed! [nRet:%d]", nRet);
     }

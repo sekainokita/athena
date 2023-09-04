@@ -680,26 +680,47 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
                         {
                             if(s_bFirstPacket == TRUE)
                             {
-                                s_bFirstPacket = FALSE;
                                 PrintWarn("Successfully received the first packet from the other device, set s_bFirstPacket [%d]", s_bFirstPacket);
                             }
                             else
                             {
                                 PrintError("CRC32 does not matched!! check Get:ulDbV2xTotalPacketCrc32[0x%x] != Calculate:ulCompDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32, ulCompDbV2xTotalPacketCrc32);
                                 nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
-                                if(nRet != FRAMEWORK_ERROR)
+                                if(nRet != FRAMEWORK_OK)
                                 {
                                     PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                                 }
 
+                                stDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
                                 stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
                                 PrintWarn("increase ulTotalErrCnt [from %ld to %ld]", (stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
 
                                 nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
-                                if(nRet != FRAMEWORK_ERROR)
+                                if(nRet != FRAMEWORK_OK)
                                 {
                                     PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                                 }
+                            }
+                        }
+
+                        if(s_bFirstPacket == TRUE)
+                        {
+                            s_bFirstPacket = FALSE;
+                        }
+                        else
+                        {
+                            nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                            if(nRet != FRAMEWORK_OK)
+                            {
+                                PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                            }
+
+                            stDbV2xStatus.stV2xStatusRx.ulTotalPacketCnt++;
+
+                            nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                            if(nRet != FRAMEWORK_OK)
+                            {
+                                PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                             }
                         }
 
