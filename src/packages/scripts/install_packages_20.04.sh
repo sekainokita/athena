@@ -72,6 +72,7 @@ apt-get install -y g++ inetutils-tools libboost-all-dev
 apt-get install -y libncurses5 libncurses5-dev install thrift-compiler
 
 apt install -y ntp ntpstat ufw
+apt install -y systemd-timesyncd
 apt install -y libgmp-dev swig
 apt install -y python3-sphinx python3-lxml
 apt install -y libfftw3-dev libsdl1.2-dev libgsl-dev
