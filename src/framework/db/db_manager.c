@@ -166,8 +166,16 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
         PrintError("DI_GPS_Get() is failed! [nRet:%d]", nRet);
     }
 
-    pstDbV2xStatusRx->stRxPosition.usCommDistance = 255;
+    double dRxlat, dRxLon, dTxLat, dTxLon, dDistMeter;
 
+    dRxlat = (double)pstDi->stDiGps.stDiGpsData.fLatitude;
+    dRxLon = (double)pstDi->stDiGps.stDiGpsData.fLongitude;
+    dTxLat = (double)pstDbV2xStatusTx->stTxPosition.nTxLatitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    dTxLon = (double)pstDbV2xStatusTx->stTxPosition.nTxLongitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+
+    dDistMeter = DI_GPS_CalculateDistance(dRxlat, dRxLon, dTxLat, dTxLon);
+
+    pstDbV2xStatusRx->stRxPosition.unCommDistance = (uint32_t)(dDistMeter * SVC_CP_GPS_VALUE_CONVERT);
     pstDbV2xStatusRx->stRxPosition.nRxLatitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLatitude * SVC_CP_GPS_VALUE_CONVERT);
     pstDbV2xStatusRx->stRxPosition.nRxLongitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLongitude * SVC_CP_GPS_VALUE_CONVERT);
     pstDbV2xStatusRx->stRxPosition.nRxAttitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fAltitude * SVC_CP_GPS_VALUE_CONVERT);
@@ -1021,6 +1029,7 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusTx(DB_MANAGER_EVENT_MSG_T *pstEvent
     int32_t nRet = FRAMEWORK_ERROR;
     char *pchPayload = NULL;
     DB_V2X_STATUS_TX_T stDbV2xStatusTx;
+    double dTemp;
 
     if(pstEventMsg == NULL)
     {
@@ -1061,9 +1070,13 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusTx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.sPower);
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.eBandwidth);
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.usTxRatio);
-    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.stTxPosition.nTxLatitude);
-    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.stTxPosition.nTxLongitude);
-    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.stTxPosition.nTxAttitude);
+    dTemp = (double)stDbV2xStatusTx.stTxPosition.nTxLatitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrTxMsg, "%lf,", dTemp);
+    dTemp = (double)stDbV2xStatusTx.stTxPosition.nTxLongitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrTxMsg, "%lf,", dTemp);
+    dTemp = (double)stDbV2xStatusTx.stTxPosition.nTxAttitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrTxMsg, "%lf,", dTemp);
+
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.unSeqNum);
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.unContCnt);
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.unTxVehicleSpeed);
@@ -1102,6 +1115,7 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     DB_V2X_STATUS_RX_T stDbV2xStatusRx;
     DI_T *pstDi;
     float fTemp;
+    double dTemp;
 
     if(pstEventMsg == NULL)
     {
@@ -1145,9 +1159,13 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.sPower);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.eBandwidth);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.usTxRatio);
-    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.stTxPosition.nTxLatitude);
-    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.stTxPosition.nTxLongitude);
-    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.stTxPosition.nTxAttitude);
+
+    dTemp = (double)stDbV2xStatusTx.stTxPosition.nTxLatitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
+    dTemp = (double)stDbV2xStatusTx.stTxPosition.nTxLongitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
+    dTemp = (double)stDbV2xStatusTx.stTxPosition.nTxAttitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.unSeqNum);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.unContCnt);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.unTxVehicleSpeed);
@@ -1168,9 +1186,18 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulRxTimeStampL1);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulRxTimeStampL2);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulRxTimeStampL3);
+#if 0 // TODO
+    dTemp = (double)stDbV2xStatusRx.ulLatencyL1 / TIMER_MGR_US_TO_MS_DOUBLE;
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
+    dTemp = (double)stDbV2xStatusRx.ulLatencyL2 / TIMER_MGR_US_TO_MS_DOUBLE;
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
+    dTemp = (double)stDbV2xStatusRx.ulLatencyL3 / TIMER_MGR_US_TO_MS_DOUBLE;
+#else
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulLatencyL1);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulLatencyL2);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulLatencyL3);
+#endif
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
     fprintf(sh_pDbMgrRxMsg, "0x%x,", stDbV2xStatusRx.unTxDeviceId);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unRxVehicleSpeed);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unTotalCommDevCnt);
@@ -1189,10 +1216,14 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     {
         PrintError("DI_GPS_Get() is failed! [nRet:%d]", nRet);
     }
-    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stRxPosition.usCommDistance);
-    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stRxPosition.nRxLatitude);
-    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stRxPosition.nRxLongitude);
-    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stRxPosition.nRxAttitude);
+    dTemp = (double)stDbV2xStatusRx.stRxPosition.unCommDistance / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
+    dTemp = (double)stDbV2xStatusRx.stRxPosition.nRxLatitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
+    dTemp = (double)stDbV2xStatusRx.stRxPosition.nRxLongitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
+    dTemp = (double)stDbV2xStatusRx.stRxPosition.nRxAttitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.ucErrIndicator);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulTotalPacketCnt);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulTotalErrCnt);

@@ -120,6 +120,8 @@ int32_t DI_GPS_Close(DI_GPS_T *pstDiGps);
 int32_t DI_GPS_Start(DI_GPS_T *pstDiGps);
 int32_t DI_GPS_Stop(DI_GPS_T *pstDiGps);
 
+double DI_GPS_CalculateDistance(double dRxLat, double dRxLon, double dTxLat, double dTxLon);
+
 void DI_GPS_Status(DI_GPS_T *pstDiGps);
 int32_t DI_GPS_Init(DI_GPS_T *pstDiGps);
 int32_t DI_GPS_DeInit(DI_GPS_T *pstDiGps);

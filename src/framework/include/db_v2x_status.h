@@ -118,7 +118,7 @@ typedef enum {
 
 */
 typedef struct DB_V2X_POSITION_RX_t {
-    uint16_t                                    usCommDistance;
+    uint32_t                                    unCommDistance;
     int32_t                                     nRxLatitude;
     int32_t                                     nRxLongitude;
     int32_t                                     nRxAttitude;

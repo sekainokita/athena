@@ -57,6 +57,7 @@
 #define USLEEP_S                             (USLEEP_MS*USLEEP_MS)
 
 #define TIMER_MGR_US_TO_MS                   USLEEP_MS
+#define TIMER_MGR_US_TO_MS_DOUBLE            1000.0f
 
 /***************************** Enum and Structure ****************************/
 

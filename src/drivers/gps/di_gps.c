@@ -62,6 +62,7 @@
 /***************************** Static Variable *******************************/
 static bool s_bDiGpsLog = OFF;
 static DI_GPS_XSENS_T s_stDiGpsDev;
+static bool s_bLogOnOff = FALSE;
 
 /***************************** Function  *************************************/
 
@@ -118,21 +119,22 @@ static int32_t P_DI_GPS_DeInit(DI_GPS_T *pstDiGps)
     return nRet;
 }
 
-double P_DI_GPS_SetToRadians(double degree)
+double P_DI_GPS_SetToRadians(double dDegree)
 {
-    double r = degree * PI / 180;
-    return r;
+    double dRadian = dDegree * PI / 180;
+
+    return dRadian;
 }
 
-double DI_GPS_CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+double DI_GPS_CalculateDistance(double dRxLat, double dRxLon, double dTxLat, double dTxLon)
 {
     /* Refenrece Codes : https://github.com/janantala/GPS-distance/blob/master/c/distance.c */
 
     double a = 6378137, b = 6356752.314245, f = 1 / 298.257223563;
-    double L = P_DI_GPS_SetToRadians(lon2 - lon1);
+    double L = P_DI_GPS_SetToRadians(dTxLon - dRxLon);
 
-    double U1 = atan((1 - f) * tan(P_DI_GPS_SetToRadians(lat1)));
-    double U2 = atan((1 - f) * tan(P_DI_GPS_SetToRadians(lat2)));
+    double U1 = atan((1 - f) * tan(P_DI_GPS_SetToRadians(dRxLat)));
+    double U2 = atan((1 - f) * tan(P_DI_GPS_SetToRadians(dTxLat)));
     double sinU1 = sin(U1), cosU1 = cos(U1);
     double sinU2 = sin(U2), cosU2 = cos(U2);
     double cosSqAlpha;
@@ -140,16 +142,24 @@ double DI_GPS_CalculateDistance(double lat1, double lon1, double lat2, double lo
     double cos2SigmaM;
     double cosSigma;
     double sigma;
-
     double lambda = L, lambdaP, iterLimit = 100;
+    double uSq, A, B, deltaSigma, dDistanceMeters;
+
+    if(s_bLogOnOff == TRUE)
+    {
+        PrintDebug("Rx Lat[%lf], lon[%lf] : Tx Lat[%lf], lon[%lf]", dRxLat, dRxLon, dTxLat, dTxLon);
+    }
+
     do
     {
         double sinLambda = sin(lambda), cosLambda = cos(lambda);
+
         sinSigma = sqrt((cosU2 * sinLambda)
                     * (cosU2 * sinLambda)
                         + (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda)
                             * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda)
                         );
+
         if (sinSigma == 0)
         {
             return 0;
@@ -171,24 +181,31 @@ double DI_GPS_CalculateDistance(double lat1, double lon1, double lat2, double lo
                     );
     } while (fabs(lambda - lambdaP) > 1e-12 && --iterLimit > 0);
 
-    if (iterLimit == 0) {
+    if (iterLimit == 0)
+    {
         return 0;
     }
 
-    double uSq = cosSqAlpha * (a * a - b * b) / (b * b);
-    double A = 1 + uSq / 16384
+    uSq = cosSqAlpha * (a * a - b * b) / (b * b);
+    A = 1 + uSq / 16384
             * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
-    double B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
-    double deltaSigma =
+    B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
+    deltaSigma =
                 B * sinSigma
                     * (cos2SigmaM + B / 4
                         * (cosSigma
                             * (-1 + 2 * cos2SigmaM * cos2SigmaM) - B / 6 * cos2SigmaM
                                 * (-3 + 4 * sinSigma * sinSigma)
                                     * (-3 + 4 * cos2SigmaM * cos2SigmaM)));
-    double s = b * A * (sigma - deltaSigma);
 
-    return s;
+    dDistanceMeters = b * A * (sigma - deltaSigma);
+
+    if(s_bLogOnOff == TRUE)
+    {
+        PrintDebug("Distance [%lf] meters", dDistanceMeters);
+    }
+
+    return dDistanceMeters;
 }
 
 int32_t DI_GPS_SetLog(DI_GPS_T *pstDiGps)

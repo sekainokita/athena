@@ -58,6 +58,7 @@
 #define SVC_CP_GPS_OPEN_RETRY_DELAY         (1000)
 
 #define SVC_CP_GPS_VALUE_CONVERT            (1000000)
+#define SVC_CP_GPS_VALUE_CONVERT_DOUBLE     (1000000.0f)
 
 #define SVC_CP_DEFAULT_TOTAL_DB_WRITE_TIME  (1000*1000*30) /* 1 hours */
 #define SVC_CP_STR_BUF_LEN                  (20)
