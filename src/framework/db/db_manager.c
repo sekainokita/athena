@@ -1202,7 +1202,6 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulLatencyL2);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulLatencyL3);
 #endif
-    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
     fprintf(sh_pDbMgrRxMsg, "0x%x,", stDbV2xStatusRx.unTxDeviceId);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unRxVehicleSpeed);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unTotalCommDevCnt);
