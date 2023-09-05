@@ -795,6 +795,20 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
                             pstEventMsg->pstDbV2x->ulPayloadLength = ntohl(pstDbV2x->ulPayloadLength);
                             pstEventMsg->pstDbV2x->ulReserved = ntohl(pstDbV2x->ulReserved);
 
+                            nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                            if(nRet != FRAMEWORK_OK)
+                            {
+                                PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                            }
+
+                            stDbV2xStatus.ulTxTimeStamp = pstEventMsg->pstDbV2x->ulTimeStamp;
+
+                            nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                            if(nRet != FRAMEWORK_OK)
+                            {
+                                PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                            }
+
                             nRet = P_MSG_MANAGER_SendRxMsgToDbMgr(pstEventMsg, ulDbV2xTotalPacketCrc32);
                             if (nRet != FRAMEWORK_OK)
                             {

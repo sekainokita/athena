@@ -123,6 +123,17 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
         return nRet;
     }
 
+    nRet = P_DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+    }
+
+    if(pstEventMsg->pstDbV2x->ulTimeStamp != stDbV2xStatus.ulTxTimeStamp)
+    {
+        PrintError("MSG Rx Task Timestamp[%ld], DB Checked Tx Timestamp[%ld]", pstEventMsg->pstDbV2x->ulTimeStamp, stDbV2xStatus.ulTxTimeStamp);
+    }
+
     pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
     if(pstTimeManager == NULL)
     {
@@ -179,12 +190,6 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusRx->stRxPosition.nRxLatitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLatitude * SVC_CP_GPS_VALUE_CONVERT);
     pstDbV2xStatusRx->stRxPosition.nRxLongitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLongitude * SVC_CP_GPS_VALUE_CONVERT);
     pstDbV2xStatusRx->stRxPosition.nRxAttitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fAltitude * SVC_CP_GPS_VALUE_CONVERT);
-
-    nRet = P_DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
-    if(nRet != FRAMEWORK_OK)
-    {
-        PrintError("P_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
-    }
 
     pstDbV2xStatusRx->ucErrIndicator = stDbV2xStatus.stV2xStatusRx.ucErrIndicator;
     pstDbV2xStatusRx->ulTotalPacketCnt = stDbV2xStatus.stV2xStatusRx.ulTotalPacketCnt;
