@@ -57,6 +57,7 @@
 #define CLI_DB_V2X_DEFAULT_SW_VER                 0x0001 // OBU rel. 230523
 #define CLI_DB_V2X_DEFAULT_PAYLOAD_LEN            1024
 #define CLI_DB_V2X_DEFAULT_BYTE_LEN               254
+#define CLI_DB_V2X_DEFAULT_BUF_LEN                20
 
 #define DB_MGR_FILE_MAX_LENGTH                    100
 #define DB_MGR_SYSTEM_CALL_MAX_LENGTH             200

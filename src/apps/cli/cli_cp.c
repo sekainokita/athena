@@ -49,12 +49,38 @@
 #include "db_v2x_status.h"
 #include "db_manager.h"
 #include "framework.h"
+#include <stdio.h>
 
 /***************************** Definition ************************************/
 
 /***************************** Static Variable *******************************/
-
+static char s_chSetBufDevId[CLI_DB_V2X_DEFAULT_BUF_LEN];
 /***************************** Function Protype ******************************/
+
+static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
+{
+    int32_t nRet = APP_OK;
+    SVC_CP_T *pstSvcCp;
+    char *pcCmd;
+    pstSvcCp = APP_GetSvcCpInstance();
+
+    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+    pstSvcCp->stDbV2x.unDeviceId = (uint32_t)atoi(pcCmd);
+    sprintf(s_chSetBufDevId, "%s", pcCmd);
+    pstSvcCp->pchDeviceName = s_chSetBufDevId;
+
+    if(strcmp(pstSvcCp->pchDeviceName, DB_MGR_DEFAULT_COMM_DEV_ID) == 0)
+    {
+        PrintWarn("INSERT DEVICE ID is failed!");
+        nRet = APP_ERROR;
+    }
+    else
+    {
+        PrintDebug("Device ID : [%s]", pstSvcCp->pchDeviceName);
+    }
+
+    return nRet;
+}
 
 static int P_CLI_CP_ReadyV2xStatusScenario(void)
 {
@@ -257,6 +283,22 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
             }
         }
+        else if(IS_CMD(pcCmd, "set"))
+        {
+            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+            if(pcCmd != NULL)
+            {
+                nRet = P_CLI_CP_SetV2xStatusScenario(pstCmd);
+                if(nRet != APP_OK)
+                {
+                    PrintError("P_CLI_CP_SetV2xStatusScenario() is failed![nRet:%d]", nRet);
+                }
+            }
+            else
+            {
+                return CLI_CMD_Showusage(pstCmd);
+            }
+        }
         else if(IS_CMD(pcCmd, "sce"))
         {
             pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
@@ -374,6 +416,7 @@ int32_t CLI_CP_InitCmds(void)
                "of available commands. For more details on a command, type and enter 'cp'\n"
                "and the command name.\n\n"
                "cp test                   test cp command\n"
+               "cp set                    set Device ID\n"
                "cp sce [OPTIONS]\n"
                "       base               start a base Communication Performance scenario\n"
                "       ready              ready V2X scenario\n"
