@@ -173,8 +173,8 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
     pstSvcCp->stDbV2xStatusTx.stTxPosition.nTxLongitude = 0;
     pstSvcCp->stDbV2xStatusTx.stTxPosition.nTxAttitude = 0;
 
-    pstSvcCp->stDbV2xStatusTx.unSeqNum = 0;
-    pstSvcCp->stDbV2xStatusTx.unContCnt = 0;
+    pstSvcCp->stDbV2xStatusTx.unSeqNum = 1;
+    pstSvcCp->stDbV2xStatusTx.unContCnt = 1;
     pstSvcCp->stDbV2xStatusTx.unTxVehicleSpeed = DB_MGR_DEFAULT_VEHICLE_SPEED;
 
     pstSvcCp->pchDeviceName = DB_MGR_DEFAULT_COMM_DEV_ID;

@@ -193,7 +193,6 @@ typedef struct DB_MANAGER_V2X_STATUS_t {
     uint32_t                unLastContCnt;
     uint32_t                unCurrentContCnt;
     uint32_t                unContCntLoss;
-    bool                    bCrc32ErrPkt;
 } DB_MANAGER_V2X_STATUS_T;
 
 

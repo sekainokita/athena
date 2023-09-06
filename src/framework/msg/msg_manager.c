@@ -97,7 +97,7 @@ static pthread_t sh_msgMgrTxTask;
 static pthread_t sh_msgMgrRxTask;
 
 static bool s_bMsgMgrLog = OFF;
-static bool s_bFirstPacket = FALSE;
+static bool s_bFirstPacket = TRUE;
 
 /***************************** Function  *************************************/
 
@@ -610,6 +610,13 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
     DB_V2X_T *pstDbV2x = NULL;
     uint32_t ulDbV2xTotalPacketCrc32 = 0, ulCompDbV2xTotalPacketCrc32 = 0, ulTempDbV2xTotalPacketCrc32 = 0;
     DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
+    uint32_t ulRxPayloadLength = 0;
+
+    if(pstEventMsg == NULL)
+    {
+        PrintError("pstEventMsg is NULL");
+        return nRet;
+    }
 
     while (1)
     {
@@ -650,6 +657,11 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             }
             else
             {
+                if(s_bFirstPacket == TRUE)
+                {
+                    PrintTrace("Received the first packets");
+                }
+
                 memset(pstV2xRxPdu, 0, sizeof(Ext_V2X_RxPDU_t));
                 memcpy(pstV2xRxPdu, buf, nRecvLen);
 
@@ -663,124 +675,106 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
                     memset(pstDbV2x, 0, pstV2xRxPdu->v2x_msg.length);
                     memcpy(pstDbV2x, pstV2xRxPdu->v2x_msg.data, sizeof(DB_V2X_T));
 
-                    pstEventMsg->pPayload = malloc(pstEventMsg->pstDbV2x->ulPayloadLength);
-                    if(pstEventMsg->pPayload == NULL)
+                    ulRxPayloadLength = ntohl(pstDbV2x->ulPayloadLength);
+
+                    memcpy(&ulTempDbV2xTotalPacketCrc32, pstV2xRxPdu->v2x_msg.data + sizeof(DB_V2X_T) + ulRxPayloadLength, sizeof(uint32_t));
+                    ulDbV2xTotalPacketCrc32 = ntohl(ulTempDbV2xTotalPacketCrc32);
+
+                    ulCompDbV2xTotalPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)&pstV2xRxPdu->v2x_msg.data[0], sizeof(DB_V2X_T) + ulRxPayloadLength);
+                    if(ulDbV2xTotalPacketCrc32 != ulCompDbV2xTotalPacketCrc32)
                     {
-                        PrintError("malloc() is failed! [NULL]");
+                        PrintError("CRC32 does not matched!! check Get:ulDbV2xTotalPacketCrc32[0x%x] != Calculate:ulCompDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32, ulCompDbV2xTotalPacketCrc32);
+                        nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                        if(nRet != FRAMEWORK_OK)
+                        {
+                            PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                        }
+
+                        stDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
+                        stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
+                        PrintWarn("increase ulTotalErrCnt [from %ld to %ld]", (stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
+
+                        nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                        if(nRet != FRAMEWORK_OK)
+                        {
+                            PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                        }
                     }
                     else
                     {
-                        memcpy(pstEventMsg->pPayload, pstV2xRxPdu->v2x_msg.data + sizeof(DB_V2X_T), pstEventMsg->pstDbV2x->ulPayloadLength);
-
-                        memcpy(&ulTempDbV2xTotalPacketCrc32, pstV2xRxPdu->v2x_msg.data + sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength, sizeof(uint32_t));
-                        ulDbV2xTotalPacketCrc32 = ntohl(ulTempDbV2xTotalPacketCrc32);
-
-                        ulCompDbV2xTotalPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)&pstV2xRxPdu->v2x_msg.data[0], sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength);
-                        if(ulDbV2xTotalPacketCrc32 != ulCompDbV2xTotalPacketCrc32)
+                        nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                        if(nRet != FRAMEWORK_OK)
                         {
-                            if(s_bFirstPacket == TRUE)
-                            {
-                                PrintWarn("Successfully received the first packet from the other device, set s_bFirstPacket [%d]", s_bFirstPacket);
-                            }
-                            else
-                            {
-                                PrintError("CRC32 does not matched!! check Get:ulDbV2xTotalPacketCrc32[0x%x] != Calculate:ulCompDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32, ulCompDbV2xTotalPacketCrc32);
-                                nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
-                                if(nRet != FRAMEWORK_OK)
-                                {
-                                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
-                                }
-
-                                stDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
-                                stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
-                                stDbV2xStatus.bCrc32ErrPkt = TRUE;
-                                PrintWarn("increase ulTotalErrCnt [from %ld to %ld], [bCrc32ErrPkt:%d]", (stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt, stDbV2xStatus.bCrc32ErrPkt);
-
-                                nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
-                                if(nRet != FRAMEWORK_OK)
-                                {
-                                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
-                                }
-                            }
+                            PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                         }
 
-                        if(s_bFirstPacket == TRUE)
+                        stDbV2xStatus.stV2xStatusRx.ulTotalPacketCnt++;
+
+                        nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                        if(nRet != FRAMEWORK_OK)
                         {
-                            s_bFirstPacket = FALSE;
+                            PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                        }
+
+                        pstEventMsg->pPayload = malloc(ulRxPayloadLength);
+                        if(pstEventMsg->pPayload == NULL)
+                        {
+                            PrintError("malloc() is failed! [NULL]");
                         }
                         else
                         {
-                            nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
-                            if(nRet != FRAMEWORK_OK)
+                            if(s_bMsgMgrLog == ON)
                             {
-                                PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                printf("\nV2X RX PDU>>\n"
+                                "  magic_num        : 0x%04X\n"
+                                "  ver              : 0x%04X\n"
+                                "  e_v2x_comm_type   : %d\n"
+                                "  e_payload_type   : %d\n"
+                                "  psid             : %u\n"
+                                "  freq             : %d\n"
+                                "  rssi             : %d\n"
+                                "  reserved1        : %d\n"
+                                "  peer_l2id        : %d\n"
+                                "  crc              : %d\n"
+                                "  v2x_msg.length   : %d\n",
+                                ntohs(pstV2xRxPdu->magic_num),
+                                ntohs(pstV2xRxPdu->ver),
+                                pstV2xRxPdu->e_v2x_comm_type,
+                                pstV2xRxPdu->e_payload_type,
+                                ntohl(pstV2xRxPdu->psid),
+                                pstV2xRxPdu->freq,
+                                pstV2xRxPdu->rssi,
+                                pstV2xRxPdu->reserved1,
+                                pstV2xRxPdu->u.peer_l2id,
+                                pstV2xRxPdu->crc,
+                                ntohs(pstV2xRxPdu->v2x_msg.length));
+
+                                PrintDebug("db_v2x_tmp_p->eDeviceType[%d]", ntohs(pstDbV2x->eDeviceType));
+                                PrintDebug("db_v2x_tmp_p->eTeleCommType[%d]", ntohs(pstDbV2x->eTeleCommType));
+                                PrintDebug("db_v2x_tmp_p->unDeviceId[0x%x]", ntohl(pstDbV2x->unDeviceId));
+                                PrintDebug("db_v2x_tmp_p->ulTimeStamp[%ld]", ntohll(pstDbV2x->ulTimeStamp));
+                                PrintDebug("db_v2x_tmp_p->eServiceId[%d]", ntohs(pstDbV2x->eServiceId));
+                                PrintDebug("db_v2x_tmp_p->eActionType[%d]", ntohs(pstDbV2x->eActionType));
+                                PrintDebug("db_v2x_tmp_p->eRegionId[%d]", ntohs(pstDbV2x->eRegionId));
+                                PrintDebug("db_v2x_tmp_p->ePayloadType[%d]", ntohs(pstDbV2x->ePayloadType));
+                                PrintDebug("db_v2x_tmp_p->eCommId[%d]", ntohs(pstDbV2x->eCommId));
+                                PrintDebug("db_v2x_tmp_p->usDbVer[%d.%d]", ntohs(pstDbV2x->usDbVer) >> CLI_DB_V2X_MAJOR_SHIFT, ntohs(pstDbV2x->usDbVer) & CLI_DB_V2X_MINOR_MASK);
+                                PrintDebug("db_v2x_tmp_p->usHwVer[%d]", ntohs(pstDbV2x->usHwVer));
+                                PrintDebug("db_v2x_tmp_p->usSwVer[%d]", ntohs(pstDbV2x->usSwVer));
+                                PrintDebug("db_v2x_tmp_p->ulPayloadLength[%d]", ulRxPayloadLength);
+                                PrintDebug("db_v2x_tmp_p->ulReserved[0x%x]", ntohl(pstDbV2x->ulReserved));
+
+                                PrintDebug("received CRC:ulDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32);
+                                PrintDebug("calcuated CRC:ulCompDbV2xTotalPacketCrc32[0x%x]", ulCompDbV2xTotalPacketCrc32);
+
+                                if(ulDbV2xTotalPacketCrc32 == ulCompDbV2xTotalPacketCrc32)
+                                {
+                                    PrintTrace("CRC32 is matched!");
+                                }
                             }
 
-                            stDbV2xStatus.stV2xStatusRx.ulTotalPacketCnt++;
+                            memcpy(pstEventMsg->pPayload, pstV2xRxPdu->v2x_msg.data + sizeof(DB_V2X_T), ulRxPayloadLength);
 
-                            nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
-                            if(nRet != FRAMEWORK_OK)
-                            {
-                                PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
-                            }
-                        }
-
-                        if(s_bMsgMgrLog == ON)
-                        {
-                            printf("\nV2X RX PDU>>\n"
-                            "  magic_num        : 0x%04X\n"
-                            "  ver              : 0x%04X\n"
-                            "  e_v2x_comm_type   : %d\n"
-                            "  e_payload_type   : %d\n"
-                            "  psid             : %u\n"
-                            "  freq             : %d\n"
-                            "  rssi             : %d\n"
-                            "  reserved1        : %d\n"
-                            "  peer_l2id        : %d\n"
-                            "  crc              : %d\n"
-                            "  v2x_msg.length   : %d\n",
-                            ntohs(pstV2xRxPdu->magic_num),
-                            ntohs(pstV2xRxPdu->ver),
-                            pstV2xRxPdu->e_v2x_comm_type,
-                            pstV2xRxPdu->e_payload_type,
-                            ntohl(pstV2xRxPdu->psid),
-                            pstV2xRxPdu->freq,
-                            pstV2xRxPdu->rssi,
-                            pstV2xRxPdu->reserved1,
-                            pstV2xRxPdu->u.peer_l2id,
-                            pstV2xRxPdu->crc,
-                            ntohs(pstV2xRxPdu->v2x_msg.length));
-
-                            PrintDebug("db_v2x_tmp_p->eDeviceType[%d]", ntohs(pstDbV2x->eDeviceType));
-                            PrintDebug("db_v2x_tmp_p->eTeleCommType[%d]", ntohs(pstDbV2x->eTeleCommType));
-                            PrintDebug("db_v2x_tmp_p->unDeviceId[0x%x]", ntohl(pstDbV2x->unDeviceId));
-                            PrintDebug("db_v2x_tmp_p->ulTimeStamp[%ld]", ntohll(pstDbV2x->ulTimeStamp));
-                            PrintDebug("db_v2x_tmp_p->eServiceId[%d]", ntohs(pstDbV2x->eServiceId));
-                            PrintDebug("db_v2x_tmp_p->eActionType[%d]", ntohs(pstDbV2x->eActionType));
-                            PrintDebug("db_v2x_tmp_p->eRegionId[%d]", ntohs(pstDbV2x->eRegionId));
-                            PrintDebug("db_v2x_tmp_p->ePayloadType[%d]", ntohs(pstDbV2x->ePayloadType));
-                            PrintDebug("db_v2x_tmp_p->eCommId[%d]", ntohs(pstDbV2x->eCommId));
-                            PrintDebug("db_v2x_tmp_p->usDbVer[%d.%d]", ntohs(pstDbV2x->usDbVer) >> CLI_DB_V2X_MAJOR_SHIFT, ntohs(pstDbV2x->usDbVer) & CLI_DB_V2X_MINOR_MASK);
-                            PrintDebug("db_v2x_tmp_p->usHwVer[%d]", ntohs(pstDbV2x->usHwVer));
-                            PrintDebug("db_v2x_tmp_p->usSwVer[%d]", ntohs(pstDbV2x->usSwVer));
-                            PrintDebug("db_v2x_tmp_p->ulPayloadLength[%d]", ntohl(pstDbV2x->ulPayloadLength));
-                            PrintDebug("db_v2x_tmp_p->ulReserved[0x%x]", ntohl(pstDbV2x->ulReserved));
-
-                            PrintDebug("received CRC:ulDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32);
-                            PrintDebug("calcuated CRC:ulCompDbV2xTotalPacketCrc32[0x%x]", ulCompDbV2xTotalPacketCrc32);
-
-                            if(ulDbV2xTotalPacketCrc32 == ulCompDbV2xTotalPacketCrc32)
-                            {
-                                PrintTrace("CRC32 is matched!");
-                            }
-                        }
-
-                        if(pstEventMsg == NULL)
-                        {
-                            PrintError("pstEventMsg is NULL");
-                        }
-                        else
-                        {
                             pstEventMsg->pstDbV2x->eDeviceType = ntohs(pstDbV2x->eDeviceType);
                             pstEventMsg->pstDbV2x->eTeleCommType = ntohs(pstDbV2x->eTeleCommType);
                             pstEventMsg->pstDbV2x->unDeviceId = ntohl(pstDbV2x->unDeviceId);
@@ -793,7 +787,7 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
                             pstEventMsg->pstDbV2x->usDbVer = ntohs(pstDbV2x->usDbVer);
                             pstEventMsg->pstDbV2x->usHwVer = ntohs(pstDbV2x->usHwVer);
                             pstEventMsg->pstDbV2x->usSwVer = ntohs(pstDbV2x->usSwVer);
-                            pstEventMsg->pstDbV2x->ulPayloadLength = ntohl(pstDbV2x->ulPayloadLength);
+                            pstEventMsg->pstDbV2x->ulPayloadLength = ulRxPayloadLength;
                             pstEventMsg->pstDbV2x->ulReserved = ntohl(pstDbV2x->ulReserved);
 
                             nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
@@ -815,6 +809,11 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
                             {
                                 PrintError("P_MSG_MANAGER_SendTxMsgToDbMgr() is faild! [nRet:%d]", nRet);
                             }
+
+                            if(pstEventMsg->pPayload != NULL)
+                            {
+                                free(pstEventMsg->pPayload);
+                            }
                         }
                     }
                 }
@@ -828,11 +827,6 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             if(pstDbV2x != NULL)
             {
                 free(pstDbV2x);
-            }
-
-            if(pstEventMsg->pPayload != NULL)
-            {
-                free(pstEventMsg->pPayload);
             }
         }
     }
@@ -1303,6 +1297,8 @@ int32_t MSG_MANAGER_Close(MSG_MANAGER_T *pstMsgManager)
     {
         PrintError("Disconnected [s_nSocketHandle:0x%x]", s_nSocketHandle);
     }
+
+    s_bFirstPacket = FALSE;
 
     return nRet;
 }
