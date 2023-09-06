@@ -71,7 +71,7 @@
 #define TIME_MGR_SYNC_NTP           "sudo rdate -s time.bora.net"
 
 #if defined(CONFIG_RTC)
-#define TIME_MGR_RTC_DEV            "/dev/rtc1"
+#define TIME_MGR_RTC_DEV            "/dev/rtc"
 #define TIME_MGR_CHECK_RTC          "sudo hwclock -r"
 #define TIME_MGR_UPDATE_RTC         "sudo hwclock -w"
 #define TIME_MGR_RTC_PERMISSION     "sudo chmod -R 777 "TIME_MGR_RTC_DEV
