@@ -324,7 +324,7 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                     sprintf(InsertTxData,\
                     "INSERT INTO Txtable(eDeviceType, eTeleCommType, unDeviceId, ulTimeStamp, eServiceId, eActionType, eRegionId, ePayloadType, eCommId, usDbVer, usHwVer,\
                     usSwVer, ulPayloadLength, unTotalpacketCrc32)\
-                    VALUES (%d, %d, 0x%x, %ld, %d, %d, %d, %d, %d, %d.%d, 0x%x, 0x%x, %d, 0x%x)",\
+                    VALUES (%d, %d, %d, %ld, %d, %d, %d, %d, %d, %d.%d, 0x%x, 0x%x, %d, 0x%x)",\
                     pstEventMsg->pstDbV2x->eDeviceType,\
                     pstEventMsg->pstDbV2x->eTeleCommType,\
                     pstEventMsg->pstDbV2x->unDeviceId,\
@@ -423,7 +423,7 @@ static int32_t P_DB_MANAGER_WriteSqlite(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
                     sprintf(InsertRxData,\
                     "INSERT INTO Rxtable(eDeviceType, eTeleCommType, unDeviceId, ulTimeStamp, eServiceId, eActionType, eRegionId, ePayloadType, eCommId, usDbVer, usHwVer,\
                     usSwVer, ulPayloadLength, unTotalpacketCrc32)\
-                    VALUES (%d, %d, 0x%x, %ld, %d, %d, %d, %d, %d, %d.%d, 0x%x, 0x%x, %d, 0x%x)",\
+                    VALUES (%d, %d, %d, %ld, %d, %d, %d, %d, %d, %d.%d, 0x%x, 0x%x, %d, 0x%x)",\
                     pstEventMsg->pstDbV2x->eDeviceType,\
                     pstEventMsg->pstDbV2x->eTeleCommType,\
                     pstEventMsg->pstDbV2x->unDeviceId,\
@@ -598,7 +598,7 @@ static int32_t P_DB_MANAGER_WriteTxt(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
 
                 fprintf(sh_pDbMgrTxMsg, "eDeviceType[%d], ", pstEventMsg->pstDbV2x->eDeviceType);
                 fprintf(sh_pDbMgrTxMsg, "eTeleCommType[%d], ", pstEventMsg->pstDbV2x->eTeleCommType);
-                fprintf(sh_pDbMgrTxMsg, "unDeviceId[0x%x], ", pstEventMsg->pstDbV2x->unDeviceId);
+                fprintf(sh_pDbMgrTxMsg, "unDeviceId[%d], ", pstEventMsg->pstDbV2x->unDeviceId);
                 fprintf(sh_pDbMgrTxMsg, "ulTimeStamp[%ld], ", pstEventMsg->pstDbV2x->ulTimeStamp);
                 fprintf(sh_pDbMgrTxMsg, "eServiceId[%d], ", pstEventMsg->pstDbV2x->eServiceId);
                 fprintf(sh_pDbMgrTxMsg, "eActionType[%d], ", pstEventMsg->pstDbV2x->eActionType);
@@ -662,7 +662,7 @@ static int32_t P_DB_MANAGER_WriteTxt(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
 
                 fprintf(sh_pDbMgrRxMsg, "eDeviceType[%d], ", pstEventMsg->pstDbV2x->eDeviceType);
                 fprintf(sh_pDbMgrRxMsg, "eTeleCommType[%d], ", pstEventMsg->pstDbV2x->eTeleCommType);
-                fprintf(sh_pDbMgrRxMsg, "unDeviceId[0x%x], ", pstEventMsg->pstDbV2x->unDeviceId);
+                fprintf(sh_pDbMgrRxMsg, "unDeviceId[%d], ", pstEventMsg->pstDbV2x->unDeviceId);
                 fprintf(sh_pDbMgrRxMsg, "ulTimeStamp[%ld], ", pstEventMsg->pstDbV2x->ulTimeStamp);
                 fprintf(sh_pDbMgrRxMsg, "eServiceId[%d], ", pstEventMsg->pstDbV2x->eServiceId);
                 fprintf(sh_pDbMgrRxMsg, "eActionType[%d], ", pstEventMsg->pstDbV2x->eActionType);
@@ -921,7 +921,7 @@ static int32_t P_DB_MANAGER_WriteCsvPlatooningThroughput(DB_MANAGER_EVENT_MSG_T 
 
                 fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eDeviceType);
                 fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eTeleCommType);
-                fprintf(sh_pDbMgrTxMsg, "0x%x,", pstEventMsg->pstDbV2x->unDeviceId);
+                fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->unDeviceId);
                 fprintf(sh_pDbMgrTxMsg, "%ld,", pstEventMsg->pstDbV2x->ulTimeStamp);
                 fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eServiceId);
                 fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eActionType);
@@ -984,7 +984,7 @@ static int32_t P_DB_MANAGER_WriteCsvPlatooningThroughput(DB_MANAGER_EVENT_MSG_T 
 
                 fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eDeviceType);
                 fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eTeleCommType);
-                fprintf(sh_pDbMgrRxMsg, "0x%x,", pstEventMsg->pstDbV2x->unDeviceId);
+                fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->unDeviceId);
                 fprintf(sh_pDbMgrRxMsg, "%ld,", pstEventMsg->pstDbV2x->ulTimeStamp);
                 fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eServiceId);
                 fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eActionType);
@@ -1081,7 +1081,7 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusTx(DB_MANAGER_EVENT_MSG_T *pstEvent
 
     fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eDeviceType);
     fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eTeleCommType);
-    fprintf(sh_pDbMgrTxMsg, "0x%x,", pstEventMsg->pstDbV2x->unDeviceId);
+    fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->unDeviceId);
     fprintf(sh_pDbMgrTxMsg, "%ld,", pstEventMsg->pstDbV2x->ulTimeStamp);
     fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eServiceId);
     fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eActionType);
@@ -1242,7 +1242,7 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
 
     fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eDeviceType);
     fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eTeleCommType);
-    fprintf(sh_pDbMgrRxMsg, "0x%x,", pstEventMsg->pstDbV2x->unDeviceId);
+    fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->unDeviceId);
     fprintf(sh_pDbMgrRxMsg, "%ld,", pstEventMsg->pstDbV2x->ulTimeStamp);
     fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eServiceId);
     fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eActionType);
@@ -1302,7 +1302,7 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulLatencyL2);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulLatencyL3);
 #endif
-    fprintf(sh_pDbMgrRxMsg, "0x%x,", stDbV2xStatusRx.unTxDeviceId);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unTxDeviceId);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unRxVehicleSpeed);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unTotalCommDevCnt);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.usRssi);

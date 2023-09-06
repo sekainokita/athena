@@ -642,7 +642,7 @@ void SVC_CP_ShowSettings(SVC_CP_T *pstSvcCp)
     PrintWarn("DB V2X Info>");
     PrintDebug(" eDeviceType[%d]", pstSvcCp->stDbV2x.eDeviceType);
     PrintDebug(" eTeleCommType[%d]", pstSvcCp->stDbV2x.eTeleCommType);
-    PrintDebug(" unDeviceId[0x%x]", pstSvcCp->stDbV2x.unDeviceId);
+    PrintDebug(" unDeviceId[%d]", pstSvcCp->stDbV2x.unDeviceId);
     PrintDebug(" eServiceId[%d]", pstSvcCp->stDbV2x.eServiceId);
     PrintDebug(" eActionType[%d]", pstSvcCp->stDbV2x.eActionType);
     PrintDebug(" eRegionId[%d]", pstSvcCp->stDbV2x.eRegionId);

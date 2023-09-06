@@ -139,7 +139,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
                     PrintDebug("eDeviceType[%d]", stDbV2x.eDeviceType);
                     PrintDebug("eTeleCommType[%d]", stDbV2x.eTeleCommType);
-                    PrintDebug("unDeviceId[0x%x]", stDbV2x.unDeviceId);
+                    PrintDebug("unDeviceId[%d]", stDbV2x.unDeviceId);
                     PrintDebug("ulTimeStamp[%ld]", stDbV2x.ulTimeStamp);
                     PrintDebug("eServiceId[%d]", stDbV2x.eServiceId);
                     PrintDebug("eActionType[%d]", stDbV2x.eActionType);
@@ -210,7 +210,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
                     PrintDebug("eDeviceType[%d]", stDbV2x.eDeviceType);
                     PrintDebug("eTeleCommType[%d]", stDbV2x.eTeleCommType);
-                    PrintDebug("unDeviceId[0x%x]", stDbV2x.unDeviceId);
+                    PrintDebug("unDeviceId[%d]", stDbV2x.unDeviceId);
                     PrintDebug("ulTimeStamp[%ld]", stDbV2x.ulTimeStamp);
                     PrintDebug("eServiceId[%d]", stDbV2x.eServiceId);
                     PrintDebug("eActionType[%d]", stDbV2x.eActionType);
@@ -281,7 +281,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
                     PrintDebug("eDeviceType[%d]", stDbV2x.eDeviceType);
                     PrintDebug("eTeleCommType[%d]", stDbV2x.eTeleCommType);
-                    PrintDebug("unDeviceId[0x%x]", stDbV2x.unDeviceId);
+                    PrintDebug("unDeviceId[%d]", stDbV2x.unDeviceId);
                     PrintDebug("ulTimeStamp[%ld]", stDbV2x.ulTimeStamp);
                     PrintDebug("eServiceId[%d]", stDbV2x.eServiceId);
                     PrintDebug("eActionType[%d]", stDbV2x.eActionType);
@@ -369,7 +369,7 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
                         PrintDebug("eDeviceType[%d]", stDbV2x.eDeviceType);
                         PrintDebug("eTeleCommType[%d]", stDbV2x.eTeleCommType);
-                        PrintDebug("unDeviceId[0x%x]", stDbV2x.unDeviceId);
+                        PrintDebug("unDeviceId[%d]", stDbV2x.unDeviceId);
                         PrintDebug("ulTimeStamp[%ld]", stDbV2x.ulTimeStamp);
                         PrintDebug("eServiceId[%d]", stDbV2x.eServiceId);
                         PrintDebug("eActionType[%d]", stDbV2x.eActionType);

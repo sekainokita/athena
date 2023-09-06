@@ -51,7 +51,7 @@
 #include "db_v2x_status.h"
 
 /***************************** Definition ************************************/
-#define CLI_DB_V2X_DEFAULT_DEVICE_ID              0x23040015
+#define CLI_DB_V2X_DEFAULT_DEVICE_ID              23040015
 #define CLI_DB_V2X_DEFAULT_TIMESTAMP              2023032314344766828
 #define CLI_DB_V2X_DEFAULT_HW_VER                 0x0001 // OBU rel. 230518
 #define CLI_DB_V2X_DEFAULT_SW_VER                 0x0001 // OBU rel. 230523

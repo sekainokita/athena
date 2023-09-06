@@ -753,7 +753,7 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
 
                                 PrintDebug("db_v2x_tmp_p->eDeviceType[%d]", ntohs(pstDbV2x->eDeviceType));
                                 PrintDebug("db_v2x_tmp_p->eTeleCommType[%d]", ntohs(pstDbV2x->eTeleCommType));
-                                PrintDebug("db_v2x_tmp_p->unDeviceId[0x%x]", ntohl(pstDbV2x->unDeviceId));
+                                PrintDebug("db_v2x_tmp_p->unDeviceId[%d]", ntohl(pstDbV2x->unDeviceId));
                                 PrintDebug("db_v2x_tmp_p->ulTimeStamp[%ld]", ntohll(pstDbV2x->ulTimeStamp));
                                 PrintDebug("db_v2x_tmp_p->eServiceId[%d]", ntohs(pstDbV2x->eServiceId));
                                 PrintDebug("db_v2x_tmp_p->eActionType[%d]", ntohs(pstDbV2x->eActionType));

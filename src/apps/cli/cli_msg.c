@@ -196,7 +196,7 @@ void P_CLI_MSG_ShowTxSettings(void)
     PrintWarn("DB V2X Info>");
     PrintDebug(" eDeviceType[%d]", s_stDbV2x.eDeviceType);
     PrintDebug(" eTeleCommType[%d]", s_stDbV2x.eTeleCommType);
-    PrintDebug(" unDeviceId[0x%x]", s_stDbV2x.unDeviceId);
+    PrintDebug(" unDeviceId[%d]", s_stDbV2x.unDeviceId);
     PrintDebug(" eServiceId[%d]", s_stDbV2x.eServiceId);
     PrintDebug(" eActionType[%d]", s_stDbV2x.eActionType);
     PrintDebug(" eRegionId[%d]", s_stDbV2x.eRegionId);
@@ -851,7 +851,7 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             PrintWarn("DB V2X Info>");
             PrintDebug(" eDeviceType[%d]", stDbV2x.eDeviceType);
             PrintDebug(" eTeleCommType[%d]", stDbV2x.eTeleCommType);
-            PrintDebug(" unDeviceId[0x%x]", stDbV2x.unDeviceId);
+            PrintDebug(" unDeviceId[%d]", stDbV2x.unDeviceId);
             PrintDebug(" eServiceId[%d]", stDbV2x.eServiceId);
             PrintDebug(" eActionType[%d]", stDbV2x.eActionType);
             PrintDebug(" eRegionId[%d]", stDbV2x.eRegionId);
