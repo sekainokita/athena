@@ -201,9 +201,11 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
         PrintError("ContCnt deos not be matched! [+1 increased unLastContCnt:%d], [unCurrentContCnt:%d]", stDbV2xStatus.unLastContCnt, stDbV2xStatus.unCurrentContCnt);
         stDbV2xStatus.unContCntLoss++;
         stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
-        PrintWarn("Increased unContCntLoss[%d], ulTotalErrCnt[%ld]", stDbV2xStatus.unContCntLoss, stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
+        stDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
+        PrintWarn("Increased unContCntLoss[%d], ulTotalErrCnt[%ld], set ucErrIndicator[%d]", stDbV2xStatus.unContCntLoss, stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt, stDbV2xStatus.stV2xStatusRx.ucErrIndicator);
     }
-    else // s_bDbMgrLog
+
+    if(s_bDbMgrLog  == TRUE)
     {
         PrintDebug("[+1 increased unLastContCnt:%d] == [unCurrentContCnt:%d]", stDbV2xStatus.unLastContCnt, stDbV2xStatus.unCurrentContCnt);
     }
@@ -213,7 +215,10 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     if(stDbV2xStatus.unLastContCnt > DB_V2X_STATUS_CONT_CNT_MAX)
     {
         stDbV2xStatus.unLastContCnt = 1;
-        // s_bDbMgrLog
+        if(s_bDbMgrLog  == TRUE)
+        {
+            PrintWarn("Reset unLastContCnt as [%d]", stDbV2xStatus.unLastContCnt);
+        }
     }
 
     pstDbV2xStatusRx->ulTotalErrCnt = stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt;
