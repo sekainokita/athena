@@ -72,8 +72,8 @@
 
 #if defined(CONFIG_RTC)
 #define TIME_MGR_RTC_DEV            "/dev/rtc"
-#define TIME_MGR_CHECK_RTC          "sudo hwclock -r"
-#define TIME_MGR_UPDATE_RTC         "sudo hwclock -w"
+#define TIME_MGR_CHECK_RTC          "sudo hwclock -r -f "TIME_MGR_RTC_DEV
+#define TIME_MGR_UPDATE_RTC         "sudo hwclock -w -f "TIME_MGR_RTC_DEV
 #define TIME_MGR_RTC_PERMISSION     "sudo chmod -R 777 "TIME_MGR_RTC_DEV
 #endif
 
