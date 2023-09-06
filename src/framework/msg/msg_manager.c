@@ -693,7 +693,8 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
 
                                 stDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
                                 stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
-                                PrintWarn("increase ulTotalErrCnt [from %ld to %ld]", (stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
+                                stDbV2xStatus.bCrc32ErrPkt = TRUE;
+                                PrintWarn("increase ulTotalErrCnt [from %ld to %ld], [bCrc32ErrPkt:%d]", (stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt, stDbV2xStatus.bCrc32ErrPkt);
 
                                 nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
                                 if(nRet != FRAMEWORK_OK)
