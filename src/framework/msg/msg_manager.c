@@ -1285,8 +1285,6 @@ int32_t MSG_MANAGER_Close(MSG_MANAGER_T *pstMsgManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
-    PrintWarn("TODO");
-
     if(pstMsgManager == NULL)
     {
         PrintError("pstMsgManager == NULL!!");
@@ -1298,6 +1296,11 @@ int32_t MSG_MANAGER_Close(MSG_MANAGER_T *pstMsgManager)
         close(s_nSocketHandle);
         s_nSocketHandle = 0;
         PrintTrace("Close Connection of V2X Device is successed! [s_nSocketHandle:0x%x]", s_nSocketHandle);
+        nRet = FRAMEWORK_OK;
+    }
+    else
+    {
+        PrintError("Disconnected [s_nSocketHandle:0x%x]", s_nSocketHandle);
     }
 
     return nRet;
