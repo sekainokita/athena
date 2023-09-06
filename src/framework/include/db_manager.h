@@ -190,6 +190,9 @@ typedef struct DB_MANAGER_FILE_t {
 typedef struct DB_MANAGER_V2X_STATUS_t {
     DB_V2X_STATUS_RX_T      stV2xStatusRx;
     uint64_t                ulTxTimeStamp;
+    uint32_t                unLastContCnt;
+    uint32_t                unCurrentContCnt;
+    uint32_t                unContCntLoss;
 } DB_MANAGER_V2X_STATUS_T;
 
 

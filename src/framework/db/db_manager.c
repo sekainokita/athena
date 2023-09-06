@@ -193,6 +193,22 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
 
     pstDbV2xStatusRx->ucErrIndicator = stDbV2xStatus.stV2xStatusRx.ucErrIndicator;
     pstDbV2xStatusRx->ulTotalPacketCnt = stDbV2xStatus.stV2xStatusRx.ulTotalPacketCnt;
+
+    stDbV2xStatus.unCurrentContCnt = pstDbV2xStatusTx->unContCnt;
+    if((stDbV2xStatus.unLastContCnt + 1) != stDbV2xStatus.unCurrentContCnt)
+    {
+        PrintError("ContCnt deos not be matched! [unLastContCnt+1:%d], [unCurrentContCnt:%d]", stDbV2xStatus.unLastContCnt + 1, stDbV2xStatus.unCurrentContCnt);
+        stDbV2xStatus.unContCntLoss++;
+        stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt += stDbV2xStatus.unContCntLoss;
+        PrintDebug("Increased unContCntLoss[%d], ulTotalErrCnt[%ld]", stDbV2xStatus.unContCntLoss, stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
+    }
+    else
+    {
+        PrintDebug("[unLastContCnt+1:%d] == [unCurrentContCnt:%d]", stDbV2xStatus.unLastContCnt + 1, stDbV2xStatus.unCurrentContCnt);
+    }
+
+    stDbV2xStatus.unLastContCnt = stDbV2xStatus.unCurrentContCnt;
+
     pstDbV2xStatusRx->ulTotalErrCnt = stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt;
 
     fTemp = (float)pstDbV2xStatusRx->ulTotalPacketCnt/(float)pstDbV2xStatusTx->unSeqNum;
@@ -1234,7 +1250,7 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fTemp = (float)stDbV2xStatusRx.unPdr / 100.0f;
     fprintf(sh_pDbMgrRxMsg, "%.2f,", fTemp);
     fTemp = (float)stDbV2xStatusRx.unPer / 100.0f;
-    fprintf(sh_pDbMgrRxMsg, "%.2f,", fTemp);
+    fprintf(sh_pDbMgrRxMsg, "%.2f", fTemp);
 
     fprintf(sh_pDbMgrRxMsg, "\r\n");
 

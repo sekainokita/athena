@@ -56,12 +56,29 @@
 #include <sys/msg.h>
 #include <time.h>
 
+#if defined(CONFIG_RTC)
+#include <linux/rtc.h>
+#include <sys/ioctl.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+#endif
+
 /***************************** Definition ************************************/
 #define TIME_MGR_CHECK_NTP          "rdate -p time.bora.net"
 #define TIME_MGR_SYNC_NTP           "sudo rdate -s time.bora.net"
 
-#define TIME_MANAGER_TIME_MAX_SIZE  (19)
+#if defined(CONFIG_RTC)
+#define TIME_MGR_RTC_DEV            "/dev/rtc0"
+#define TIME_MGR_CHECK_RTC          "sudo hwclock -r"
+#define TIME_MGR_UPDATE_RTC         "sudo hwclock -w"
+#define TIME_MGR_RTC_PERMISSION     "sudo chmod -R 777 "TIME_MGR_RTC_DEV
+#endif
 
+#define TIME_MANAGER_TIME_MAX_SIZE  (19)
+//#define TIME_MGR_RTC_TEST           (1)
 /***************************** Enum and Structure ****************************/
 
 /***************************** Static Variable *******************************/
@@ -74,8 +91,175 @@ static struct timespec stCurTime, stCheckBeginTime, stCheckEndTime;
 static struct timespec stDbTxStartTime, stDbTxEndTime, stDbRxStartTime, stDbRxEndTime;
 
 static bool s_bTimeMgrLog = OFF;
+#if defined(TIME_MGR_RTC_TEST)
+static const char s_chRtcDev[] = TIME_MGR_RTC_DEV;
+#endif
 
 /***************************** Function  *************************************/
+
+#if defined(CONFIG_RTC) && defined(TIME_MGR_RTC_TEST)
+int P_TIME_MANAGER_TestRtc(void)
+{
+    int i, fd_nRtcDev, irqcount = 0;
+    int32_t nRet = FRAMEWORK_ERROR;
+    unsigned long data;
+    struct rtc_time rtc_tm;
+    const char *pchRtcDev = s_chRtcDev;
+
+    fd_nRtcDev = open(pchRtcDev, O_RDONLY);
+    if (fd_nRtcDev == -1)
+    {
+        PrintError("FD is NULL!");
+    }
+
+    PrintDebug("=== RTC Driver Test Example ===");
+
+    /* Turn on update interrupts (one per second) */
+    nRet = ioctl(fd_nRtcDev, RTC_UIE_ON, 0);
+    if (nRet < FRAMEWORK_OK)
+    {
+        if (errno == ENOTTY)
+        {
+            PrintError("pdate IRQs not supported!");
+            goto READ_TEST;
+        }
+
+        PrintError("RTC_UIE_ON ioctl");
+    }
+
+    PrintDebug("Counting 5 update (1/sec) interrupts from reading %s:", pchRtcDev);
+
+    for (i = 1; i < 6; i++)
+    {
+        /* This read will block */
+        nRet = read(fd_nRtcDev, &data, sizeof(unsigned long));
+        if (nRet < FRAMEWORK_OK)
+        {
+            PrintError("read");
+        }
+
+        PrintDebug("%d", i);
+        irqcount++;
+    }
+
+    PrintDebug("Again, from using select(2) on /dev/rtc:");
+
+    for (i = 1; i < 6; i++)
+    {
+        struct timeval tv = {5, 0};
+        fd_set readfds;
+
+        FD_ZERO(&readfds);
+        FD_SET(fd_nRtcDev, &readfds);
+
+        /* The select will wait until an RTC interrupt happens. */
+        nRet = select(fd_nRtcDev + 1, &readfds, NULL, NULL, &tv);
+        if (nRet < FRAMEWORK_OK)
+        {
+            PrintError("select");
+        }
+
+        /* This read won't block unlike the select-less case above. */
+        nRet = read(fd_nRtcDev, &data, sizeof(unsigned long));
+        if (nRet < FRAMEWORK_OK)
+        {
+            PrintError("read");
+        }
+
+        PrintDebug("%d", i);
+
+        irqcount++;
+    }
+
+    /* Turn off update interrupts */
+    nRet = ioctl(fd_nRtcDev, RTC_UIE_OFF, 0);
+    if (nRet < FRAMEWORK_OK)
+    {
+        PrintError("RTC_UIE_OFF ioctl");
+    }
+
+READ_TEST:
+    /* Read the RTC time/date */
+    nRet = ioctl(fd_nRtcDev, RTC_RD_TIME, &rtc_tm);
+    if (nRet < FRAMEWORK_OK)
+    {
+        PrintError("RTC_RD_TIME ioctl");
+    }
+
+    PrintDebug("Current RTC date/time is %d-%d-%d, %02d:%02d:%02d",
+            rtc_tm.tm_mday, rtc_tm.tm_mon + 1, rtc_tm.tm_year + 1900,
+            rtc_tm.tm_hour, rtc_tm.tm_min, rtc_tm.tm_sec);
+
+    /* Set the alarm to 5 sec in the future, and check for rollover */
+    rtc_tm.tm_sec += 5;
+    if (rtc_tm.tm_sec >= 60)
+    {
+        rtc_tm.tm_sec %= 60;
+        rtc_tm.tm_min++;
+    }
+
+    if (rtc_tm.tm_min == 60)
+    {
+        rtc_tm.tm_min = 0;
+        rtc_tm.tm_hour++;
+    }
+
+    if (rtc_tm.tm_hour == 24)
+    {
+        rtc_tm.tm_hour = 0;
+    }
+
+    nRet = ioctl(fd_nRtcDev, RTC_ALM_SET, &rtc_tm);
+    if (nRet < FRAMEWORK_OK)
+    {
+        if (errno == ENOTTY)
+        {
+            PrintError("Alarm IRQs not supported.");
+        }
+
+        PrintError("RTC_ALM_SET ioctl");
+    }
+
+    /* Read the current alarm settings */
+    nRet = ioctl(fd_nRtcDev, RTC_ALM_READ, &rtc_tm);
+    if (nRet < FRAMEWORK_OK)
+    {
+        PrintError("RTC_ALM_READ ioctl");
+    }
+
+    PrintDebug("Alarm time now set to %02d:%02d:%02d", rtc_tm.tm_hour, rtc_tm.tm_min, rtc_tm.tm_sec);
+
+    /* Enable alarm interrupts */
+    nRet = ioctl(fd_nRtcDev, RTC_AIE_ON, 0);
+    if (nRet < FRAMEWORK_OK)
+    {
+        PrintError("RTC_AIE_ON ioctl");
+    }
+
+    PrintDebug("Waiting 5 seconds for alarm...");
+    /* This blocks until the alarm ring causes an interrupt */
+    nRet = read(fd_nRtcDev, &data, sizeof(unsigned long));
+    if (nRet < FRAMEWORK_OK)
+    {
+        PrintError("read() is failed!");
+    }
+
+    irqcount++;
+
+    PrintDebug("okay. Alarm rang.");
+
+    /* Disable alarm interrupts */
+    nRet = ioctl(fd_nRtcDev, RTC_AIE_OFF, 0);
+    if (nRet < FRAMEWORK_OK)
+    {
+        PrintError("RTC_AIE_OFF ioctl");
+    }
+
+    close(fd_nRtcDev);
+
+    return nRet;
+}
+#endif
 
 static int32_t P_TIME_MANAGER_SyncNtpServer(TIME_MANAGER_T *pstTimeMgr)
 {
@@ -100,6 +284,29 @@ static int32_t P_TIME_MANAGER_SyncNtpServer(TIME_MANAGER_T *pstTimeMgr)
         PrintError("system() is failed! [nRet:%d]", nRet);
         return nRet;
     }
+
+#if defined(CONFIG_RTC)
+    nRet = system(TIME_MGR_CHECK_RTC);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("system() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    nRet = system(TIME_MGR_UPDATE_RTC);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("system() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    nRet = system(TIME_MGR_RTC_PERMISSION);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("system() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+#endif
 
     return nRet;
 }
@@ -558,7 +765,7 @@ int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeMgr)
         PrintWarn("is successfully initialized.");
     }
 
-    nRet= P_TIME_MANAGER_SyncNtpServer(pstTimeMgr);
+    nRet = P_TIME_MANAGER_SyncNtpServer(pstTimeMgr);
     if(nRet != FRAMEWORK_OK)
     {
         PrintError("P_TIME_MANAGER_Init() is failed! [unRet:%d]", nRet);
@@ -567,6 +774,14 @@ int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeMgr)
     {
         PrintWarn("P_TIME_MANAGER_SyncNtpServer() is successfully updated.");
     }
+
+#if defined(CONFIG_RTC) && defined(TIME_MGR_RTC_TEST)
+    nRet = P_TIME_MANAGER_TestRtc();
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_TIME_MANAGER_TestRtc() is failed! [unRet:%d]", nRet);
+    }
+#endif
 
     s_bTimeMgrLog = pstTimeMgr->bLogLevel;
     PrintDebug("s_bTimeMgrLog [%s]", s_bTimeMgrLog == ON ? "ON" : "OFF");
