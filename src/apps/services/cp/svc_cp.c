@@ -595,6 +595,11 @@ static int32_t P_SVC_CP_Init(SVC_CP_T *pstSvcCp)
         PrintError("P_SVC_CP_SetDefaultSettings() is failed! [nRet:%d]", nRet);
     }
 
+    nRet = P_SVC_CP_SetSettings(pstSvcCp);
+    if(nRet != APP_OK)
+    {
+        PrintError("P_SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+    }
     return nRet;
 }
 

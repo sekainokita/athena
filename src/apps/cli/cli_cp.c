@@ -49,12 +49,12 @@
 #include "db_v2x_status.h"
 #include "db_manager.h"
 #include "framework.h"
-#include <stdio.h>
 
 /***************************** Definition ************************************/
 
 /***************************** Static Variable *******************************/
 static char s_chSetBufDevId[CLI_DB_V2X_DEFAULT_BUF_LEN];
+
 /***************************** Function Protype ******************************/
 
 static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
@@ -64,20 +64,64 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
     char *pcCmd;
     pstSvcCp = APP_GetSvcCpInstance();
 
-    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
-    pstSvcCp->stDbV2x.unDeviceId = (uint32_t)atoi(pcCmd);
-    sprintf(s_chSetBufDevId, "%s", pcCmd);
-    pstSvcCp->pchDeviceName = s_chSetBufDevId;
-
-    if(strcmp(pstSvcCp->pchDeviceName, DB_MGR_DEFAULT_COMM_DEV_ID) == 0)
+    if(pstCmd == NULL)
     {
-        PrintWarn("INSERT DEVICE ID is failed!");
-        nRet = APP_ERROR;
+        PrintError("pstCmd == NULL!!");
+        return CLI_CMD_Showusage(pstCmd);
+    }
+
+    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+    if(pcCmd == NULL)
+    {
+        PrintError("pcCmd == NULL!!");
+        return CLI_CMD_Showusage(pstCmd);
     }
     else
     {
-        PrintDebug("Device ID : [%s]", pstSvcCp->pchDeviceName);
+        nRet = SVC_CP_GetSettings(pstSvcCp);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+
+        pstSvcCp->stDbV2x.unDeviceId = (uint32_t)atoi(pcCmd);
+        sprintf(s_chSetBufDevId, "%s", pcCmd);
+        pstSvcCp->pchDeviceName = s_chSetBufDevId;
+
+        if(strcmp(pstSvcCp->pchDeviceName, DB_MGR_DEFAULT_COMM_DEV_ID) == 0)
+        {
+            PrintWarn("INSERT DEVICE ID is failed!");
+            nRet = APP_ERROR;
+        }
+        else
+        {
+            PrintDebug("SET:unDeviceId[%d]", pstSvcCp->stDbV2x.unDeviceId);
+            PrintDebug("SET:pchDeviceName[%s]", pstSvcCp->pchDeviceName);
+        }
+
+        nRet = SVC_CP_SetSettings(pstSvcCp);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        }
     }
+
+    return nRet;
+}
+
+static int P_CLI_CP_CheckV2xStatusScenario(void)
+{
+    int32_t nRet = APP_OK;
+    SVC_CP_T *pstSvcCp;
+    pstSvcCp = APP_GetSvcCpInstance();
+
+    nRet = SVC_CP_GetSettings(pstSvcCp);
+    if(nRet != APP_OK)
+    {
+        PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+    }
+
+    (void)SVC_CP_ShowSettings(pstSvcCp);
 
     return nRet;
 }
@@ -94,6 +138,12 @@ static int P_CLI_CP_ReadyV2xStatusScenario(void)
     if(nRet != APP_OK)
     {
         PrintError("SVC_CP_Open() is failed! [nRet:%d]", nRet);
+    }
+
+    nRet = SVC_CP_GetSettings(pstSvcCp);
+    if(nRet != APP_OK)
+    {
+        PrintError("SVC_CP_GetSettings() is failed! [nRet:%d]", nRet);
     }
 
     nRet = SVC_CP_SetSettings(pstSvcCp);
@@ -299,6 +349,14 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 return CLI_CMD_Showusage(pstCmd);
             }
         }
+        else if(IS_CMD(pcCmd, "check"))
+        {
+            nRet = P_CLI_CP_CheckV2xStatusScenario();
+            if(nRet != APP_OK)
+            {
+                PrintError("P_CLI_CP_CheckV2xStatusScenario() is failed![nRet:%d]", nRet);
+            }
+        }
         else if(IS_CMD(pcCmd, "sce"))
         {
             pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
@@ -417,6 +475,7 @@ int32_t CLI_CP_InitCmds(void)
                "and the command name.\n\n"
                "cp test                   test cp command\n"
                "cp set                    set Device ID\n"
+               "cp check                  check V2X scenario\n"
                "cp sce [OPTIONS]\n"
                "       base               start a base Communication Performance scenario\n"
                "       ready              ready V2X scenario\n"
