@@ -804,6 +804,7 @@ int32_t SVC_CP_Close(SVC_CP_T *pstSvcCp)
     int32_t nRet = APP_ERROR;
     DI_T *pstDi;
     DB_MANAGER_T *pstDbManager;
+    MSG_MANAGER_T *pstMsgManager;    pstMsgManager = FRAMEWORK_GetMsgManagerInstance();
     char chTempDate[SVC_CP_DATE_LEN+1];
     char chTempHour[SVC_CP_HOUR_LEN+1];
     char chTempMin[SVC_CP_MIN_LEN+1];
@@ -819,6 +820,15 @@ int32_t SVC_CP_Close(SVC_CP_T *pstSvcCp)
     if (pstDi == NULL)
     {
         PrintError("APP_GetDiInstance() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    pstMsgManager->pchIfaceName = pstSvcCp->pchIfaceName;
+
+    nRet = MSG_MANAGER_Close(pstMsgManager);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("MSG_MANAGER_Close() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 

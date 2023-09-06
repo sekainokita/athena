@@ -1293,6 +1293,13 @@ int32_t MSG_MANAGER_Close(MSG_MANAGER_T *pstMsgManager)
         return nRet;
     }
 
+    if(s_nSocketHandle != 0)
+    {
+        close(s_nSocketHandle);
+        s_nSocketHandle = 0;
+        PrintTrace("Close Connection of V2X Device is successed! [s_nSocketHandle:0x%x]", s_nSocketHandle);
+    }
+
     return nRet;
 }
 
