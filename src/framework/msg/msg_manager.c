@@ -657,11 +657,6 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             }
             else
             {
-                if(s_bFirstPacket == TRUE)
-                {
-                    PrintTrace("Received the first packets");
-                }
-
                 memset(pstV2xRxPdu, 0, sizeof(Ext_V2X_RxPDU_t));
                 memcpy(pstV2xRxPdu, buf, nRecvLen);
 
@@ -709,6 +704,13 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
                         }
 
                         stDbV2xStatus.stV2xStatusRx.ulTotalPacketCnt++;
+
+                        if(s_bFirstPacket == TRUE)
+                        {
+                            PrintTrace("Received the first packets");
+                            s_bFirstPacket = FALSE;
+                            stDbV2xStatus.unLastContCnt = 1; /* The first packet number is started from 1 */
+                        }
 
                         nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
                         if(nRet != FRAMEWORK_OK)
@@ -1271,7 +1273,7 @@ int32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager)
     }
 #endif
 
-    s_bFirstPacket = TRUE;
+    s_bFirstPacket = FALSE;
 
     return nRet;
 }
@@ -1298,7 +1300,7 @@ int32_t MSG_MANAGER_Close(MSG_MANAGER_T *pstMsgManager)
         PrintError("Disconnected [s_nSocketHandle:0x%x]", s_nSocketHandle);
     }
 
-    s_bFirstPacket = FALSE;
+    s_bFirstPacket = TRUE;
 
     return nRet;
 }
