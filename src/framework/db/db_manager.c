@@ -229,8 +229,6 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     fTemp = (float)pstDbV2xStatusRx->ulTotalErrCnt/(float)pstDbV2xStatusTx->unSeqNum;
     pstDbV2xStatusRx->unPer = (uint32_t)(fTemp*100*100); /* divide /100 at the writing db */
 
-    /* Reset the err indicator */
-    stDbV2xStatus.stV2xStatusRx.ucErrIndicator = FALSE;
     nRet = P_DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
     if(nRet != FRAMEWORK_OK)
     {
@@ -1146,6 +1144,7 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     char *pchPayload = NULL;
     DB_V2X_STATUS_TX_T stDbV2xStatusTx;
     DB_V2X_STATUS_RX_T stDbV2xStatusRx;
+    DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
     DI_T *pstDi;
     float fTemp;
     double dTemp;
@@ -1265,6 +1264,20 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrRxMsg, "%.2f", fTemp);
 
     fprintf(sh_pDbMgrRxMsg, "\r\n");
+
+    nRet = P_DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+    }
+
+    /* Reset the err indicator */
+    stDbV2xStatus.stV2xStatusRx.ucErrIndicator = FALSE;
+    nRet = P_DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+    }
 
     nRet = fflush(sh_pDbMgrRxMsg);
     if (nRet < 0)
