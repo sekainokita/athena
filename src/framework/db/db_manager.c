@@ -210,7 +210,7 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
 
     stDbV2xStatus.unLastContCnt = stDbV2xStatus.unCurrentContCnt;
     stDbV2xStatus.unLastContCnt++;
-    if(stDbV2xStatus.unLastContCnt >= DB_V2X_STATUS_CONT_CNT_MAX)
+    if(stDbV2xStatus.unLastContCnt > DB_V2X_STATUS_CONT_CNT_MAX)
     {
         stDbV2xStatus.unLastContCnt = 0;
     }
