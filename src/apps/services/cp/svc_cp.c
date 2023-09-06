@@ -752,6 +752,13 @@ int32_t SVC_CP_Open(SVC_CP_T *pstSvcCp)
     }
 
     pstDbManager = FRAMEWORK_GetDbManagerInstance();
+    if(pstDbManager == NULL)
+    {
+        PrintError("pstDbManager == NULL!!");
+        nRet = APP_ERROR;
+        return nRet;
+    }
+
     pstDbManager->eFileType = pstSvcCp->stDbManagerWrite.eFileType;
     pstDbManager->eSvcType = DB_MANAGER_SVC_TYPE_V2X_STATUS;
 
@@ -763,6 +770,13 @@ int32_t SVC_CP_Open(SVC_CP_T *pstSvcCp)
     }
 
     pstMsgManager = FRAMEWORK_GetMsgManagerInstance();
+    if(pstMsgManager == NULL)
+    {
+        PrintError("pstMsgManager == NULL!!");
+        nRet = APP_ERROR;
+        return nRet;
+    }
+
     pstMsgManager->pchIfaceName = pstSvcCp->pchIfaceName;
 
     nFrameWorkRet = MSG_MANAGER_Open(pstMsgManager);
@@ -776,6 +790,7 @@ int32_t SVC_CP_Open(SVC_CP_T *pstSvcCp)
     if (pstDi == NULL)
     {
         PrintError("APP_GetDiInstance() is failed! [nRet:%d]", nRet);
+        nRet = APP_ERROR;
         return nRet;
     }
 
@@ -820,6 +835,14 @@ int32_t SVC_CP_Close(SVC_CP_T *pstSvcCp)
     if (pstDi == NULL)
     {
         PrintError("APP_GetDiInstance() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    pstMsgManager = FRAMEWORK_GetMsgManagerInstance();
+    if(pstMsgManager == NULL)
+    {
+        PrintError("pstMsgManager == NULL!!");
+        nRet = APP_ERROR;
         return nRet;
     }
 

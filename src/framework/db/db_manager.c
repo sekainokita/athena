@@ -191,9 +191,6 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusRx->stRxPosition.nRxLongitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLongitude * SVC_CP_GPS_VALUE_CONVERT);
     pstDbV2xStatusRx->stRxPosition.nRxAttitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fAltitude * SVC_CP_GPS_VALUE_CONVERT);
 
-    pstDbV2xStatusRx->ucErrIndicator = stDbV2xStatus.stV2xStatusRx.ucErrIndicator;
-    pstDbV2xStatusRx->ulTotalPacketCnt = stDbV2xStatus.stV2xStatusRx.ulTotalPacketCnt;
-
     stDbV2xStatus.unCurrentContCnt = pstDbV2xStatusTx->unContCnt;
 
     if((stDbV2xStatus.unLastContCnt) != stDbV2xStatus.unCurrentContCnt)
@@ -209,6 +206,9 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     {
         PrintDebug("[+1 increased unLastContCnt:%d] == [unCurrentContCnt:%d]", stDbV2xStatus.unLastContCnt, stDbV2xStatus.unCurrentContCnt);
     }
+
+    pstDbV2xStatusRx->ucErrIndicator = stDbV2xStatus.stV2xStatusRx.ucErrIndicator;
+    pstDbV2xStatusRx->ulTotalPacketCnt = stDbV2xStatus.stV2xStatusRx.ulTotalPacketCnt;
 
     stDbV2xStatus.unLastContCnt = stDbV2xStatus.unCurrentContCnt;
     stDbV2xStatus.unLastContCnt++;
