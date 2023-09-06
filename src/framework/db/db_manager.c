@@ -203,7 +203,7 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
         stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
         PrintWarn("Increased unContCntLoss[%d], ulTotalErrCnt[%ld]", stDbV2xStatus.unContCntLoss, stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
     }
-    else
+    else // s_bDbMgrLog
     {
         PrintDebug("[+1 increased unLastContCnt:%d] == [unCurrentContCnt:%d]", stDbV2xStatus.unLastContCnt, stDbV2xStatus.unCurrentContCnt);
     }
@@ -212,7 +212,8 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     stDbV2xStatus.unLastContCnt++;
     if(stDbV2xStatus.unLastContCnt > DB_V2X_STATUS_CONT_CNT_MAX)
     {
-        stDbV2xStatus.unLastContCnt = 0;
+        stDbV2xStatus.unLastContCnt = 1;
+        // s_bDbMgrLog
     }
 
     pstDbV2xStatusRx->ulTotalErrCnt = stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt;
