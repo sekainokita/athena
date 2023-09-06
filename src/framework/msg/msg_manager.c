@@ -1273,7 +1273,7 @@ int32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager)
     }
 #endif
 
-    s_bFirstPacket = FALSE;
+    s_bFirstPacket = TRUE;
 
     return nRet;
 }
