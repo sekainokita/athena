@@ -91,7 +91,7 @@ static struct timespec stCurTime, stCheckBeginTime, stCheckEndTime;
 static struct timespec stDbTxStartTime, stDbTxEndTime, stDbRxStartTime, stDbRxEndTime;
 
 static bool s_bTimeMgrLog = OFF;
-#if defined(TIME_MGR_RTC_TEST)
+#if defined(CONFIG_RTC) && defined(TIME_MGR_RTC_TEST)
 static const char s_chRtcDev[] = TIME_MGR_RTC_DEV;
 #endif
 
@@ -256,6 +256,35 @@ READ_TEST:
     }
 
     close(fd_nRtcDev);
+
+    return nRet;
+}
+#endif
+
+#if defined(CONFIG_RTC) && defined(TIME_MGR_RTC_TEST)
+int P_TIME_MANAGER_GetRtc(void)
+{
+    int nRtcDev = 0;
+    int32_t nRet = FRAMEWORK_ERROR;
+    struct rtc_time stRtcTime;
+    const char *pchRtcDev = s_chRtcDev;
+
+    nRtcDev = open(pchRtcDev, O_RDONLY);
+    if (nRtcDev == -1)
+    {
+        PrintError("FD is NULL!");
+    }
+
+    /* Read the RTC time/date */
+    nRet = ioctl(nRtcDev, RTC_RD_TIME, &stRtcTime);
+    if (nRet < FRAMEWORK_OK)
+    {
+        PrintError("RTC_RD_TIME ioctl");
+    }
+
+    PrintDebug("Current RTC date/time is %d-%d-%d, %02d:%02d:%02d", stRtcTime.tm_year + 1900,  stRtcTime.tm_mon + 1, stRtcTime.tm_mday, stRtcTime.tm_hour, stRtcTime.tm_min, stRtcTime.tm_sec);
+
+    close(nRtcDev);
 
     return nRet;
 }
