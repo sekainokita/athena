@@ -91,6 +91,15 @@ int32_t APP_Init(APP_T *pstApp)
         return nRet;
     }
 
+    printf(COLOR_YELLOW "=======================================================\r\n");
+    printf(COLOR_YELLOW "\r\n");
+    printf(COLOR_YELLOW "Copyright (C) 2023 - 2028 KETI, All rights reserved.\r\n");
+    printf(COLOR_YELLOW "Korea Electronics Technology Institute\r\n");
+    printf(COLOR_YELLOW "\r\n");
+    printf(COLOR_YELLOW "ATHENA SW (VERSION : %.1f)\r\n", CONFIG_SW_VERSION);
+    printf(COLOR_YELLOW "\r\n");
+    printf(COLOR_YELLOW "=======================================================\r\n");
+
     nRet = CLI_Init();
     if (nRet != APP_OK)
     {
