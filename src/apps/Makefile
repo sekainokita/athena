@@ -33,7 +33,7 @@
 
 TARGET = app
 
-APP_BIN = app-v2x
+APP_BIN = athena
 
 SRCS = $(wildcard *.c)
 SRCS += $(wildcard $(APP_CLI_PATH)/*.c)
