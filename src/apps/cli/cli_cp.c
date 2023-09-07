@@ -54,6 +54,7 @@
 
 /***************************** Static Variable *******************************/
 static char s_chSetBufDevId[CLI_DB_V2X_DEFAULT_BUF_LEN];
+static char s_chSetEth[CLI_DB_V2X_DEFAULT_BUF_LEN];
 
 /***************************** Function Protype ******************************/
 
@@ -76,8 +77,15 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
         PrintError("pcCmd == NULL!!");
         return CLI_CMD_Showusage(pstCmd);
     }
-    else
+    else if(strcmp(pcCmd, "dev") == 0)
     {
+        pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+        if(pcCmd == NULL)
+        {
+            PrintError("pcCmd == NULL!!");
+            return CLI_CMD_Showusage(pstCmd);
+        }
+
         nRet = SVC_CP_GetSettings(pstSvcCp);
         if(nRet != APP_OK)
         {
@@ -104,6 +112,90 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
         {
             PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
         }
+    }
+    else if(strcmp(pcCmd, "eth") == 0)
+    {
+        pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+        if(pcCmd == NULL)
+        {
+            PrintError("pcCmd == NULL!!");
+            return CLI_CMD_Showusage(pstCmd);
+        }
+
+        nRet = SVC_CP_GetSettings(pstSvcCp);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+
+        sprintf(s_chSetEth, "%s", pcCmd);
+        pstSvcCp->pchIfaceName = s_chSetEth;
+
+        PrintDebug("SET:pchIfaceName[%s]", pstSvcCp->pchIfaceName);
+
+        nRet = SVC_CP_SetSettings(pstSvcCp);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+
+    }
+    else if(strcmp(pcCmd, "txrat") == 0)
+    {
+        pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+        if(pcCmd == NULL)
+        {
+            PrintError("pcCmd == NULL!!");
+            return CLI_CMD_Showusage(pstCmd);
+        }
+
+        nRet = SVC_CP_GetSettings(pstSvcCp);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+
+        pstSvcCp->stMsgManagerTx.unTxDelay = (uint16_t)atoi(pcCmd);
+        pstSvcCp->stDbV2xStatusTx.usTxRatio = (uint16_t)atoi(pcCmd);
+
+        PrintDebug("SET:unTxDelay[%d]", pstSvcCp->stMsgManagerTx.unTxDelay);
+        PrintDebug("SET:usTxRatio[%d]", pstSvcCp->stDbV2xStatusTx.usTxRatio);
+
+        nRet = SVC_CP_SetSettings(pstSvcCp);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+    }
+    else if(strcmp(pcCmd, "spd") == 0)
+    {
+        pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+        if(pcCmd == NULL)
+        {
+            PrintError("pcCmd == NULL!!");
+            return CLI_CMD_Showusage(pstCmd);
+        }
+
+        nRet = SVC_CP_GetSettings(pstSvcCp);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+
+        pstSvcCp->stDbV2xStatusTx.unTxVehicleSpeed = (uint32_t)atoi(pcCmd);
+
+        PrintDebug("SET:unTxVehicleSpeed[%d]", pstSvcCp->stDbV2xStatusTx.unTxVehicleSpeed);
+
+        nRet = SVC_CP_SetSettings(pstSvcCp);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+    }
+    else
+    {
+        PrintWarn("unknown set type");
+        nRet = APP_ERROR;
     }
 
     return nRet;
@@ -338,10 +430,53 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
             if(pcCmd != NULL)
             {
+                if(IS_CMD(pcCmd, "dev"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        nRet = P_CLI_CP_SetV2xStatusScenario(pstCmd);
+                        if(nRet != APP_OK)
+                        {
+                            PrintError("P_CLI_CP_SetOptV2xStatusScenario() is failed![nRet:%d]", nRet);
+                        }
+                    }
+                }
+                else if(IS_CMD(pcCmd, "eth"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
                 nRet = P_CLI_CP_SetV2xStatusScenario(pstCmd);
                 if(nRet != APP_OK)
                 {
-                    PrintError("P_CLI_CP_SetV2xStatusScenario() is failed![nRet:%d]", nRet);
+                            PrintError("P_CLI_CP_SetOptV2xStatusScenario() is failed![nRet:%d]", nRet);
+                        }
+                    }
+                }
+                else if(IS_CMD(pcCmd, "txrat"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        nRet = P_CLI_CP_SetV2xStatusScenario(pstCmd);
+                        if(nRet != APP_OK)
+                        {
+                            PrintError("P_CLI_CP_SetOptV2xStatusScenario() is failed![nRet:%d]", nRet);
+                        }
+                    }
+                }
+                else if(IS_CMD(pcCmd, "spd"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        nRet = P_CLI_CP_SetV2xStatusScenario(pstCmd);
+                        if(nRet != APP_OK)
+                        {
+                            PrintError("P_CLI_CP_SetOptV2xStatusScenario() is failed![nRet:%d]", nRet);
+                        }
+                    }
                 }
             }
             else
@@ -357,12 +492,7 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintError("P_CLI_CP_CheckV2xStatusScenario() is failed![nRet:%d]", nRet);
             }
         }
-        else if(IS_CMD(pcCmd, "sce"))
-        {
-            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
-            if(pcCmd != NULL)
-            {
-                if(IS_CMD(pcCmd, "base"))
+        else if(IS_CMD(pcCmd, "base"))
                 {
                     PrintTrace("Open DB");
 
@@ -400,12 +530,12 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 }
                 else if(IS_CMD(pcCmd, "status"))
                 {
-                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
                     if (pcCmd != NULL)
                     {
                         if(IS_CMD(pcCmd, "start"))
                         {
-                            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_3);
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
                             if (pcCmd != NULL)
                             {
                                 bLogOnOff = TRUE;
@@ -447,16 +577,6 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     return CLI_CMD_Showusage(pstCmd);
                 }
             }
-            else
-            {
-                return CLI_CMD_Showusage(pstCmd);
-            }
-        }
-        else
-        {
-            return CLI_CMD_Showusage(pstCmd);
-        }
-    }
 
 	return nRet;
 }
@@ -473,17 +593,22 @@ int32_t CLI_CP_InitCmds(void)
                "Without any parameters, the 'cp' show a description\n"
                "of available commands. For more details on a command, type and enter 'cp'\n"
                "and the command name.\n\n"
-               "cp test                   test cp command\n"
-               "cp set                    set Device ID\n"
-               "cp check                  check V2X scenario\n"
-               "cp sce [OPTIONS]\n"
+               "cp [OPTIONS]\n"
+               "   test                         test cp command\n"
+               "   set                          set Device ID (should be set cp ready first)\n"
+               "   check                        check V2X scenario\n"
                "       base               start a base Communication Performance scenario\n"
                "       ready              ready V2X scenario\n"
-               "       start              start V2X scenario (should be set cp sce ready first)\n"
+               "   start                        start V2X scenario (should be set cp ready first)\n"
                "       stop               stop V2X scenario\n"
                "       status start msg   start a test sample of V2X status data of msg tx\n"
                "       status start db    start a test sample of V2X status data of db\n"
-               "cp info                   get a status Communication Performance\n",
+               "   info                         get a status Communication Performance\n"
+               "cp set [OPT] [PARAM]\n"
+               "       dev   [id]               set device id Device ID\n"
+               "       eth   [dev]              set ethernet i/f name\n"
+               "       txrat [param ms]         set tx ratio\n"
+               "       spd   [speed km/hrs]     set tx / rx vehicle speed\n",
                "");
     if(nRet != APP_OK)
     {
