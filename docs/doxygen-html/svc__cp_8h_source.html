@@ -108,49 +108,101 @@ $(function() {
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="comment">/***************************** Include ***************************************/</span></div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="type_8h.html">type.h</a>&quot;</span></div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="db__v2x_8h.html">db_v2x.h</a>&quot;</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="comment">/***************************** Definition ************************************/</span></div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="preprocessor">#define SVC_CP_TASK_MSG_KEY               (0x230531)</span></div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="comment">/***************************** Enum and Structure ****************************/</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="db__v2x__status_8h.html">db_v2x_status.h</a>&quot;</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="comment">/***************************** Definition ************************************/</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="preprocessor">#define SVC_CP_TASK_MSG_KEY                 (0x2319)</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="preprocessor">#define SVC_CP_DEFAULT_ETH_DEV              &quot;eth1&quot;</span></div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
-<div class="line"><a name="l00061"></a><span class="lineno"><a class="line" href="structSVC__CP__SETTING__t.html">   61</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structSVC__CP__SETTING__t.html">SVC_CP_SETTING_t</a> {</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    uint32_t                     unReserved;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;} <a class="code" href="svc__cp_8h.html#a90584d02e458bb2d04ad6b31cc76c147">SVC_CP_SETTING_T</a>;</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
-<div class="line"><a name="l00069"></a><span class="lineno"><a class="line" href="structSVC__CP__EVENT__MSG__t.html">   69</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structSVC__CP__EVENT__MSG__t.html">SVC_CP_EVENT_MSG_t</a> {</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <a class="code" href="structSVC__CP__SETTING__t.html">SVC_CP_SETTING_T</a>      *pstSvcCpSetting;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;} <a class="code" href="svc__cp_8h.html#a61b923b160b705dd3ccdd92dd52f364a">SVC_CP_EVENT_MSG_T</a>;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160; </div>
-<div class="line"><a name="l00078"></a><span class="lineno"><a class="line" href="structSVC__CP__t.html">   78</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structSVC__CP__t.html">SVC_CP_t</a> {</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keywordtype">bool</span>                    bLogLevel;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    uint32_t                unReserved;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;} <a class="code" href="svc__cp_8h.html#abc4d8fafa3c92462d0749e6b22f19e82">SVC_CP_T</a>;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="comment">/***************************** Function Protype ******************************/</span></div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;int32_t SVC_CP_SetLog(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;int32_t SVC_CP_Open(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;int32_t SVC_CP_Close(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;int32_t SVC_CP_Start(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;int32_t SVC_CP_Stop(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;int32_t SVC_CP_Status(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160; </div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;int32_t SVC_CP_Init(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;int32_t SVC_CP_DeInit(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160; </div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">/* _SVC_CP_H_ */</span><span class="preprocessor"></span></div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160; </div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="preprocessor">#define SVC_CP_GPS_OPEN_RETRY_CNT           (10)</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="preprocessor">#define SVC_CP_GPS_OPEN_RETRY_DELAY         (1000)</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="preprocessor">#define SVC_CP_GPS_VALUE_CONVERT            (1000000)</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="preprocessor">#define SVC_CP_GPS_VALUE_CONVERT_DOUBLE     (1000000.0f)</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="preprocessor">#define SVC_CP_DEFAULT_TOTAL_DB_WRITE_TIME  (1000*1000*30) </span><span class="comment">/* 1 hours */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="preprocessor">#define SVC_CP_STR_BUF_LEN                  (20)</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="preprocessor">#define SVC_CP_DATE_LEN                     (8)</span></div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="preprocessor">#define SVC_CP_HOUR_LEN                     (2)</span></div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="preprocessor">#define SVC_CP_MIN_LEN                      (2)</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="preprocessor">#define SVC_CP_SEC_LEN                      (2)</span></div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="preprocessor">#define SVC_CP_DB_TX                        &quot;Tx&quot;</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="preprocessor">#define SVC_CP_DB_RX                        &quot;Rx&quot;</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="preprocessor">#define SVC_CP_DEV_OBU                      &quot;OBU&quot;</span></div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="preprocessor">#define SVC_CP_DEV_RSU                      &quot;RSU&quot;</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="preprocessor">#define SVC_CP_DEV_UNKNOWN                  &quot;UNKNOWN&quot;</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="comment">/***************************** Enum and Structure ****************************/</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
+<div class="line"><a name="l00082"></a><span class="lineno"><a class="line" href="svc__cp_8h.html#a2256685f8791e1ec7ff0fa826d6a6f12">   82</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    SVC_CP_EVENT_UNKNOWN                    = 0x0000,</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    SVC_CP_EVENT_START                      = 0x0001,</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    SVC_CP_EVENT_STOP                       = 0x0002,</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    SVC_CP_EVENT_UNDEFINED_1,</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    SVC_CP_EVENT_UNDEFINED_2,</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    SVC_CP_EVENT_MAX                        = 0xFFFF</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;} <a class="code" href="svc__cp_8h.html#a2256685f8791e1ec7ff0fa826d6a6f12">SVC_CP_EVENT_E</a>;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160; </div>
+<div class="line"><a name="l00096"></a><span class="lineno"><a class="line" href="svc__cp_8h.html#a03c8fc4bd5f8a6bbf5c0c148f278b597">   96</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    SVC_CP_STATUS_IDLE                       = 0x0000,</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    SVC_CP_STATUS_START                      = 0x0001,</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    SVC_CP_STATUS_STOP                       = 0x0002,</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    SVC_CP_STATUS_MAX                        = 0xFFFF</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;} <a class="code" href="svc__cp_8h.html#a03c8fc4bd5f8a6bbf5c0c148f278b597">SVC_CP_STATUS_E</a>;</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160; </div>
+<div class="line"><a name="l00109"></a><span class="lineno"><a class="line" href="structSVC__CP__EVENT__MSG__t.html">  109</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structSVC__CP__EVENT__MSG__t.html">SVC_CP_EVENT_MSG_t</a> {</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    <a class="code" href="svc__cp_8h.html#a2256685f8791e1ec7ff0fa826d6a6f12">SVC_CP_EVENT_E</a>          eEventType;</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;} <a class="code" href="svc__cp_8h.html#a61b923b160b705dd3ccdd92dd52f364a">SVC_CP_EVENT_MSG_T</a>;</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160; </div>
+<div class="line"><a name="l00118"></a><span class="lineno"><a class="line" href="structSVC__CP__t.html">  118</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structSVC__CP__t.html">SVC_CP_t</a> {</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    <span class="keywordtype">bool</span>                    bLogLevel;</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    <a class="code" href="svc__cp_8h.html#a03c8fc4bd5f8a6bbf5c0c148f278b597">SVC_CP_STATUS_E</a>         eSvcCpStatus;</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;    <a class="code" href="structDB__MANAGER__WRITE__t.html">DB_MANAGER_WRITE_T</a>      stDbManagerWrite;</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    <a class="code" href="structMSG__MANAGER__TX__t.html">MSG_MANAGER_TX_T</a>        stMsgManagerTx;</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    <a class="code" href="structMSG__MANAGER__RX__t.html">MSG_MANAGER_RX_T</a>        stMsgManagerRx;</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;    DB_V2X_T                stDbV2x;</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    DB_V2X_STATUS_TX_T      stDbV2xStatusTx;</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;    <span class="keywordtype">char</span>                    *pchIfaceName;</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    <span class="keywordtype">char</span>                    *pchDeviceName;</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    uint64_t                ulDbStartTime;</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    uint64_t                ulDbEndTime;</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;    uint32_t                unDbTotalWrittenTime;</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;    uint32_t                unReserved;</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;} <a class="code" href="svc__cp_8h.html#abc4d8fafa3c92462d0749e6b22f19e82">SVC_CP_T</a>;</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160; </div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;<span class="comment">/***************************** Function Protype ******************************/</span></div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160; </div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;int32_t SVC_CP_SetLog(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160; </div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;int32_t SVC_CP_Open(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;int32_t SVC_CP_Close(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;int32_t SVC_CP_Start(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;int32_t SVC_CP_Stop(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;int32_t SVC_CP_Status(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160; </div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;<span class="keywordtype">void</span> SVC_CP_ShowSettings(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160; </div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;int32_t SVC_CP_SetSettings(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;int32_t SVC_CP_GetSettings(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160; </div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;int32_t SVC_CP_Init(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;int32_t SVC_CP_DeInit(<a class="code" href="structSVC__CP__t.html">SVC_CP_T</a> *pstSvcCp);</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160; </div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">/* _SVC_CP_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160; </div>
 </div><!-- fragment --></div><!-- contents -->
+<div class="ttc" id="astructDB__MANAGER__WRITE__t_html"><div class="ttname"><a href="structDB__MANAGER__WRITE__t.html">DB_MANAGER_WRITE_t</a></div><div class="ttdef"><b>Definition:</b> db_manager.h:144</div></div>
 <div class="ttc" id="asvc__cp_8h_html_a61b923b160b705dd3ccdd92dd52f364a"><div class="ttname"><a href="svc__cp_8h.html#a61b923b160b705dd3ccdd92dd52f364a">SVC_CP_EVENT_MSG_T</a></div><div class="ttdeci">struct SVC_CP_EVENT_MSG_t SVC_CP_EVENT_MSG_T</div></div>
 <div class="ttc" id="asvc__cp_8h_html_abc4d8fafa3c92462d0749e6b22f19e82"><div class="ttname"><a href="svc__cp_8h.html#abc4d8fafa3c92462d0749e6b22f19e82">SVC_CP_T</a></div><div class="ttdeci">struct SVC_CP_t SVC_CP_T</div></div>
-<div class="ttc" id="asvc__cp_8h_html_a90584d02e458bb2d04ad6b31cc76c147"><div class="ttname"><a href="svc__cp_8h.html#a90584d02e458bb2d04ad6b31cc76c147">SVC_CP_SETTING_T</a></div><div class="ttdeci">struct SVC_CP_SETTING_t SVC_CP_SETTING_T</div></div>
-<div class="ttc" id="astructSVC__CP__SETTING__t_html"><div class="ttname"><a href="structSVC__CP__SETTING__t.html">SVC_CP_SETTING_t</a></div><div class="ttdef"><b>Definition:</b> svc_cp.h:61</div></div>
 <div class="ttc" id="atype_8h_html"><div class="ttname"><a href="type_8h.html">type.h</a></div></div>
+<div class="ttc" id="asvc__cp_8h_html_a03c8fc4bd5f8a6bbf5c0c148f278b597"><div class="ttname"><a href="svc__cp_8h.html#a03c8fc4bd5f8a6bbf5c0c148f278b597">SVC_CP_STATUS_E</a></div><div class="ttdeci">SVC_CP_STATUS_E</div><div class="ttdef"><b>Definition:</b> svc_cp.h:96</div></div>
 <div class="ttc" id="adb__v2x_8h_html"><div class="ttname"><a href="db__v2x_8h.html">db_v2x.h</a></div></div>
-<div class="ttc" id="astructSVC__CP__t_html"><div class="ttname"><a href="structSVC__CP__t.html">SVC_CP_t</a></div><div class="ttdef"><b>Definition:</b> svc_cp.h:78</div></div>
-<div class="ttc" id="astructSVC__CP__EVENT__MSG__t_html"><div class="ttname"><a href="structSVC__CP__EVENT__MSG__t.html">SVC_CP_EVENT_MSG_t</a></div><div class="ttdef"><b>Definition:</b> svc_cp.h:69</div></div>
+<div class="ttc" id="astructMSG__MANAGER__RX__t_html"><div class="ttname"><a href="structMSG__MANAGER__RX__t.html">MSG_MANAGER_RX_t</a></div><div class="ttdef"><b>Definition:</b> msg_manager.h:199</div></div>
+<div class="ttc" id="astructSVC__CP__t_html"><div class="ttname"><a href="structSVC__CP__t.html">SVC_CP_t</a></div><div class="ttdef"><b>Definition:</b> svc_cp.h:118</div></div>
+<div class="ttc" id="adb__v2x__status_8h_html"><div class="ttname"><a href="db__v2x__status_8h.html">db_v2x_status.h</a></div></div>
+<div class="ttc" id="astructSVC__CP__EVENT__MSG__t_html"><div class="ttname"><a href="structSVC__CP__EVENT__MSG__t.html">SVC_CP_EVENT_MSG_t</a></div><div class="ttdef"><b>Definition:</b> svc_cp.h:109</div></div>
+<div class="ttc" id="asvc__cp_8h_html_a2256685f8791e1ec7ff0fa826d6a6f12"><div class="ttname"><a href="svc__cp_8h.html#a2256685f8791e1ec7ff0fa826d6a6f12">SVC_CP_EVENT_E</a></div><div class="ttdeci">SVC_CP_EVENT_E</div><div class="ttdef"><b>Definition:</b> svc_cp.h:82</div></div>
+<div class="ttc" id="astructMSG__MANAGER__TX__t_html"><div class="ttname"><a href="structMSG__MANAGER__TX__t.html">MSG_MANAGER_TX_t</a></div><div class="ttdef"><b>Definition:</b> msg_manager.h:181</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

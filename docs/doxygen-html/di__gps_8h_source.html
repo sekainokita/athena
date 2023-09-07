@@ -168,11 +168,13 @@ $(function() {
 <div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;int32_t DI_GPS_Start(<a class="code" href="structDI__GPS__t.html">DI_GPS_T</a> *pstDiGps);</div>
 <div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;int32_t DI_GPS_Stop(<a class="code" href="structDI__GPS__t.html">DI_GPS_T</a> *pstDiGps);</div>
 <div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160; </div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;<span class="keywordtype">void</span> DI_GPS_Status(<a class="code" href="structDI__GPS__t.html">DI_GPS_T</a> *pstDiGps);</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;int32_t DI_GPS_Init(<a class="code" href="structDI__GPS__t.html">DI_GPS_T</a> *pstDiGps);</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;int32_t DI_GPS_DeInit(<a class="code" href="structDI__GPS__t.html">DI_GPS_T</a> *pstDiGps);</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">/* _DI_GPS_H_ */</span><span class="preprocessor"></span></div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160; </div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;<span class="keywordtype">double</span> DI_GPS_CalculateDistance(<span class="keywordtype">double</span> dRxLat, <span class="keywordtype">double</span> dRxLon, <span class="keywordtype">double</span> dTxLat, <span class="keywordtype">double</span> dTxLon);</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160; </div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;<span class="keywordtype">void</span> DI_GPS_Status(<a class="code" href="structDI__GPS__t.html">DI_GPS_T</a> *pstDiGps);</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;int32_t DI_GPS_Init(<a class="code" href="structDI__GPS__t.html">DI_GPS_T</a> *pstDiGps);</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;int32_t DI_GPS_DeInit(<a class="code" href="structDI__GPS__t.html">DI_GPS_T</a> *pstDiGps);</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">/* _DI_GPS_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160; </div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="adi__gps_8h_html_a658c222e6914bd4bddea65c4c1f16e45"><div class="ttname"><a href="di__gps_8h.html#a658c222e6914bd4bddea65c4c1f16e45">DI_GPS_STATUS_E</a></div><div class="ttdeci">DI_GPS_STATUS_E</div><div class="ttdef"><b>Definition:</b> di_gps.h:60</div></div>
 <div class="ttc" id="atype_8h_html"><div class="ttname"><a href="type_8h.html">type.h</a></div></div>

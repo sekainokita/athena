@@ -82,15 +82,15 @@ uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulRxTimeStampL2</
 <tr class="memitem:a6580c6235fedd7a0681a485956d123a7"><td class="memItemLeft" align="right" valign="top"><a id="a6580c6235fedd7a0681a485956d123a7"></a>
 uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulRxTimeStampL3</b></td></tr>
 <tr class="separator:a6580c6235fedd7a0681a485956d123a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0685076ede31ba6c8239577ba5164bdb"><td class="memItemLeft" align="right" valign="top"><a id="a0685076ede31ba6c8239577ba5164bdb"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulAvgLatencyL1</b></td></tr>
-<tr class="separator:a0685076ede31ba6c8239577ba5164bdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c48f2807c185e1a20d371b88fe4e109"><td class="memItemLeft" align="right" valign="top"><a id="a4c48f2807c185e1a20d371b88fe4e109"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulAvgLatencyL2</b></td></tr>
-<tr class="separator:a4c48f2807c185e1a20d371b88fe4e109"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0896aada5fbb0b73d3d0bae073103057"><td class="memItemLeft" align="right" valign="top"><a id="a0896aada5fbb0b73d3d0bae073103057"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulAvgLatencyL3</b></td></tr>
-<tr class="separator:a0896aada5fbb0b73d3d0bae073103057"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14d31cf7aa54873909b92b4fa0d75c4f"><td class="memItemLeft" align="right" valign="top"><a id="a14d31cf7aa54873909b92b4fa0d75c4f"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulLatencyL1</b></td></tr>
+<tr class="separator:a14d31cf7aa54873909b92b4fa0d75c4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65219247c272af0654450a1e9753e7ec"><td class="memItemLeft" align="right" valign="top"><a id="a65219247c272af0654450a1e9753e7ec"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulLatencyL2</b></td></tr>
+<tr class="separator:a65219247c272af0654450a1e9753e7ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35a1da3a32cd213a1a8e8960c6ceca39"><td class="memItemLeft" align="right" valign="top"><a id="a35a1da3a32cd213a1a8e8960c6ceca39"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>ulLatencyL3</b></td></tr>
+<tr class="separator:a35a1da3a32cd213a1a8e8960c6ceca39"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a04897fecac6fab4eee70442a8515bd18"><td class="memItemLeft" align="right" valign="top"><a id="a04897fecac6fab4eee70442a8515bd18"></a>
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>unTxDeviceId</b></td></tr>
 <tr class="separator:a04897fecac6fab4eee70442a8515bd18"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -131,9 +131,9 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>unPer</b></td></t
     <tr><td class="paramname">ulRxTimeStampL1</td><td>The system layer 1 time value at which the communication device transmitted the message (need to change to future UTF time, C-ITS communication time compatibility) </td></tr>
     <tr><td class="paramname">ulRxTimeStampL2</td><td>The system layer 2 time value at which the OBU/RSU/Control Units transmitted the message (Optional, if the devices are separated from model IP) </td></tr>
     <tr><td class="paramname">ulRxTimeStampL2</td><td>The system layer 3 time value at which the application device transmitted the message (Optional, if the devices are separated OBU/RSU) </td></tr>
-    <tr><td class="paramname">ulAvgLatencyL1</td><td>[L1] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second) </td></tr>
-    <tr><td class="paramname">ulAvgLatencyL2</td><td>[L2] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second) </td></tr>
-    <tr><td class="paramname">ulAvgLatencyL3</td><td>[L3] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second) </td></tr>
+    <tr><td class="paramname">ulLatencyL1</td><td>[L1] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second) </td></tr>
+    <tr><td class="paramname">ulLatencyL2</td><td>[L2] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second) </td></tr>
+    <tr><td class="paramname">ulLatencyL3</td><td>[L3] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second) </td></tr>
     <tr><td class="paramname">unTxDeviceId</td><td>The unique ID (Serial Number) of the transfer device </td></tr>
     <tr><td class="paramname">unRxVehicleSpeed</td><td>Rx vehicle speed (Rx vehicle speed (if available), if not available, set the experimental value manually, default 60km/h) </td></tr>
     <tr><td class="paramname">unTotalCommDevCnt</td><td>The total number of devices that are currently simultaneously connected and transmitting/receiving (the count number of all device IDs currently received and stored by the Rx device) </td></tr>
