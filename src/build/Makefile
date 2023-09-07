@@ -209,14 +209,22 @@ plat-chem-obu-distclean:
 #
 # Build All
 #
-
 lib-all:lib-db lib-msg lib-time
 all: lib-di lib-platform lib-framework app lib-all
+.PHONY: lib-all all
+
+#
+# Release
+#
+release:
+	@echo release $(RELEASE_DIR)/$(CONFIG_SW_VERSION)
+	mkdir -p $(RELEASE_DIR)/$(CONFIG_SW_VERSION)
+	cp -a $(OUT_BIN_DIR) $(RELEASE_DIR)/$(CONFIG_SW_VERSION)/bin
+	cp -a $(OUT_LIB_DIR) $(RELEASE_DIR)/$(CONFIG_SW_VERSION)/lib
 
 #
 # Clean
 #
-
 clean: distclean
 
 distclean: lib-db-distclean lib-msg-distclean lib-time-distclean lib-di-distclean lib-platform-distclean lib-framework-distclean app-distclean

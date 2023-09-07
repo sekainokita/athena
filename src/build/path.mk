@@ -44,6 +44,7 @@ export INCLUDE_DIR = $(TOP_DIR)/include
 export PACKAGE_DIR = $(TOP_DIR)/packages
 export PLATFORM_DIR = $(TOP_DIR)/platform
 export TOOL_DIR = $(TOP_DIR)/tools
+export RELEASE_DIR = $(TOP_DIR)/../release/athena
 
 export OUT_DIR = $(BUILD_DIR)/output
 export OUT_BIN_DIR = $(OUT_DIR)/bin
