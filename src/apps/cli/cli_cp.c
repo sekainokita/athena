@@ -447,9 +447,9 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
                     if(pcCmd != NULL)
                     {
-                nRet = P_CLI_CP_SetV2xStatusScenario(pstCmd);
-                if(nRet != APP_OK)
-                {
+                        nRet = P_CLI_CP_SetV2xStatusScenario(pstCmd);
+                        if(nRet != APP_OK)
+                        {
                             PrintError("P_CLI_CP_SetOptV2xStatusScenario() is failed![nRet:%d]", nRet);
                         }
                     }
@@ -493,78 +493,68 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             }
         }
         else if(IS_CMD(pcCmd, "base"))
-                {
-                    PrintTrace("Open DB");
+        {
+            PrintTrace("Open DB");
 
-                    PrintTrace("Connect V2X Device (OBU/RSU)");
+            PrintTrace("Connect V2X Device (OBU/RSU)");
 
-                    PrintTrace("Setting Parameters");
+            PrintTrace("Setting Parameters");
 
-                    PrintTrace("Start V2X Tx/Rx Communication of Platooning");
+            PrintTrace("Start V2X Tx/Rx Communication of Platooning");
 
-                    PrintTrace("Save DB");
-                }
-                else if(IS_CMD(pcCmd, "ready"))
-                {
-                    nRet = P_CLI_CP_ReadyV2xStatusScenario();
-                    if(nRet != APP_OK)
-                    {
-                        PrintError("P_CLI_CP_ReadyV2xStatusScenario() is failed![nRet:%d]", nRet);
-                    }
-                }
-                else if(IS_CMD(pcCmd, "start"))
-                {
-                    nRet = P_CLI_CP_StartV2xStatusScenario();
-                    if(nRet != APP_OK)
-                    {
-                        PrintError("P_CLI_CP_StartV2xStatusScenario() is failed![nRet:%d]", nRet);
-                    }
-                }
-                else if(IS_CMD(pcCmd, "stop"))
-                {
-                    nRet = P_CLI_CP_StopV2xStatusScenario();
-                    if(nRet != APP_OK)
-                    {
-                        PrintError("P_CLI_CP_StopV2xStatusScenario() is failed![nRet:%d]", nRet);
-                    }
-                }
-                else if(IS_CMD(pcCmd, "status"))
-                {
+            PrintTrace("Save DB");
+        }
+        else if(IS_CMD(pcCmd, "ready"))
+        {
+            nRet = P_CLI_CP_ReadyV2xStatusScenario();
+            if(nRet != APP_OK)
+            {
+                PrintError("P_CLI_CP_ReadyV2xStatusScenario() is failed![nRet:%d]", nRet);
+            }
+        }
+        else if(IS_CMD(pcCmd, "start"))
+        {
+            nRet = P_CLI_CP_StartV2xStatusScenario();
+            if(nRet != APP_OK)
+            {
+                PrintError("P_CLI_CP_StartV2xStatusScenario() is failed![nRet:%d]", nRet);
+            }
+        }
+        else if(IS_CMD(pcCmd, "stop"))
+        {
+            nRet = P_CLI_CP_StopV2xStatusScenario();
+            if(nRet != APP_OK)
+            {
+                PrintError("P_CLI_CP_StopV2xStatusScenario() is failed![nRet:%d]", nRet);
+            }
+        }
+        else if(IS_CMD(pcCmd, "status"))
+        {
             pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+            if (pcCmd != NULL)
+            {
+                if(IS_CMD(pcCmd, "start"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
                     if (pcCmd != NULL)
                     {
-                        if(IS_CMD(pcCmd, "start"))
+                        bLogOnOff = TRUE;
+
+                        if(IS_CMD(pcCmd, "msg"))
                         {
-                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
-                            if (pcCmd != NULL)
-                            {
-                                bLogOnOff = TRUE;
-
-                                if(IS_CMD(pcCmd, "msg"))
-                                {
-                                    bMsgTx = TRUE;
-                                }
-                                else if(IS_CMD(pcCmd, "db"))
-                                {
-                                    bMsgTx = FALSE;
-                                }
-
-                                PrintTrace("bMsgTx[%d], bLogOnOff[%d]", bMsgTx, bLogOnOff);
-
-                                nRet = P_CLI_CP_StartV2xStatus(bMsgTx, bLogOnOff);
-                                if(nRet != APP_OK)
-                                {
-                                    PrintError("P_CLI_CP_StartV2xStatus() is failed![nRet:%d]", nRet);
-                                }
-                            }
-                            else
-                            {
-                                return CLI_CMD_Showusage(pstCmd);
-                            }
+                            bMsgTx = TRUE;
                         }
-                        else
+                        else if(IS_CMD(pcCmd, "db"))
                         {
-                            return CLI_CMD_Showusage(pstCmd);
+                            bMsgTx = FALSE;
+                        }
+
+                        PrintTrace("bMsgTx[%d], bLogOnOff[%d]", bMsgTx, bLogOnOff);
+
+                        nRet = P_CLI_CP_StartV2xStatus(bMsgTx, bLogOnOff);
+                        if(nRet != APP_OK)
+                        {
+                            PrintError("P_CLI_CP_StartV2xStatus() is failed![nRet:%d]", nRet);
                         }
                     }
                     else
@@ -577,6 +567,16 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     return CLI_CMD_Showusage(pstCmd);
                 }
             }
+            else
+            {
+                return CLI_CMD_Showusage(pstCmd);
+            }
+        }
+        else
+        {
+            return CLI_CMD_Showusage(pstCmd);
+        }
+    }
 
 	return nRet;
 }
@@ -597,12 +597,12 @@ int32_t CLI_CP_InitCmds(void)
                "   test                         test cp command\n"
                "   set                          set Device ID (should be set cp ready first)\n"
                "   check                        check V2X scenario\n"
-               "       base               start a base Communication Performance scenario\n"
-               "       ready              ready V2X scenario\n"
+               "   base                         start a base Communication Performance scenario\n"
+               "   ready                        ready V2X scenario\n"
                "   start                        start V2X scenario (should be set cp ready first)\n"
-               "       stop               stop V2X scenario\n"
-               "       status start msg   start a test sample of V2X status data of msg tx\n"
-               "       status start db    start a test sample of V2X status data of db\n"
+               "   stop                         stop V2X scenario\n"
+               "   status start msg             start a test sample of V2X status data of msg tx\n"
+               "   status start db              start a test sample of V2X status data of db\n"
                "   info                         get a status Communication Performance\n"
                "cp set [OPT] [PARAM]\n"
                "       dev   [id]               set device id Device ID\n"
