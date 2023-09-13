@@ -192,6 +192,31 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
         }
     }
+    else if(strcmp(pcCmd, "rg") == 0)
+    {
+        pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+        if(pcCmd == NULL)
+        {
+            PrintError("pcCmd == NULL!!");
+            return CLI_CMD_Showusage(pstCmd);
+        }
+
+        nRet = SVC_CP_GetSettings(pstSvcCp);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+
+        pstSvcCp->stDbV2x.eRegionId = (uint32_t)atoi(pcCmd);
+
+        PrintDebug("SET:eRegionId[0x%x]", pstSvcCp->stDbV2x.eRegionId);
+
+        nRet = SVC_CP_SetSettings(pstSvcCp);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+    }
     else
     {
         PrintWarn("unknown set type");
@@ -478,13 +503,29 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                         }
                     }
                 }
+                else if(IS_CMD(pcCmd, "rg"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        nRet = P_CLI_CP_SetV2xStatusScenario(pstCmd);
+                        if(nRet != APP_OK)
+                        {
+                            PrintError("P_CLI_CP_SetOptV2xStatusScenario() is failed![nRet:%d]", nRet);
+                        }
+                    }
+                }
+                else
+                {
+                    return CLI_CMD_Showusage(pstCmd);
+                }
             }
             else
             {
                 return CLI_CMD_Showusage(pstCmd);
             }
         }
-        else if(IS_CMD(pcCmd, "check"))
+        else if(IS_CMD(pcCmd, "check") || IS_CMD(pcCmd, "get"))
         {
             nRet = P_CLI_CP_CheckV2xStatusScenario();
             if(nRet != APP_OK)
@@ -608,7 +649,9 @@ int32_t CLI_CP_InitCmds(void)
                "       dev   [id]               set device id Device ID\n"
                "       eth   [dev]              set ethernet i/f name\n"
                "       txrat [param ms]         set tx ratio\n"
-               "       spd   [speed km/hrs]     set tx / rx vehicle speed\n",
+               "       spd   [speed km/hrs]     set tx / rx vehicle speed\n"
+               "       rg    [region id]        set region ID (1:SEOUL, 2:SEJONG, 3:BUSAN, 4:DAEGEON, 5:INCHEON\n"
+               "                                               6:DAEGU, 7:DAEGU PG, 8:CHEONGJU, 9:SEONGNAM\n",
                "");
     if(nRet != APP_OK)
     {
