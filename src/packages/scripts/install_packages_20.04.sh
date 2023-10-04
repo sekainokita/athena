@@ -100,6 +100,7 @@ pip3 install pybind11 pybind11-global thrift thrift-tools
 sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
 apt-get install -y curl
 curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+apt-get install -y libcurl4-openssl-dev
 apt-get update
 apt install -y ros-noetic-desktop-full
 apt search ros-noetic
