@@ -101,6 +101,10 @@ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main
 apt-get install -y curl
 curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
 apt-get install -y libcurl4-openssl-dev
+apt-get install -y libglfw3-dev
+apt-get install -y libuv1-dev
+apt-get install -y libpng-dev
+apt-get install -y libjpeg-dev
 apt-get update
 apt install -y ros-noetic-desktop-full
 apt search ros-noetic
