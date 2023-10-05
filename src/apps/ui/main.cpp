@@ -5,6 +5,8 @@
 #include <QtQml/QQmlContext>
 
 #include <QtGui/QGuiApplication>
+#include <QApplication>
+#include "clientapplication.h"
 
 #if QT_CONFIG(ssl)
 #include <QtNetwork/QSslSocket>
@@ -52,6 +54,10 @@ int main(int argc, char *argv[])
 #endif
 
     QGuiApplication application(argc, argv);
+
+    QApplication app(argc, argv);
+    ClientApplication client;
+
     QCoreApplication::setApplicationName(u"QtLocation app-v2x-ui example"_s);
 
     QStringList args = QCoreApplication::arguments();
@@ -82,5 +88,8 @@ int main(int argc, char *argv[])
 
     QMetaObject::invokeMethod(item, "initializeProviders", QVariant::fromValue(parameters));
 
+    client.show();
+
     return application.exec();
 }
+

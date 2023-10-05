@@ -1,8 +1,13 @@
 TARGET = app-v2x-ui
 TEMPLATE = app
 
-QT += qml network quick positioning location
+QT += core qml network quick positioning location widgets
 SOURCES += main.cpp
+SOURCES += logfilepositionsource.cpp
+SOURCES += clientapplication.cpp
+
+HEADERS += logfilepositionsource.h
+HEADERS += clientapplication.h
 
 # Workaround for QTBUG-38735
 QT_FOR_CONFIG += location-private
