@@ -301,7 +301,7 @@ ApplicationWindow {
             stackView.pop(page)
         }
 
-        function doing_in_loop(latitude, longitude)
+        function coordinateGpsInfo(latitude, longitude)
         {
             for (var i = 0; i < 9; i++)
             {
@@ -321,7 +321,9 @@ ApplicationWindow {
                 break;
             case "moveMarkerTo":
                 askForCoordinate()
-                doing_in_loop(mapview.markers[mapview.currentMarker].coordinate.latitude, mapview.markers[mapview.currentMarker].coordinate.longitude)
+                break;
+            case "coordinateGpsInfo":
+                coordinateGpsInfo(mapview.markers[mapview.currentMarker].coordinate.latitude, mapview.markers[mapview.currentMarker].coordinate.longitude)
                 break;
             case "routeToNextPoint":
             case "routeToNextPoints":
