@@ -1,7 +1,8 @@
 TARGET = app-v2x-ui
 TEMPLATE = app
 
-QT += core qml network quick positioning location widgets
+QT += core qml network quick positioning positioning-private location widgets gui location
+
 SOURCES += main.cpp
 SOURCES += logfilepositionsource.cpp
 SOURCES += clientapplication.cpp

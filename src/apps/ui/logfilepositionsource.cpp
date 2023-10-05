@@ -31,15 +31,20 @@ LogFilePositionSource::PositioningMethods LogFilePositionSource::supportedPositi
 
 int LogFilePositionSource::minimumUpdateInterval() const
 {
-    return 500;
+    return 100;
 }
 
 void LogFilePositionSource::startUpdates()
 {
     lastError = QGeoPositionInfoSource::NoError;
     int interval = updateInterval();
+
+    qDebug() << "interval" << interval;
+
     if (interval < minimumUpdateInterval())
         interval = minimumUpdateInterval();
+
+    qDebug() << "minimum interval" << interval;
 
     timer->start(interval);
 }

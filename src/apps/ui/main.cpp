@@ -1,17 +1,23 @@
 // Copyright (C) 2017 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-#include <QtQml/QQmlApplicationEngine>
-#include <QtQml/QQmlContext>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
 
-#include <QtGui/QGuiApplication>
+#include <QGuiApplication>
 #include <QApplication>
+#include <QObject>
+#include <QTime>
+#include <QBasicTimer>
+#include <QDebug>
+#include <QEasingCurve>
+#include <QGeoCoordinate>
+#include <QtPositioning/private/qwebmercator_p.h>
+
 #include "clientapplication.h"
+#include "logfilepositionsource.h"
 
-#if QT_CONFIG(ssl)
 #include <QtNetwork/QSslSocket>
-#endif
-
 #include <iostream>
 
 using namespace Qt::StringLiterals;
@@ -47,14 +53,13 @@ static QVariantMap parseArgs(QStringList args)
 
 int main(int argc, char *argv[])
 {
-#if QT_CONFIG(library)
     const QString additionalLibraryPaths = qEnvironmentVariable("QTLOCATION_EXTRA_LIBRARY_PATH");
     for (const auto &p : additionalLibraryPaths.split(u':', Qt::SkipEmptyParts))
+    {
         QCoreApplication::addLibraryPath(p);
-#endif
+    }
 
     QGuiApplication application(argc, argv);
-
     QApplication app(argc, argv);
     ClientApplication client;
 
@@ -69,22 +74,25 @@ int main(int argc, char *argv[])
 
     QVariantMap parameters = parseArgs(args);
     if (!parameters.contains(u"osm.useragent"_s))
+    {
         parameters.insert(u"osm.useragent"_s, QCoreApplication::applicationName());
+    }
+
+    // add Class to QML
+    qmlRegisterType<LogFilePositionSource>("Qt.LogFilePositionSource", 1, 0, "LogFilePositionSource");
 
     QQmlApplicationEngine engine;
-#if QT_CONFIG(ssl)
+
     engine.rootContext()->setContextProperty("supportsSsl", QSslSocket::supportsSsl());
-#else
-    engine.rootContext()->setContextProperty("supportsSsl", false);
-#endif
     engine.addImportPath(u":/imports"_s);
     engine.load(QUrl(u"qrc:///app-v2x-ui.qml"_s));
-    QObject::connect(&engine, &QQmlApplicationEngine::quit,
-                     qApp, QCoreApplication::quit);
+    QObject::connect(&engine, &QQmlApplicationEngine::quit, qApp, QCoreApplication::quit);
 
     auto *item = engine.rootObjects().value(0);
     if (item == nullptr)
+    {
         return -1;
+    }
 
     QMetaObject::invokeMethod(item, "initializeProviders", QVariant::fromValue(parameters));
 

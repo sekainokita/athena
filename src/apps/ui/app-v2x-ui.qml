@@ -5,6 +5,8 @@ import QtQuick
 import QtQuick.Controls
 import QtLocation
 import QtPositioning
+import Qt.LogFilePositionSource
+
 import "map"
 import "menus"
 import "helper.js" as Helper
@@ -96,6 +98,10 @@ ApplicationWindow {
             if (plugins[i] === "osm")
                 mainMenu.selectProvider(plugins[i])
         }
+    }
+
+    LogFilePositionSource {
+        id: vehiclePositionSrc
     }
 
     title: qsTr("KETI Copyright - V2X Application GUI")
@@ -295,6 +301,14 @@ ApplicationWindow {
             stackView.pop(page)
         }
 
+        function doing_in_loop(latitude, longitude)
+        {
+            for (var i = 0; i < 9; i++)
+            {
+                console.log(latitude, longitude)
+            }
+        }
+
         onItemClicked: (item) => {
             stackView.pop(page)
             switch (item) {
@@ -307,6 +321,7 @@ ApplicationWindow {
                 break;
             case "moveMarkerTo":
                 askForCoordinate()
+                doing_in_loop(mapview.markers[mapview.currentMarker].coordinate.latitude, mapview.markers[mapview.currentMarker].coordinate.longitude)
                 break;
             case "routeToNextPoint":
             case "routeToNextPoints":
