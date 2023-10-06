@@ -41,6 +41,7 @@ MapQuickItem {
 //! [mqi-anchor]
         source: "../resources/vehicle.png"
         opacity: hoverHandler.hovered ? 0.6 : 1.0
+        transform: Rotation { angle: 45}
 
         Text{
             id: number

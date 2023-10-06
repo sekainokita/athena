@@ -17,7 +17,7 @@ ApplicationWindow {
     property variant minimap
     property variant plugin
     property variant parameters
-    property var addLocation: 0.000001
+    property variant addLocation: 0.000001
 
     //defaults
     //! [routecoordinate]
