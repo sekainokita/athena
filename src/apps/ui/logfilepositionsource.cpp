@@ -16,7 +16,14 @@ LogFilePositionSource::LogFilePositionSource(QObject *parent)
 
     logFile->setFileName("../ui/simplelog.txt");
     if (!logFile->open(QIODevice::ReadOnly))
+    {
         qWarning() << "Error: cannot open source file" << logFile->fileName();
+    }
+    else
+    {
+        qDebug() << "opened file: simplelog.txt";
+    }
+    qDebug() << "LogFilePositionSource() is initialized.";
 }
 
 QGeoPositionInfo LogFilePositionSource::lastKnownPosition(bool /*satelliteMethodsOnly*/) const

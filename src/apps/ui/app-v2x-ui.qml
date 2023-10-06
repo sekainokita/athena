@@ -345,6 +345,10 @@ ApplicationWindow {
                 mapview.map.center.latitude = latitude;
                 mapview.map.center.longitude = longitude;
             }
+           var coord;
+            vehiclePositionSrc.positionUpdated(coord)
+
+            console.log("Coordinate:", coord.longitude, coord.latitude);
         }
 
         onItemClicked: (item) => {

@@ -17,6 +17,8 @@ ClientApplication::ClientApplication(QWidget *parent)
     LogFilePositionSource *source = new LogFilePositionSource(this);
     connect(source, &LogFilePositionSource::positionUpdated, this, &ClientApplication::positionUpdated);
 
+    qDebug() << "ClientApplication() is initialized.";
+
     source->startUpdates();
 }
 

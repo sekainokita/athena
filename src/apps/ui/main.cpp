@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 
     QMetaObject::invokeMethod(item, "initializeProviders", QVariant::fromValue(parameters));
 
-    client.show();
+//    client.show();
 
     return application.exec();
 }
