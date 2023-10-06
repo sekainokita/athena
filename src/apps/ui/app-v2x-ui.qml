@@ -17,6 +17,7 @@ ApplicationWindow {
     property variant minimap
     property variant plugin
     property variant parameters
+    property var addLocation: 0.000001
 
     //defaults
     //! [routecoordinate]
@@ -274,6 +275,27 @@ ApplicationWindow {
         }
     }
 
+    // Allow outside access (optional)
+    property alias timer: timer
+
+    Timer {
+        id: timer
+
+        // Start the timer and execute the provided callback on every X milliseconds
+        function startTimer(callback, milliseconds) {
+            timer.interval = milliseconds;
+            timer.repeat = true;
+            timer.triggered.connect(callback);
+            timer.start();
+        }
+
+        // Stop the timer and unregister the callback
+        function stopTimer(callback) {
+            timer.stop();
+            timer.triggered.disconnect(callback);
+        }
+    }
+
     MarkerPopupMenu {
         id: markerPopupMenu
 
@@ -301,9 +323,18 @@ ApplicationWindow {
             stackView.pop(page)
         }
 
+        function updatePosition()
+        {
+         //   addLocation = 0.0001
+            mapview.markers[mapview.currentMarker].coordinate.latitude = mapview.markers[mapview.currentMarker].coordinate.latitude + addLocation
+            mapview.markers[mapview.currentMarker].coordinate.longitude = mapview.markers[mapview.currentMarker].coordinate.longitude + addLocation
+            mapview.map.center.latitude = mapview.markers[mapview.currentMarker].coordinate.latitude;
+            mapview.map.center.longitude = mapview.markers[mapview.currentMarker].coordinate.longitude;
+        }
+
         function coordinateGpsInfo(latitude, longitude)
         {
-            for (var i = 0; i < 1000; i++)
+            for (var i = 0; i < 5; i++)
             {
                 latitude = latitude+0.00001
                 longitude = longitude+0.00001
@@ -313,7 +344,6 @@ ApplicationWindow {
                 mapview.markers[mapview.currentMarker].coordinate.longitude = longitude
                 mapview.map.center.latitude = latitude;
                 mapview.map.center.longitude = longitude;
-                //stackView.pop(page)
             }
         }
 
@@ -332,6 +362,9 @@ ApplicationWindow {
                 break;
             case "coordinateGpsInfo":
                 coordinateGpsInfo(mapview.markers[mapview.currentMarker].coordinate.latitude, mapview.markers[mapview.currentMarker].coordinate.longitude)
+                break;
+            case "updatePosition":
+                timer.startTimer(updatePosition, 10)
                 break;
             case "routeToNextPoint":
             case "routeToNextPoints":

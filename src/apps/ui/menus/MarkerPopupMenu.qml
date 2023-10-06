@@ -26,6 +26,10 @@ Menu {
         onTriggered: itemClicked("coordinateGpsInfo")
     }
     MenuItem {
+        text: qsTr("update position using GPS device info")
+        onTriggered: itemClicked("updatePosition")
+    }
+    MenuItem {
         text: currentMarker < markersCount-2 ? qsTr("Route to next markers")
                                              : qsTr("Route to next marker")
         enabled: currentMarker <= markersCount - 2
