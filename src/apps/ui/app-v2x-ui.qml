@@ -363,8 +363,11 @@ ApplicationWindow {
             case "coordinateGpsInfo":
                 coordinateGpsInfo(mapview.markers[mapview.currentMarker].coordinate.latitude, mapview.markers[mapview.currentMarker].coordinate.longitude)
                 break;
-            case "updatePosition":
+            case "updatePositionStart":
                 timer.startTimer(updatePosition, 10)
+                break;
+            case "updatePositionStop":
+                timer.stopTimer(updatePosition)
                 break;
             case "routeToNextPoint":
             case "routeToNextPoints":
