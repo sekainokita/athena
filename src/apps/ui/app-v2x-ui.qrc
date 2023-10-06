@@ -27,7 +27,8 @@
         <file>helper.js</file>
         <file>resources/scale_end.png</file>
         <file>resources/scale.png</file>
-        <file>resources/marker.png</file>
+        <file>resources/marker_red.png</file>
         <file>resources/marker_blue.png</file>
+        <file>resources/vehicle.png</file>
     </qresource>
 </RCC>

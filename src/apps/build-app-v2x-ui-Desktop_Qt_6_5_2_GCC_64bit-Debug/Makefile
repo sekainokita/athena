@@ -1098,10 +1098,11 @@ qrc_app-v2x-ui.cpp: ../ui/app-v2x-ui.qrc \
 		../ui/map/Marker.qml \
 		../ui/map/MiniMap.qml \
 		../ui/map/MapSliders.qml \
+		../ui/resources/marker_red.png \
 		../ui/resources/marker_blue.png \
 		../ui/resources/scale.png \
 		../ui/resources/scale_end.png \
-		../ui/resources/marker.png \
+		../ui/resources/vehicle.png \
 		../ui/menus/ItemPopupMenu.qml \
 		../ui/menus/MapPopupMenu.qml \
 		../ui/menus/MainMenu.qml \
@@ -1409,253 +1410,8 @@ moc_clientapplication.cpp: ../ui/clientapplication.h \
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
-compiler_moc_source_make_all: main.moc
+compiler_moc_source_make_all:
 compiler_moc_source_clean:
-	-$(DEL_FILE) main.moc
-main.moc: ../ui/main.cpp \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/QQmlApplicationEngine \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qqmlapplicationengine.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qqmlengine.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qurl.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qbytearray.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qrefcount.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qatomic.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qglobal.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtversionchecks.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qconfig.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtcore-config.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtconfigmacros.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtcoreexports.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtpreprocessorsupport.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtnoop.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qsystemdetection.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qprocessordetection.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qcompilerdetection.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qassert.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtypes.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtclasshelpermacros.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtversion.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtypeinfo.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qcontainerfwd.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qsysinfo.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qlogging.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qflags.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qcompare_impl.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qconstructormacros.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qdarwinhelpers.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qexceptionhandling.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qforeach.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtdeprecationmarkers.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qttypetraits.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qfunctionpointer.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qglobalstatic.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qmalloc.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qminmax.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qnumeric.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qoverload.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qswap.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtenvironmentvariables.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtresource.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qttranslation.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qversiontagging.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qbasicatomic.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qatomic_cxx11.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qgenericatomic.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qnamespace.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtmetamacros.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qarraydata.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qpair.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qarraydatapointer.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qarraydataops.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qcontainertools_impl.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qxptype_traits.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qbytearrayalgorithms.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qbytearrayview.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qstringfwd.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/q20type_traits.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qobjectdefs.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qobjectdefs_impl.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qstring.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qchar.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qstringview.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qstringliteral.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qstringalgorithms.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qanystringview.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qutf8stringview.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qstringtokenizer.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qstringbuilder.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qlist.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qhashfunctions.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qiterator.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qbytearraylist.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qstringlist.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qalgorithms.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qstringmatcher.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qobject.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qcoreevent.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qscopedpointer.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qmetatype.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qcompare.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qdatastream.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qiodevicebase.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qfloat16.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qmath.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qiterable.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qmetacontainer.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qcontainerinfo.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtaggedpointer.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qscopeguard.h \
-		../ui/map \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qobject_impl.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qbindingstorage.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qmap.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qshareddata.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qshareddata_impl.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qjsengine.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qvariant.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qdebug.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtextstream.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qstringconverter_base.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qcontiguouscache.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qsharedpointer.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qsharedpointer_impl.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qset.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qhash.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qvarlengtharray.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/q20memory.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtimezone.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qdatetime.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qcalendar.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qlocale.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qjsvalue.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qtqmlglobal.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qtqml-config.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtNetwork/qtnetworkglobal.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtNetwork/qtnetwork-config.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtNetwork/qtnetworkexports.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qtqmlexports.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qjsmanagedvalue.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qjsprimitivevalue.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qjsnumbercoercion.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qqmldebug.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qqml.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qqmlprivate.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qqmlparserstatus.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qqmllist.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/QMetaType \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qqmlpropertyvaluesource.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qpointer.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qversionnumber.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qmetaobject.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qqmlregistration.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQmlIntegration/qqmlintegration.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qqmlerror.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qqmlabstracturlinterceptor.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/QQmlContext \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtQml/qqmlcontext.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/QGuiApplication \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qguiapplication.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qtguiglobal.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qtgui-config.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qtguiexports.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qcoreapplication.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qeventloop.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qnativeinterface.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qcoreapplication_platform.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qfuture.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qfutureinterface.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qmutex.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qtsan_impl.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qresultstore.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qfuture_impl.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qthreadpool.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qthread.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qdeadlinetimer.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qelapsedtimer.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qrunnable.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qexception.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qpromise.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qwindowdefs.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qinputmethod.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qpoint.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qsize.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qmargins.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qguiapplication_platform.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtWidgets/QApplication \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtWidgets/qapplication.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtWidgets/qtwidgetsglobal.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtWidgets/qtwidgets-config.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtWidgets/qtwidgetsexports.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qcursor.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qbitmap.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qpixmap.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qpaintdevice.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qrect.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qcolor.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qrgb.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qrgba64.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qimage.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qpixelformat.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qtransform.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qpolygon.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qregion.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qline.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/QObject \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/QTime \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/QBasicTimer \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qbasictimer.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/QDebug \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/QEasingCurve \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qeasingcurve.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtPositioning/QGeoCoordinate \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtPositioning/qgeocoordinate.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/QString \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/QSharedDataPointer \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtPositioning/qpositioningglobal.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtPositioning/qtpositioningexports.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtPositioning/6.5.2/QtPositioning/private/qwebmercator_p.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtPositioning/6.5.2/QtPositioning/private/qpositioningglobal_p.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtPositioning/6.5.2/QtPositioning/private/qtpositioningexports_p.h \
-		../ui/clientapplication.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtWidgets/qmainwindow.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtWidgets/qwidget.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qaction.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qkeysequence.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qicon.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qpalette.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qbrush.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qfont.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qfontmetrics.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qfontinfo.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtWidgets/qsizepolicy.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qevent.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qiodevice.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qeventpoint.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qvector2d.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qvectornd.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qpointingdevice.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qinputdevice.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/qscreen.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/QList \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/QRect \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/QSize \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/QSizeF \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/QTransform \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtWidgets/qtabwidget.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtNetwork/QSslSocket \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtNetwork/qsslsocket.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtNetwork/qtcpsocket.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtNetwork/qabstractsocket.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtNetwork/qhostaddress.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtNetwork/qsslerror.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtNetwork/qsslcertificate.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/qcryptographichash.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtNetwork/qssl.h \
-		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/QFlags \
-		moc_predefs.h \
-		/home/bman/Qt/6.5.2/gcc_64/libexec/moc
-	/home/bman/Qt/6.5.2/gcc_64/libexec/moc $(DEFINES) --include /home/bman/work/athena/src/apps/build-app-v2x-ui-Desktop_Qt_6_5_2_GCC_64bit-Debug/moc_predefs.h -I/home/bman/Qt/6.5.2/gcc_64/mkspecs/linux-g++ -I/home/bman/work/athena/src/apps/ui -I/home/bman/Qt/6.5.2/gcc_64/include -I/home/bman/Qt/6.5.2/gcc_64/include/QtLocation -I/home/bman/Qt/6.5.2/gcc_64/include/QtPositioningQuick -I/home/bman/Qt/6.5.2/gcc_64/include/QtQuickShapes -I/home/bman/Qt/6.5.2/gcc_64/include/QtQuickShapes/6.5.2 -I/home/bman/Qt/6.5.2/gcc_64/include/QtQuickShapes/6.5.2/QtQuickShapes -I/home/bman/Qt/6.5.2/gcc_64/include/QtQuick/6.5.2 -I/home/bman/Qt/6.5.2/gcc_64/include/QtQuick/6.5.2/QtQuick -I/home/bman/Qt/6.5.2/gcc_64/include/QtQuick -I/home/bman/Qt/6.5.2/gcc_64/include/QtOpenGL -I/home/bman/Qt/6.5.2/gcc_64/include/QtGui/6.5.2 -I/home/bman/Qt/6.5.2/gcc_64/include/QtGui/6.5.2/QtGui -I/home/bman/Qt/6.5.2/gcc_64/include/QtWidgets -I/home/bman/Qt/6.5.2/gcc_64/include/QtGui -I/home/bman/Qt/6.5.2/gcc_64/include/QtQmlModels/6.5.2 -I/home/bman/Qt/6.5.2/gcc_64/include/QtQmlModels/6.5.2/QtQmlModels -I/home/bman/Qt/6.5.2/gcc_64/include/QtQmlModels -I/home/bman/Qt/6.5.2/gcc_64/include/QtQml/6.5.2 -I/home/bman/Qt/6.5.2/gcc_64/include/QtQml/6.5.2/QtQml -I/home/bman/Qt/6.5.2/gcc_64/include/QtQml -I/home/bman/Qt/6.5.2/gcc_64/include/QtQmlIntegration -I/home/bman/Qt/6.5.2/gcc_64/include/QtNetwork -I/home/bman/Qt/6.5.2/gcc_64/include/QtPositioning/6.5.2 -I/home/bman/Qt/6.5.2/gcc_64/include/QtPositioning/6.5.2/QtPositioning -I/home/bman/Qt/6.5.2/gcc_64/include/QtPositioning -I/home/bman/Qt/6.5.2/gcc_64/include/QtCore/6.5.2 -I/home/bman/Qt/6.5.2/gcc_64/include/QtCore/6.5.2/QtCore -I/home/bman/Qt/6.5.2/gcc_64/include/QtCore -I. -I/usr/include/c++/9 -I/usr/include/x86_64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/x86_64-linux-gnu/9/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../ui/main.cpp -o main.moc
-
 compiler_uic_make_all:
 compiler_uic_clean:
 compiler_yacc_decl_make_all:
@@ -1664,7 +1420,7 @@ compiler_yacc_impl_make_all:
 compiler_yacc_impl_clean:
 compiler_lex_make_all:
 compiler_lex_clean:
-compiler_clean: compiler_rcc_clean compiler_moc_predefs_clean compiler_moc_header_clean compiler_moc_source_clean 
+compiler_clean: compiler_rcc_clean compiler_moc_predefs_clean compiler_moc_header_clean 
 
 ####### Compile
 
@@ -1897,6 +1653,12 @@ main.o: ../ui/main.cpp /home/bman/Qt/6.5.2/gcc_64/include/QtQml/QQmlApplicationE
 		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/QSizeF \
 		/home/bman/Qt/6.5.2/gcc_64/include/QtGui/QTransform \
 		/home/bman/Qt/6.5.2/gcc_64/include/QtWidgets/qtabwidget.h \
+		../ui/logfilepositionsource.h \
+		/home/bman/Qt/6.5.2/gcc_64/include/QtPositioning/qgeopositioninfosource.h \
+		/home/bman/Qt/6.5.2/gcc_64/include/QtPositioning/QGeoPositionInfo \
+		/home/bman/Qt/6.5.2/gcc_64/include/QtPositioning/qgeopositioninfo.h \
+		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/QExplicitlySharedDataPointer \
+		/home/bman/Qt/6.5.2/gcc_64/include/QtCore/QDateTime \
 		/home/bman/Qt/6.5.2/gcc_64/include/QtNetwork/QSslSocket \
 		/home/bman/Qt/6.5.2/gcc_64/include/QtNetwork/qsslsocket.h \
 		/home/bman/Qt/6.5.2/gcc_64/include/QtNetwork/qtcpsocket.h \

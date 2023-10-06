@@ -303,9 +303,17 @@ ApplicationWindow {
 
         function coordinateGpsInfo(latitude, longitude)
         {
-            for (var i = 0; i < 9; i++)
+            for (var i = 0; i < 1000; i++)
             {
-                console.log(latitude, longitude)
+                latitude = latitude+0.00001
+                longitude = longitude+0.00001
+                console.log(i, latitude, longitude)
+
+                mapview.markers[mapview.currentMarker].coordinate.latitude = latitude
+                mapview.markers[mapview.currentMarker].coordinate.longitude = longitude
+                mapview.map.center.latitude = latitude;
+                mapview.map.center.longitude = longitude;
+                //stackView.pop(page)
             }
         }
 
