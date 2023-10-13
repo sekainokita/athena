@@ -18,12 +18,25 @@ ApplicationWindow {
     property variant plugin
     property variant parameters
     property variant addLocation: 0.000001
+    property LogFilePositionSource gpsClass: LogFilePositionSource{}
 
     //defaults
     //! [routecoordinate]
     property variant fromCoordinate: QtPositioning.coordinate(59.9483, 10.7695)
     property variant toCoordinate: QtPositioning.coordinate(59.9645, 10.671)
     //! [routecoordinate]
+
+    Map{
+        id: mapView
+        anchors.fill: parent
+        plugin: Plugin{
+            id:mapPlugin
+            name: "osm"
+            PluginParameter { name: "osm.mapping.providersrepository.address"; value: "http://www.mywebsite.com/osm_repository" }
+            PluginParameter { name: "osm.mapping.highdpi_tiles"; value: true }
+        }
+        activeMapType: supportedMapTypes[1] // Cycle map provided by Thunderforest
+    }
 
     function createMap(provider)
     {
@@ -325,9 +338,19 @@ ApplicationWindow {
 
         function updatePosition()
         {
-         //   addLocation = 0.0001
-            mapview.markers[mapview.currentMarker].coordinate.latitude = mapview.markers[mapview.currentMarker].coordinate.latitude + addLocation
-            mapview.markers[mapview.currentMarker].coordinate.longitude = mapview.markers[mapview.currentMarker].coordinate.longitude + addLocation
+            var getLatitude;
+            var getLongitude;
+
+            getLatitude = gpsClass.getGpsLatitude()
+            getLongitude = gpsClass.getGpsLongitude()
+            console.log("getLatitude:", getLatitude, "getLongitude", getLongitude);
+
+            //mapview.markers[mapview.currentMarker].coordinate.latitude = mapview.markers[mapview.currentMarker].coordinate.latitude + addLocation
+            //mapview.markers[mapview.currentMarker].coordinate.longitude = mapview.markers[mapview.currentMarker].coordinate.longitude + addLocation
+
+            mapview.markers[mapview.currentMarker].coordinate.latitude = getLatitude
+            mapview.markers[mapview.currentMarker].coordinate.longitude = getLongitude
+
             mapview.map.center.latitude = mapview.markers[mapview.currentMarker].coordinate.latitude;
             mapview.map.center.longitude = mapview.markers[mapview.currentMarker].coordinate.longitude;
         }
@@ -345,10 +368,16 @@ ApplicationWindow {
                 mapview.map.center.latitude = latitude;
                 mapview.map.center.longitude = longitude;
             }
-           var coord;
-            vehiclePositionSrc.positionUpdated(coord)
 
-            console.log("Coordinate:", coord.longitude, coord.latitude);
+            //vehiclePositionSrc.positionUpdated(coordinate)
+            //var coord = coordinate;
+            //console.log("Coordinate:", coord.longitude, coord.latitude);
+            var getLatitude;
+            var getLongitude;
+            //getLatitude = gpsClass.getGpsInfo(latitude, longitude)
+            getLatitude = gpsClass.getGpsLatitude()
+            getLongitude = gpsClass.getGpsLongitude()
+            console.log("getLatitude:", getLatitude, "getLongitude", getLongitude);
         }
 
         onItemClicked: (item) => {

@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
 
     // add Class to QML
     qmlRegisterType<LogFilePositionSource>("Qt.LogFilePositionSource", 1, 0, "LogFilePositionSource");
+    qRegisterMetaType<QGeoPositionInfo>();
 
     QQmlApplicationEngine engine;
 

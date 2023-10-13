@@ -10,6 +10,12 @@ class QFile;
 class QTimer;
 QT_END_NAMESPACE
 
+typedef struct GPS_V2X_POSITION_t {
+    double dLatitude;
+    double dLongitude;
+    double dAttitude;
+} GPS_POSITION_T;
+
 class LogFilePositionSource : public QGeoPositionInfoSource
 {
     Q_OBJECT
@@ -25,6 +31,9 @@ public:
 public slots:
     virtual void startUpdates() override;
     virtual void stopUpdates() override;
+    virtual double getGpsInfo(double lan, double lon);
+    virtual double getGpsLatitude(void);
+    virtual double getGpsLongitude(void);
 
     virtual void requestUpdate(int timeout = 5000) override;
 

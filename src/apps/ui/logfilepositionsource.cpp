@@ -7,6 +7,10 @@
 #include <QtCore/qfile.h>
 #include <QtCore/qtimer.h>
 
+static double s_dLatitude = 37.40611064950719;
+static double s_dLongitude = 127.10226288596837;
+static double s_dAddPosition = 0.000001;
+
 LogFilePositionSource::LogFilePositionSource(QObject *parent)
     : QGeoPositionInfoSource(parent),
       logFile(new QFile(this)),
@@ -54,6 +58,25 @@ void LogFilePositionSource::startUpdates()
     qDebug() << "minimum interval" << interval;
 
     timer->start(interval);
+}
+
+double LogFilePositionSource::getGpsInfo(double dLatitude, double dLongitude)
+{
+    qDebug() << "getGpsInfo lantitude" << dLatitude << "longitude" << dLongitude;
+
+    return 111.111;
+}
+
+double LogFilePositionSource::getGpsLatitude(void)
+{
+    s_dLatitude = s_dLatitude + s_dAddPosition;
+    return s_dLatitude;
+}
+
+double LogFilePositionSource::getGpsLongitude(void)
+{
+    s_dLongitude = s_dLongitude + s_dAddPosition;
+    return s_dLongitude;
 }
 
 void LogFilePositionSource::stopUpdates()
