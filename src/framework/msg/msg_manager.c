@@ -679,6 +679,7 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
                     if(ulDbV2xTotalPacketCrc32 != ulCompDbV2xTotalPacketCrc32)
                     {
                         PrintError("CRC32 does not matched!! check Get:ulDbV2xTotalPacketCrc32[0x%x] != Calculate:ulCompDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32, ulCompDbV2xTotalPacketCrc32);
+                        PrintError("Check nRecvLen[%d], sizeof(Ext_V2X_RxPDU_t)[%ld]", nRecvLen, sizeof(Ext_V2X_RxPDU_t));
                         nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
                         if(nRet != FRAMEWORK_OK)
                         {
