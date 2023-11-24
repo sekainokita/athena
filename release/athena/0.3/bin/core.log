@@ -1,0 +1,18 @@
+#0  __GI_raise (sig=sig@entry=6) at ../sysdeps/unix/sysv/linux/raise.c:50
+#1  0x0000fffff7a29aac in __GI_abort () at abort.c:79
+#2  0x0000fffff7a76f40 in __libc_message (action=action@entry=do_abort, 
+    fmt=fmt@entry=0xfffff7b38518 "%s\n") at ../sysdeps/posix/libc_fatal.c:155
+#3  0x0000fffff7a7e344 in malloc_printerr (
+    str=str@entry=0xfffff7b33b88 "corrupted size vs. prev_size") at malloc.c:5347
+#4  0x0000fffff7a7eaf8 in unlink_chunk (p=p@entry=0xffffec001b00, av=0xffffec000020)
+    at malloc.c:1454
+#5  0x0000fffff7a7fe64 in _int_free (av=0xffffec000020, p=0xffffec001180, have_lock=<optimized out>)
+    at malloc.c:4342
+#6  0x0000aaaaaaade97c in P_MSG_MANAGER_ReceiveRxMsg (pstEventMsg=pstEventMsg@entry=0xfffff6a05948)
+    at /media/psf/Home/Desktop/ubuntu/athena/src/build/../framework/msg/msg_manager.c:826
+#7  0x0000aaaaaaadf13c in P_MSG_MANAGER_RxTask (arg=<optimized out>)
+    at /media/psf/Home/Desktop/ubuntu/athena/src/build/../framework/msg/msg_manager.c:885
+#8  0x0000fffff7c66624 in start_thread (arg=0xaaaaaaadf0f0 <P_MSG_MANAGER_RxTask>)
+    at pthread_create.c:477
+#9  0x0000fffff7ada49c in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone.S:78
+
