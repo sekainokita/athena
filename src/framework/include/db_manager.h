@@ -193,6 +193,7 @@ typedef struct DB_MANAGER_V2X_STATUS_t {
     uint32_t                unLastContCnt;
     uint32_t                unCurrentContCnt;
     uint32_t                unContCntLoss;
+    bool                    bFirstPacket;
 } DB_MANAGER_V2X_STATUS_T;
 
 

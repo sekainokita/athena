@@ -195,6 +195,15 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
 
     stDbV2xStatus.unCurrentContCnt = pstDbV2xStatusTx->unContCnt;
 
+    if(stDbV2xStatus.bFirstPacket == TRUE)
+    {
+        stDbV2xStatus.unLastContCnt = pstDbV2xStatusTx->unContCnt;
+        stDbV2xStatus.bFirstPacket = FALSE;
+        stDbV2xStatus.stV2xStatusRx.ulTotalPacketCnt = pstDbV2xStatusTx->unSeqNum;
+        PrintDebug("update unLastContCnt as the first packet's unCountCnt [%d], stDbV2xStatus.bFirstPacket[%d]", stDbV2xStatus.unLastContCnt, stDbV2xStatus.bFirstPacket);
+        PrintDebug("update ulTotalPacketCnt[%ld] as the unSeqNum[%d]", pstDbV2xStatusRx->ulTotalPacketCnt, pstDbV2xStatusTx->unSeqNum);
+    }
+
     if(stDbV2xStatus.unLastContCnt != stDbV2xStatus.unCurrentContCnt)
     {
         PrintError("ContCnt does not be matched! [+1 increased unLastContCnt:%d], [unCurrentContCnt:%d]", stDbV2xStatus.unLastContCnt, stDbV2xStatus.unCurrentContCnt);
