@@ -76,6 +76,13 @@ static int32_t P_DI_GPS_Init(DI_GPS_T *pstDiGps)
         return nRet;
     }
 
+    if (pstDiGps->bGpsNotAvailable == TRUE)
+    {
+        PrintWarn("bGpsNotAvailable[%d]", pstDiGps->bGpsNotAvailable);
+        nRet = DI_OK;
+        return nRet;
+    }
+
 #if defined(CONFIG_GPS_XSENS)
     (void*)memset(&s_stDiGpsDev, 0x00, sizeof(DI_GPS_XSENS_T));
 
@@ -102,6 +109,13 @@ static int32_t P_DI_GPS_DeInit(DI_GPS_T *pstDiGps)
         return nRet;
     }
 
+    if (pstDiGps->bGpsNotAvailable == TRUE)
+    {
+        PrintWarn("bGpsNotAvailable[%d]", pstDiGps->bGpsNotAvailable);
+        nRet = DI_OK;
+        return nRet;
+    }
+
 #if defined(CONFIG_GPS_XSENS)
     nRet = DI_GPS_XSENS_DeInit(&s_stDiGpsDev);
     if(nRet != DI_OK)
@@ -112,8 +126,8 @@ static int32_t P_DI_GPS_DeInit(DI_GPS_T *pstDiGps)
 
     (void*)memset(&s_stDiGpsDev, 0x00, sizeof(DI_GPS_XSENS_T));
 #else
-        nRet = DI_OK;
-        PrintWarn("None of GPS devices are supported.");
+    nRet = DI_OK;
+    PrintWarn("None of GPS devices are supported.");
 #endif
 
     return nRet;
@@ -236,6 +250,14 @@ int32_t DI_GPS_Get(DI_GPS_T *pstDiGps)
         return nRet;
     }
 
+    if (pstDiGps->bGpsNotAvailable == TRUE)
+    {
+        (void*)memset(&pstDiGps->stDiGpsData, 0x00, sizeof(DI_GPS_DATA_T));
+
+        nRet = DI_OK;
+        return nRet;
+    }
+
     if(pstDiGps->eDiGpsStatus >= DI_GPS_STATUS_OPENED)
     {
 #if defined(CONFIG_GPS_XSENS)
@@ -281,6 +303,23 @@ int32_t DI_GPS_Get(DI_GPS_T *pstDiGps)
     return nRet;
 }
 
+int32_t DI_GPS_SetNa(DI_GPS_T *pstDiGps, bool bNotAvailable)
+{
+    int32_t nRet = DI_ERROR;
+
+    if(pstDiGps == NULL)
+    {
+        PrintError("pstDiGps == NULL!!");
+        return nRet;
+    }
+
+    pstDiGps->bGpsNotAvailable = bNotAvailable;
+
+    PrintDebug("bNotAvailable[%d] => pstDiGps->bGpsNotAvailable[%d]", bNotAvailable, pstDiGps->bGpsNotAvailable);
+    nRet = DI_OK;
+
+    return nRet;
+}
 
 int32_t DI_GPS_Open(DI_GPS_T *pstDiGps)
 {
@@ -289,6 +328,15 @@ int32_t DI_GPS_Open(DI_GPS_T *pstDiGps)
     if(pstDiGps == NULL)
     {
         PrintError("pstDiGps == NULL!!");
+        return nRet;
+    }
+
+    if (pstDiGps->bGpsNotAvailable == TRUE)
+    {
+        PrintWarn("bGpsNotAvailable[%d]", pstDiGps->bGpsNotAvailable);
+        pstDiGps->eDiGpsStatus = DI_GPS_STATUS_OPENED;
+
+        nRet = DI_OK;
         return nRet;
     }
 
@@ -327,6 +375,15 @@ int32_t DI_GPS_Close(DI_GPS_T *pstDiGps)
     if(pstDiGps == NULL)
     {
         PrintError("pstDiGps == NULL!!");
+        return nRet;
+    }
+
+    if (pstDiGps->bGpsNotAvailable == TRUE)
+    {
+        PrintWarn("bGpsNotAvailable[%d]", pstDiGps->bGpsNotAvailable);
+        pstDiGps->eDiGpsStatus = DI_GPS_STATUS_CLOSED;
+
+        nRet = DI_OK;
         return nRet;
     }
 

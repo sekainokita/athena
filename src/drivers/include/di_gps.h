@@ -102,6 +102,7 @@ typedef struct DI_GPS_DATA_t {
 */
 typedef struct DI_GPS_t {
     bool                        bLogLevel;
+    bool                        bGpsNotAvailable;
     DI_GPS_STATUS_E             eDiGpsStatus;
     DI_GPS_DATA_T               stDiGpsData;
     uint32_t                    unReserved;
@@ -114,6 +115,7 @@ int32_t DI_GPS_DeInit(DI_GPS_T *pstDiGps);
 
 int32_t DI_GPS_SetLog(DI_GPS_T *pstDiGps);
 int32_t DI_GPS_Get(DI_GPS_T *pstDiGps);
+int32_t DI_GPS_SetNa(DI_GPS_T *pstDiGps, bool bNotAvailable);
 
 int32_t DI_GPS_Open(DI_GPS_T *pstDiGps);
 int32_t DI_GPS_Close(DI_GPS_T *pstDiGps);

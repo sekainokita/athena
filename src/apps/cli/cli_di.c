@@ -150,6 +150,22 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     PrintDebug("VelocityNorth   %.9f", pstDi->stDiGps.stDiGpsData.fVelocityNorth);
                     PrintDebug("VelocityUp      %.9f", pstDi->stDiGps.stDiGpsData.fVelocityUp);
                 }
+                else if(IS_CMD(pcCmd, "set"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        if(IS_CMD(pcCmd, "na"))
+                        {
+                            nRet = DI_GPS_SetNa(&pstDi->stDiGps, TRUE);
+                            if (nRet != DI_OK)
+                            {
+                                PrintError("DI_GPS_SetNa() is failed! [nRet:%d]", nRet);
+                                return nRet;
+                            }
+                        }
+                    }
+                }
                 else
                 {
                     return CLI_CMD_Showusage(pstCmd);
@@ -180,7 +196,8 @@ int32_t CLI_DI_InitCmds(void)
                "di test        test di command\n"
                "di gps open    open a GPS device\n"
                "di gps close   close a GPS device\n"
-               "di gps get     get a GPS data\n",
+               "di gps get     get a GPS data\n"
+               "di gps set na  set a GPS device as not available\n",
                "");
     if(nRet != APP_OK)
     {
