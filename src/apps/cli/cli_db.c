@@ -48,6 +48,7 @@
 #include "db_v2x.h"
 #include "db_manager.h"
 #include "framework.h"
+#include "svc_cp.h"
 
 /***************************** Definition ************************************/
 
@@ -507,6 +508,19 @@ static int P_CLI_DB(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintError("DB_MANAGER_MakeDbFile() is failed! [nRet:%d]", nFrameWorkRet);
             }
         }
+        else if(IS_CMD(pcCmd, "upload"))
+        {
+            DB_MANAGER_T *pstDbManager;
+
+            pstDbManager = FRAMEWORK_GetDbManagerInstance();
+            PrintDebug("pstDbManager[0x%p]", pstDbManager);
+
+            nFrameWorkRet = DB_MANAGER_UploadFile(pstDbManager);
+            if(nFrameWorkRet != FRAMEWORK_OK)
+            {
+                PrintError("DB_MANAGER_UploadFile() is failed! [nRet:%d]", nFrameWorkRet);
+            }            
+        }
         else if(IS_CMD(pcCmd, "time"))
         {
             TIME_MANAGER_T *pstTimeManager;
@@ -555,6 +569,7 @@ int32_t CLI_DB_InitCmds(void)
                "db open sqlite    open a db sqlite file\n"
                "db close          close a db file\n"
                "db make           make a db file (copy the default db file to specified db file)\n"
+               "db upload         send a db file to server\n"
                "db time           get a current timestamp\n",
                "");
     if(nRet != APP_OK)

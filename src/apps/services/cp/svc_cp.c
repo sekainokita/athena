@@ -814,6 +814,105 @@ int32_t SVC_CP_Open(SVC_CP_T *pstSvcCp)
     return nRet;
 }
 
+int32_t DB_MANAGER_UploadFile(DB_MANAGER_T *pstDbManager)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    char chFileName[DB_MGR_FILE_MAX_LENGTH];
+    char chSysCallStr[DB_MGR_SYSTEM_CALL_MAX_LENGTH];
+    int nCharCnt = 0;
+
+    if(pstDbManager == NULL)
+    {
+        PrintError("pstDbManager == NULL!!");
+        return nRet;
+    }
+
+    sprintf(chSysCallStr, "mkdir -p %s", DB_V2X_FOLDER_DIR);
+    nRet = system("mkdir -p v2x-db");
+    if(nRet < FRAMEWORK_OK)
+    {
+        PrintError("system() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    nCharCnt = sprintf(chFileName, "%s_", pstDbManager->stDbFile.pchTxRxType);
+    nCharCnt += sprintf(chFileName+nCharCnt, "%s_", pstDbManager->stDbFile.pchDeviceType);
+    nCharCnt += sprintf(chFileName+nCharCnt, "%s_", pstDbManager->stDbFile.pchDeviceId);
+    nCharCnt += sprintf(chFileName+nCharCnt, "%s_", pstDbManager->stDbFile.pchStartTime);
+    nCharCnt += sprintf(chFileName+nCharCnt, "%s_", pstDbManager->stDbFile.pchEndTime);
+    nCharCnt += sprintf(chFileName+nCharCnt, "%s.", pstDbManager->stDbFile.pchTotalTime);
+
+    switch(pstDbManager->eFileType)
+    {
+        case DB_MANAGER_FILE_TYPE_TXT:
+            nCharCnt += sprintf(chFileName+nCharCnt, "%s", "txt");
+            if(strcmp("Tx", pstDbManager->stDbFile.pchTxRxType) == 0)
+            {
+                sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s/%s/%s", SVC_CP_DB_PORT, DB_V2X_FOLDER_DIR, chFileName, SVC_CP_DB_IP, SVC_CP_DB_STORAGE, SVC_CP_DB_YEAR, SVC_CP_DB_MONTH);
+            }
+            else if(strcmp("Rx", pstDbManager->stDbFile.pchTxRxType) == 0)
+            {
+                sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s/%s/%s", SVC_CP_DB_PORT, DB_V2X_FOLDER_DIR, chFileName, SVC_CP_DB_IP, SVC_CP_DB_STORAGE, SVC_CP_DB_YEAR, SVC_CP_DB_MONTH);
+            }
+            else
+            {
+                PrintError("unknown type [%s]", pstDbManager->stDbFile.pchTxRxType);
+                return nRet;
+            }
+            break;
+
+        case DB_MANAGER_FILE_TYPE_CSV:
+            nCharCnt += sprintf(chFileName+nCharCnt, "%s", "csv");
+            if(strcmp("Tx", pstDbManager->stDbFile.pchTxRxType) == 0)
+            {
+                sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s/%s/%s", SVC_CP_DB_PORT, DB_V2X_FOLDER_DIR, chFileName, SVC_CP_DB_IP, SVC_CP_DB_STORAGE, SVC_CP_DB_YEAR, SVC_CP_DB_MONTH);
+            }
+            else if(strcmp("Rx", pstDbManager->stDbFile.pchTxRxType) == 0)
+            {
+                sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s/%s/%s", SVC_CP_DB_PORT, DB_V2X_FOLDER_DIR, chFileName, SVC_CP_DB_IP, SVC_CP_DB_STORAGE, SVC_CP_DB_YEAR, SVC_CP_DB_MONTH);
+            }
+            else
+            {
+                PrintError("unknown type [%s]", pstDbManager->stDbFile.pchTxRxType);
+                return nRet;
+            }
+            break;
+
+        case DB_MANAGER_FILE_TYPE_SQLITE:
+            nCharCnt += sprintf(chFileName+nCharCnt, "%s", "db");
+            if(strcmp("Tx", pstDbManager->stDbFile.pchTxRxType) == 0)
+            {
+                sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s/%s/%s", SVC_CP_DB_PORT, DB_V2X_FOLDER_DIR, chFileName, SVC_CP_DB_IP, SVC_CP_DB_STORAGE, SVC_CP_DB_YEAR, SVC_CP_DB_MONTH);
+            }
+            else if(strcmp("Rx", pstDbManager->stDbFile.pchTxRxType) == 0)
+            {
+                sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s/%s/%s", SVC_CP_DB_PORT, DB_V2X_FOLDER_DIR, chFileName, SVC_CP_DB_IP, SVC_CP_DB_STORAGE, SVC_CP_DB_YEAR, SVC_CP_DB_MONTH);
+            }
+            else
+            {
+                PrintError("unknown type [%s]", pstDbManager->stDbFile.pchTxRxType);
+                return nRet;
+            }
+            break;
+
+        default:
+            PrintError("unknown file type [%d]", pstDbManager->eFileType);
+            break;
+    }
+
+    PrintTrace("[scp:%s][%s/%s] is successfully send!", SVC_CP_DB_IP, DB_V2X_FOLDER_DIR, chFileName);
+    PrintDebug("%s", chSysCallStr);
+
+    nRet = system(chSysCallStr);
+    if(nRet < FRAMEWORK_OK)
+    {
+        PrintError("system() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    return nRet;
+}
+
 int32_t SVC_CP_Close(SVC_CP_T *pstSvcCp)
 {
     int32_t nRet = APP_ERROR;
@@ -939,6 +1038,13 @@ int32_t SVC_CP_Close(SVC_CP_T *pstSvcCp)
         return nRet;
     }
 
+    nRet = DB_MANAGER_UploadFile(pstDbManager);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("DB_MANAGER_UploadFile() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
     /* Rx */
     sprintf(s_chStrBufTxRxType, "%s", SVC_CP_DB_RX);
     pstDbManager->stDbFile.pchTxRxType = s_chStrBufTxRxType;
@@ -954,6 +1060,13 @@ int32_t SVC_CP_Close(SVC_CP_T *pstSvcCp)
     if(nRet != FRAMEWORK_OK)
     {
         PrintError("DB_MANAGER_RemoveTempFile() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    nRet = DB_MANAGER_UploadFile(pstDbManager);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("DB_MANAGER_UploadFile() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 

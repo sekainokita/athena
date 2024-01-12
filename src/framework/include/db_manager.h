@@ -219,7 +219,7 @@ int32_t DB_MANAGER_Converter(DB_MANAGER_READ_T *pstDbManagerRead, DB_MANAGER_WRI
 int32_t DB_MANAGER_SetLog(DB_MANAGER_T *pstDbManager);
 
 int32_t DB_MANAGER_RemoveTempFile(DB_MANAGER_T *pstDbManager);
-
+int32_t DB_MANAGER_UploadFile(DB_MANAGER_T *pstDbManager);
 int32_t DB_MANAGER_MakeDbFile(DB_MANAGER_T *pstDbManager);
 int32_t DB_MANAGER_Open(DB_MANAGER_T *pstDbManager);
 int32_t DB_MANAGER_Close(DB_MANAGER_T *pstDbManager);
