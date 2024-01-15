@@ -71,11 +71,6 @@
 #define SVC_CP_DEV_OBU                      "OBU"
 #define SVC_CP_DEV_RSU                      "RSU"
 #define SVC_CP_DEV_UNKNOWN                  "UNKNOWN"
-#define SVC_CP_DB_PORT                      (50008)
-#define SVC_CP_DB_IP                        "106.248.49.98"
-#define SVC_CP_DB_YEAR                      "2024"
-#define SVC_CP_DB_MONTH                     "M_01"
-#define SVC_CP_DB_STORAGE                   "/exStorage/hdd_v2x_db_1/5g-nr-v2x/5g-nr-v2x-db/keti/results"
 
 /***************************** Enum and Structure ****************************/
 

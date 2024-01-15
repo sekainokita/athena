@@ -48,7 +48,6 @@
 #include "db_v2x.h"
 #include "db_manager.h"
 #include "framework.h"
-#include "svc_cp.h"
 
 /***************************** Definition ************************************/
 
