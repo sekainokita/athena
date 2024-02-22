@@ -38,6 +38,7 @@ if [ $# -ne 1 ]; then
         exit 1
 fi
 
+
 # Package
 apt-get update
 apt-get -y install make cmake build-essential vim openssh-server ssh
