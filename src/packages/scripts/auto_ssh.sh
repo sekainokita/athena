@@ -58,9 +58,9 @@ echo "" >> /etc/systemd/system/autossh.service
 echo "[Service]" >> /etc/systemd/system/autossh.service
 echo "Type=forking" >> /etc/systemd/system/autossh.service
 echo "User=$USER" >> /etc/systemd/system/autossh.service
-echo "Environment="AUTOSSH_GATETIME=0"" >> /etc/systemd/system/autossh.service
+echo "Environment=\"AUTOSSH_GATETIME=0\"" >> /etc/systemd/system/autossh.service
 echo "ExecStart=/usr/bin/autossh -M 0 -f -N -R $PORT_NUMBER:localhost:22 $USER@106.248.49.98 -p 50008" >> /etc/systemd/system/autossh.service
-echo "ExecStop=/bin/kill -HUP $MAINPID" >> /etc/systemd/system/autossh.service
+echo "ExecStop=/bin/kill -HUP \$MAINPID" >> /etc/systemd/system/autossh.service
 echo "Restart=always" >> /etc/systemd/system/autossh.service
 echo "RestartSec=5" >> /etc/systemd/system/autossh.service
 echo "" >> /etc/systemd/system/autossh.service
