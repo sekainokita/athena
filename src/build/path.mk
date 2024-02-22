@@ -92,9 +92,12 @@ export LIB_PLAT_CHEM_OBU_INC_PATH = $(PLATFORM_DIR)/chemtronics/obu/include
 # XSENS
 export XSENS_MTI680G_SDK_PATH = $(PLATFORM_DIR)/movella/xsens/MTi-680g/mtsdk-2022.0-xda_public_cpp/xspublic
 export XSENS_MTI680G_AARCH64_LIB_PATH = $(PLATFORM_DIR)/movella/xsens/MTi-680g/lib/arm_aarch64
+export XSENS_MTI680G_NANO_LIB_PATH = $(PLATFORM_DIR)/movella/xsens/MTi-680g/lib/arm_nano
 export XSENS_MTI680G_X64_LIB_PATH = $(PLATFORM_DIR)/movella/xsens/MTi-680g/lib/ubuntu_x64
 ifeq ($(CONFIG_UBUNTU),y)
 export XSENS_MTI680G_LIB_PATH = $(XSENS_MTI680G_X64_LIB_PATH)
+else ifeq ($(CONFIG_NVIDIA_NANO),y)
+export XSENS_MTI680G_LIB_PATH = $(XSENS_MTI680G_NANO_LIB_PATH)
 else
 export XSENS_MTI680G_LIB_PATH = $(XSENS_MTI680G_AARCH64_LIB_PATH)
 endif
