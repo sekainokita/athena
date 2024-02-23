@@ -52,7 +52,7 @@ apt-get install -y autossh
 rm -f /etc/systemd/system/autossh.service
 
 echo "[Unit]" >> /etc/systemd/system/autossh.service
-echo "Desciption=Keep reverse ssh tunnel" >> /etc/systemd/system/autossh.service
+echo "Description=Keep reverse ssh tunnel" >> /etc/systemd/system/autossh.service
 echo "After=network-online.target ssh.service" >> /etc/systemd/system/autossh.service
 echo "" >> /etc/systemd/system/autossh.service
 echo "[Service]" >> /etc/systemd/system/autossh.service
