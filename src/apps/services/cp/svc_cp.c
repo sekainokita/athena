@@ -211,6 +211,7 @@ static int32_t P_SVC_CP_Start(SVC_CP_EVENT_MSG_T *stEventMsg)
         }
         else
         {
+            PrintDebug("pstTimeManager->ulTimeStamp[%ld]", pstTimeManager->ulTimeStamp);
             s_stSvcCp.ulDbStartTime = pstTimeManager->ulTimeStamp;
         }
 
@@ -258,6 +259,7 @@ static int32_t P_SVC_CP_Stop(SVC_CP_EVENT_MSG_T *stEventMsg)
         }
         else
         {
+            PrintDebug("pstTimeManager->ulTimeStamp[%ld]", pstTimeManager->ulTimeStamp);
             s_stSvcCp.ulDbEndTime = pstTimeManager->ulTimeStamp;
         }
 
