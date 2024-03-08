@@ -77,7 +77,7 @@
 #define DB_V2X_CP_PORT                            50008
 #define DB_V2X_CP_IP                              "106.248.49.98"
 #define DB_V2X_CP_YEAR                            "2024"
-#define DB_V2X_CP_MONTH                           "M_02"
+#define DB_V2X_CP_MONTH                           "M_03"
 #define DB_V2X_CP_STORAGE                         "/exStorage/hdd_v2x_db_1/5g-nr-v2x/5g-nr-v2x-db/keti/results"
 
 #if defined(CONFIG_PLATFORM_OBU_CHEMTRONICS)
