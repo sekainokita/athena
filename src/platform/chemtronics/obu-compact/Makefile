@@ -39,21 +39,21 @@ OUT_LIB_DIR = ../../../build/output/lib
 
 OUT_BIN_DIR = ../../../build/output/bin
 
-$(OBJS) %.o : %.c
-        @echo "Compiling..."
-        $(CC) $(CFLAGS) -c $< -o $@
+%.o:%.c
+	@echo "Compiling..."
+	$(CC) $(CFLAGS) -c $^ -pthread
 
 $(TARGET):$(OBJS)
-        @echo "Check SRCS:$(SRCS), OBJS:$(OBJS)"
-        $(CC) -o $@ $(OBJS) $(CFLAGS) -pthread
-        cp -f $(TARGET) $(OUT_BIN_DIR)/$(TARGET)
+	@echo "Check SRCS:$(SRCS), OBJS:$(OBJS)"
+	$(CC) -o $@ $(OBJS) $(CFLAGS) -pthread
+	cp -f $(TARGET) $(OUT_BIN_DIR)/$(TARGET)
 
 all: $(TARGET)
 
 clean:
-        @$(RM) -f $(OBJS) $(OUT_BIN_DIR)/$(TARGET)
+	@$(RM) -f $(OBJS) $(OUT_BIN_DIR)/$(TARGET)
 
 distclean:
-        @$(RM) -f $(OBJS) $(OUT_BIN_DIR)/$(TARGET)
+	@$(RM) -f $(OBJS) $(OUT_BIN_DIR)/$(TARGET)
 
 .PHONY: clean distclean

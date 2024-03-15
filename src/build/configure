@@ -40,6 +40,7 @@ CONFIGS_FILE=.config
 
 UBUNTU_PLATFORM_CONFIG=ubuntu_20.04_defconfig
 NVIDIA_PLATFORM_CONFIG=nvidia_orin_defconfig
+NVIDIA_COMPACT_PLATFORM_CONFIG=nvidia_orin_obu_compact_defconfig
 NVIDIA_PLATFORM_NANO_CONFIG=nvidia_nano_defconfig
 XILINX_PLATFORM_CONFIG=xilinx_zcu216_defconfig
 
@@ -53,6 +54,9 @@ if [ "ubuntu" = "$1" ]; then
 elif [ "nvidia" = "$1" ]; then
 	echo "NVIDIA PLATFORM"
     cp ${CONFIGS_DIR}/${NVIDIA_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+elif [ "nvidia-compact" = "$1" ]; then
+        echo "NVIDIA-COMPACT PLATFORM"
+    cp ${CONFIGS_DIR}/${NVIDIA_COMPACT_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
 elif [ "nvidia-nano" = "$1" ]; then
         echo "NVIDIA NANO PLATFORM"
     cp ${CONFIGS_DIR}/${NVIDIA_PLATFORM_NANO_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}

@@ -85,16 +85,15 @@ export APP_OBJS_DIR=$(APP_DIR)/objs
 export APP_OBJS = $(APP_OBJS_DIR)/*.o
 
 # Chemtronics
+ifeq ($(CONFIG_PLATFORM_OBU_CHEMTRONICS),y)
 export LIB_PLAT_CHEM_PATH = $(PLATFORM_DIR)/chemtronics
 ifeq ($(CONFIG_PLATFORM_OBU_CHEMTRONICS_COMPACT),y)
 export LIB_PLAT_CHEM_OBU_PATH = $(LIB_PLAT_CHEM_PATH)/obu-compact
-else
-export LIB_PLAT_CHEM_OBU_PATH = $(LIB_PLAT_CHEM_PATH)/obu
-endif
-ifeq ($(CONFIG_PLATFORM_OBU_CHEMTRONICS_COMPACT),y)
 export LIB_PLAT_CHEM_OBU_INC_PATH = $(PLATFORM_DIR)/chemtronics/obu-compact/include
 else
-export LIB_PLAT_CHEM_OBU_INC_PATH = $(PLATFORM_DIR)/chemtronics/obu/inclue
+export LIB_PLAT_CHEM_OBU_PATH = $(LIB_PLAT_CHEM_PATH)/obu
+export LIB_PLAT_CHEM_OBU_INC_PATH = $(PLATFORM_DIR)/chemtronics/obu/include
+endif
 endif
 
 # XSENS
