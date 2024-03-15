@@ -86,8 +86,16 @@ export APP_OBJS = $(APP_OBJS_DIR)/*.o
 
 # Chemtronics
 export LIB_PLAT_CHEM_PATH = $(PLATFORM_DIR)/chemtronics
+ifeq ($(CONFIG_PLATFORM_OBU_CHEMTRONICS_COMPACT),y)
+export LIB_PLAT_CHEM_OBU_PATH = $(LIB_PLAT_CHEM_PATH)/obu-compact
+else
 export LIB_PLAT_CHEM_OBU_PATH = $(LIB_PLAT_CHEM_PATH)/obu
-export LIB_PLAT_CHEM_OBU_INC_PATH = $(PLATFORM_DIR)/chemtronics/obu/include
+endif
+ifeq ($(CONFIG_PLATFORM_OBU_CHEMTRONICS_COMPACT),y)
+export LIB_PLAT_CHEM_OBU_INC_PATH = $(PLATFORM_DIR)/chemtronics/obu-compact/include
+else
+export LIB_PLAT_CHEM_OBU_INC_PATH = $(PLATFORM_DIR)/chemtronics/obu/inclue
+endif
 
 # XSENS
 export XSENS_MTI680G_SDK_PATH = $(PLATFORM_DIR)/movella/xsens/MTi-680g/mtsdk-2022.0-xda_public_cpp/xspublic
