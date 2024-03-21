@@ -302,9 +302,10 @@ int AddExtStatusData(TLVC_Overall *p_overall, int tx_rx)
 
 bool Test_App_Main(int fd)
 {
-	bool rtnVal = true;
+	bool rtnVal = true, flag_send_fin = false;
 	int re = 0, n, send_len, i, cnt = 1, period = 100;
 	char buf[MAX_TX_PACKET_TO_OBU];
+
 	memset(buf,0, sizeof(buf));	
 	V2x_App_Hdr* hdr = (V2x_App_Hdr*)buf;
 	choiceNum = -1;
@@ -321,6 +322,8 @@ bool Test_App_Main(int fd)
 		Test_Msg_Print("[%d] Send Test PVD", CMD_SEND_TEST_PVD);
 		Test_Msg_Print("[%d] Send V2V Test Extensible MSG", CMD_SEND_TEST_EXTENSIBLE_V2V);
 		Test_Msg_Print("[%d] Send V2I Test Extensible MSG", CMD_SEND_TEST_EXTENSIBLE_V2I);
+		Test_Msg_Print("[%d] Send V2V Test Extensible MSG with SEQ", CMD_SEND_TEST_EXTENSIBLE_V2V_ADD_SEQUENCE);
+		Test_Msg_Print("[%d] Send V2I Test Extensible MSG with SEQ", CMD_SEND_TEST_EXTENSIBLE_V2I_ADD_SEQUENCE);
 
 		Test_Msg_Print("< EXIT >-------------------------------");
 		Test_Msg_Print("[0] Exit");
@@ -617,7 +620,7 @@ bool Test_App_Main(int fd)
 			}
 
 			crc16 = (uint16_t*)((uint8_t*)p_dummy + 6 + size);
-			*crc16 = htons(CalcCRC16((uint8_t*)p_dummy, size+6 - 2));	// TLVC 중 CRC만 제외
+			*crc16 = htons(CalcCRC16((uint8_t*)p_dummy, size+6));	// TLVC 중 CRC만 제외
 		}
 
 		AddExtStatusData(p_overall, eStatusTxRx_Tx);
@@ -692,7 +695,7 @@ bool Test_App_Main(int fd)
 			}
 
 			crc16 = (uint16_t*)((uint8_t*)p_dummy + 6 + size);
-			*crc16 = htons(CalcCRC16((uint8_t*)p_dummy, size+6 - 2));	// TLVC 중 CRC만 제외
+			*crc16 = htons(CalcCRC16((uint8_t*)p_dummy, size+6));	// TLVC 중 CRC만 제외
 		}
 
 		AddExtStatusData(p_overall, eStatusTxRx_Tx);
@@ -713,6 +716,200 @@ bool Test_App_Main(int fd)
 		break;
 	}
 
+	  case CMD_SEND_TEST_EXTENSIBLE_V2V_ADD_SEQUENCE:
+	  {
+		int size = -1, psid = -1, i;
+		uint32_t *p_seq;
+		uint16_t *crc16;
+		uint16_t calc_crc16;
+		V2x_App_TxMsg* tx_msg = (V2x_App_TxMsg*)hdr->data;
+		TLVC_Overall *p_overall;
+		V2x_App_Ext_TLVC *p_dummy;
+		TLVC_STATUS_CommUnit *p_status;
+		struct timeval now;
+		struct tm *tm;
+		uint64_t keti_time;
+		uint16_t package_len;
+
+		Debug_Msg_Print(DEBUG_MSG_LV_LOW," >> Send Extensible(V2V) DATA");
+		Test_Msg_Print("Enter count : \n");
+		re = scanf("%d", &cnt);
+		if (cnt > 1)
+		{
+			Test_Msg_Print("Enter Period(ms) : \n");
+			re = scanf("%d", &period);
+		}
+		else
+			cnt = 1;
+
+		for (i=0; i<cnt; i++)
+		{
+			psid = EM_V2V_MSG;
+			p_overall = (TLVC_Overall*)tx_msg->data;
+			p_overall->type = htonl(EM_PT_OVERALL);
+			p_overall->len = htons(sizeof(TLVC_Overall) - 6);
+			p_overall->magic[0] = 'E';
+			p_overall->magic[1] = 'M';
+			p_overall->magic[2] = 'O';
+			p_overall->magic[3] = 'P';
+			p_overall->version = 1;
+			p_overall->num_package = 0;
+			p_overall->len_package = 0;
+
+			package_len = ntohs(p_overall->len_package);
+
+			// add raw package for sequence number
+			size = 4;	// raw package size
+			p_dummy  = (V2x_App_Ext_TLVC *)((uint8_t*)p_overall + sizeof(TLVC_Overall) + package_len);
+			p_overall->num_package++;
+			package_len = package_len + 8 + size;
+			p_overall->len_package = htons(package_len);
+			p_overall->crc = htons(CalcCRC16((uint8_t*)p_overall, sizeof(TLVC_Overall) - 2));	// TLVC 중 CRC만 제외
+			p_dummy->type = htonl(EM_PT_RAW_DATA);
+			p_dummy->len = htons(size + 2);		// V=size, C=2
+			p_seq = (uint32_t*)p_dummy->data;
+			*p_seq = htonl(i+1);
+			crc16 = (uint16_t*)((uint8_t*)p_dummy + 6 + size);
+			*crc16 = htons(CalcCRC16((uint8_t*)p_dummy, size+6));	// TLVC 중 CRC만 제외
+
+			// add status package
+			AddExtStatusData(p_overall, eStatusTxRx_Tx);
+			
+			memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
+			send_len = 16 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package);	// 16 : header(10) + psid(4) + crc(2)
+			hdr->len = htons(10 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package));		// seq(2) + payload id(2) + crc(2) + psid(4)
+			hdr->seq = 0;
+			hdr->payload_id = htons(ePayloadId_TxMsg);
+			tx_msg->psid = htonl(EM_V2V_MSG);
+
+			send_len = ntohs(hdr->len) + 6;		// magic 4byte, lenth 2byte
+
+			crc16 = (uint16_t*)&buf[send_len-2];
+			calc_crc16 = CalcCRC16(buf + SIZE_MAGIC_NUMBER_OF_HEADER, send_len - 6);		// magic(4), crc(2)
+			*crc16 = htons(calc_crc16);
+
+			Debug_Msg_Print(DEBUG_MSG_LV_MID, "\tCount = %d / %d, Period = %d ms", i+1, cnt, period);
+			Debug_Msg_Print_Data(DEBUG_MSG_LV_MID, buf, send_len);
+			n = send(fd, buf, send_len, 0);
+			if (n < 0)
+			{
+				perror("send() failed");
+			}
+			else if (n != send_len)
+			{
+				fprintf(stderr, "send() sent a different number of bytes than expected\n");
+			}
+			else if (n == 0)
+			{
+				perror("closed socket");
+				close(fd);
+				return false;
+			}
+			usleep(period * 1000);
+		}
+
+		flag_send_fin = true;
+
+		break;
+	  }
+
+	  case CMD_SEND_TEST_EXTENSIBLE_V2I_ADD_SEQUENCE:
+	  {
+		int size = -1, psid = -1, i;
+		uint32_t *p_seq;
+		uint16_t *crc16;
+		uint16_t calc_crc16;
+		V2x_App_TxMsg* tx_msg = (V2x_App_TxMsg*)hdr->data;
+		TLVC_Overall *p_overall;
+		V2x_App_Ext_TLVC *p_dummy;
+		TLVC_STATUS_CommUnit *p_status;
+		struct timeval now;
+		struct tm *tm;
+		uint64_t keti_time;
+		uint16_t package_len;
+
+		Debug_Msg_Print(DEBUG_MSG_LV_LOW," >> Send Extensible(V2I) DATA");
+		Test_Msg_Print("Enter count : \n");
+		re = scanf("%d", &cnt);
+		if (cnt > 1)
+		{
+			Test_Msg_Print("Enter Period(ms) : \n");
+			re = scanf("%d", &period);
+		}
+		else
+			cnt = 1;
+
+		for (i=0; i<cnt; i++)
+		{
+			psid = EM_V2I_MSG;
+			p_overall = (TLVC_Overall*)tx_msg->data;
+			p_overall->type = htonl(EM_PT_OVERALL);
+			p_overall->len = htons(sizeof(TLVC_Overall) - 6);
+			p_overall->magic[0] = 'E';
+			p_overall->magic[1] = 'M';
+			p_overall->magic[2] = 'O';
+			p_overall->magic[3] = 'P';
+			p_overall->version = 1;
+			p_overall->num_package = 0;
+			p_overall->len_package = 0;
+
+			package_len = ntohs(p_overall->len_package);
+
+			// add raw package for sequence number
+			size = 4;	// raw package size
+			p_dummy  = (V2x_App_Ext_TLVC *)((uint8_t*)p_overall + sizeof(TLVC_Overall) + package_len);
+			p_overall->num_package++;
+			package_len = package_len + 8 + size;
+			p_overall->len_package = htons(package_len);
+			p_overall->crc = htons(CalcCRC16((uint8_t*)p_overall, sizeof(TLVC_Overall) - 2));	// TLVC 중 CRC만 제외
+			p_dummy->type = htonl(EM_PT_RAW_DATA);
+			p_dummy->len = htons(size + 2);		// V=size, C=2
+			p_seq = (uint32_t*)p_dummy->data;
+			*p_seq = htonl(i+1);
+			crc16 = (uint16_t*)((uint8_t*)p_dummy + 6 + size);
+			*crc16 = htons(CalcCRC16((uint8_t*)p_dummy, size+6));	// TLVC 중 CRC만 제외
+
+			// add status package
+			AddExtStatusData(p_overall, eStatusTxRx_Tx);
+			
+			memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
+			send_len = 16 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package);	// 16 : header(10) + psid(4) + crc(2)
+			hdr->len = htons(10 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package));		// seq(2) + payload id(2) + crc(2) + psid(4)
+			hdr->seq = 0;
+			hdr->payload_id = htons(ePayloadId_TxMsg);
+			tx_msg->psid = htonl(EM_V2I_MSG);
+
+			send_len = ntohs(hdr->len) + 6;		// magic 4byte, lenth 2byte
+
+			crc16 = (uint16_t*)&buf[send_len-2];
+			calc_crc16 = CalcCRC16(buf + SIZE_MAGIC_NUMBER_OF_HEADER, send_len - 6);		// magic(4), crc(2)
+			*crc16 = htons(calc_crc16);
+
+			Debug_Msg_Print(DEBUG_MSG_LV_MID, "\tCount = %d / %d, Period = %d ms", i+1, cnt, period);
+			Debug_Msg_Print_Data(DEBUG_MSG_LV_MID, buf, send_len);
+			n = send(fd, buf, send_len, 0);
+			if (n < 0)
+			{
+				perror("send() failed");
+			}
+			else if (n != send_len)
+			{
+				fprintf(stderr, "send() sent a different number of bytes than expected\n");
+			}
+			else if (n == 0)
+			{
+				perror("closed socket");
+				close(fd);
+				return false;
+			}
+			usleep(period * 1000);
+		}
+
+		flag_send_fin = true;
+
+		break;
+	  }
+
 	  default:
 		Debug_Msg_Print(DEBUG_MSG_LV_LOW, "\tIt was the wrong choice !");
 		break;
@@ -721,6 +918,12 @@ bool Test_App_Main(int fd)
 	Debug_Msg_Print(DEBUG_MSG_LV_MID, "\tCount = %d, Period = %d ms", cnt, period);
 	for (i=0; i<cnt; i++)
 	{
+		if (flag_send_fin == true)
+		{
+			break;
+		}
+		else
+		{
 		Debug_Msg_Print(DEBUG_MSG_LV_MID, "\tCount = %d / %d, Period = %d ms", i+1, cnt, period);
 		Debug_Msg_Print_Data(DEBUG_MSG_LV_MID, buf, send_len);
 		n = send(fd, buf, send_len, 0);
@@ -740,8 +943,10 @@ bool Test_App_Main(int fd)
 		}
 		usleep(period * 1000);
 	}
+	}
 	cnt = 1;
 	period = 100;
+	flag_send_fin = false;
 
 	return rtnVal;
 }
@@ -985,7 +1190,7 @@ static int AnalyzeMsg(uint8_t *msg, int len)
 			printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_overall->crc), cal_crc);
 
 
-		AddExtStatusData(p_overall, eStatusTxRx_Rx);
+		//AddExtStatusData(p_overall, eStatusTxRx_Rx);
 		p = (uint8_t*)p_overall + sizeof(TLVC_Overall);	// next TLVC
 		for (i=0; i<p_overall->num_package; i++)
 		{
@@ -1007,7 +1212,7 @@ static int AnalyzeMsg(uint8_t *msg, int len)
 			else
 			{	
 				printf("Package : %d\n\tPSID : %d, TLV lenth : %d\n", i+1, tlvc_type, tlvc_len + 6);
-				//DebugMsgPrintData((uint8_t*)p, tlvc_len + 6);   // 6: T, L 크기 추가
+				Debug_Msg_Print_Data(DEBUG_MSG_LV_MID, (uint8_t*)p, tlvc_len + 6);   // 6: T, L 크기 추가
 			}
 
 			p = p + tlvc_len + 6; // 6: T, L 크기
