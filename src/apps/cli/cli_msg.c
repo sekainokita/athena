@@ -50,8 +50,25 @@
 #include "msg_manager.h"
 #include "framework.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <errno.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <pthread.h>
+
 /***************************** Definition ************************************/
 //#define CONFIG_CLI_MSG_DEBUG        (1)
+const int MAX_LINE = 2048;
+const int PORT = 6001;
+const int BACKLOG = 10;
+const int LISTENQ = 6666;
+const int MAX_CONNECT = 20;
 
 /***************************** Static Variable *******************************/
 static MSG_MANAGER_TX_T s_stMsgManagerTx;
@@ -59,112 +76,214 @@ static MSG_MANAGER_RX_T s_stMsgManagerRx;
 static DB_V2X_T s_stDbV2x;
 
 /***************************** Function Protype ******************************/
-static int P_CLI_MSG_TcpRlogin(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
+
+void *P_CLI_MSG_TcpServerTask(void *fd)
 {
-    int32_t nRet = APP_OK;
-    char *pcCmd;
+    int h_nSocket = *(int *)fd;
+    char cMsgBuf[MAX_LINE];
+    int nRevLen;
 
-    UNUSED(argc);
-
-    if(argv == NULL)
+    while(1)
     {
-        PrintError("argv == NULL!!");
+        memset(cMsgBuf , 0 , MAX_LINE);
+        if((nRevLen = recv(h_nSocket , cMsgBuf , MAX_LINE , 0)) == -1)
+        {
+            PrintError("recv error.\n");
+            break;
+        }
+
+        cMsgBuf[nRevLen] = '\0';
+
+        if (nRevLen == 0)
+        {
+            PrintDebug("Client closed.\n");
+            close(h_nSocket);
+            break;
+        }
+
+        if(strcmp(cMsgBuf , "exit") == 0)
+        {
+            PrintDebug("Client closed.\n");
+            close(h_nSocket);
+            break;
+        }
+
+        PrintTrace("Received message from client: %s", cMsgBuf);
+    }
+
+	return NULL;
+}
+
+int32_t P_CLI_MSG_TcpServerStart(void)
+{
+    int32_t nRet = APP_ERROR;
+    int h_nListen , h_nConn;
+    pthread_t h_stRecvTid ;
+    struct sockaddr_in stServerAddr , stClientAddr;
+    socklen_t stClientLen = sizeof(stClientAddr);
+    char cMsgBuf[MAX_LINE];
+    memset(cMsgBuf, 0, MAX_LINE);
+    int nVal = 1;
+
+    if((h_nListen = socket(AF_INET , SOCK_STREAM , 0)) == -1)
+    {
+        PrintError("socket error.\n");
         return nRet;
     }
 
-    pcCmd = CLI_CMD_GetArg(pstCmd, 0);
-    if (pcCmd == NULL)
+    bzero(&stServerAddr , sizeof(stServerAddr));
+
+    stServerAddr.sin_family = AF_INET;
+    stServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    stServerAddr.sin_port = htons(PORT);
+
+    if (setsockopt(h_nListen, SOL_SOCKET, SO_REUSEADDR, (char *) &nVal, sizeof nVal) < 0) {
+        PrintError("setsockopt");
+        close(h_nListen);
+        return -1;
+    }
+
+    if(bind(h_nListen , (struct sockaddr *)&stServerAddr , sizeof(stServerAddr)) < 0)
     {
-        return CLI_CMD_Showusage(pstCmd);
+        PrintError("bind error.");
+        return nRet;
+    }
+
+    if(listen(h_nListen , LISTENQ) < 0)
+    {
+        PrintError("listen error.");
+        return nRet;
+    }
+
+    if((h_nConn = accept(h_nListen , (struct sockaddr *)&stClientAddr , &stClientLen)) < 0)
+    {
+        PrintError("accept error.");
+        return nRet;
+    }
+
+    PrintDebug("server: got connection from %s", inet_ntoa(stClientAddr.sin_addr));
+
+    if(pthread_create(&h_stRecvTid , NULL , P_CLI_MSG_TcpServerTask, &h_nConn) == -1)
+    {
+        PrintError("pthread create error.");
+        return nRet;
+    }
+
+
+    while(fgets(cMsgBuf, MAX_LINE , stdin) != NULL)
+    {
+        if(strcmp(cMsgBuf, "exit\n") == 0)
+        {
+            close(h_nConn);
+            exit(0);
+        }
+
+        if(send(h_nConn, cMsgBuf, strlen(cMsgBuf) , 0) == -1)
+        {
+            PrintError("send error.");
+            return nRet;
+        }
     }
 
     return nRet;
 }
 
-static int P_CLI_MSG_TcpConnect(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
+void *P_CLI_MSG_TcpClientTask(void *fd)
 {
-    int32_t nRet = APP_OK;
-    char *pcCmd;
+    int h_nSocket = *(int *)fd;
+    char cMsgBuf[MAX_LINE];
+    int nRevLen;
 
-    UNUSED(argc);
-
-    if(argv == NULL)
+    while(1)
     {
-        PrintError("argv == NULL!!");
-        return nRet;
+        memset(cMsgBuf, 0, MAX_LINE);
+        if((nRevLen = recv(h_nSocket, cMsgBuf, MAX_LINE , 0)) == -1)
+        {
+            PrintError("recv error.");
+            break;
+        }
+        cMsgBuf[nRevLen] = '\0';
+
+        if (nRevLen == 0)
+        {
+            PrintDebug("Server is closed.");
+            close(h_nSocket);
+            break;
+        }
+
+        if(strcmp(cMsgBuf , "exit") == 0)
+        {
+            PrintDebug("Server is closed.");
+            close(h_nSocket);
+            break;
+        }
+
+        PrintTrace("Received message from server: %s", cMsgBuf);
     }
 
-    pcCmd = CLI_CMD_GetArg(pstCmd, 0);
-    if (pcCmd == NULL)
-    {
-        return CLI_CMD_Showusage(pstCmd);
-    }
-
-
-    return nRet;
+	return NULL;
 }
 
-static int P_CLI_MSG_TcpListen(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
+int32_t P_CLI_MSG_TcpClientStart(char *pcIpAddr)
 {
-    int32_t nRet = APP_OK;
-    char *pcCmd;
+    int32_t nRet = APP_ERROR;
+    int h_nSocket;
+    pthread_t h_stRecvTid;
+    struct sockaddr_in stServerAddr;
+    char cMsgBuf[MAX_LINE];
+    memset(cMsgBuf , 0 , MAX_LINE);
 
-    UNUSED(argc);
-
-    if(argv == NULL)
+    if(pcIpAddr == NULL)
     {
-        PrintError("argv == NULL!!");
+        PrintError("pucIpAddr is NULL!");
         return nRet;
     }
 
-    pcCmd = CLI_CMD_GetArg(pstCmd, 0);
-    if (pcCmd == NULL)
+    PrintWarn("Server IP [%s]", pcIpAddr);
+
+    if((h_nSocket = socket(AF_INET , SOCK_STREAM , 0)) == -1)
     {
-        return CLI_CMD_Showusage(pstCmd);
-    }
-
-    return nRet;
-}
-
-static int P_CLI_MSG_TcpConsTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
-{
-    int32_t nRet = APP_OK;
-    char *pcCmd;
-
-    UNUSED(argc);
-
-    if(argv == NULL)
-    {
-        PrintError("argv == NULL!!");
+        PrintError("socket error");
         return nRet;
     }
 
-    pcCmd = CLI_CMD_GetArg(pstCmd, 0);
-    if (pcCmd == NULL)
+    bzero(&stServerAddr , sizeof(stServerAddr));
+
+    stServerAddr.sin_family = AF_INET;
+    stServerAddr.sin_port = htons(PORT);
+
+    if(inet_pton(AF_INET, pcIpAddr, &stServerAddr.sin_addr) < 0)
     {
-        return CLI_CMD_Showusage(pstCmd);
-    }
-
-    return nRet;
-}
-
-static int P_CLI_MSG_TcpTest(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
-{
-    int32_t nRet = APP_OK;
-    char *pcCmd;
-
-    UNUSED(argc);
-
-    if(argv == NULL)
-    {
-        PrintError("argv == NULL!!");
+        PrintError("inet_pton error for %s", pcIpAddr);
         return nRet;
     }
 
-    pcCmd = CLI_CMD_GetArg(pstCmd, 0);
-    if (pcCmd == NULL)
+    if( connect(h_nSocket, (struct sockaddr *)&stServerAddr, sizeof(stServerAddr)) < 0)
     {
-        return CLI_CMD_Showusage(pstCmd);
+        PrintError("connect error");
+        return nRet;
+    }
+
+    if(pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpClientTask, &h_nSocket) == -1)
+    {
+        PrintError("pthread create error");
+        return nRet;
+    }
+
+    while(fgets(cMsgBuf, MAX_LINE, stdin) != NULL)
+    {
+        if(strcmp(cMsgBuf, "exit\n") == 0)
+        {
+            PrintWarn("Exit");
+            close(h_nSocket);
+            break;
+        }
+
+        if(send(h_nSocket, cMsgBuf, strlen(cMsgBuf) , 0) == -1)
+        {
+            PrintError("send error");
+            return nRet;
+        }
     }
 
     return nRet;
@@ -361,9 +480,9 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 for(i = 0; i < CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; i++)
                 {
                     cPayload[i] = rand();
-                    printf("[%d:%d] ", i, cPayload[i]);
+                    PrintDebug("[%d:%d] ", i, cPayload[i]);
                 }
-                printf("\r\n");
+                PrintDebug("\r\n");
 
                 PrintDebug("ulReserved[0x%x]", s_stDbV2x.ulReserved);
                 PrintTrace("========================================================");
@@ -420,9 +539,9 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 for(i = 0; i < CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; i++)
                 {
                     cPayload[i] = unTxCount;
-                    printf("[%d:%d] ", i, cPayload[i]);
+                    PrintDebug("[%d:%d] ", i, cPayload[i]);
                 }
-                printf("\r\n");
+                PrintDebug("\r\n");
 
                 PrintDebug("ulReserved[0x%x]", s_stDbV2x.ulReserved);
                 PrintTrace("========================================================");
@@ -862,6 +981,45 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             PrintDebug(" usSwVer[0x%x]", stDbV2x.usSwVer);
             PrintTrace("========================================================");
         }
+        else if(IS_CMD(pcCmd, "tcp"))
+        {
+            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+            if(pcCmd != NULL)
+            {
+                if(IS_CMD(pcCmd, "server"))
+                {
+                    nRet = P_CLI_MSG_TcpServerStart();
+                    if (nRet != APP_OK)
+                    {
+                        PrintError("P_CLI_MSG_TcpServerStart() is failed! [nRet:%d]", nRet);
+                    }
+                }
+                else if(IS_CMD(pcCmd, "client"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        nRet = P_CLI_MSG_TcpClientStart(pcCmd);
+                    if (nRet != APP_OK)
+                    {
+                        PrintError("P_CLI_MSG_TcpClientStart() is failed! [nRet:%d]", nRet);
+                    }
+
+                    }
+                    else
+                    {
+                        PrintError("CMD_2 is NULL, see. msg help");
+                    }
+                }
+            }
+            else
+            {
+                PrintError("msg tcp [OPTIONS]\n"
+                           "  server           start TCP server (127.0.0.1)\n"
+                           "  client [IP Addr] start TCP client with IP server IP address\n"
+                           "");
+            }
+        }
         else
         {
             return CLI_CMD_Showusage(pstCmd);
@@ -907,79 +1065,11 @@ int32_t CLI_MSG_InitCmds(void)
                "  region          [0]UNKONWN, [1]Seoul, [2]Sejong, [3]Busan, [4]Daegeon, [5]Incheon, [6]Daegu, [7]Daegu KIAPI PG, [8]Cheongju, [9]Seongnam(default)\n"
                "  pl_type         [0]UNKONWN, [1]SAE J2735 BSM, [2]SAE J2736 PVD, [201]Platooning(default), [301]Sensor sharing, [401]Remote driving, [501] Advanced driving\n"
                "  comm_id         [0]UNKONWN, [1]V2V(default), [2]V2I,...\n"
-               "msg get           get setting values of v2x structures\n",
+               "msg get           get setting values of v2x structures\n"
+               "msg tcp [OPTIONS]\n"
+               "  server           start TCP server (127.0.0.1)\n"
+               "  client [IP Addr] start TCP client with IP server IP address\n",
                "");
-    if(nRet != APP_OK)
-    {
-        PrintError("CLI_CMD_AddCmd() is failed! [nRet:%d]", nRet);
-    }
-
-    nRet = CLI_CMD_AddCmd("tcp-rlogin",
-	       P_CLI_MSG_TcpRlogin,
-	       NULL,
-	       "mini rlogin client.",
-	       "rlogin hostname [username]\n\n"
-	       "Connects to a remote system using the RLOGIN protocol.\n"
-	       "The remote system must have appropriate permissions in place\n"
-	       "(usually via the file '.rhosts') for CFE to connect.\n"
-	       "To terminate the session, type\n"
-	       "a tilde (~) character followed by a period (.)",
-	       "");
-    if(nRet != APP_OK)
-    {
-        PrintError("CLI_CMD_AddCmd() is failed! [nRet:%d]", nRet);
-    }
-
-    nRet = CLI_CMD_AddCmd("tcp-connect",
-	       P_CLI_MSG_TcpConnect,
-	       NULL,
-	       "TCP connection test.",
-	       "tcp connect hostname [portnum]",
-	       "-q;sink output, don't display on terminal|"
-	       "-d;Send junk data to discard|"
-	       "-nodelay;set nodelay option on socket|"
-	       "-srcport=*;Specify the source port");
-    if(nRet != APP_OK)
-    {
-        PrintError("CLI_CMD_AddCmd() is failed! [nRet:%d]", nRet);
-    }
-
-    nRet = CLI_CMD_AddCmd("tcp-listen",
-	       P_CLI_MSG_TcpListen,
-	       NULL,
-	       "port listener.",
-	       "tcp listen portnum",
-	       "-q;sink output, don't display on terminal|"
-	       "-d;Send junk data to discard|"
-	       "-nodelay;set nodelay option on socket");
-    if(nRet != APP_OK)
-    {
-        PrintError("CLI_CMD_AddCmd() is failed! [nRet:%d]", nRet);
-    }
-
-    nRet = CLI_CMD_AddCmd("tcp-constest",
-	       P_CLI_MSG_TcpConsTest,
-	       NULL,
-	       "tcp console test.",
-	       "tcp constest device",
-	       "");
-    if(nRet != APP_OK)
-    {
-        PrintError("CLI_CMD_AddCmd() is failed! [nRet:%d]", nRet);
-    }
-
-    nRet = CLI_CMD_AddCmd("tcp-test",
-	       P_CLI_MSG_TcpTest,
-	       NULL,
-	       "TCP test command.",
-	       "ttcp -t [-options] host\n"
-	       "ttcp -r [-options]\n\n",
-	       "-t;Source a pattern to the network|"
-	       "-r;Sink (discard) data from the network|"
-	       "-D;Don't buffer TCP writes (TCP_NODELAY)|"
-	       "-n=*;Number of buffers to send (-t only) (default 2048)|"
-	       "-l=*;Size of buffer to send/receive (default 2048)|"
-	       "-p=*;Port number to use (default 5001)");
     if(nRet != APP_OK)
     {
         PrintError("CLI_CMD_AddCmd() is failed! [nRet:%d]", nRet);
