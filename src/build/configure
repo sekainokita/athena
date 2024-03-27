@@ -33,36 +33,126 @@
 #
 #******************************************************************************
 
+# Regular Colors
+B='\033[0;30m'       # Black
+R='\033[0;31m'       # Red
+G='\033[0;32m'       # Green
+Y='\033[0;33m'       # Yellow
+BL='\033[0;34m'      # Blue
+P='\033[0;35m'       # Purple
+C='\033[0;36m'       # Cyan
+W='\033[0;37m'       # White
+
 BUILD_TOP_DIR=$(pwd)
 
 CONFIGS_DIR=${BUILD_TOP_DIR}/configs
 CONFIGS_FILE=.config
 
 UBUNTU_PLATFORM_CONFIG=ubuntu_20.04_defconfig
-NVIDIA_PLATFORM_CONFIG=nvidia_orin_defconfig
-NVIDIA_COMPACT_PLATFORM_CONFIG=nvidia_orin_obu_compact_defconfig
-NVIDIA_PLATFORM_NANO_CONFIG=nvidia_nano_defconfig
+NVIDIA_ORIN_BASE_PLATFORM_CONFIG=nvidia_orin_base_defconfig
+NVIDIA_ORIN_COMPACT_PLATFORM_CONFIG=nvidia_orin_compact_defconfig
+NVIDIA_NANO_BASE_PLATFORM_CONFIG=nvidia_nano_base_defconfig
+NVIDIA_NANO_COMPACT_PLATFORM_CONFIG=nvidia_nano_compact_defconfig
 XILINX_PLATFORM_CONFIG=xilinx_zcu216_defconfig
 
-echo "=========================================================="
+echo 
+echo -e "$W"
+echo "========================================================================="
+echo "[CONFIGURATIONS Options]"
+echo "    UBUNTU PLATFORM              :   ./configure ubuntu"
+echo "    NVIDIA ORIN BASE PLATFORM    :   ./configure nvidia orin base"
+echo "    NVIDIA ORIN COMPACT PLATFORM :   ./configure nvidia orin compact"
+echo "    NVIDIA NANO BASE PLATFORM    :   ./configure nvidia nano base"
+echo "    NVIDIA NANO COMPACT PLATFORM :   ./configure nvidia nano compact"
+echo "    XILINX PLATFORM              :   ./configure xilinx"
+echo "========================================================================="
+echo
+echo -e "$BL"
+echo "========================================================================="
 echo "Start Configuration"
-echo "=========================================================="
+echo -e "$W"
+
+function cfg_nvidia_orin_base()
+{
+    echo -e "$BL"
+    echo Configuration NVIDIA ORIN BASE Model
+    echo "========================================================================="
+    echo -e "$W"
+    echo $1 $2 $3
+    cp ${CONFIGS_DIR}/${NVIDIA_ORIN_BASE_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+}
+
+function cfg_nvidia_orin_compact()
+{
+    echo -e "$BL"
+    echo Configuration NVIDIA ORIN COMPACT Model
+    echo "========================================================================="
+    echo -e "$W"
+    echo $1 $2 $3
+    cp ${CONFIGS_DIR}/${NVIDIA_ORIN_COMPACT_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+}
+
+function cfg_nvidia_nano_base()
+{
+    echo -e "$BL"
+    echo Configuration NVIDIA NANO BASE Model
+    echo "========================================================================="
+    echo -e "$W"
+    echo $1 $2 $3
+    cp ${CONFIGS_DIR}/${NVIDIA_NANO_BASE_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+}
+
+function cfg_nvidia_nano_compact()
+{
+    echo -e "$BL"
+    echo Configuration NVIDIA NANO COMPACT Model
+    echo "========================================================================="
+    echo -e "$W"
+    echo $1 $2 $3
+    cp ${CONFIGS_DIR}/${NVIDIA_NANO_COMPACT_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+}
+
+function cfg_xilinx()
+{
+    echo -e "$BL"
+    echo Configuration XILINX Model
+    echo "========================================================================="
+    echo -e "$W"
+    echo $1
+    cp ${CONFIGS_DIR}/${XILINX_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+}
 
 if [ "ubuntu" = "$1" ]; then
+    echo -e "$BL"
 	echo "UBUNTU PLATFORM"
+    echo "========================================================================="
+    echo -e "$W"
     cp ${CONFIGS_DIR}/${UBUNTU_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
 elif [ "nvidia" = "$1" ]; then
-	echo "NVIDIA PLATFORM"
-    cp ${CONFIGS_DIR}/${NVIDIA_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
-elif [ "nvidia-compact" = "$1" ]; then
-        echo "NVIDIA-COMPACT PLATFORM"
-    cp ${CONFIGS_DIR}/${NVIDIA_COMPACT_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
-elif [ "nvidia-nano" = "$1" ]; then
-        echo "NVIDIA NANO PLATFORM"
-    cp ${CONFIGS_DIR}/${NVIDIA_PLATFORM_NANO_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+    if [ "orin" == "$2" ]; then
+        if [ "base" == "$3" ]; then
+            cfg_nvidia_orin_base
+        elif [ "compact" = "$3" ]; then
+            cfg_nvidia_orin_compact
+        else
+            error
+            echo "See help"
+        fi
+    elif [ "nano" = "$2" ]; then
+        if [ "base" == "$3" ]; then
+            cfg_nvidia_nano_base
+        elif [ "compact" = "$3" ]; then
+            cfg_nvidia_nano_compact
+        else
+            error
+            echo "See help"
+    	fi
+    fi
 elif [ "xilinx" = "$1" ]; then
-	echo "XILINX PLATFORM"
-    cp ${CONFIGS_DIR}/${XILINX_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+    cfg_xilinx    
 else
+    echo -e "$BL"
 	echo "CHECK THE PLATFORM"
+    echo "========================================================================="
+    echo -e "$W"
 fi
