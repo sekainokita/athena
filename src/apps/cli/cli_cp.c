@@ -450,6 +450,16 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
             }
         }
+#if defined(CONFIG_EXT_DATA_FORMAT)
+        else if(IS_CMD(pcCmd, "ext"))
+        {
+            nRet = P_CLI_CP_ReadyV2xStatusScenario();
+            if(nRet != APP_OK)
+            {
+                PrintError("P_CLI_CP_ReadyV2xStatusScenario() is failed![nRet:%d]", nRet);
+            }
+        }
+#endif
         else if(IS_CMD(pcCmd, "set"))
         {
             pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
@@ -636,6 +646,9 @@ int32_t CLI_CP_InitCmds(void)
                "and the command name.\n\n"
                "cp [OPTIONS]\n"
                "   test                         test cp command\n"
+#if
+               ""
+#endif
                "   set                          set Device ID (should be set cp ready first)\n"
                "   check                        check V2X scenario\n"
                "   base                         start a base Communication Performance scenario\n"
