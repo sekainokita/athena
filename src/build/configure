@@ -59,12 +59,12 @@ echo
 echo -e "$W"
 echo "========================================================================="
 echo "[Platform Configurations Options]"
-echo "    ./configure U-CO1XG   : UBUNTU"
-echo "                NO-CO1XG  : NVIDIA ORIN RxAnt.1 MODEM"
-echo "                NO-CO2XG  : NVIDIA ORIN RxAnt.2 MODEM"
-echo "                NN-CO1XG  : NVIDIA NANO RxAnt.1 MODEM"
-echo "                NN-CO2XG  : NVIDIA NANO RxAnt.2 MODEM"
-echo "                XZ-CO1XGC : XILINX"
+echo "    ./configure u-co1xg   : UBUNTU"
+echo "                no-co1xg  : NVIDIA ORIN RxAnt.1 MODEM"
+echo "                no-co2xg  : NVIDIA ORIN RxAnt.2 MODEM"
+echo "                nn-co1xg  : NVIDIA NANO RxAnt.1 MODEM"
+echo "                nn-co2xg  : NVIDIA NANO RxAnt.2 MODEM"
+echo "                xz-co1xgc : XILINX"
 echo "========================================================================="
 echo
 echo -e "$BL"
@@ -72,37 +72,37 @@ echo "========================================================================="
 echo "Start Configuration"
 echo -e "$W"
 
-if [ "U-CO1XG" = "$1" ]; then
+if [ "u-co1xg" = "$1" ]; then
     echo -e "$BL"
 	echo "UBUNTU"
     echo "========================================================================="
     echo -e "$W"
     cp ${CONFIGS_DIR}/${UBUNTU_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
-elif [ "NO-CO1XG" = "$1" ]; then
+elif [ "no-co1xg" = "$1" ]; then
     echo -e "$BL"
 	echo "NVIDIA ORIN RxAnt.1 MODEM"
     echo "========================================================================="
     echo -e "$W"
     cp ${CONFIGS_DIR}/${NVIDIA_ORIN_RxAnt1_MODEM_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
-elif [ "NO-CO2XG" = "$1" ]; then
+elif [ "no-co2xg" = "$1" ]; then
     echo -e "$BL"
 	echo "NVIDIA ORIN RxAnt.2 MODEM"
     echo "========================================================================="
     echo -e "$W"
     cp ${CONFIGS_DIR}/${NVIDIA_ORIN_RxAnt2_MODEM_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
-elif [ "NN-CO1XG" = "$1" ]; then
+elif [ "nn-co1xg" = "$1" ]; then
     echo -e "$BL"
 	echo "NVIDIA NANO RxAnt.1 MODEM"
     echo "========================================================================="
     echo -e "$W"
     cp ${CONFIGS_DIR}/${NVIDIA_NANO_RxAnt1_MODEM_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
-elif [ "NN-CO2XG" = "$1" ]; then
+elif [ "nn-co2xg" = "$1" ]; then
     echo -e "$BL"
 	echo "NVIDIA NANO RxAnt.2 MODEM"
     echo "========================================================================="
     echo -e "$W"
     cp ${CONFIGS_DIR}/${NVIDIA_NANO_RxAnt2_MODEM_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
-elif [ "XZ-CO1XGC" = "$1" ]; then
+elif [ "xz-co1xgc" = "$1" ]; then
     echo -e "$BL"
     echo "XILINX"
     echo "========================================================================="
