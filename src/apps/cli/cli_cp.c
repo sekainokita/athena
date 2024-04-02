@@ -646,8 +646,8 @@ int32_t CLI_CP_InitCmds(void)
                "and the command name.\n\n"
                "cp [OPTIONS]\n"
                "   test                         test cp command\n"
-#if
-               ""
+#if defined(CONFIG_EXT_DATA_FORMAT)
+               "   ext                          test Extensible Data Format"
 #endif
                "   set                          set Device ID (should be set cp ready first)\n"
                "   check                        check V2X scenario\n"
