@@ -574,8 +574,10 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintDebug("pstMsgManager[0x%p]", pstMsgManager);
 
                 pstMsgManager->pchIfaceName = pcCmd;
+                pstMsgManager->stExtMsgWsr.unPsid = MSG_MANAGER_EXT_MSG_V2V_PSID;
 
                 PrintTrace("pstMsgManager->pchIfaceName[%s]", pstMsgManager->pchIfaceName);
+                PrintTrace("pstMsgManager->stExtMsgWsr.unPsid[%d]", pstMsgManager->stExtMsgWsr.unPsid);
 
                 nFrameWorkRet = MSG_MANAGER_Open(pstMsgManager);
                 if(nFrameWorkRet != FRAMEWORK_OK)

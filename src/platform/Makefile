@@ -35,7 +35,9 @@ TARGET = lib-platform
 LIB_PLATFORM = libplatform.a
 
 SRCS = $(wildcard *.c)
-SRCS += $(wildcard $(LIB_PLAT_CHEM_OBU_PATH)/*.c)
+
+# build via plat-chem-obu target
+#SRCS += $(wildcard $(LIB_PLAT_CHEM_OBU_PATH)/*.c)
 
 TARGET_AR = ar
 OBJS = ${SRCS:.c=.o}

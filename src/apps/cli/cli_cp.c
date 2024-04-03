@@ -342,8 +342,9 @@ static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
         PrintDebug("pstMsgManager[0x%p]", pstMsgManager);
 
         pstMsgManager->pchIfaceName = pstSvcCp->pchIfaceName;
+        pstMsgManager->stExtMsgWsr.unPsid = pstSvcCp->unPsid;
 
-        PrintTrace("pstMsgManager->pchIfaceName[%s]", pstMsgManager->pchIfaceName);
+        PrintTrace("pchIfaceName[%s], unPsid[%d]", pstMsgManager->pchIfaceName, pstMsgManager->stExtMsgWsr.unPsid);
 
         nFrameWorkRet = MSG_MANAGER_Open(pstMsgManager);
         if(nFrameWorkRet != FRAMEWORK_OK)

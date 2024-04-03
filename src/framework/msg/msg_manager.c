@@ -67,6 +67,8 @@
 
 #include "v2x_defs.h"
 #include "v2x_ext_type.h"
+#include "v2x_app_ext.h"
+#include "nr_v2x_interface.h"
 
 #include "cli_util.h"
 
@@ -75,6 +77,15 @@
 #define SAMPLE_V2X_IP_ADDR "192.168.1.11"
 #define SAMPLE_V2X_MSG_LEN 100
 #define SAMPLE_V2X_PORT_ADDR 47347
+
+#if defined(CONFIG_EXT_DATA_FORMAT)
+#define MSG_MANAGER_EXT_MSG_HEADER_SIZE     (sizeof(MSG_MANAGER_EXT_MSG))
+#define MSG_MANAGER_EXT_MSG_TX_SIZE         (sizeof(MSG_MANAGER_EXT_MSG_TX))
+#define MSG_MANAGER_EXT_MSG_RX_SIZE         (sizeof(MSG_MANAGER_EXT_MSG_RX))
+#define MSG_MANAGER_EXT_TLVC_SIZE           (sizeof(MSG_MANAGER_EXT_MSG_TLVC))
+#define MSG_MANAGER_EXT_WSC_SIZE            (sizeof(MSG_MANAGER_EXT_MSG_WSC) + MSG_MANAGER_EXT_MSG_HEADER_SIZE)
+#define MSG_MANAGER_EXT_WSR_SIZE            (sizeof(MSG_MANAGER_EXT_MSG_WSR) + MSG_MANAGER_EXT_MSG_HEADER_SIZE)
+#endif
 
 //#define CONFIG_TEMP_OBU_TEST (1)
 
@@ -225,6 +236,162 @@ static int32_t P_MSG_MANAGER_DisconnectV2XDevice(void)
     return nRet;
 }
 
+#if defined(CONFIG_EXT_DATA_FORMAT)
+void P_MSG_MANAGER_PrintMsgData(unsigned char* ucMsgData, int nLength)
+{
+    int i;
+    char cMsgBuf[MSG_MANAGER_MSG_BUF_MAX_LEN], cHexStr[MSG_MANAGER_MSG_HEX_STR_LEN];
+
+    PrintTrace("===============================================================");
+    PrintDebug("length [0x%x, %d] bytes", nLength, nLength);
+    PrintDebug("---------------------------------------------------------------");
+    PrintDebug("Hex.   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
+    PrintDebug("---------------------------------------------------------------");
+
+    for(i = 0; i < nLength; i++)
+    {
+        if((i % MSG_MANAGER_MSG_HEX_SIZE) == 0)
+        {
+            if (i == 0)
+            {
+                sprintf(cMsgBuf, "%03X- : ", (i/MSG_MANAGER_MSG_HEX_SIZE));
+            }
+            else
+            {
+                printf("%s\n", cMsgBuf);
+                sprintf(cMsgBuf, "%03X- : ", (i/MSG_MANAGER_MSG_HEX_SIZE));
+            }
+        }
+
+        sprintf(cHexStr, "%02X ", ucMsgData[i]);
+        strcat(cMsgBuf, cHexStr);
+    }
+
+    PrintDebug("%s", cMsgBuf);
+    PrintTrace("===============================================================\n");
+}
+
+int32_t P_MSG_MANAGER_SetV2xWsrSetting(MSG_MANAGER_T *pstMsgManager)
+{
+	int32_t nRet = FRAMEWORK_ERROR;
+	int nRxLen = 0, nTxLen = 0;
+	uint8_t ucTxMsgBuf[MAX_TX_PACKET_TO_OBU];
+	uint8_t ucRxMsgBuf[MAX_RX_PACKET_BY_OBU];
+	MSG_MANAGER_EXT_MSG *pstTxMsgHdr = (MSG_MANAGER_EXT_MSG *)ucTxMsgBuf;
+	MSG_MANAGER_EXT_MSG *pstRxMsgHdr = (MSG_MANAGER_EXT_MSG *)ucRxMsgBuf;
+
+    MSG_MANAGER_EXT_MSG_WSR* pstWsr = (MSG_MANAGER_EXT_MSG_WSR*)pstTxMsgHdr->ucPayload;
+    MSG_MANAGER_EXT_MSG_WSC* pstWsc = (MSG_MANAGER_EXT_MSG_WSC*)pstRxMsgHdr->ucPayload;
+
+	memset(ucTxMsgBuf, 0, sizeof(ucTxMsgBuf));
+	memset(ucRxMsgBuf, 0, sizeof(ucRxMsgBuf));
+
+    PrintWarn("Magic Number Name [%s], WSR length[%d]", MSG_MANAGER_EXT_MSG_MAGIC_NUM_NAME, (int)sizeof(MSG_MANAGER_EXT_WSR_SIZE));
+
+    memcpy(pstTxMsgHdr->cMagicNumber, MSG_MANAGER_EXT_MSG_MAGIC_NUM_NAME, sizeof(pstTxMsgHdr->cMagicNumber));
+
+    pstTxMsgHdr->usLength = htons(MSG_MANAGER_EXT_WSR_SIZE - 6); // 6??
+    pstTxMsgHdr->usSeqNum = 0;
+    pstTxMsgHdr->usPayloadId = htons(eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_WSM_SVC_REQ);
+
+    pstWsr->ucAction = pstMsgManager->stExtMsgWsr.ucAction;
+
+    pstWsr->unPsid = htonl(pstMsgManager->stExtMsgWsr.unPsid);
+    nTxLen = SIZE_WSR_DATA;
+
+    PrintDebug("action[%s], psid[%u]", (pstMsgManager->stExtMsgWsr.ucAction == eMSG_MANAGER_EXT_MSG_ACTION_ADD) ? "ADD":"DEL", pstMsgManager->stExtMsgWsr.unPsid);
+
+    PrintDebug("\nWSM Service REQ>\n"
+           "  cMagicNumber   : %s\n"
+           "  usLength       : %d\n"
+           "  usSeqNum       : %d\n"
+           "  usPayloadId    : 0x%x\n"
+           "  ucActionRst    : %d\n"
+           "  psid           : %d\n",
+           pstTxMsgHdr->cMagicNumber,
+           ntohs(pstTxMsgHdr->usLength),
+           ntohs(pstTxMsgHdr->usSeqNum),
+           ntohs(pstTxMsgHdr->usPayloadId),
+           ntohs(pstWsr->ucAction),
+           ntohl(pstWsr->unPsid));
+
+    P_MSG_MANAGER_PrintMsgData(ucTxMsgBuf, nTxLen);
+    nRxLen = send(s_nSocketHandle, ucTxMsgBuf, nTxLen, 0);
+	if ((nRxLen < 0) || (nRxLen == 0))
+	{
+		PrintError("send() is failed!!");
+		return nRet;
+	}
+    else if (nRxLen != nTxLen)
+    {
+        PrintError("send() sent a different number of bytes than expected\n");
+    }
+    else
+    {
+        PrintDebug("successfully request WSR to OBU");
+    }
+
+    nRxLen = -1;
+
+	while (nRxLen <= 0)
+	{
+		nRxLen = recv(s_nSocketHandle, &ucRxMsgBuf, sizeof(ucRxMsgBuf), 0);
+		if (nRxLen < 0)
+		{
+			if ((errno != EAGAIN) && (errno != EWOULDBLOCK))
+			{
+				PrintError("recv() is failed!!");
+				break;
+			}
+		}
+		else if (nRxLen == 0)
+		{
+			PrintError("recv()'connection is closed by peer!!");
+		}
+        else
+        {
+            P_MSG_MANAGER_PrintMsgData(ucRxMsgBuf, nRxLen);
+
+            PrintDebug("\nWSM Service RESP>\n"
+                   "  cMagicNumber   : %s\n"
+                   "  usLength       : %d\n"
+                   "  usSeqNum       : %d\n"
+                   "  usPayloadId    : 0x%x\n"
+                   "  ucActionRst    : %d\n"
+                   "  psid           : %d\n",
+                   pstRxMsgHdr->cMagicNumber,
+                   ntohs(pstRxMsgHdr->usLength),
+                   ntohs(pstRxMsgHdr->usSeqNum),
+                   ntohs(pstRxMsgHdr->usPayloadId),
+                   ntohs(pstWsc->ucActionRst),
+                   ntohl(pstWsc->unPsid));
+
+#if 0 // TODO
+            if(ntohs(pstRxMsgHdr->usPayloadId) != eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_WSM_SVC_CONFIRM)
+            {
+                PrintError("Error! payload ID is not matched[0x%x]", ntohs(pstRxMsgHdr->usPayloadId));
+
+                if(ntohs(pstWsc->ucActionRst) == eMSG_MANAGER_EXT_MSG_WSC_ACTION_FAIL)
+                {
+                    PrintError("WSR failure [%d]", ntohs(pstWsc->ucActionRst));
+                }
+
+                nRet = FRAMEWORK_ERROR;
+            }
+            else
+            {
+                PrintTrace("PSID[%d] is successfully registered [WSR Action:0x%x]", pstMsgManager->stExtMsgWsr.unPsid, ntohs(pstWsc->ucActionRst));
+                nRet = FRAMEWORK_OK;
+            }
+#else
+            nRet = FRAMEWORK_OK;
+#endif
+        }
+	}
+
+	return nRet;
+}
+#else
 int32_t P_MSG_MANAGER_SetV2xWsrSetting(void)
 {
 	int32_t nRet = FRAMEWORK_ERROR;
@@ -310,6 +477,7 @@ int32_t P_MSG_MANAGER_SetV2xWsrSetting(void)
 
 	return nRet;
 }
+#endif
 
 static int32_t P_MSG_MANAGER_SendTxMsgToDbMgr(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg, uint32_t unCrc32)
 {
@@ -1300,12 +1468,23 @@ int32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager)
         return nRet;
     }
 
+#if defined(CONFIG_EXT_DATA_FORMAT)
+    pstMsgManager->stExtMsgWsr.ucAction = eMSG_MANAGER_EXT_MSG_ACTION_ADD;
+
+	nRet = P_MSG_MANAGER_SetV2xWsrSetting(pstMsgManager);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
+        return nRet;
+    }
+#else
 	nRet = P_MSG_MANAGER_SetV2xWsrSetting();
     if (nRet != FRAMEWORK_OK)
     {
         PrintError("P_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
         return nRet;
     }
+#endif
 
 #if defined(CONFIG_TEMP_OBU_TEST)
     nRet = P_MSG_MANAGER_CreateObuTask();

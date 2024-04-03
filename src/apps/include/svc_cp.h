@@ -53,6 +53,7 @@
 /***************************** Definition ************************************/
 #define SVC_CP_TASK_MSG_KEY                 (0x2319)
 #define SVC_CP_DEFAULT_ETH_DEV              "eth1"
+#define SVC_CP_V2V_PSID                     (58200)
 
 #define SVC_CP_GPS_OPEN_RETRY_CNT           (10)
 #define SVC_CP_GPS_OPEN_RETRY_DELAY         (1000)
@@ -124,6 +125,7 @@ typedef struct SVC_CP_t {
     DB_V2X_T                stDbV2x;
     DB_V2X_STATUS_TX_T      stDbV2xStatusTx;
     char                    *pchIfaceName;
+    uint32_t                unPsid;
     char                    *pchDeviceName;
     uint64_t                ulDbStartTime;
     uint64_t                ulDbEndTime;
