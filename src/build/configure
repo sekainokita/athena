@@ -48,22 +48,25 @@ BUILD_TOP_DIR=$(pwd)
 CONFIGS_DIR=${BUILD_TOP_DIR}/configs
 CONFIGS_FILE=.config
 
-UBUNTU_PLATFORM_CONFIG=U-CO1XG_defconfig
-NVIDIA_ORIN_RxAnt1_MODEM_PLATFORM_CONFIG=NO-CO1XG_defconfig
-NVIDIA_ORIN_RxAnt2_MODEM_PLATFORM_CONFIG=NO-CO2XG_defconfig
-NVIDIA_NANO_RxAnt1_MODEM_PLATFORM_CONFIG=NN-CO1XG_defconfig
-NVIDIA_NANO_RxAnt2_MODEM_PLATFORM_CONFIG=NN-CO2XG_defconfig
-XILINX_PLATFORM_CONFIG=XZ-CO1XGC_defconfig
+CONFIG_MODEM_UBUNTU=u-co1xg_defconfig
+CONFIG_MODEL_NO_CO1XG=no-co1xg_defconfig
+CONFIG_MODEM_NO_CO2XG=no-co2xg_defconfig
+CONFIG_MODEL_NO_CO2OG=no-co2og_defconfig
+CONFIG_MODEL_NN_CO1XG=nn-co1xg_defconfig
+CONFIG_MODEL_NN_CO2XG=nn-CO2xg_defconfig
+CONFIG_MODEL_XILINX=zb-co1xgc_defconfig
 
 echo 
 echo -e "$W"
 echo "========================================================================="
 echo "[Platform Configurations Options]"
 echo "    ./configure u-co1xg   : UBUNTU"
-echo "                no-co1xg  : NVIDIA ORIN RxAnt.1 MODEM"
-echo "                no-co2xg  : NVIDIA ORIN RxAnt.2 MODEM"
-echo "                nn-co1xg  : NVIDIA NANO RxAnt.1 MODEM"
-echo "                nn-co2xg  : NVIDIA NANO RxAnt.2 MODEM"
+echo "                no-co1xg  : NVIDIA ORIN RxAnt.1 MODEM, XSENS GPS"
+echo "                no-co2xg  : NVIDIA ORIN RxAnt.2 MODEM, XSENS GPS"
+echo "                no-co2og  : NVIDIA ORIN RxAnt.2 MODEM, OBU GPS"
+echo "                nn-co1xg  : NVIDIA NANO RxAnt.1 MODEM, XSENS GPS"
+echo "                nn-co2xg  : NVIDIA NANO RxAnt.2 MODEM, XSENS GPS"
+echo "                nn-co2og  : NVIDIA NANO RxAnt.2 MODEM, OBU GPS"
 echo "                xz-co1xgc : XILINX"
 echo "========================================================================="
 echo
@@ -77,37 +80,43 @@ if [ "u-co1xg" = "$1" ]; then
 	echo "UBUNTU"
     echo "========================================================================="
     echo -e "$W"
-    cp ${CONFIGS_DIR}/${UBUNTU_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+    cp ${CONFIGS_DIR}/${CONFIG_MODEM_UBUNTU} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
 elif [ "no-co1xg" = "$1" ]; then
     echo -e "$BL"
 	echo "NVIDIA ORIN RxAnt.1 MODEM"
     echo "========================================================================="
     echo -e "$W"
-    cp ${CONFIGS_DIR}/${NVIDIA_ORIN_RxAnt1_MODEM_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+    cp ${CONFIGS_DIR}/${CONFIG_MODEL_NO_CO1XG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
 elif [ "no-co2xg" = "$1" ]; then
     echo -e "$BL"
 	echo "NVIDIA ORIN RxAnt.2 MODEM"
     echo "========================================================================="
     echo -e "$W"
-    cp ${CONFIGS_DIR}/${NVIDIA_ORIN_RxAnt2_MODEM_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+    cp ${CONFIGS_DIR}/${CONFIG_MODEM_NO_CO2XG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+elif [ "no-co2og" = "$1" ]; then
+    echo -e "$BL"
+	echo "NVIDIA ORIN RxAnt.2 MODEM, OBU GPS"
+    echo "========================================================================="
+    echo -e "$W"
+    cp ${CONFIGS_DIR}/${CONFIG_MODEL_NO_CO2OG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}    
 elif [ "nn-co1xg" = "$1" ]; then
     echo -e "$BL"
 	echo "NVIDIA NANO RxAnt.1 MODEM"
     echo "========================================================================="
     echo -e "$W"
-    cp ${CONFIGS_DIR}/${NVIDIA_NANO_RxAnt1_MODEM_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+    cp ${CONFIGS_DIR}/${CONFIG_MODEL_NN_CO1XG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
 elif [ "nn-co2xg" = "$1" ]; then
     echo -e "$BL"
 	echo "NVIDIA NANO RxAnt.2 MODEM"
     echo "========================================================================="
     echo -e "$W"
-    cp ${CONFIGS_DIR}/${NVIDIA_NANO_RxAnt2_MODEM_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+    cp ${CONFIGS_DIR}/${CONFIG_MODEL_NN_CO2XG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
 elif [ "xz-co1xgc" = "$1" ]; then
     echo -e "$BL"
     echo "XILINX"
     echo "========================================================================="
     echo -e "$W"
-    cp ${CONFIGS_DIR}/${XILINX_PLATFORM_CONFIG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}    
+    cp ${CONFIGS_DIR}/${CONFIG_MODEL_XILINX} ${BUILD_TOP_DIR}/${CONFIGS_FILE}    
 else
     echo -e "$Y"
 	echo "CHECK THE PLATFORM"
