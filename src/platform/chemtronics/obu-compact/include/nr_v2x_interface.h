@@ -8,8 +8,8 @@
 #define SIZE_TX_HEADER						(sizeof(V2x_App_TxMsg))
 #define SIZE_RX_HEADER						(sizeof(V2x_App_RxMsg))
 #define SIZE_EXT_HEADER						(sizeof(V2x_App_TLVC))
-#define SIZE_WSC_DATA						(sizeof(V2x_App_WSC) + SIZE_V2X_APP_EXT_HEADER)
-#define SIZE_WSR_DATA						(sizeof(V2x_App_WSR) + SIZE_V2X_APP_EXT_HEADER)
+#define SIZE_WSC_DATA						(sizeof(V2x_App_WSC_Add_Crc) + SIZE_V2X_APP_EXT_HEADER)
+#define SIZE_WSR_DATA						(sizeof(V2x_App_WSR_Add_Crc) + SIZE_V2X_APP_EXT_HEADER)
 
 #define SIZE_MAGIC_NUMBER_OF_HEADER			(sizeof(uint32_t))
 #define SIZE_LENTH_OF_HEADER				(sizeof(uint16_t))

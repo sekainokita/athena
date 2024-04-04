@@ -348,7 +348,9 @@ bool Test_App_Main(int fd)
 	  case CMD_WSM_SERVICE_REQ:
 	  {
 		int psid = -1, action = -1;
-		V2x_App_WSR* wsr = (V2x_App_WSR*)hdr->data;
+		uint16_t *crc16;
+		uint16_t calc_crc16;
+		V2x_App_WSR_Add_Crc* wsr = (V2x_App_WSR_Add_Crc*)hdr->data;
 		
 		Debug_Msg_Print(DEBUG_MSG_LV_MID," >> WSR len: %d",(int) sizeof(SIZE_WSR_DATA));
 		memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
@@ -367,6 +369,10 @@ bool Test_App_Main(int fd)
 		wsr->action = action;
 		wsr->psid = htonl(psid);
 		send_len = SIZE_WSR_DATA;
+
+		crc16 = (uint16_t*)&buf[send_len-2];
+		calc_crc16 = CalcCRC16(buf + SIZE_MAGIC_NUMBER_OF_HEADER, send_len - 4 - 2);	// magic 4byte, crc 2byte
+		*crc16 = htons(calc_crc16);
 
 		printf("action = %s, psid = %u\n", (action==0)?"ADD":"DEL", psid);
 		break;

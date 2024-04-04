@@ -49,7 +49,7 @@ typedef enum
 	ePayloadId_WsmServiceReq,
 	ePayloadId_WsmServiceConfirm,
 	ePayloadId_MAX = ePayloadId_WsmServiceConfirm
-} eV2x_App_Ext_Payload_Id;
+} eV2x_App_Payload_Id;
 
 typedef enum
 {
@@ -103,17 +103,19 @@ Data struct (Payload 부분)
 	|------|------|---------|
 	|  4   |   1  |    n    |
 */
-typedef struct _V2x_App_WSR
+typedef struct _V2x_App_WSR_Add_Crc
 {
 	uint8_t		action;
 	uint32_t	psid;			// network byte oder
-}__attribute__((__packed__)) V2x_App_WSR;
+	uint16_t	crc;
+}__attribute__((__packed__)) V2x_App_WSR_Add_Crc;
 
-typedef struct _V2x_App_WSC
+typedef struct _V2x_App_WSC_Add_Crc
 {
 	uint8_t		action_result;
 	uint32_t	psid;			// network byte oder
-}__attribute__((__packed__)) V2x_App_WSC;
+	uint16_t	crc;
+}__attribute__((__packed__)) V2x_App_WSC_Add_Crc;
 
 typedef struct _V2x_App_TxMsg
 {
