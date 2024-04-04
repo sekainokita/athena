@@ -577,6 +577,7 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 pstMsgManager->stExtMsgWsr.unPsid = MSG_MANAGER_EXT_MSG_V2V_PSID;
 
                 PrintTrace("pstMsgManager->pchIfaceName[%s]", pstMsgManager->pchIfaceName);
+                PrintTrace("pstMsgManager->stExtMsgWsr.unPsid[%d]", pstMsgManager->stExtMsgWsr.unPsid);
                 pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
                 if(pcCmd != NULL)
                 {

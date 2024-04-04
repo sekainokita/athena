@@ -166,6 +166,7 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
 #endif
 
     pstSvcCp->pchIfaceName = SVC_CP_DEFAULT_ETH_DEV;
+    pstSvcCp->unPsid = SVC_CP_V2V_PSID;
     pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL1 = 0;
     pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL2 = 0;
     pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL3 = 0;
@@ -661,6 +662,7 @@ void SVC_CP_ShowSettings(SVC_CP_T *pstSvcCp)
 
     PrintWarn("Device Info>");
     PrintDebug("Ethernet Interface [%s]", pstSvcCp->pchIfaceName);
+    PrintDebug("PSID [%d]", pstSvcCp->unPsid);
 #if defined(CONFIG_EXT_DATA_FORMAT)
     PrintDebug("pchIpAddr [%s]", pstSvcCp->pchIpAddr);
     PrintDebug("unPort [%d]", pstSvcCp->unPort);
@@ -789,6 +791,7 @@ int32_t SVC_CP_Open(SVC_CP_T *pstSvcCp)
     }
 
     pstMsgManager->pchIfaceName = pstSvcCp->pchIfaceName;
+    pstMsgManager->stExtMsgWsr.unPsid = pstSvcCp->unPsid;
 #if defined(CONFIG_EXT_DATA_FORMAT)
     pstMsgManager->pchIpAddr = pstSvcCp->pchIpAddr;
     pstMsgManager->unPort = pstSvcCp->unPort;

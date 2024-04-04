@@ -184,7 +184,7 @@ static int32_t P_MSG_MANAGER_ConnectV2XDevice(MSG_MANAGER_T *pstMsgManager)
         return nRet;
     }
 
-    PrintDebug("pchIfaceName[%s]", pstMsgManager->pchIfaceName);
+    PrintDebug("pstMsgManager->pchIfaceName[%s]", pstMsgManager->pchIfaceName);
 
 #if defined(CONFIG_EXT_DATA_FORMAT)
     if (pstMsgManager->pchIpAddr == NULL)
