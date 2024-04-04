@@ -242,33 +242,36 @@ void P_MSG_MANAGER_PrintMsgData(unsigned char* ucMsgData, int nLength)
     int i;
     char cMsgBuf[MSG_MANAGER_MSG_BUF_MAX_LEN], cHexStr[MSG_MANAGER_MSG_HEX_STR_LEN];
 
-    PrintTrace("===============================================================");
-    PrintDebug("length [0x%x, %d] bytes", nLength, nLength);
-    PrintDebug("---------------------------------------------------------------");
-    PrintDebug("Hex.   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
-    PrintDebug("---------------------------------------------------------------");
-
-    for(i = 0; i < nLength; i++)
+    if (s_bMsgMgrLog == TRUE)
     {
-        if((i % MSG_MANAGER_MSG_HEX_SIZE) == 0)
+        PrintTrace("===============================================================");
+        PrintDebug("length [0x%x, %d] bytes", nLength, nLength);
+        PrintDebug("---------------------------------------------------------------");
+        PrintDebug("Hex.   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
+        PrintDebug("---------------------------------------------------------------");
+
+        for(i = 0; i < nLength; i++)
         {
-            if (i == 0)
+            if((i % MSG_MANAGER_MSG_HEX_SIZE) == 0)
             {
-                sprintf(cMsgBuf, "%03X- : ", (i/MSG_MANAGER_MSG_HEX_SIZE));
+                if (i == 0)
+                {
+                    sprintf(cMsgBuf, "%03X- : ", (i/MSG_MANAGER_MSG_HEX_SIZE));
+                }
+                else
+                {
+                    printf("%s\n", cMsgBuf);
+                    sprintf(cMsgBuf, "%03X- : ", (i/MSG_MANAGER_MSG_HEX_SIZE));
+                }
             }
-            else
-            {
-                printf("%s\n", cMsgBuf);
-                sprintf(cMsgBuf, "%03X- : ", (i/MSG_MANAGER_MSG_HEX_SIZE));
-            }
+
+            sprintf(cHexStr, "%02X ", ucMsgData[i]);
+            strcat(cMsgBuf, cHexStr);
         }
 
-        sprintf(cHexStr, "%02X ", ucMsgData[i]);
-        strcat(cMsgBuf, cHexStr);
+        PrintDebug("%s", cMsgBuf);
+        PrintTrace("===============================================================\n");
     }
-
-    PrintDebug("%s", cMsgBuf);
-    PrintTrace("===============================================================\n");
 }
 
 int32_t P_MSG_MANAGER_SetV2xWsrSetting(MSG_MANAGER_T *pstMsgManager)
@@ -277,6 +280,7 @@ int32_t P_MSG_MANAGER_SetV2xWsrSetting(MSG_MANAGER_T *pstMsgManager)
 	int nRxLen = 0, nTxLen = 0;
 	uint8_t ucTxMsgBuf[MAX_TX_PACKET_TO_OBU];
 	uint8_t ucRxMsgBuf[MAX_RX_PACKET_BY_OBU];
+    uint16_t *pusCrc16 = NULL;
 	MSG_MANAGER_EXT_MSG *pstTxMsgHdr = (MSG_MANAGER_EXT_MSG *)ucTxMsgBuf;
 	MSG_MANAGER_EXT_MSG *pstRxMsgHdr = (MSG_MANAGER_EXT_MSG *)ucRxMsgBuf;
 
@@ -299,21 +303,27 @@ int32_t P_MSG_MANAGER_SetV2xWsrSetting(MSG_MANAGER_T *pstMsgManager)
     pstWsr->unPsid = htonl(pstMsgManager->stExtMsgWsr.unPsid);
     nTxLen = SIZE_WSR_DATA;
 
-    PrintDebug("action[%s], psid[%u]", (pstMsgManager->stExtMsgWsr.ucAction == eMSG_MANAGER_EXT_MSG_ACTION_ADD) ? "ADD":"DEL", pstMsgManager->stExtMsgWsr.unPsid);
+    pusCrc16 = (uint16_t*)&ucTxMsgBuf[nTxLen - sizeof(pstWsr->usCrc16)];
+    pstWsr->usCrc16 = CLI_UTIL_GetCrc16(ucTxMsgBuf + SIZE_MAGIC_NUMBER_OF_HEADER, nTxLen - sizeof(pstTxMsgHdr->cMagicNumber) - sizeof(pstWsr->usCrc16));
+    *pusCrc16 = htons(pstWsr->usCrc16);
+
+    PrintDebug("Action ID[%s], PSID[%u]", (pstMsgManager->stExtMsgWsr.ucAction == eMSG_MANAGER_EXT_MSG_ACTION_ADD) ? "ADD":"DEL", pstMsgManager->stExtMsgWsr.unPsid);
 
     PrintDebug("\nWSM Service REQ>\n"
            "  cMagicNumber   : %s\n"
            "  usLength       : %d\n"
            "  usSeqNum       : %d\n"
            "  usPayloadId    : 0x%x\n"
-           "  ucActionRst    : %d\n"
-           "  psid           : %d\n",
+           "  ucAction       : %d\n"
+           "  psid           : %d\n"
+           "  crc16          : %d\n",
            pstTxMsgHdr->cMagicNumber,
            ntohs(pstTxMsgHdr->usLength),
            ntohs(pstTxMsgHdr->usSeqNum),
            ntohs(pstTxMsgHdr->usPayloadId),
-           ntohs(pstWsr->ucAction),
-           ntohl(pstWsr->unPsid));
+           pstWsr->ucAction,
+           ntohl(pstWsr->unPsid),
+           ntohs(pstWsr->usCrc16));
 
     P_MSG_MANAGER_PrintMsgData(ucTxMsgBuf, nTxLen);
     nRxLen = send(s_nSocketHandle, ucTxMsgBuf, nTxLen, 0);
@@ -363,10 +373,9 @@ int32_t P_MSG_MANAGER_SetV2xWsrSetting(MSG_MANAGER_T *pstMsgManager)
                    ntohs(pstRxMsgHdr->usLength),
                    ntohs(pstRxMsgHdr->usSeqNum),
                    ntohs(pstRxMsgHdr->usPayloadId),
-                   ntohs(pstWsc->ucActionRst),
+                   pstWsc->ucActionRst,
                    ntohl(pstWsc->unPsid));
 
-#if 0 // TODO
             if(ntohs(pstRxMsgHdr->usPayloadId) != eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_WSM_SVC_CONFIRM)
             {
                 PrintError("Error! payload ID is not matched[0x%x]", ntohs(pstRxMsgHdr->usPayloadId));
@@ -380,12 +389,9 @@ int32_t P_MSG_MANAGER_SetV2xWsrSetting(MSG_MANAGER_T *pstMsgManager)
             }
             else
             {
-                PrintTrace("PSID[%d] is successfully registered [WSR Action:0x%x]", pstMsgManager->stExtMsgWsr.unPsid, ntohs(pstWsc->ucActionRst));
+                PrintTrace("PSID[%d] is successfully registered [WSR Action:0x%x]", pstMsgManager->stExtMsgWsr.unPsid, pstWsc->ucActionRst);
                 nRet = FRAMEWORK_OK;
             }
-#else
-            nRet = FRAMEWORK_OK;
-#endif
         }
 	}
 

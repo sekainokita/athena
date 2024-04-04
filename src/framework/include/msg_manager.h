@@ -268,6 +268,7 @@ typedef struct  MSG_MANAGER_EXT_MSG_WSR_t
 {
     uint8_t		ucAction;
     uint32_t	unPsid;
+    uint16_t    usCrc16;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_WSR;
 
 /**
@@ -279,6 +280,7 @@ typedef struct MSG_MANAGER_EXT_MSG_WSC_t
 {
     uint8_t		ucActionRst;
     uint32_t	unPsid;
+    uint16_t    usCrc16;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_WSC;
 
 /**
