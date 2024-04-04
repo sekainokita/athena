@@ -55,6 +55,9 @@
 /***************************** Static Variable *******************************/
 static char s_chSetBufDevId[CLI_DB_V2X_DEFAULT_BUF_LEN];
 static char s_chSetEth[CLI_DB_V2X_DEFAULT_BUF_LEN];
+#if defined(CONFIG_EXT_DATA_FORMAT)
+static char s_chSetIp[CLI_DB_V2X_DEFAULT_BUF_LEN];
+#endif
 
 /***************************** Function Protype ******************************/
 
@@ -217,6 +220,59 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
         }
     }
+#if defined(CONFIG_EXT_DATA_FORMAT)
+    else if(strcmp(pcCmd, "ip") == 0)
+    {
+        pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+        if(pcCmd == NULL)
+        {
+            PrintError("pcCmd == NULL!!");
+            return CLI_CMD_Showusage(pstCmd);
+        }
+
+        nRet = SVC_CP_GetSettings(pstSvcCp);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+
+        sprintf(s_chSetIp, "%s", pcCmd);
+        pstSvcCp->pchIpAddr = s_chSetIp;
+
+        PrintDebug("Set:IP[%s]", pstSvcCp->pchIpAddr);
+
+        nRet = SVC_CP_SetSettings(pstSvcCp);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+    }
+    else if(strcmp(pcCmd, "port") == 0)
+    {
+        pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+        if(pcCmd == NULL)
+        {
+            PrintError("pcCmd == NULL!!");
+            return CLI_CMD_Showusage(pstCmd);
+        }
+
+        nRet = SVC_CP_GetSettings(pstSvcCp);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+
+        pstSvcCp->unPort = (uint32_t)atoi(pcCmd);
+
+        PrintDebug("SET:port[%d]", pstSvcCp->unPort);
+
+        nRet = SVC_CP_SetSettings(pstSvcCp);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+    }
+#endif
     else
     {
         PrintWarn("unknown set type");
@@ -342,9 +398,10 @@ static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
         PrintDebug("pstMsgManager[0x%p]", pstMsgManager);
 
         pstMsgManager->pchIfaceName = pstSvcCp->pchIfaceName;
-        pstMsgManager->stExtMsgWsr.unPsid = pstSvcCp->unPsid;
+        pstMsgManager->pchIpAddr = pstSvcCp->pchIpAddr;
+        pstMsgManager->unPort = pstSvcCp->unPort;
 
-        PrintTrace("pchIfaceName[%s], unPsid[%d]", pstMsgManager->pchIfaceName, pstMsgManager->stExtMsgWsr.unPsid);
+        PrintTrace("pchIfaceName[%s], pchIpAddr[%s], unPort[%d]", pstMsgManager->pchIfaceName, pstMsgManager->pchIpAddr, pstMsgManager->unPort);
 
         nFrameWorkRet = MSG_MANAGER_Open(pstMsgManager);
         if(nFrameWorkRet != FRAMEWORK_OK)
@@ -451,16 +508,6 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
             }
         }
-#if defined(CONFIG_EXT_DATA_FORMAT)
-        else if(IS_CMD(pcCmd, "ext"))
-        {
-            nRet = P_CLI_CP_ReadyV2xStatusScenario();
-            if(nRet != APP_OK)
-            {
-                PrintError("P_CLI_CP_ReadyV2xStatusScenario() is failed![nRet:%d]", nRet);
-            }
-        }
-#endif
         else if(IS_CMD(pcCmd, "set"))
         {
             pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
@@ -526,6 +573,32 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                         }
                     }
                 }
+#if defined(CONFIG_EXT_DATA_FORMAT)
+                else if(IS_CMD(pcCmd, "ip"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        nRet = P_CLI_CP_SetV2xStatusScenario(pstCmd);
+                        if(nRet != APP_OK)
+                        {
+                            PrintError("P_CLI_CP_SetOptV2xStatusScenario() is failed![nRet:%d]", nRet);
+                        }
+                    }
+                }
+                else if(IS_CMD(pcCmd, "port"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        nRet = P_CLI_CP_SetV2xStatusScenario(pstCmd);
+                        if(nRet != APP_OK)
+                        {
+                            PrintError("P_CLI_CP_SetOptV2xStatusScenario() is failed![nRet:%d]", nRet);
+                        }
+                    }
+                }
+#endif
                 else
                 {
                     return CLI_CMD_Showusage(pstCmd);
@@ -647,9 +720,6 @@ int32_t CLI_CP_InitCmds(void)
                "and the command name.\n\n"
                "cp [OPTIONS]\n"
                "   test                         test cp command\n"
-#if defined(CONFIG_EXT_DATA_FORMAT)
-               "   ext                          test Extensible Data Format"
-#endif
                "   set                          set Device ID (should be set cp ready first)\n"
                "   check                        check V2X scenario\n"
                "   base                         start a base Communication Performance scenario\n"
@@ -665,7 +735,11 @@ int32_t CLI_CP_InitCmds(void)
                "       txrat [param ms]         set tx ratio\n"
                "       spd   [speed km/hrs]     set tx / rx vehicle speed\n"
                "       rg    [region id]        set region ID (1:SEOUL, 2:SEJONG, 3:BUSAN, 4:DAEGEON, 5:INCHEON\n"
-               "                                               6:DAEGU, 7:DAEGU PG, 8:CHEONGJU, 9:SEONGNAM\n",
+               "                                               6:DAEGU, 7:DAEGU PG, 8:CHEONGJU, 9:SEONGNAM\n"
+#if defined(CONFIG_EXT_DATA_FORMAT)
+               "       ip    [ip]               set Ip (default ip : 192.168.1.11)\n"
+               "       port  [port]             set port (default port : 47347)\n",
+#endif
                "");
     if(nRet != APP_OK)
     {

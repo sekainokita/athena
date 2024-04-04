@@ -73,6 +73,10 @@
 #define SVC_CP_DEV_RSU                      "RSU"
 #define SVC_CP_DEV_UNKNOWN                  "UNKNOWN"
 
+#if defined(CONFIG_EXT_DATA_FORMAT)
+#define SVC_CP_DEFAULT_IP                   "192.168.1.11"
+#define SVC_CP_DEFAULT_PORT                 (47347)
+#endif
 /***************************** Enum and Structure ****************************/
 
 /**
@@ -131,6 +135,8 @@ typedef struct SVC_CP_t {
     uint64_t                ulDbEndTime;
     uint32_t                unDbTotalWrittenTime;
     uint32_t                unReserved;
+    char                    *pchIpAddr;
+    uint32_t                unPort;
 } SVC_CP_T;
 
 /***************************** Function Protype ******************************/

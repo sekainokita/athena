@@ -64,6 +64,9 @@
 #include "msg_manager.h"
 #include "db_manager.h"
 #include "time_manager.h"
+#if defined(CONFIG_EXT_DATA_FORMAT)
+#include "svc_cp.h"
+#endif
 
 #include "v2x_defs.h"
 #include "v2x_ext_type.h"
@@ -161,6 +164,12 @@ static int32_t P_MSG_MANAGER_ConnectV2XDevice(MSG_MANAGER_T *pstMsgManager)
     int32_t nSocketHandle = -1;
     int32_t nFlags = 0;
 
+    if (pstMsgManager == NULL)
+    {
+        PrintError("pstMsgManager is NULL!");
+        return nRet;
+    }
+
     nSocketHandle = socket(AF_INET, SOCK_STREAM, 0);
     if (nSocketHandle < 0)
     {
@@ -169,7 +178,26 @@ static int32_t P_MSG_MANAGER_ConnectV2XDevice(MSG_MANAGER_T *pstMsgManager)
         return nRet;
     }
 
-    PrintDebug("pstMsgManager->pchIfaceName[%s]", pstMsgManager->pchIfaceName);
+    if (pstMsgManager->pchIfaceName == NULL)
+    {
+        PrintError("pstMsgManager->pchIfaceName is NULL!");
+        return nRet;
+    }
+
+    PrintDebug("pchIfaceName[%s]", pstMsgManager->pchIfaceName);
+
+#if defined(CONFIG_EXT_DATA_FORMAT)
+    if (pstMsgManager->pchIpAddr == NULL)
+    {
+        PrintError("pstMsgManager->pchIpAddr is NULL!");
+        return nRet;
+    }
+#endif
+
+#if defined(CONFIG_EXT_DATA_FORMAT)
+    PrintDebug("pchIpAddr[%s]", pstMsgManager->pchIpAddr);
+    PrintDebug("unPort[%d]", pstMsgManager->unPort);
+#endif
 
     nRet = setsockopt(nSocketHandle, SOL_SOCKET, SO_BINDTODEVICE, pstMsgManager->pchIfaceName, strlen(pstMsgManager->pchIfaceName));
     if (nRet < 0)
@@ -181,8 +209,13 @@ static int32_t P_MSG_MANAGER_ConnectV2XDevice(MSG_MANAGER_T *pstMsgManager)
     struct sockaddr_in server_addr =
     {
         .sin_family = AF_INET,
+#if defined(CONFIG_EXT_DATA_FORMAT)
+        .sin_addr.s_addr = inet_addr(pstMsgManager->pchIpAddr),
+        .sin_port = htons(pstMsgManager->unPort)
+#else
         .sin_addr.s_addr = inet_addr(SAMPLE_V2X_IP_ADDR),
         .sin_port = htons(SAMPLE_V2X_PORT_ADDR)
+#endif
     };
 
     nRet = connect(nSocketHandle, (struct sockaddr *)&server_addr, sizeof(server_addr));

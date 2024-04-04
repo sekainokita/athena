@@ -577,7 +577,33 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 pstMsgManager->stExtMsgWsr.unPsid = MSG_MANAGER_EXT_MSG_V2V_PSID;
 
                 PrintTrace("pstMsgManager->pchIfaceName[%s]", pstMsgManager->pchIfaceName);
-                PrintTrace("pstMsgManager->stExtMsgWsr.unPsid[%d]", pstMsgManager->stExtMsgWsr.unPsid);
+                pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                if(pcCmd != NULL)
+                {
+                    pstMsgManager->pchIpAddr = pcCmd;
+
+                    PrintTrace("pstMsgManager->pchIpAddr[%s]", pstMsgManager->pchIpAddr);
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_3);
+                    if(pcCmd != NULL)
+                    {
+                        pstMsgManager->unPort = (uint32_t)atoi(pcCmd);
+
+                        PrintTrace("pstMsgManager->unPort[%d]", pstMsgManager->unPort);
+                    }
+                    else
+                    {
+                        PrintError("set port number, e.g. CLI> msg open eth1 ip port");
+                    }
+                }
+                else
+                {
+                    PrintError("set ip address, e.g. CLI> msg open eth1 ip port");
+                }
+                nFrameWorkRet = MSG_MANAGER_Open(pstMsgManager);
+                if(nFrameWorkRet != FRAMEWORK_OK)
+                {
+                   PrintError("MSG_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
+                }
 
                 nFrameWorkRet = MSG_MANAGER_Open(pstMsgManager);
                 if(nFrameWorkRet != FRAMEWORK_OK)
@@ -587,7 +613,7 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             }
             else
             {
-                PrintError("set an ethernet interface name, e.g. CLI> msg open eth1");
+                PrintError("set an ethernet interface name, e.g. CLI> msg open eth1 ip port");
             }
         }
         else if(IS_CMD(pcCmd, "close"))

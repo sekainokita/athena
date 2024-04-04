@@ -160,9 +160,12 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
     pstSvcCp->stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
     pstSvcCp->stDbV2x.usSwVer = CLI_DB_V2X_DEFAULT_SW_VER;
 
-    pstSvcCp->pchIfaceName = SVC_CP_DEFAULT_ETH_DEV;
-    pstSvcCp->unPsid = SVC_CP_V2V_PSID;
+#if defined(CONFIG_EXT_DATA_FORMAT)
+    pstSvcCp->pchIpAddr = SVC_CP_DEFAULT_IP;
+    pstSvcCp->unPort = SVC_CP_DEFAULT_PORT;
+#endif
 
+    pstSvcCp->pchIfaceName = SVC_CP_DEFAULT_ETH_DEV;
     pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL1 = 0;
     pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL2 = 0;
     pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL3 = 0;
@@ -186,7 +189,7 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
 
     nRet = APP_OK;
 
-    PrintDebug("P_SVC_CP_SetDefaultSettings() set is finished.[eth:%s]", pstSvcCp->pchIfaceName);
+    PrintDebug("P_SVC_CP_SetDefaultSettings() set is finished.[eth:%s,ip:%s,port:%d]", pstSvcCp->pchIfaceName, pstSvcCp->pchIpAddr, pstSvcCp->unPort);
 
     return nRet;
 }
@@ -658,7 +661,10 @@ void SVC_CP_ShowSettings(SVC_CP_T *pstSvcCp)
 
     PrintWarn("Device Info>");
     PrintDebug("Ethernet Interface [%s]", pstSvcCp->pchIfaceName);
-    PrintDebug("PSID [%d]", pstSvcCp->unPsid);
+#if defined(CONFIG_EXT_DATA_FORMAT)
+    PrintDebug("pchIpAddr [%s]", pstSvcCp->pchIpAddr);
+    PrintDebug("unPort [%d]", pstSvcCp->unPort);
+#endif
 
     PrintDebug("pchDeviceName [%s]", pstSvcCp->pchDeviceName);
     PrintDebug("ulDbStartTime [%ld]", pstSvcCp->ulDbStartTime);
@@ -783,7 +789,10 @@ int32_t SVC_CP_Open(SVC_CP_T *pstSvcCp)
     }
 
     pstMsgManager->pchIfaceName = pstSvcCp->pchIfaceName;
-    pstMsgManager->stExtMsgWsr.unPsid = pstSvcCp->unPsid;
+#if defined(CONFIG_EXT_DATA_FORMAT)
+    pstMsgManager->pchIpAddr = pstSvcCp->pchIpAddr;
+    pstMsgManager->unPort = pstSvcCp->unPort;
+#endif
 
     nFrameWorkRet = MSG_MANAGER_Open(pstMsgManager);
     if(nFrameWorkRet != FRAMEWORK_OK)

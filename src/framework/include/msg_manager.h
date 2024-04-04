@@ -544,6 +544,8 @@ typedef struct MSG_MANAGER_RX_EVENT_MSG_t {
 
 typedef struct MSG_MANAGER_t {
     char                            *pchIfaceName;
+    char                            *pchIpAddr;
+    uint32_t                        unPort;
     bool                            bLogLevel;
     MSG_MANAGER_EXT_MSG_WSR         stExtMsgWsr;
     uint32_t                        unReserved;
