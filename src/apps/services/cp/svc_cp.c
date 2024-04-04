@@ -128,13 +128,13 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
     pstSvcCp->stDbManagerWrite.eCommMsgType = DB_MANAGER_COMM_MSG_TYPE_TX;
     pstSvcCp->stDbManagerWrite.eProc = DB_MANAGER_PROC_WRITE;
 
-    pstSvcCp->stMsgManagerTx.ePayloadType = MSG_MANAGER_PAYLOAD_TYPE_RAW;
-    pstSvcCp->stMsgManagerTx.eCommType = MSG_MANAGER_COMM_TYPE_5GNRV2X;
-    pstSvcCp->stMsgManagerTx.eSignId = MSG_MANAGER_SIGN_ID_UNSECURED;
-    pstSvcCp->stMsgManagerTx.eV2xFreq = MSG_MANAGER_V2X_FREQ_5900;
-    pstSvcCp->stMsgManagerTx.ePriority = MSG_MANAGER_PRIORITY_CV2X_PPPP_0;
-    pstSvcCp->stMsgManagerTx.eV2xDataRate = MSG_MANAGER_V2X_DATA_RATE_6MBPS;
-    pstSvcCp->stMsgManagerTx.eV2xTimeSlot = MSG_MANAGER_V2X_TIME_SLOT_CONTINUOUS;
+    pstSvcCp->stMsgManagerTx.ePayloadType = eMSG_MANAGER_PAYLOAD_TYPE_RAW;
+    pstSvcCp->stMsgManagerTx.eCommType = eMSG_MANAGER_COMM_TYPE_5GNRV2X;
+    pstSvcCp->stMsgManagerTx.eSignId = eMSG_MANAGER_SIGN_ID_UNSECURED;
+    pstSvcCp->stMsgManagerTx.eV2xFreq = eMSG_MANAGER_V2X_FREQ_5900;
+    pstSvcCp->stMsgManagerTx.ePriority = eMSG_MANAGER_PRIORITY_CV2X_PPPP_0;
+    pstSvcCp->stMsgManagerTx.eV2xDataRate = eMSG_MANAGER_V2X_DATA_RATE_6MBPS;
+    pstSvcCp->stMsgManagerTx.eV2xTimeSlot = eMSG_MANAGER_V2X_TIME_SLOT_CONTINUOUS;
     pstSvcCp->stMsgManagerTx.unPsid = DB_V2X_PSID;
     pstSvcCp->stMsgManagerTx.nTxPower = MSG_MANAGER_V2X_TX_POWER;
     pstSvcCp->stMsgManagerTx.unTxCount = 10;

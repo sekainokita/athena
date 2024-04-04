@@ -368,13 +368,13 @@ int32_t P_CLI_MSG_SetDefaultSettings(void)
     MSG_MANAGER_TX_T stMsgManagerTx;
     DB_V2X_T stDbV2x;
 
-    stMsgManagerTx.ePayloadType = MSG_MANAGER_PAYLOAD_TYPE_RAW;
-    stMsgManagerTx.eCommType = MSG_MANAGER_COMM_TYPE_5GNRV2X;
-    stMsgManagerTx.eSignId = MSG_MANAGER_SIGN_ID_UNSECURED;
-    stMsgManagerTx.eV2xFreq = MSG_MANAGER_V2X_FREQ_5900;
-    stMsgManagerTx.ePriority = MSG_MANAGER_PRIORITY_CV2X_PPPP_0;
-    stMsgManagerTx.eV2xDataRate = MSG_MANAGER_V2X_DATA_RATE_6MBPS;
-    stMsgManagerTx.eV2xTimeSlot = MSG_MANAGER_V2X_TIME_SLOT_CONTINUOUS;
+    stMsgManagerTx.ePayloadType = eMSG_MANAGER_PAYLOAD_TYPE_RAW;
+    stMsgManagerTx.eCommType = eMSG_MANAGER_COMM_TYPE_5GNRV2X;
+    stMsgManagerTx.eSignId = eMSG_MANAGER_SIGN_ID_UNSECURED;
+    stMsgManagerTx.eV2xFreq = eMSG_MANAGER_V2X_FREQ_5900;
+    stMsgManagerTx.ePriority = eMSG_MANAGER_PRIORITY_CV2X_PPPP_0;
+    stMsgManagerTx.eV2xDataRate = eMSG_MANAGER_V2X_DATA_RATE_6MBPS;
+    stMsgManagerTx.eV2xTimeSlot = eMSG_MANAGER_V2X_TIME_SLOT_CONTINUOUS;
     stMsgManagerTx.unPsid = DB_V2X_PSID;
     stMsgManagerTx.nTxPower = MSG_MANAGER_V2X_TX_POWER;
     stMsgManagerTx.unTxCount = 10;
