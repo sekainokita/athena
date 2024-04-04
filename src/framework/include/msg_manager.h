@@ -68,7 +68,7 @@
 * @details V2X Extensible Message Format
 */
 #define MSG_MANAGER_EXT_MSG_MAGIC_NUM_MAX       (4)
-#define MSG_MANAGER_EXT_MSG_MAGIC_NUM_NAME		"5GVX"
+#define MSG_MANAGER_EXT_MSG_MAGIC_NUM_NAME      "5GVX"
 #define MSG_MANAGER_EXT_MSG_V2V_PSID            (58200)
 #define MSG_MANAGER_EXT_MSG_V2I_PSID            (58201)
 #define MSG_MANAGER_EXT_MSG_I2V_PSID            (58202)
@@ -190,14 +190,14 @@ typedef enum
     eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_ACK,
     eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_NAK,
     eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_HEARTBEAT,
-	eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_TIME,
-	eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_STATUS,
-	eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_REPAIR,
-	eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_CMD,
-  	eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_TX = 0x10,
-  	eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_RX,
-  	eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_WSM_SVC_REQ,
-  	eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_WSM_SVC_CONFIRM,
+    eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_TIME,
+    eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_STATUS,
+    eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_REPAIR,
+    eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_CMD,
+    eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_TX = 0x10,
+    eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_RX,
+    eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_WSM_SVC_REQ,
+    eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_WSM_SVC_CONFIRM,
     eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_MAX = 0xFF
 } MSG_MANAGER_EXT_MSG_PAYLOAD_ID_E;
 
@@ -206,7 +206,7 @@ typedef enum
 */
 typedef enum
 {
-	eMSG_MANAGER_EXT_MSG_ACTION_ADD = 0,
+    eMSG_MANAGER_EXT_MSG_ACTION_ADD = 0,
     eMSG_MANAGER_EXT_MSG_ACTION_DEL = 1,
     eMSG_MANAGER_EXT_MSG_ACTION_MAX
 } MSG_MANAGER_EXT_MSG_ACTION_E;
@@ -216,9 +216,9 @@ typedef enum
 */
 typedef enum
 {
-	eMSG_MANAGER_EXT_MSG_WSC_ACTION_FAIL = 0x00,
-	eMSG_MANAGER_EXT_MSG_WSC_ACTION_ADDED,
-	eMSG_MANAGER_EXT_MSG_WSC_ACTION_ALREADY_ADD,
+    eMSG_MANAGER_EXT_MSG_WSC_ACTION_FAIL = 0x00,
+    eMSG_MANAGER_EXT_MSG_WSC_ACTION_ADDED,
+    eMSG_MANAGER_EXT_MSG_WSC_ACTION_ALREADY_ADD,
     eMSG_MANAGER_EXT_MSG_WSC_ACTION_DELETED,
     eMSG_MANAGER_EXT_MSG_WSC_ACTION_NOT_EXIST,
     eMSG_MANAGER_EXT_MSG_WSC_ACTION_ALL_DELETED,
@@ -230,10 +230,10 @@ typedef enum
 */
 typedef enum
 {
-	eMSG_MANAGER_EXT_MSG_DEV_TYPE_OBU_MODEM = 10,
-	eMSG_MANAGER_EXT_MSG_DEV_TYPE_OBU = 11,
-	eMSG_MANAGER_EXT_MSG_DEV_TYPE_RSU_MODEM = 20,
-	eMSG_MANAGER_EXT_MSG_DEV_TYPE_RSU = 21,
+    eMSG_MANAGER_EXT_MSG_DEV_TYPE_OBU_MODEM = 10,
+    eMSG_MANAGER_EXT_MSG_DEV_TYPE_OBU = 11,
+    eMSG_MANAGER_EXT_MSG_DEV_TYPE_RSU_MODEM = 20,
+    eMSG_MANAGER_EXT_MSG_DEV_TYPE_RSU = 21,
     eMSG_MANAGER_EXT_MSG_DEV_TYPE_RSU_CTL = 22,
     eMSG_MANAGER_EXT_MSG_DEV_TYPE_MAX
 } MSG_MANAGER_EXT_MSG_DEV_TYPE_E;
@@ -243,7 +243,7 @@ typedef enum
 */
 typedef enum
 {
-	eMSG_MANAGER_EXT_MSG_STATUS_TX = 0,
+    eMSG_MANAGER_EXT_MSG_STATUS_TX = 0,
     eMSG_MANAGER_EXT_MSG_STATUS_RX = 1,
     eMSG_MANAGER_EXT_MSG_STATUS_MAX
 } MSG_MANAGER_EXT_MSG_STATUS_E;
@@ -258,11 +258,11 @@ typedef enum
 */
 typedef struct MSG_MANAGER_EXT_MSG_t
 {
-    char		cMagicNumber[MSG_MANAGER_EXT_MSG_MAGIC_NUM_MAX];
-    uint16_t	usLength;
-    uint16_t	usSeqNum;
-    uint16_t	usPayloadId;
-    uint8_t		ucPayload[0];
+    char        cMagicNumber[MSG_MANAGER_EXT_MSG_MAGIC_NUM_MAX];
+    uint16_t    usLength;
+    uint16_t    usSeqNum;
+    uint16_t    usPayloadId;
+    uint8_t     ucPayload[0];
     /* CRC16 (2bytes) is added at the end of packet from usLength to ucPayload */
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG;
 
@@ -273,8 +273,8 @@ typedef struct MSG_MANAGER_EXT_MSG_t
 */
 typedef struct  MSG_MANAGER_EXT_MSG_WSR_t
 {
-    uint8_t		ucAction;
-    uint32_t	unPsid;
+    uint8_t     ucAction;
+    uint32_t    unPsid;
     uint16_t    usCrc16;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_WSR;
 
@@ -285,8 +285,8 @@ typedef struct  MSG_MANAGER_EXT_MSG_WSR_t
 */
 typedef struct MSG_MANAGER_EXT_MSG_WSC_t
 {
-    uint8_t		ucActionRst;
-    uint32_t	unPsid;
+    uint8_t     ucActionRst;
+    uint32_t    unPsid;
     uint16_t    usCrc16;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_WSC;
 
@@ -297,8 +297,8 @@ typedef struct MSG_MANAGER_EXT_MSG_WSC_t
 */
 typedef struct MSG_MANAGER_EXT_MSG_TX_t
 {
-    uint32_t	unPsid;
-    uint8_t		ucPayload[0];
+    uint32_t    unPsid;
+    uint8_t     ucPayload[0];
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TX;
 
 /**
@@ -309,9 +309,9 @@ typedef struct MSG_MANAGER_EXT_MSG_TX_t
 */
 typedef struct MSG_MANAGER_EXT_MSG_RX_t
 {
-    uint32_t	unPsid;
-    uint8_t		ucRcpi;
-    uint8_t		ucPayload[0];
+    uint32_t    unPsid;
+    uint8_t     ucRcpi;
+    uint8_t     ucPayload[0];
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_RX;
 
 /**
@@ -336,9 +336,9 @@ typedef struct MSG_MANAGER_EXT_MSG_RX_t
 */
 typedef struct MSG_MANAGER_EXT_MSG_TLVC_t
 {
-    uint32_t	unType;
-    uint16_t	usLength;
-    uint8_t		ucValue[0];
+    uint32_t    unType;
+    uint16_t    usLength;
+    uint8_t     ucValue[0];
     /* CRC16 is added at the end of packet */
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC;
 
@@ -354,13 +354,13 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_t
 */
 typedef struct MSG_MANAGER_EXT_MSG_TLVC_OVERALL_t
 {
-    uint32_t	unType;
-    uint16_t	usLength;
-    char		cMagicNum[4];
-    uint8_t		ucVersion;
-    uint8_t		ucNumOfPkg;
-    uint16_t	usLenOfPkg;
-    uint16_t	usCrc;
+    uint32_t    unType;
+    uint16_t    usLength;
+    char        cMagicNum[4];
+    uint8_t     ucVersion;
+    uint8_t     ucNumOfPkg;
+    uint16_t    usLenOfPkg;
+    uint16_t    usCrc;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC_OVERALL;
 
 /**
@@ -384,22 +384,22 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_OVERALL_t
 */
 typedef struct MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX_t
 {
-    uint32_t	unType;
-    uint16_t	usLenth;
-    uint8_t		ucDevType;
-    uint8_t		ucTxRxId;
-    uint32_t	unDevId;
-    uint16_t	usHwVer;
-    uint16_t	usSwVer;
-    uint64_t	ulTimeStamp;
-    uint8_t		ucTxPwr;
-    uint16_t	usTxFreq;
-    uint8_t		ucTxBw;
-    uint8_t		ucScs;
-    uint8_t		ucMcs;
-    int32_t		nLatitude;
-    int32_t		nLongitude;
-    uint16_t	usCrc;
+    uint32_t    unType;
+    uint16_t    usLenth;
+    uint8_t     ucDevType;
+    uint8_t     ucTxRxId;
+    uint32_t    unDevId;
+    uint16_t    usHwVer;
+    uint16_t    usSwVer;
+    uint64_t    ulTimeStamp;
+    uint8_t     ucTxPwr;
+    uint16_t    usTxFreq;
+    uint8_t     ucTxBw;
+    uint8_t     ucScs;
+    uint8_t     ucMcs;
+    int32_t     nLatitude;
+    int32_t     nLongitude;
+    uint16_t    usCrc;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX;
 
 /**
@@ -449,15 +449,15 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_RX_t
 */
 typedef struct MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT_t
 {
-    uint32_t	unType;
-    uint16_t	usLenth;
-    uint8_t		ucDevType;
-    uint8_t		ucTxRxId;
-    uint32_t	unDevId;
-    uint16_t	usHwVer;
-    uint16_t	usSwVer;
-    uint64_t	ulTimeStamp;
-    uint16_t	usCrc;
+    uint32_t    unType;
+    uint16_t    usLenth;
+    uint8_t     ucDevType;
+    uint8_t     ucTxRxId;
+    uint32_t    unDevId;
+    uint16_t    usHwVer;
+    uint16_t    usSwVer;
+    uint64_t    ulTimeStamp;
+    uint16_t    usCrc;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT;
 
 /**
@@ -474,15 +474,15 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT_t
 */
 typedef struct MSG_MANAGER_EXT_MSG_TLVC_CONTROL_UNIT_t
 {
-    uint32_t	unType;
-    uint16_t	usLenth;
-    uint8_t		ucDevType;
-    uint8_t		ucTxRxId;
-    uint32_t	unDevId;
-    uint16_t	usHwVer;
-    uint16_t	usSwVer;
-    uint64_t	ulTimeStamp;
-    uint16_t	usCrc;
+    uint32_t    unType;
+    uint16_t    usLenth;
+    uint8_t     ucDevType;
+    uint8_t     ucTxRxId;
+    uint32_t    unDevId;
+    uint16_t    usHwVer;
+    uint16_t    usSwVer;
+    uint64_t    ulTimeStamp;
+    uint16_t    usCrc;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC_CONTROL_UNIT;
 
 /**
