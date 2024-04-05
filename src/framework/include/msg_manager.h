@@ -50,33 +50,43 @@
 #include "db_v2x.h"
 
 /***************************** Definition ************************************/
-#define MSG_MANAGER_MAC_LENGTH                  (6)
+#define MSG_MANAGER_MAC_LENGTH                      (6)
 
  /**
 * @details V2X TX POWER
 * @param MSG_MANAGER_V2X_TX_POWER       DSRC (0 ~ 23, Korea 20), C-V2X (-30~23)
 */
-#define MSG_MANAGER_V2X_TX_POWER                (20)
+#define MSG_MANAGER_V2X_TX_POWER                    (20)
 
-#define MSG_MANAGER_V2X_TX_PROFILE_ID           (100)
-#define MSG_MANAGER_V2X_TX_PEER_L2_ID           (0)
+#define MSG_MANAGER_V2X_TX_PROFILE_ID               (100)
+#define MSG_MANAGER_V2X_TX_PEER_L2_ID               (0)
 
-#define MSG_MANAGER_MSG_BUF_MAX_LEN             (1024)
-#define MSG_MANAGER_MSG_HEX_STR_LEN             (5)
-#define MSG_MANAGER_MSG_HEX_SIZE                (16)
+#define MSG_MANAGER_MSG_BUF_MAX_LEN                 (1024)
+#define MSG_MANAGER_MSG_HEX_STR_LEN                 (5)
+#define MSG_MANAGER_MSG_HEX_SIZE                    (16)
+
+#define MSG_MANAGER_CRC16_LEN                       (2)
+#define MSG_MANAGER_CRC32_LEN                       (4)
+
  /**
 * @details V2X Extensible Message Format
 */
-#define MSG_MANAGER_EXT_MSG_MAGIC_NUM_MAX       (4)
-#define MSG_MANAGER_EXT_MSG_MAGIC_NUM_NAME      "5GVX"
-#define MSG_MANAGER_EXT_MSG_V2V_PSID            (58200)
-#define MSG_MANAGER_EXT_MSG_V2I_PSID            (58201)
-#define MSG_MANAGER_EXT_MSG_I2V_PSID            (58202)
+#define MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN           (4)
+#define MSG_MANAGER_EXT_MSG_MAGIC_NUM_NAME          "5GVX"
+#define MSG_MANAGER_EXT_MSG_OVERALL_PKG_EXTENSIBLE	'E'
+#define MSG_MANAGER_EXT_MSG_OVERALL_PKG_MESSAGE	    'M'
+#define MSG_MANAGER_EXT_MSG_OVERALL_PKG_OVERALL	    'O'
+#define MSG_MANAGER_EXT_MSG_OVERALL_PKG_PACKAGE	    'P'
 
-#define MSG_MANAGER_EXT_MSG_OVERALL_PKG         (58220)
-#define MSG_MANAGER_EXT_MSG_RAW_DATA_PKG        (58221)
-#define MSG_MANAGER_EXT_MSG_SSOV_PKG            (58222)
-#define MSG_MANAGER_EXT_MSG_STATUS_PKG          (58223)
+#define MSG_MANAGER_EXT_MSG_OVERALL_PKG_VER         (1)
+#define MSG_MANAGER_EXT_MSG_V2V_PSID                (58200)
+#define MSG_MANAGER_EXT_MSG_V2I_PSID                (58201)
+#define MSG_MANAGER_EXT_MSG_I2V_PSID                (58202)
+
+#define MSG_MANAGER_EXT_MSG_OVERALL_PKG             (58220)
+#define MSG_MANAGER_EXT_MSG_RAW_DATA_PKG            (58221)
+#define MSG_MANAGER_EXT_MSG_SSOV_PKG                (58222)
+#define MSG_MANAGER_EXT_MSG_STATUS_PKG              (58223)
 
 /***************************** Enum and Structure ****************************/
 
@@ -258,7 +268,7 @@ typedef enum
 */
 typedef struct MSG_MANAGER_EXT_MSG_t
 {
-    char        cMagicNumber[MSG_MANAGER_EXT_MSG_MAGIC_NUM_MAX];
+    char        cMagicNumber[MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN];
     uint16_t    usLength;
     uint16_t    usSeqNum;
     uint16_t    usPayloadId;
@@ -331,14 +341,14 @@ typedef struct MSG_MANAGER_EXT_MSG_RX_t
 * @details MSG_MANAGER_EXT_MSG_RX (define TLVC of Extensible Message)
 * @param unType (T) package types (overall, raw data, J2735, SSOV, etc)
 * @param usLength (L) length between value and crc
-* @param ucValue (V) defined by unType
+* @param ucPayload (V) defined by unType
 * @param CRC16 (C) crc of TLV (polynomial 1021h)
 */
 typedef struct MSG_MANAGER_EXT_MSG_TLVC_t
 {
     uint32_t    unType;
     uint16_t    usLength;
-    uint8_t     ucValue[0];
+    uint8_t     ucPayload[0];
     /* CRC16 is added at the end of packet */
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC;
 
@@ -356,11 +366,11 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_OVERALL_t
 {
     uint32_t    unType;
     uint16_t    usLength;
-    char        cMagicNum[4];
+    char        chMagicNum[4];
     uint8_t     ucVersion;
     uint8_t     ucNumOfPkg;
     uint16_t    usLenOfPkg;
-    uint16_t    usCrc;
+    uint16_t    usCrc16;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC_OVERALL;
 
 /**
@@ -399,7 +409,7 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX_t
     uint8_t     ucMcs;
     int32_t     nLatitude;
     int32_t     nLongitude;
-    uint16_t    usCrc;
+    uint16_t    usCrc16;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX;
 
 /**
@@ -432,7 +442,7 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_RX_t
     uint8_t     ucRcpi;
     int32_t     nLatitude;
     int32_t     nLongitude;
-    uint16_t    usCrc;
+    uint16_t    usCrc16;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_RX;
 
 /**
@@ -440,7 +450,7 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_RX_t
 * @param unType         the type of modem unit package (58223)
 * @param usLenth        the length
 * @param ucDevType      the device type obu_modem:10, obu:11, rsu_modem:20, rsu:21, rsu_control:22
-* @param ucTxRxId       the ID Tx (0) / Rx (1)
+* @param ucStatus       the status of Tx (0) / Rx (1)
 * @param unDevId        the device id of obu modem
 * @param usHwVer        the hardware version of obu modem
 * @param usSwVer        the software version of obu modem
@@ -452,12 +462,12 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT_t
     uint32_t    unType;
     uint16_t    usLenth;
     uint8_t     ucDevType;
-    uint8_t     ucTxRxId;
+    uint8_t     ucStatus;
     uint32_t    unDevId;
     uint16_t    usHwVer;
     uint16_t    usSwVer;
     uint64_t    ulTimeStamp;
-    uint16_t    usCrc;
+    uint16_t    usCrc16;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT;
 
 /**
@@ -482,7 +492,7 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_CONTROL_UNIT_t
     uint16_t    usHwVer;
     uint16_t    usSwVer;
     uint64_t    ulTimeStamp;
-    uint16_t    usCrc;
+    uint16_t    usCrc16;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC_CONTROL_UNIT;
 
 /**

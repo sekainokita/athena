@@ -64,6 +64,7 @@
 #include "msg_manager.h"
 #include "db_manager.h"
 #include "time_manager.h"
+#include <sys/time.h>
 #if defined(CONFIG_EXT_DATA_FORMAT)
 #include "svc_cp.h"
 #endif
@@ -565,6 +566,238 @@ static int32_t P_MSG_MANAGER_SendTxMsgToDbMgr(MSG_MANAGER_TX_EVENT_MSG_T *pstEve
 	return nRet;
 }
 
+#if defined(CONFIG_EXT_DATA_FORMAT)
+static int32_t P_MSG_MANAGER_CreateStatusPkg(MSG_MANAGER_EXT_MSG_TLVC_OVERALL *pstExtMsgOverall, MSG_MANAGER_EXT_MSG_STATUS_E eStatus)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+	MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT *pstCommUnit;
+	struct timeval stTvUsec;
+	struct tm *pstTm;
+	uint64_t ulSysTime;
+	uint16_t usPkgLen = ntohs(pstExtMsgOverall->usLenOfPkg);
+
+	pstCommUnit  = (MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT *)((uint8_t*)pstExtMsgOverall + sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL) + usPkgLen);
+
+	pstExtMsgOverall->ucNumOfPkg++;
+	usPkgLen += sizeof(MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT);
+	pstExtMsgOverall->usLenOfPkg = htons(usPkgLen);
+	pstExtMsgOverall->usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgOverall, sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL) - MSG_MANAGER_CRC16_LEN));
+
+	pstCommUnit->unType = htonl(MSG_MANAGER_EXT_MSG_STATUS_PKG);
+	pstCommUnit->usLenth = htons(sizeof(MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT) - 6);
+	pstCommUnit->ucDevType = eMSG_MANAGER_EXT_MSG_DEV_TYPE_OBU;
+	pstCommUnit->ucStatus = eStatus;
+	pstCommUnit->unDevId = htonl(1);
+	pstCommUnit->usHwVer = htons(2);
+	pstCommUnit->usSwVer = htons(3);
+
+	gettimeofday(&stTvUsec, NULL);
+	stTvUsec.tv_sec = stTvUsec.tv_sec + (3600 * 9); /* UTC -> KST */
+
+	pstTm = localtime(&stTvUsec.tv_sec);
+	ulSysTime = (uint64_t)(pstTm->tm_year + 1900) * 1000000000000000 +
+				(uint64_t)(pstTm->tm_mon + 1)     * 10000000000000 +
+				(uint64_t)pstTm->tm_mday        * 100000000000 +
+				(uint64_t)pstTm->tm_hour        * 1000000000 +
+				(uint64_t)pstTm->tm_min         * 10000000 +
+				(uint64_t)pstTm->tm_sec         * 100000 +
+				(uint64_t)stTvUsec.tv_usec        / 10;
+
+	pstCommUnit->ulTimeStamp = htobe64(ulSysTime);
+	pstCommUnit->usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstCommUnit, sizeof(MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT) - MSG_MANAGER_CRC16_LEN));
+
+    nRet = FRAMEWORK_OK;
+
+	return nRet;
+}
+
+static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    uint32_t unDbV2xPacketLength = sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength + sizeof(pstEventMsg->pstDbV2x->ulReserved);
+    uint32_t unDbV2xCrcCalcuatedLength = sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength;
+    ssize_t nRetSendSize = 0, i = 0;
+    uint32_t ulTempDbV2xTotalPacketCrc32 = 0, ulDbV2xTotalPacketCrc32 = 0;
+    TIME_MANAGER_T *pstTimeManager;
+
+    DB_V2X_T *pstDbV2x = NULL;
+    uint8_t *pchDbV2xCrc = NULL;
+    uint32_t unTxMsgLen;
+    uint32_t unPsid = 0;
+    uint8_t ucMsgBuf[MAX_TX_PACKET_TO_OBU];
+
+    memset(ucMsgBuf,0, sizeof(ucMsgBuf));
+    MSG_MANAGER_EXT_MSG* pstExtMsg = (MSG_MANAGER_EXT_MSG*)ucMsgBuf;
+
+    int32_t nRawPkgSize = 10;
+    uint16_t *usCrc16;
+    uint16_t usCalcCrc16;
+    MSG_MANAGER_EXT_MSG_TX* pstExtMsgTx = (MSG_MANAGER_EXT_MSG_TX*)pstExtMsg->ucPayload;
+    MSG_MANAGER_EXT_MSG_TLVC_OVERALL *pstExtMsgOverall;
+    MSG_MANAGER_EXT_MSG_TLVC *pstTxPkg;
+    uint16_t unExtMsgPkgLen;
+
+    s_unV2xMsgTxLen = unDbV2xPacketLength;
+
+    pstDbV2x = malloc(unDbV2xPacketLength);
+    if(pstDbV2x == NULL)
+    {
+        PrintError("malloc() is failed! [NULL]");
+        return nRet;
+    }
+
+    memset(pstDbV2x, 0, unDbV2xPacketLength);
+
+    pstDbV2x->eDeviceType = htons(pstEventMsg->pstDbV2x->eDeviceType);
+    pstDbV2x->eTeleCommType = htons(pstEventMsg->pstDbV2x->eTeleCommType);
+    pstDbV2x->unDeviceId = htonl(pstEventMsg->pstDbV2x->unDeviceId);
+    pstDbV2x->ulTimeStamp = htonll(pstEventMsg->pstDbV2x->ulTimeStamp);
+    pstDbV2x->eServiceId = htons(pstEventMsg->pstDbV2x->eServiceId);
+    pstDbV2x->eActionType = htons(pstEventMsg->pstDbV2x->eActionType);
+    pstDbV2x->eRegionId = htons(pstEventMsg->pstDbV2x->eRegionId);
+    pstDbV2x->ePayloadType = htons(pstEventMsg->pstDbV2x->ePayloadType);
+    pstDbV2x->eCommId = htons(pstEventMsg->pstDbV2x->eCommId);
+    pstDbV2x->usDbVer = htons(pstEventMsg->pstDbV2x->usDbVer);
+    pstDbV2x->usHwVer = htons(pstEventMsg->pstDbV2x->usHwVer);
+    pstDbV2x->usSwVer = htons(pstEventMsg->pstDbV2x->usSwVer);
+    pstDbV2x->ulPayloadLength = htonl(pstEventMsg->pstDbV2x->ulPayloadLength);
+    pstDbV2x->ulReserved = htonl(pstEventMsg->pstDbV2x->ulReserved);
+
+    pchDbV2xCrc = malloc(unDbV2xPacketLength);
+    if(pchDbV2xCrc == NULL)
+    {
+        PrintError("malloc() is failed! [NULL]");
+        return nRet;
+    }
+    memset(pchDbV2xCrc, 0, unDbV2xCrcCalcuatedLength);
+    memcpy(pchDbV2xCrc, pstDbV2x, unDbV2xPacketLength);
+    memcpy(pchDbV2xCrc + sizeof(DB_V2X_T), pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
+
+    ulTempDbV2xTotalPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)pchDbV2xCrc, sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength);
+    ulDbV2xTotalPacketCrc32 = htonl(ulTempDbV2xTotalPacketCrc32);
+
+    /* free the allocated payload */
+    if(pstEventMsg->pPayload != NULL)
+    {
+        if (pstEventMsg->pstDbV2x->ePayloadType != DB_V2X_PAYLOAD_TYPE_PLATOONING_THROUGHPUT)
+        {
+            free(pstEventMsg->pPayload);
+        }
+    }
+
+    if(s_bMsgMgrLog == ON)
+    {
+        pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
+        if(pstTimeManager == NULL)
+        {
+            PrintError("pstTimeManager is NULL!");
+        }
+
+        nRet = TIME_MANAGER_Get(pstTimeManager);
+        if(nRet != FRAMEWORK_OK)
+        {
+            PrintError("TIME_MANAGER_Get() is failed! [nRet:%d]", nRet);
+        }
+        else
+        {
+            /* The average delay between svc and send() is about 10 us, so use the timestamp of svc */
+            PrintDebug("[%ld]-[%ld]=[%ld]", pstTimeManager->ulTimeStamp, pstEventMsg->pstDbV2x->ulTimeStamp, pstTimeManager->ulTimeStamp-pstEventMsg->pstDbV2x->ulTimeStamp);
+        }
+    }
+
+    unPsid = MSG_MANAGER_EXT_MSG_V2V_PSID;
+
+    pstExtMsgOverall = (MSG_MANAGER_EXT_MSG_TLVC_OVERALL*)pstExtMsgTx->ucPayload;
+    pstExtMsgOverall->unType = htonl(MSG_MANAGER_EXT_MSG_OVERALL_PKG);
+    pstExtMsgOverall->usLength = htons(sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL) - (MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN + MSG_MANAGER_CRC16_LEN));
+    pstExtMsgOverall->chMagicNum[0] = MSG_MANAGER_EXT_MSG_OVERALL_PKG_EXTENSIBLE;
+    pstExtMsgOverall->chMagicNum[1] = MSG_MANAGER_EXT_MSG_OVERALL_PKG_MESSAGE;
+    pstExtMsgOverall->chMagicNum[2] = MSG_MANAGER_EXT_MSG_OVERALL_PKG_OVERALL;
+    pstExtMsgOverall->chMagicNum[3] = MSG_MANAGER_EXT_MSG_OVERALL_PKG_PACKAGE;
+    pstExtMsgOverall->ucVersion = MSG_MANAGER_EXT_MSG_OVERALL_PKG_VER;
+    pstExtMsgOverall->ucNumOfPkg = 0;
+    pstExtMsgOverall->usLenOfPkg = 0;
+
+    unExtMsgPkgLen = ntohs(pstExtMsgOverall->usLenOfPkg);
+
+    if (nRawPkgSize > 0)
+    {
+        pstTxPkg  = (MSG_MANAGER_EXT_MSG_TLVC *)((uint8_t*)pstExtMsgOverall + sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL) + unExtMsgPkgLen);
+
+        pstExtMsgOverall->ucNumOfPkg++;
+        unExtMsgPkgLen = unExtMsgPkgLen + 8 + nRawPkgSize;
+        pstExtMsgOverall->usLenOfPkg = htons(unExtMsgPkgLen);
+        pstExtMsgOverall->usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgOverall, sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL) - MSG_MANAGER_CRC16_LEN));
+
+        pstTxPkg->unType = htonl(MSG_MANAGER_EXT_MSG_RAW_DATA_PKG);
+        pstTxPkg->usLength = htons(nRawPkgSize + MSG_MANAGER_CRC16_LEN);
+        for(i = 0; i < nRawPkgSize; i++)
+        {
+            pstTxPkg->ucPayload[i] = i % 255;
+        }
+
+        usCrc16 = (uint16_t*)((uint8_t*)pstTxPkg + (MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN + MSG_MANAGER_CRC16_LEN) + nRawPkgSize);
+        *usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstTxPkg, nRawPkgSize + (MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN + MSG_MANAGER_CRC16_LEN)));   // TLVC 중 CRC만 제외
+    }
+
+    nRet = P_MSG_MANAGER_CreateStatusPkg(pstExtMsgOverall, eMSG_MANAGER_EXT_MSG_STATUS_TX);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_MSG_MANAGER_CreateStatusPkg() is failed! [nRet:%d]", nRet);
+    }
+
+    memcpy(pstExtMsg->cMagicNumber, MSG_MANAGER_EXT_MSG_MAGIC_NUM_NAME, sizeof(pstExtMsg->cMagicNumber));
+    unTxMsgLen = 16 + sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL) + ntohs(pstExtMsgOverall->usLenOfPkg);   // 16 : header(10) + psid(4) + crc(2)
+    pstExtMsg->usLength = htons(10 + sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL) + ntohs(pstExtMsgOverall->usLenOfPkg));        // seq(2) + payload id(2) + crc(2) + psid(4)
+    pstExtMsg->usSeqNum = 0;
+    pstExtMsg->usPayloadId = htons(eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_TX);
+    pstExtMsgTx->unPsid = htonl(unPsid);
+
+    unTxMsgLen = ntohs(pstExtMsg->usLength) + (MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN + MSG_MANAGER_CRC16_LEN);
+
+    usCrc16 = (uint16_t*)&ucMsgBuf[unTxMsgLen - MSG_MANAGER_CRC16_LEN];
+    usCalcCrc16 = CLI_UTIL_GetCrc16(ucMsgBuf + MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN, unTxMsgLen - (MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN + MSG_MANAGER_CRC16_LEN));
+    *usCrc16 = htons(usCalcCrc16);
+
+    nRetSendSize = send(s_nSocketHandle, ucMsgBuf, unTxMsgLen, 0);
+    if (nRetSendSize < 0)
+    {
+        PrintError("send() is failed! [nRetSendSize:%ld]", nRetSendSize);
+    }
+    else if (nRetSendSize != (int32_t)unTxMsgLen)
+    {
+        PrintError("send() is failed! sent a different number of bytes than expected [nRetSendSize:%ld], unTxMsgLen[%d]", nRetSendSize, unTxMsgLen);
+    }
+    else if (nRetSendSize == 0)
+    {
+        PrintError("send() is failed! [nRetSendSize:%ld]", nRetSendSize);
+    }
+    else
+    {
+        nRet = FRAMEWORK_OK;
+    }
+
+    nRet = P_MSG_MANAGER_SendTxMsgToDbMgr(pstEventMsg, ntohl(ulDbV2xTotalPacketCrc32));
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_MSG_MANAGER_SendTxMsgToDbMgr() is faild! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    if(pstDbV2x != NULL)
+    {
+        free(pstDbV2x);
+    }
+
+    if(pchDbV2xCrc != NULL)
+    {
+        free(pchDbV2xCrc);
+    }
+
+    return nRet;
+}
+#else
 static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -763,6 +996,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
 
     return nRet;
 }
+#endif
 
 static int32_t P_MSG_MANAGER_SendRxMsgToDbMgr(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMsg, uint32_t unCrc32)
 {
