@@ -89,6 +89,14 @@
 #define MSG_MANAGER_EXT_TLVC_SIZE           (sizeof(MSG_MANAGER_EXT_MSG_TLVC))
 #define MSG_MANAGER_EXT_WSC_SIZE            (sizeof(MSG_MANAGER_EXT_MSG_WSC) + MSG_MANAGER_EXT_MSG_HEADER_SIZE)
 #define MSG_MANAGER_EXT_WSR_SIZE            (sizeof(MSG_MANAGER_EXT_MSG_WSR) + MSG_MANAGER_EXT_MSG_HEADER_SIZE)
+
+#define MSG_MANAGER_MAX_DATA_SIZE			(8999) /* RAW Message Size */
+#define MSG_MANAGER_MAX_TX_PAYLOAD			(MSG_MANAGER_MAX_DATA_SIZE)
+#define MSG_MANAGER_MAX_RX_PAYLOAD			(MSG_MANAGER_MAX_RX_PAYLOAD)
+
+#define MSG_MANAGER_MAX_TX_PKG_SIZE			(MSG_MANAGER_MAX_DATA_SIZE + MSG_MANAGER_EXT_MSG_HEADER_SIZE + MSG_MANAGER_EXT_MSG_TX_SIZE + MSG_MANAGER_CRC16_LEN)
+#define MSG_MANAGER_MAX_RX_PKG_SIZE			(MSG_MANAGER_MAX_DATA_SIZE + MSG_MANAGER_EXT_MSG_HEADER_SIZE + MSG_MANAGER_EXT_MSG_RX_SIZE + MSG_MANAGER_CRC16_LEN)
+
 #endif
 
 //#define CONFIG_TEMP_OBU_TEST (1)
@@ -312,8 +320,8 @@ int32_t P_MSG_MANAGER_SetV2xWsrSetting(MSG_MANAGER_T *pstMsgManager)
 {
 	int32_t nRet = FRAMEWORK_ERROR;
 	int nRxLen = 0, nTxLen = 0;
-	uint8_t ucTxMsgBuf[MAX_TX_PACKET_TO_OBU];
-	uint8_t ucRxMsgBuf[MAX_RX_PACKET_BY_OBU];
+	uint8_t ucTxMsgBuf[MSG_MANAGER_MAX_TX_PKG_SIZE];
+	uint8_t ucRxMsgBuf[MSG_MANAGER_MAX_RX_PKG_SIZE];
     uint16_t *pusCrc16 = NULL;
 	MSG_MANAGER_EXT_MSG *pstTxMsgHdr = (MSG_MANAGER_EXT_MSG *)ucTxMsgBuf;
 	MSG_MANAGER_EXT_MSG *pstRxMsgHdr = (MSG_MANAGER_EXT_MSG *)ucRxMsgBuf;
@@ -625,7 +633,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     uint8_t *pchDbV2xCrc = NULL;
     uint32_t unTxMsgLen;
     uint32_t unPsid = 0;
-    uint8_t ucMsgBuf[MAX_TX_PACKET_TO_OBU];
+    uint8_t ucMsgBuf[MSG_MANAGER_MAX_TX_PKG_SIZE];
 
     memset(ucMsgBuf,0, sizeof(ucMsgBuf));
     MSG_MANAGER_EXT_MSG* pstExtMsg = (MSG_MANAGER_EXT_MSG*)ucMsgBuf;
@@ -1045,6 +1053,532 @@ static int32_t P_MSG_MANAGER_SendRxMsgToDbMgr(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
 	return nRet;
 }
 
+#if defined(CONFIG_EXT_DATA_FORMAT)
+static void P_MSG_MANAGER_PrintExtMsgPkg(void *pvExtMsgPkg)
+{
+    MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX *pstExtMsgModemTx;
+    MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_RX *pstExtMsgModemRx;
+    MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT *pstExtMsgComm;
+    MSG_MANAGER_EXT_MSG_TLVC_CONTROL_UNIT *pstExtMsgCtrl;
+    uint8_t *pucDeviceType = (uint8_t*)pvExtMsgPkg + 6;	// T, L 뒤에 dev_type 존재
+    uint16_t usCalcCrc16;
+    uint8_t ucStatus;
+
+    switch(*pucDeviceType)
+    {
+        case eMSG_MANAGER_EXT_MSG_DEV_TYPE_OBU_MODEM:
+        {
+            pstExtMsgModemTx = (MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX*)pvExtMsgPkg;
+            pstExtMsgModemRx = (MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_RX*)pvExtMsgPkg;
+            ucStatus = pstExtMsgModemTx->ucStatus;
+
+            if (ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX)
+            {
+                PrintDebug("OBU Modem : Tx");
+                PrintDebug("unDevId[%u]", htonl(pstExtMsgModemTx->unDevId));
+                PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgModemTx->usHwVer), htons(pstExtMsgModemTx->usSwVer));
+                PrintDebug("ucTxPwr[%d], usTxFreq[%d], ucTxBw[%d], ucMcs[%d], ucScs[%d]", pstExtMsgModemTx->ucTxPwr, htons(pstExtMsgModemTx->usTxFreq), pstExtMsgModemTx->ucTxBw, pstExtMsgModemTx->ucMcs, pstExtMsgModemTx->ucScs);
+                PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemTx->nLatitude), htonl(pstExtMsgModemTx->nLongitude));
+                PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgModemTx->ulTimeStamp));
+
+                usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemTx, htons(pstExtMsgModemTx->usLenth) + 4); // T, L, V 길이
+                if(usCalcCrc16 != ntohs(pstExtMsgModemTx->usCrc16))
+                {
+                    PrintError("[Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgModemTx->usCrc16), usCalcCrc16);
+                }
+            }
+            else if (ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_RX)
+            {
+                PrintDebug("OBU Modem : Rx");
+                PrintDebug("unDevId[%u]", htonl(pstExtMsgModemRx->unDevId));
+                PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgModemRx->usHwVer), htons(pstExtMsgModemRx->usSwVer));
+                PrintDebug("nRssi[%d], ucRcpi[%d]", pstExtMsgModemRx->nRssi, pstExtMsgModemRx->ucRcpi);
+                PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemRx->nLatitude), htonl(pstExtMsgModemRx->nLongitude));
+                PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgModemRx->ulTimeStamp));
+
+                usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemRx, htons(pstExtMsgModemRx->usLenth) + 4);	// T, L, V 길이
+                if(usCalcCrc16 != ntohs(pstExtMsgModemRx->usCrc16))
+                {
+                    PrintError("[Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgModemRx->usCrc16), usCalcCrc16);
+                }
+            }
+            else
+            {
+                PrintError("Error type [ucStatus:%d]\n", ucStatus);
+                return;
+            }
+
+            break;
+        }
+
+        case eMSG_MANAGER_EXT_MSG_DEV_TYPE_OBU:
+        {
+            pstExtMsgComm = (MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT*)pvExtMsgPkg;
+
+            PrintDebug("OBU AP : %s", (pstExtMsgComm->ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX) ? "Tx":"Rx");
+            PrintDebug("unDevId[%d]", htonl(pstExtMsgComm->unDevId));
+            PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgComm->usHwVer), htons(pstExtMsgComm->usSwVer));
+            PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgComm->ulTimeStamp));
+
+            usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgComm, htons(pstExtMsgComm->usLenth) + 4);	// T, L, V 길이
+            if(usCalcCrc16 != ntohs(pstExtMsgComm->usCrc16))
+            {
+                PrintError("[Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgComm->usCrc16), usCalcCrc16);
+            }
+
+            break;
+        }
+
+        case eMSG_MANAGER_EXT_MSG_DEV_TYPE_RSU:
+        {
+            pstExtMsgComm = (MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT*)pvExtMsgPkg;
+
+            PrintDebug("RSU AP : %s", (pstExtMsgComm->ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX) ? "Tx":"Rx");
+            PrintDebug("unDevId[%d]", htonl(pstExtMsgComm->unDevId));
+            PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgComm->usHwVer), htons(pstExtMsgComm->usSwVer));
+            PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgComm->ulTimeStamp));
+
+            usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgComm, htons(pstExtMsgComm->usLenth) + 4);	// T, L, V 길이
+            if(usCalcCrc16 != ntohs(pstExtMsgComm->usCrc16))
+            {
+                PrintError("[Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgComm->usCrc16), usCalcCrc16);
+            }
+
+            break;
+        }
+
+        case eMSG_MANAGER_EXT_MSG_DEV_TYPE_RSU_MODEM:
+        {
+            pstExtMsgModemTx = (MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX*)pvExtMsgPkg;
+            pstExtMsgModemRx = (MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_RX*)pvExtMsgPkg;
+            ucStatus = pstExtMsgModemTx->ucStatus;
+
+            if (ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX)
+            {
+                PrintDebug("RSU Modem : Tx");
+                PrintDebug("unDevId[%u]", htonl(pstExtMsgModemTx->unDevId));
+                PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgModemTx->usHwVer), htons(pstExtMsgModemTx->usSwVer));
+                PrintDebug("ucTxPwr[%d], usTxFreq[%d], ucTxBw[%d], ucMcs[%d], ucScs[%d]", pstExtMsgModemTx->ucTxPwr, htons(pstExtMsgModemTx->usTxFreq), pstExtMsgModemTx->ucTxBw, pstExtMsgModemTx->ucMcs, pstExtMsgModemTx->ucScs);
+                PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemTx->nLatitude), htonl(pstExtMsgModemTx->nLongitude));
+                PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgModemTx->ulTimeStamp));
+
+                usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemTx, htons(pstExtMsgModemTx->usLenth) + 4);	// T, L, V 길이
+                if(usCalcCrc16 != ntohs(pstExtMsgModemTx->usCrc16))
+                {
+                    PrintError("[Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgModemTx->usCrc16), usCalcCrc16);
+                }
+            }
+            else if (ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_RX)
+            {
+                PrintDebug("RSU Modem : Rx");
+                PrintDebug("unDevId[%u]", htonl(pstExtMsgModemRx->unDevId));
+                PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgModemRx->usHwVer), htons(pstExtMsgModemRx->usSwVer));
+                PrintDebug("nRssi[%d], ucRcpi[%d]", pstExtMsgModemRx->nRssi, pstExtMsgModemRx->ucRcpi);
+                PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemRx->nLatitude), htonl(pstExtMsgModemRx->nLongitude));
+                PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgModemRx->ulTimeStamp));
+
+                usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemRx, htons(pstExtMsgModemRx->usLenth) + 4);	// T, L, V 길이
+                if(usCalcCrc16 != ntohs(pstExtMsgModemRx->usCrc16))
+                {
+                    PrintError("[Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgModemRx->usCrc16), usCalcCrc16);
+                }
+            }
+            else
+            {
+                PrintError("Error type [ucStatus:%d]\n", ucStatus);
+                return;
+            }
+
+            break;
+        }
+
+        case eMSG_MANAGER_EXT_MSG_DEV_TYPE_RSU_CTL:
+        {
+            pstExtMsgCtrl = (MSG_MANAGER_EXT_MSG_TLVC_CONTROL_UNIT*)pvExtMsgPkg;
+
+            PrintDebug("RSU Controller : %s", (pstExtMsgCtrl->ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX) ? "Tx":"Rx");
+            PrintDebug("unDevId[%d]", htonl(pstExtMsgCtrl->unDevId));
+            PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgCtrl->usHwVer), htons(pstExtMsgCtrl->usSwVer));
+            PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgCtrl->ulTimeStamp));
+
+            usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgCtrl, htons(pstExtMsgCtrl->usLenth) + 4);	// T, L, V 길이
+            if(usCalcCrc16 != ntohs(pstExtMsgCtrl->usCrc16))
+            {
+                PrintError("Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgCtrl->usCrc16), usCalcCrc16);
+            }
+
+            break;
+        }
+
+        default:
+        {
+            PrintError("Error! unknown device type[%d]", *pucDeviceType);
+            break;
+        }
+    }
+
+    return;
+}
+
+static int32_t P_MSG_MANAGER_AnalyzeRxMsg(uint8_t *pucMsg, int32_t nRxLen)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    uint8_t ucNumPkgCnt;
+    uint32_t unOverallPkgLen, unTotalPkgLen, unRemainedPkgLen, unTlvcPkgLen;
+    uint16_t usCalcCrc16;
+    void *pvNextRxPkg;
+    MSG_MANAGER_EXT_MSG_TLVC_OVERALL *pstExtMsgOverall = NULL;
+    MSG_MANAGER_EXT_MSG *pstExtMsg = (MSG_MANAGER_EXT_MSG *)pucMsg;
+    MSG_MANAGER_EXT_MSG_RX *pstExtMsgRx = (MSG_MANAGER_EXT_MSG_RX *)pstExtMsg->ucPayload;
+    uint32_t unPsid = ntohl(pstExtMsgRx->unPsid);
+    bool bExtMsgFlag = FALSE;
+    uint32_t unType;
+    MSG_MANAGER_EXT_MSG_TLVC *pstRxPkg;
+
+    if (nRxLen > 0)
+    {
+        pstExtMsgOverall = (MSG_MANAGER_EXT_MSG_TLVC_OVERALL*)pstExtMsgRx->ucPayload;
+    }
+    else
+    {
+        PrintError("Error! extensible message length[%d]", nRxLen);
+        return nRet;
+    }
+
+    if(unPsid == MSG_MANAGER_EXT_MSG_V2V_PSID)
+    {
+        PrintTrace("Get Extensible Message - V2V");
+        bExtMsgFlag = TRUE;
+    }
+    else if (unPsid == MSG_MANAGER_EXT_MSG_V2I_PSID)
+    {
+        PrintTrace("Get Extensible Message - V2I");
+        bExtMsgFlag = TRUE;
+    }
+    else if (unPsid == MSG_MANAGER_EXT_MSG_I2V_PSID)
+    {
+        PrintTrace("Get Extensible Message - I2V");
+        bExtMsgFlag = TRUE;
+    }
+    else
+    {
+        PrintTrace("Get Normal Message - PSID(%d)", unPsid);
+    }
+
+    if (bExtMsgFlag == TRUE)
+    {
+        if (ntohl(pstExtMsgOverall->unType) != MSG_MANAGER_EXT_MSG_OVERALL_PKG)
+        {
+            PrintError("Error! overall type[%d] != [%d]", ntohl(pstExtMsgOverall->unType), MSG_MANAGER_EXT_MSG_OVERALL_PKG);
+            return nRet;
+        }
+
+        unOverallPkgLen = ntohs(pstExtMsgOverall->usLength);
+        unRemainedPkgLen = unTotalPkgLen = pstExtMsgOverall->usLenOfPkg;
+
+        PrintWarn("[Overall Package] ucVersion[%d], unOverallPkgLen[%d]", pstExtMsgOverall->ucVersion, unOverallPkgLen);
+        PrintDebug("Number of Packages[%d], Total Length of Package[%d]", pstExtMsgOverall->ucNumOfPkg, ntohs(unTotalPkgLen));
+
+        usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgOverall, unOverallPkgLen + 4);	// T, L, V 길이
+        if(usCalcCrc16 != ntohs(pstExtMsgOverall->usCrc16))
+        {
+            PrintError("Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgOverall->usCrc16), usCalcCrc16);
+        }
+
+        pvNextRxPkg = (uint8_t*)pstExtMsgOverall + sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL); // next TLVC
+
+        for (ucNumPkgCnt = 1; ucNumPkgCnt <= pstExtMsgOverall->ucNumOfPkg; ucNumPkgCnt++)
+        {
+            pstRxPkg = (MSG_MANAGER_EXT_MSG_TLVC *)pvNextRxPkg;
+            unTlvcPkgLen = ntohs(pstRxPkg->usLength);
+            unType = ntohl(pstRxPkg->unType);
+
+            if (unRemainedPkgLen < unTlvcPkgLen)
+            {
+                PrintError("Error! remain length [unTlvcPkgLen:%d]", unTlvcPkgLen);
+                break;
+            }
+
+            if (unType == MSG_MANAGER_EXT_MSG_STATUS_PKG)
+            {
+                PrintWarn("Package : %d (Status Package)", ucNumPkgCnt);
+                P_MSG_MANAGER_PrintExtMsgPkg(pvNextRxPkg);
+            }
+            else
+            {
+                PrintDebug("Package : %d\n\tPSID : %d, TLV lenth : %d", ucNumPkgCnt, unType, unTlvcPkgLen + 6);
+                P_MSG_MANAGER_PrintMsgData((uint8_t*)pvNextRxPkg, unTlvcPkgLen + 6);   // 6: T, L 크기 추가
+            }
+
+            pvNextRxPkg = pvNextRxPkg + unTlvcPkgLen + 6; // 6: T, L 크기
+            unRemainedPkgLen = unRemainedPkgLen - unTlvcPkgLen - 6; // 6: T, L 크기
+        }
+    }
+    else
+    {
+        (void)P_MSG_MANAGER_PrintMsgData(pucMsg, nRxLen);
+    }
+
+    return 0;
+}
+
+static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMsg)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    uint8_t ucMsgBuf[MSG_MANAGER_MAX_RX_PKG_SIZE] = {0};
+    int nRecvLen = -1;
+    Ext_V2X_RxPDU_t *pstV2xRxPdu = NULL;
+    DB_V2X_T *pstDbV2x = NULL;
+    uint32_t ulDbV2xTotalPacketCrc32 = 0, ulCompDbV2xTotalPacketCrc32 = 0, ulTempDbV2xTotalPacketCrc32 = 0;
+    DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
+    uint32_t ulRxPayloadLength = 0;
+
+    if(pstEventMsg == NULL)
+    {
+        PrintError("pstEventMsg is NULL");
+        return nRet;
+    }
+
+    while (1)
+    {
+        nRecvLen = recv(s_nSocketHandle, ucMsgBuf, sizeof(ucMsgBuf), 0);
+        if (nRecvLen < 0)
+        {
+            if ((errno != EAGAIN) && (errno != EWOULDBLOCK))
+            {
+                if(s_bMsgMgrLog == ON)
+                {
+                    PrintError("recv() is failed!!");
+                }
+
+                usleep(1000*1000);
+            }
+            else
+            {
+                usleep(10*1000);
+                continue;
+            }
+        }
+        else if (nRecvLen == 0)
+        {
+            PrintError("recv()'s connection is closed by peer!!");
+            break;
+        }
+        else
+        {
+            if(s_bMsgMgrLog == ON)
+            {
+                PrintDebug("recv() is success, nRecvLen[%u]", nRecvLen);
+            }
+
+            nRet = P_MSG_MANAGER_AnalyzeRxMsg(ucMsgBuf, nRecvLen);
+            if(nRet != FRAMEWORK_OK)
+            {
+                PrintError("P_MSG_MANAGER_AnalyzeRxMsg() is failed! [nRet:%d]", nRet);
+            }
+
+            pstV2xRxPdu = malloc(nRecvLen);
+            if(pstV2xRxPdu == NULL)
+            {
+                PrintError("malloc() is failed! [NULL]");
+            }
+            else
+            {
+                memset(pstV2xRxPdu, 0, nRecvLen);
+                memcpy(pstV2xRxPdu, ucMsgBuf, nRecvLen);
+
+                if(s_unV2xMsgTxLen != 0)
+                {
+                    if(s_bFirstPacket == TRUE)
+                    {
+                        s_unV2xMsgRxLen = s_unV2xMsgTxLen;
+                        PrintTrace("Update s_unV2xMsgTxLen[%d] => s_unV2xMsgRxLen[%d]", s_unV2xMsgTxLen, s_unV2xMsgRxLen);
+                    }
+
+                    if(s_unV2xMsgRxLen != ntohs(pstV2xRxPdu->v2x_msg.length))
+                    {
+                        PrintError("Tx and Rx size does not matched!! check s_unV2xMsgRxLen[%d] != pstV2xRxPdu->v2x_msg.length[%d]", s_unV2xMsgRxLen, ntohs(pstV2xRxPdu->v2x_msg.length));
+                        nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                        if(nRet != FRAMEWORK_OK)
+                        {
+                            PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                        }
+
+                        stDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
+                        stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
+                        PrintWarn("increase ulTotalErrCnt [from %ld to %ld]", (stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
+
+                        nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                        if(nRet != FRAMEWORK_OK)
+                        {
+                            PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                        }
+                    }
+                    else
+                    {
+                        pstDbV2x = malloc(ntohs(pstV2xRxPdu->v2x_msg.length));
+                        if(pstDbV2x == NULL)
+                        {
+                            PrintError("malloc() is failed! [NULL]");
+                        }
+                        else
+                        {
+                            memset(pstDbV2x, 0, ntohs(pstV2xRxPdu->v2x_msg.length));
+                            memcpy(pstDbV2x, pstV2xRxPdu->v2x_msg.data, sizeof(DB_V2X_T));
+
+                            ulRxPayloadLength = ntohl(pstDbV2x->ulPayloadLength);
+
+                            memcpy(&ulTempDbV2xTotalPacketCrc32, pstV2xRxPdu->v2x_msg.data + sizeof(DB_V2X_T) + ulRxPayloadLength, sizeof(uint32_t));
+                            ulDbV2xTotalPacketCrc32 = ntohl(ulTempDbV2xTotalPacketCrc32);
+
+                            ulCompDbV2xTotalPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)&pstV2xRxPdu->v2x_msg.data[0], sizeof(DB_V2X_T) + ulRxPayloadLength);
+                            if(ulDbV2xTotalPacketCrc32 != ulCompDbV2xTotalPacketCrc32)
+                            {
+                                PrintError("CRC32 does not matched!! check Get:ulDbV2xTotalPacketCrc32[0x%x] != Calculate:ulCompDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32, ulCompDbV2xTotalPacketCrc32);
+                                PrintError("Check nRecvLen[%d], sizeof(Ext_V2X_RxPDU_t)[%ld]+pstV2xRxPdu->v2x_msg.length[%d]", nRecvLen, sizeof(Ext_V2X_RxPDU_t), ntohs(pstV2xRxPdu->v2x_msg.length));
+                                nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                                if(nRet != FRAMEWORK_OK)
+                                {
+                                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                }
+
+                                stDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
+                                stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
+                                PrintWarn("increase ulTotalErrCnt [from %ld to %ld]", (stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
+
+                                nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                                if(nRet != FRAMEWORK_OK)
+                                {
+                                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                }
+                            }
+                            else
+                            {
+                                nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                                if(nRet != FRAMEWORK_OK)
+                                {
+                                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                }
+
+                                stDbV2xStatus.stV2xStatusRx.ulTotalPacketCnt++;
+
+                                if(s_bFirstPacket == TRUE)
+                                {
+                                    s_bFirstPacket = FALSE;
+                                    stDbV2xStatus.bFirstPacket = TRUE;
+                                    PrintTrace("Received the first packets, stDbV2xStatus.bFirstPacket [%d]", stDbV2xStatus.bFirstPacket);
+                                    /* The first packet number is updated at db manager, P_DB_MANAGER_UpdateStatus() */
+                                }
+
+                                nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                                if(nRet != FRAMEWORK_OK)
+                                {
+                                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                }
+
+                                pstEventMsg->pPayload = malloc(ulRxPayloadLength);
+                                if(pstEventMsg->pPayload == NULL)
+                                {
+                                    PrintError("malloc() is failed! [NULL]");
+                                }
+                                else
+                                {
+                                    if(s_bMsgMgrLog == ON)
+                                    {
+                                        PrintDebug("db_v2x_tmp_p->eDeviceType[%d]", ntohs(pstDbV2x->eDeviceType));
+                                        PrintDebug("db_v2x_tmp_p->eTeleCommType[%d]", ntohs(pstDbV2x->eTeleCommType));
+                                        PrintDebug("db_v2x_tmp_p->unDeviceId[%d]", ntohl(pstDbV2x->unDeviceId));
+                                        PrintDebug("db_v2x_tmp_p->ulTimeStamp[%ld]", ntohll(pstDbV2x->ulTimeStamp));
+                                        PrintDebug("db_v2x_tmp_p->eServiceId[%d]", ntohs(pstDbV2x->eServiceId));
+                                        PrintDebug("db_v2x_tmp_p->eActionType[%d]", ntohs(pstDbV2x->eActionType));
+                                        PrintDebug("db_v2x_tmp_p->eRegionId[%d]", ntohs(pstDbV2x->eRegionId));
+                                        PrintDebug("db_v2x_tmp_p->ePayloadType[%d]", ntohs(pstDbV2x->ePayloadType));
+                                        PrintDebug("db_v2x_tmp_p->eCommId[%d]", ntohs(pstDbV2x->eCommId));
+                                        PrintDebug("db_v2x_tmp_p->usDbVer[%d.%d]", ntohs(pstDbV2x->usDbVer) >> CLI_DB_V2X_MAJOR_SHIFT, ntohs(pstDbV2x->usDbVer) & CLI_DB_V2X_MINOR_MASK);
+                                        PrintDebug("db_v2x_tmp_p->usHwVer[%d]", ntohs(pstDbV2x->usHwVer));
+                                        PrintDebug("db_v2x_tmp_p->usSwVer[%d]", ntohs(pstDbV2x->usSwVer));
+                                        PrintDebug("db_v2x_tmp_p->ulPayloadLength[%d]", ulRxPayloadLength);
+                                        PrintDebug("db_v2x_tmp_p->ulReserved[0x%x]", ntohl(pstDbV2x->ulReserved));
+
+                                        PrintDebug("received CRC:ulDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32);
+                                        PrintDebug("calcuated CRC:ulCompDbV2xTotalPacketCrc32[0x%x]", ulCompDbV2xTotalPacketCrc32);
+
+                                        if(ulDbV2xTotalPacketCrc32 == ulCompDbV2xTotalPacketCrc32)
+                                        {
+                                            PrintTrace("CRC32 is matched!");
+                                        }
+                                    }
+
+                                    memcpy(pstEventMsg->pPayload, pstV2xRxPdu->v2x_msg.data + sizeof(DB_V2X_T), ulRxPayloadLength);
+
+                                    pstEventMsg->pstDbV2x->eDeviceType = ntohs(pstDbV2x->eDeviceType);
+                                    pstEventMsg->pstDbV2x->eTeleCommType = ntohs(pstDbV2x->eTeleCommType);
+                                    pstEventMsg->pstDbV2x->unDeviceId = ntohl(pstDbV2x->unDeviceId);
+                                    pstEventMsg->pstDbV2x->ulTimeStamp = ntohll(pstDbV2x->ulTimeStamp);
+                                    pstEventMsg->pstDbV2x->eServiceId = ntohs(pstDbV2x->eServiceId);
+                                    pstEventMsg->pstDbV2x->eActionType = ntohs(pstDbV2x->eActionType);
+                                    pstEventMsg->pstDbV2x->eRegionId = ntohs(pstDbV2x->eRegionId);
+                                    pstEventMsg->pstDbV2x->ePayloadType = ntohs(pstDbV2x->ePayloadType);
+                                    pstEventMsg->pstDbV2x->eCommId = ntohs(pstDbV2x->eCommId);
+                                    pstEventMsg->pstDbV2x->usDbVer = ntohs(pstDbV2x->usDbVer);
+                                    pstEventMsg->pstDbV2x->usHwVer = ntohs(pstDbV2x->usHwVer);
+                                    pstEventMsg->pstDbV2x->usSwVer = ntohs(pstDbV2x->usSwVer);
+                                    pstEventMsg->pstDbV2x->ulPayloadLength = ulRxPayloadLength;
+                                    pstEventMsg->pstDbV2x->ulReserved = ntohl(pstDbV2x->ulReserved);
+
+                                    nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                                    if(nRet != FRAMEWORK_OK)
+                                    {
+                                        PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                    }
+
+                                    stDbV2xStatus.ulTxTimeStamp = pstEventMsg->pstDbV2x->ulTimeStamp;
+
+                                    nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                                    if(nRet != FRAMEWORK_OK)
+                                    {
+                                        PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                    }
+
+                                    nRet = P_MSG_MANAGER_SendRxMsgToDbMgr(pstEventMsg, ulDbV2xTotalPacketCrc32);
+                                    if (nRet != FRAMEWORK_OK)
+                                    {
+                                        PrintError("P_MSG_MANAGER_SendTxMsgToDbMgr() is faild! [nRet:%d]", nRet);
+                                    }
+
+                                    if(pstEventMsg->pPayload != NULL)
+                                    {
+                                        free(pstEventMsg->pPayload);
+                                    }
+                                }
+                            }
+
+                            if(pstDbV2x != NULL)
+                            {
+                                free(pstDbV2x);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if(s_bMsgMgrLog == ON)
+                    {
+                        PrintWarn("The Message Manager is not started yet.");
+                    }
+                }
+
+                if(pstV2xRxPdu != NULL)
+                {
+                    free(pstV2xRxPdu);
+                }
+            }
+        }
+    }
+
+    return nRet;
+}
+#else
 static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -1319,6 +1853,7 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
 
     return nRet;
 }
+#endif
 
 static void *P_MSG_MANAGER_TxTask(void *arg)
 {
@@ -1347,7 +1882,6 @@ static void *P_MSG_MANAGER_TxTask(void *arg)
 
     return NULL;
 }
-
 
 static void *P_MSG_MANAGER_RxTask(void *arg)
 {

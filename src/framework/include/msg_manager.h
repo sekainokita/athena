@@ -378,7 +378,7 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_OVERALL_t
 * @param unType         the type of modem unit package (58223)
 * @param usLenth        the length
 * @param ucDevType      the device type obu_modem:10, obu:11, rsu_modem:20, rsu:21, rsu_control:22
-* @param ucTxRxId       the ID Tx (0) / Rx (1)
+* @param ucStatus       the ID Tx (0) / Rx (1)
 * @param unDevId        the device id of obu modem
 * @param usHwVer        the hardware version of obu modem
 * @param usSwVer        the software version of obu modem
@@ -397,7 +397,7 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX_t
     uint32_t    unType;
     uint16_t    usLenth;
     uint8_t     ucDevType;
-    uint8_t     ucTxRxId;
+    uint8_t     ucStatus;
     uint32_t    unDevId;
     uint16_t    usHwVer;
     uint16_t    usSwVer;
@@ -417,7 +417,7 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX_t
 * @param unType         the type of modem unit package (58223)
 * @param usLenth        the length
 * @param ucDevType      the device type obu_modem:10, obu:11, rsu_modem:20, rsu:21, rsu_control:22
-* @param ucTxRxId       the ID Tx (0) / Rx (1)
+* @param ucStatus       the ID Tx (0) / Rx (1)
 * @param unDevId        the device id of obu modem
 * @param usHwVer        the hardware version of obu modem
 * @param usSwVer        the software version of obu modem
@@ -433,7 +433,7 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_RX_t
     uint32_t    unType;
     uint16_t    usLenth;
     uint8_t     ucDevType;
-    uint8_t     ucTxRxId;
+    uint8_t     ucStatus;
     uint32_t    unDevId;
     uint16_t    usHwVer;
     uint16_t    usSwVer;
@@ -475,7 +475,7 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT_t
 * @param unType         the type of modem unit package (58223)
 * @param usLenth        the length
 * @param ucDevType      the device type obu_modem:10, obu:11, rsu_modem:20, rsu:21, rsu_control:22
-* @param ucTxRxId       the ID Tx (0) / Rx (1)
+* @param ucStatus       the ID Tx (0) / Rx (1)
 * @param unDevId        the device id of obu modem
 * @param usHwVer        the hardware version of obu modem
 * @param usSwVer        the software version of obu modem
@@ -487,7 +487,7 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_CONTROL_UNIT_t
     uint32_t    unType;
     uint16_t    usLenth;
     uint8_t     ucDevType;
-    uint8_t     ucTxRxId;
+    uint8_t     ucStatus;
     uint32_t    unDevId;
     uint16_t    usHwVer;
     uint16_t    usSwVer;
