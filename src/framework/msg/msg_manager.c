@@ -100,6 +100,7 @@
 #endif
 
 //#define CONFIG_TEMP_OBU_TEST (1)
+//#define CONFIG_TEST_EXT_MSG_STATUS_PKG (1)
 
 #ifdef WORDS_BIGENDIAN
 #define htonll(x)   (x)
@@ -575,6 +576,7 @@ static int32_t P_MSG_MANAGER_SendTxMsgToDbMgr(MSG_MANAGER_TX_EVENT_MSG_T *pstEve
 }
 
 #if defined(CONFIG_EXT_DATA_FORMAT)
+#if defined(CONFIG_TEST_EXT_MSG_STATUS_PKG)
 static int32_t P_MSG_MANAGER_CreateStatusPkg(MSG_MANAGER_EXT_MSG_TLVC_OVERALL *pstExtMsgOverall, MSG_MANAGER_EXT_MSG_STATUS_E eStatus)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -619,13 +621,14 @@ static int32_t P_MSG_MANAGER_CreateStatusPkg(MSG_MANAGER_EXT_MSG_TLVC_OVERALL *p
 
 	return nRet;
 }
+#endif
 
 static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
     uint32_t unDbV2xPacketLength = sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength + sizeof(pstEventMsg->pstDbV2x->ulReserved);
     uint32_t unDbV2xCrcCalcuatedLength = sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength;
-    ssize_t nRetSendSize = 0, i = 0;
+    ssize_t nRetSendSize = 0;
     uint32_t ulTempDbV2xTotalPacketCrc32 = 0, ulDbV2xTotalPacketCrc32 = 0;
     TIME_MANAGER_T *pstTimeManager;
 
@@ -638,7 +641,10 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     memset(ucMsgBuf,0, sizeof(ucMsgBuf));
     MSG_MANAGER_EXT_MSG* pstExtMsg = (MSG_MANAGER_EXT_MSG*)ucMsgBuf;
 
+#if defined(CONFIG_TEST_EXT_MSG_PKG)
     int32_t nRawPkgSize = 10;
+    ssize_t i = 0;
+#endif
     uint16_t *usCrc16;
     uint16_t usCalcCrc16;
     MSG_MANAGER_EXT_MSG_TX* pstExtMsgTx = (MSG_MANAGER_EXT_MSG_TX*)pstExtMsg->ucPayload;
@@ -729,6 +735,28 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
 
     unExtMsgPkgLen = ntohs(pstExtMsgOverall->usLenOfPkg);
 
+    /* SSOV Pkg */
+    if (unDbV2xPacketLength > 0)
+    {
+        pstTxPkg  = (MSG_MANAGER_EXT_MSG_TLVC *)((uint8_t*)pstExtMsgOverall + sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL) + unExtMsgPkgLen);
+
+        pstExtMsgOverall->ucNumOfPkg++;
+        unExtMsgPkgLen = unExtMsgPkgLen + 8 + unDbV2xPacketLength;
+        pstExtMsgOverall->usLenOfPkg = htons(unExtMsgPkgLen);
+        pstExtMsgOverall->usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgOverall, sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL) - MSG_MANAGER_CRC16_LEN));
+
+        pstTxPkg->unType = htonl(MSG_MANAGER_EXT_MSG_SSOV_PKG);
+        pstTxPkg->usLength = htons(unDbV2xPacketLength + MSG_MANAGER_CRC16_LEN);
+
+        memcpy(pstTxPkg->ucPayload, pstDbV2x, unDbV2xPacketLength);
+        memcpy(pstTxPkg->ucPayload + sizeof(DB_V2X_T), pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
+        memcpy(pstTxPkg->ucPayload + sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength, &ulDbV2xTotalPacketCrc32, sizeof(uint32_t));
+
+        usCrc16 = (uint16_t*)((uint8_t*)pstTxPkg + (MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN + MSG_MANAGER_CRC16_LEN) + unDbV2xPacketLength);
+        *usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstTxPkg, unDbV2xPacketLength + (MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN + MSG_MANAGER_CRC16_LEN)));   // TLVC 중 CRC만 제외
+    }
+
+#if defined(CONFIG_TEST_EXT_MSG_PKG)
     if (nRawPkgSize > 0)
     {
         pstTxPkg  = (MSG_MANAGER_EXT_MSG_TLVC *)((uint8_t*)pstExtMsgOverall + sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL) + unExtMsgPkgLen);
@@ -754,6 +782,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     {
         PrintError("P_MSG_MANAGER_CreateStatusPkg() is failed! [nRet:%d]", nRet);
     }
+#endif
 
     memcpy(pstExtMsg->cMagicNumber, MSG_MANAGER_EXT_MSG_MAGIC_NUM_NAME, sizeof(pstExtMsg->cMagicNumber));
     unTxMsgLen = 16 + sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL) + ntohs(pstExtMsgOverall->usLenOfPkg);   // 16 : header(10) + psid(4) + crc(2)
@@ -1324,6 +1353,138 @@ static int32_t P_MSG_MANAGER_AnalyzeRxMsg(uint8_t *pucMsg, int32_t nRxLen)
     return nRet;
 }
 
+static int32_t P_MSG_MANAGER_ProcessSsovPkg(void *pvExtMsgPkg)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    MSG_MANAGER_EXT_MSG_TLVC *pstExtMsgSsov;
+    uint16_t usCalcCrc16;
+
+    pstExtMsgSsov = (MSG_MANAGER_EXT_MSG_TLVC*)pvExtMsgPkg;
+
+    PrintDebug("unType [%d]", htonl(pstExtMsgSsov->unType));
+    PrintDebug("unDevId[%d]", ntohs(pstExtMsgSsov->usLength));
+
+    usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgSsov, htons(pstExtMsgSsov->usLength) + 4);	// T, L, V 길이
+    if(usCalcCrc16 != ntohs(pstExtMsgSsov->usCrc16))
+    {
+        PrintError("Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgSsov->usCrc16), usCalcCrc16);
+    }
+
+    nRet = FRAMEWORK_OK;
+
+    return nRet;
+}
+
+static int32_t P_MSG_MANAGER_ProcessRxMsg(uint8_t *pucMsg, int32_t nRxLen)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    uint8_t ucNumPkgCnt;
+    uint32_t unOverallPkgLen, unTotalPkgLen, unRemainedPkgLen, unTlvcPkgLen;
+    uint16_t usCalcCrc16;
+    void *pvNextRxPkg;
+    MSG_MANAGER_EXT_MSG_TLVC_OVERALL *pstExtMsgOverall = NULL;
+    MSG_MANAGER_EXT_MSG *pstExtMsg = (MSG_MANAGER_EXT_MSG *)pucMsg;
+    MSG_MANAGER_EXT_MSG_RX *pstExtMsgRx = (MSG_MANAGER_EXT_MSG_RX *)pstExtMsg->ucPayload;
+    uint32_t unPsid = ntohl(pstExtMsgRx->unPsid);
+    bool bExtMsgFlag = FALSE;
+    uint32_t unType;
+    MSG_MANAGER_EXT_MSG_TLVC *pstRxPkg;
+
+    if (nRxLen > 0)
+    {
+        pstExtMsgOverall = (MSG_MANAGER_EXT_MSG_TLVC_OVERALL*)pstExtMsgRx->ucPayload;
+    }
+    else
+    {
+        PrintError("Error! extensible message length[%d]", nRxLen);
+        return nRet;
+    }
+
+    if(unPsid == MSG_MANAGER_EXT_MSG_V2V_PSID)
+    {
+        PrintTrace("Get Extensible Message - V2V");
+        bExtMsgFlag = TRUE;
+    }
+    else if (unPsid == MSG_MANAGER_EXT_MSG_V2I_PSID)
+    {
+        PrintTrace("Get Extensible Message - V2I");
+        bExtMsgFlag = TRUE;
+    }
+    else if (unPsid == MSG_MANAGER_EXT_MSG_I2V_PSID)
+    {
+        PrintTrace("Get Extensible Message - I2V");
+        bExtMsgFlag = TRUE;
+    }
+    else
+    {
+        PrintTrace("Get Normal Message - PSID(%d)", unPsid);
+    }
+
+    if (bExtMsgFlag == TRUE)
+    {
+        if (ntohl(pstExtMsgOverall->unType) != MSG_MANAGER_EXT_MSG_OVERALL_PKG)
+        {
+            PrintError("Error! overall type[%d] != [%d]", ntohl(pstExtMsgOverall->unType), MSG_MANAGER_EXT_MSG_OVERALL_PKG);
+            return nRet;
+        }
+
+        unOverallPkgLen = ntohs(pstExtMsgOverall->usLength);
+        unRemainedPkgLen = unTotalPkgLen = pstExtMsgOverall->usLenOfPkg;
+
+        PrintWarn("[Overall Package] ucVersion[%d], unOverallPkgLen[%d]", pstExtMsgOverall->ucVersion, unOverallPkgLen);
+        PrintDebug("Number of Packages[%d], Total Length of Package[%d]", pstExtMsgOverall->ucNumOfPkg, ntohs(unTotalPkgLen));
+
+        usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgOverall, unOverallPkgLen + 4);	// T, L, V 길이
+        if(usCalcCrc16 != ntohs(pstExtMsgOverall->usCrc16))
+        {
+            PrintError("Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgOverall->usCrc16), usCalcCrc16);
+        }
+
+        pvNextRxPkg = (uint8_t*)pstExtMsgOverall + sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL); // next TLVC
+
+        for (ucNumPkgCnt = 1; ucNumPkgCnt <= pstExtMsgOverall->ucNumOfPkg; ucNumPkgCnt++)
+        {
+            pstRxPkg = (MSG_MANAGER_EXT_MSG_TLVC *)pvNextRxPkg;
+            unTlvcPkgLen = ntohs(pstRxPkg->usLength);
+            unType = ntohl(pstRxPkg->unType);
+
+            if (unRemainedPkgLen < unTlvcPkgLen)
+            {
+                PrintError("Error! remain length [unTlvcPkgLen:%d]", unTlvcPkgLen);
+                break;
+            }
+
+            if (unType == MSG_MANAGER_EXT_MSG_STATUS_PKG)
+            {
+                PrintWarn("Package : %d (Status Package)", ucNumPkgCnt);
+                P_MSG_MANAGER_PrintExtMsgPkg(pvNextRxPkg);
+            }
+            else if (unType == MSG_MANAGER_EXT_MSG_SSOV_PKG)
+            {
+                PrintWarn("SSOV Package : %d\n\tPSID : %d, TLV lenth : %d", ucNumPkgCnt, unType, unTlvcPkgLen + 6);
+                P_MSG_MANAGER_ProcessSsovPkg(pvNextRxPkg);
+            }
+            else
+            {
+                PrintDebug("Package : %d\n\tPSID : %d, TLV lenth : %d", ucNumPkgCnt, unType, unTlvcPkgLen + 6);
+                P_MSG_MANAGER_PrintMsgData((uint8_t*)pvNextRxPkg, unTlvcPkgLen + 6);   // 6: T, L 크기 추가
+            }
+
+            pvNextRxPkg = pvNextRxPkg + unTlvcPkgLen + 6; // 6: T, L 크기
+            unRemainedPkgLen = unRemainedPkgLen - unTlvcPkgLen - 6; // 6: T, L 크기
+        }
+    }
+    else
+    {
+        (void)P_MSG_MANAGER_PrintMsgData(pucMsg, nRxLen);
+    }
+
+    nRet = FRAMEWORK_OK;
+
+    return nRet;
+}
+
 static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -1377,6 +1538,12 @@ static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
             if(nRet != FRAMEWORK_OK)
             {
                 PrintError("P_MSG_MANAGER_AnalyzeRxMsg() is failed! [nRet:%d]", nRet);
+            }
+
+            nRet =  P_MSG_MANAGER_ProcessRxMsg(ucMsgBuf, nRecvLen);
+            if(nRet != FRAMEWORK_OK)
+            {
+                PrintError("P_MSG_MANAGER_ProcessRxMsg() is failed! [nRet:%d]", nRet);
             }
 
             pstV2xRxPdu = malloc(nRecvLen);
