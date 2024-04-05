@@ -1319,7 +1319,9 @@ static int32_t P_MSG_MANAGER_AnalyzeRxMsg(uint8_t *pucMsg, int32_t nRxLen)
         (void)P_MSG_MANAGER_PrintMsgData(pucMsg, nRxLen);
     }
 
-    return 0;
+    nRet = FRAMEWORK_OK;
+
+    return nRet;
 }
 
 static int32_t P_MSG_MANAGER_ReceiveRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMsg)
