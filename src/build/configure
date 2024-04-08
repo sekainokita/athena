@@ -53,7 +53,7 @@ CONFIG_MODEL_NO_CO1XG=no-co1xg_defconfig
 CONFIG_MODEM_NO_CO2XG=no-co2xg_defconfig
 CONFIG_MODEL_NO_CO2OG=no-co2og_defconfig
 CONFIG_MODEL_NN_CO1XG=nn-co1xg_defconfig
-CONFIG_MODEL_NN_CO2XG=nn-CO2xg_defconfig
+CONFIG_MODEL_NN_CO2XG=nn-co2xg_defconfig
 CONFIG_MODEL_XILINX=zb-co1xgc_defconfig
 
 echo 
