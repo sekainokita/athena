@@ -338,7 +338,22 @@ typedef struct MSG_MANAGER_EXT_MSG_RX_t
 */
 
 /**
-* @details MSG_MANAGER_EXT_MSG_RX (define TLVC of Extensible Message)
+* @details MSG_MANAGER_EXT_MSG_SSOV (define TLVC of Extensible Message)
+* @param unType (T) package types (overall, raw data, J2735, SSOV, etc)
+* @param usLength (L) length between value and crc
+* @param ucPayload (V) defined by unType
+* @param CRC16 (C) crc of TLV (polynomial 1021h)
+*/
+typedef struct MSG_MANAGER_EXT_MSG_SSOV_t
+{
+    uint32_t    unType;
+    uint16_t    usLength;
+    uint8_t     ucPayload[0];
+    uint16_t    usCrc16;
+}__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_SSOV;
+
+/**
+* @details MSG_MANAGER_EXT_MSG_TLVC (define TLVC of Extensible Message)
 * @param unType (T) package types (overall, raw data, J2735, SSOV, etc)
 * @param usLength (L) length between value and crc
 * @param ucPayload (V) defined by unType
@@ -349,7 +364,7 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_t
     uint32_t    unType;
     uint16_t    usLength;
     uint8_t     ucPayload[0];
-    uint16_t    usCrc16;
+    /* CRC16 (2bytes) is added at the end of packet from usLength to ucPayload */
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC;
 
 /**
