@@ -638,14 +638,14 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     uint32_t unPsid = 0;
     uint8_t ucMsgBuf[MSG_MANAGER_MAX_TX_PKG_SIZE];
 
-    memset(ucMsgBuf,0, sizeof(ucMsgBuf));
+    memset(ucMsgBuf, 0, sizeof(ucMsgBuf));
     MSG_MANAGER_EXT_MSG* pstExtMsg = (MSG_MANAGER_EXT_MSG*)ucMsgBuf;
 
 #if defined(CONFIG_TEST_EXT_MSG_PKG)
     int32_t nRawPkgSize = 10;
     ssize_t i = 0;
 #endif
-    uint16_t *usCrc16;
+    uint16_t *pusCrc16;
     uint16_t usCalcCrc16;
     MSG_MANAGER_EXT_MSG_TX* pstExtMsgTx = (MSG_MANAGER_EXT_MSG_TX*)pstExtMsg->ucPayload;
     MSG_MANAGER_EXT_MSG_TLVC_OVERALL *pstExtMsgOverall;
@@ -777,7 +777,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
         memcpy(pstTxSsovPkg->ucPayload + sizeof(DB_V2X_T), pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
         memcpy(pstTxSsovPkg->ucPayload + sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength, &ulDbV2xTotalPacketCrc32, sizeof(uint32_t));
 
-        pstTxSsovPkg->usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstTxSsovPkg, unDbV2xPacketLength + MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN + MSG_MANAGER_CRC16_LEN));
+        pstTxSsovPkg->usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstTxSsovPkg, 4 + 2 + ntohs(pstTxSsovPkg->usLength)));
 
         PrintDebug("unType[%d], usLength[%d], usCrc16[0x%x]", ntohl(pstTxSsovPkg->unType), ntohs(pstTxSsovPkg->usLength), ntohs(pstTxSsovPkg->usCrc16));
     }
@@ -799,8 +799,8 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
             pstTxPkg->ucPayload[i] = i % 255;
         }
 
-        usCrc16 = (uint16_t*)((uint8_t*)pstTxPkg + (MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN + MSG_MANAGER_CRC16_LEN) + nRawPkgSize);
-        *usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstTxPkg, nRawPkgSize + (MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN + MSG_MANAGER_CRC16_LEN)));   // TLVC 중 CRC만 제외
+        pusCrc16 = (uint16_t*)((uint8_t*)pstTxPkg + (MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN + MSG_MANAGER_CRC16_LEN) + nRawPkgSize);
+        *pusCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstTxPkg, nRawPkgSize + (MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN + MSG_MANAGER_CRC16_LEN)));   // TLVC 중 CRC만 제외
     }
 
     nRet = P_MSG_MANAGER_CreateStatusPkg(pstExtMsgOverall, eMSG_MANAGER_EXT_MSG_STATUS_TX);
@@ -819,9 +819,9 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
 
     unTxMsgLen = ntohs(pstExtMsg->usLength) + (MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN + MSG_MANAGER_CRC16_LEN);
 
-    usCrc16 = (uint16_t*)&ucMsgBuf[unTxMsgLen - MSG_MANAGER_CRC16_LEN];
+    pusCrc16 = (uint16_t*)&ucMsgBuf[unTxMsgLen - MSG_MANAGER_CRC16_LEN];
     usCalcCrc16 = CLI_UTIL_GetCrc16(ucMsgBuf + MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN, unTxMsgLen - (MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN + MSG_MANAGER_CRC16_LEN));
-    *usCrc16 = htons(usCalcCrc16);
+    *pusCrc16 = htons(usCalcCrc16);
 
     nRetSendSize = send(s_nSocketHandle, ucMsgBuf, unTxMsgLen, 0);
     if (nRetSendSize < 0)
@@ -1399,13 +1399,7 @@ static int32_t P_MSG_MANAGER_ProcessSsovPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEvent
 
     PrintDebug("unType[%d], usLength[%d], usCrc16[0x%x]", ntohl(pstExtMsgSsov->unType), ntohs(pstExtMsgSsov->usLength), ntohs(pstExtMsgSsov->usCrc16));
 
-//    usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemTx, htons(pstExtMsgModemTx->usLenth) + 4); // T, L, V 길이
-//    if(usCalcCrc16 != ntohs(pstExtMsgModemTx->usCrc16))
-//    {
-//        PrintError("[Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgModemTx->usCrc16), usCalcCrc16);
-//    }
-
-    usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgSsov, usExtMsgSsovLength + 4);	// T, L, V 길이
+    usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgSsov, 4 + 2 + usExtMsgSsovLength);	// T, L, V 길이
 //    pstTxSsovPkg->usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstTxSsovPkg, sizeof(MSG_MANAGER_EXT_MSG_SSOV) - MSG_MANAGER_CRC16_LEN));
 
     if(usCalcCrc16 != ntohs(pstExtMsgSsov->usCrc16))
