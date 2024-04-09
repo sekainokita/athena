@@ -777,7 +777,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
         memcpy(pstTxSsovPkg->ucPayload + sizeof(DB_V2X_T), pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
         memcpy(pstTxSsovPkg->ucPayload + sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength, &ulDbV2xTotalPacketCrc32, sizeof(uint32_t));
 
-        pstTxSsovPkg->usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstTxSsovPkg, unDbV2xPacketLength + MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN));
+        pstTxSsovPkg->usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstTxSsovPkg, unDbV2xPacketLength + MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN + MSG_MANAGER_CRC16_LEN));
 
         PrintDebug("unType[%d], usLength[%d], usCrc16[0x%x]", ntohl(pstTxSsovPkg->unType), ntohs(pstTxSsovPkg->usLength), ntohs(pstTxSsovPkg->usCrc16));
     }
