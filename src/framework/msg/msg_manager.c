@@ -779,6 +779,8 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
 
         pstTxSsovPkg->usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstTxSsovPkg, 4 + 2 + ntohs(pstTxSsovPkg->usLength)));
 
+        P_MSG_MANAGER_PrintMsgData(pstTxSsovPkg, ntohs(pstTxSsovPkg->usLength) + 4 + 2 + 2);
+
         PrintDebug("unType[%d], usLength[%d], usCrc16[0x%x]", ntohl(pstTxSsovPkg->unType), ntohs(pstTxSsovPkg->usLength), ntohs(pstTxSsovPkg->usCrc16));
     }
 
@@ -1398,6 +1400,8 @@ static int32_t P_MSG_MANAGER_ProcessSsovPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEvent
     usExtMsgSsovLength = ntohs(pstExtMsgSsov->usLength);
 
     PrintDebug("unType[%d], usLength[%d], usCrc16[0x%x]", ntohl(pstExtMsgSsov->unType), ntohs(pstExtMsgSsov->usLength), ntohs(pstExtMsgSsov->usCrc16));
+
+    P_MSG_MANAGER_PrintMsgData(pstExtMsgSsov, usExtMsgSsovLength + 4 + 2 + 2);
 
     usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgSsov, 4 + 2 + usExtMsgSsovLength);	// T, L, V 길이
 //    pstTxSsovPkg->usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstTxSsovPkg, sizeof(MSG_MANAGER_EXT_MSG_SSOV) - MSG_MANAGER_CRC16_LEN));
