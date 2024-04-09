@@ -349,7 +349,7 @@ typedef struct MSG_MANAGER_EXT_MSG_SSOV_t
     uint32_t    unType;
     uint16_t    usLength;
     uint8_t     ucPayload[0];
-    uint16_t    usCrc16;
+    /* CRC16 (2bytes) is added at the end of packet from usLength to ucPayload */
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_SSOV;
 
 /**

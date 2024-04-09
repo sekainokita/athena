@@ -777,11 +777,12 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
         memcpy(pstTxSsovPkg->ucPayload + sizeof(DB_V2X_T), pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
         memcpy(pstTxSsovPkg->ucPayload + sizeof(DB_V2X_T) + pstEventMsg->pstDbV2x->ulPayloadLength, &ulDbV2xTotalPacketCrc32, sizeof(uint32_t));
 
-        pstTxSsovPkg->usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstTxSsovPkg, 4 + 2 + ntohs(pstTxSsovPkg->usLength)));
+        pusCrc16 = (uint16_t*)((uint8_t*)pstTxSsovPkg + (sizeof(pstTxSsovPkg->unType) + sizeof(pstTxSsovPkg->usLength)) + unDbV2xPacketLength);
+        *pusCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstTxSsovPkg, sizeof(pstTxSsovPkg->unType) + sizeof(pstTxSsovPkg->usLength) + unDbV2xPacketLength));
 
         P_MSG_MANAGER_PrintMsgData(pstTxSsovPkg, ntohs(pstTxSsovPkg->usLength) + 4 + 2 + 2);
 
-        PrintDebug("unType[%d], usLength[%d], usCrc16[0x%x]", ntohl(pstTxSsovPkg->unType), ntohs(pstTxSsovPkg->usLength), ntohs(pstTxSsovPkg->usCrc16));
+        PrintDebug("unType[%d], usLength[%d], usCrc16[0x%x]", ntohl(pstTxSsovPkg->unType), ntohs(pstTxSsovPkg->usLength), *pusCrc16);
     }
 
 #if defined(CONFIG_TEST_EXT_MSG_PKG)
@@ -1399,17 +1400,20 @@ static int32_t P_MSG_MANAGER_ProcessSsovPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEvent
     pstExtMsgSsov = (MSG_MANAGER_EXT_MSG_SSOV*)pvExtMsgPkg;
     usExtMsgSsovLength = ntohs(pstExtMsgSsov->usLength);
 
-    PrintDebug("unType[%d], usLength[%d], usCrc16[0x%x]", ntohl(pstExtMsgSsov->unType), ntohs(pstExtMsgSsov->usLength), ntohs(pstExtMsgSsov->usCrc16));
+    PrintDebug("unType[%d], usLength[%d]", ntohl(pstExtMsgSsov->unType), ntohs(pstExtMsgSsov->usLength));
 
     P_MSG_MANAGER_PrintMsgData(pstExtMsgSsov, usExtMsgSsovLength + 4 + 2 + 2);
 
     usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgSsov, 4 + 2 + usExtMsgSsovLength);	// T, L, V 길이
 //    pstTxSsovPkg->usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstTxSsovPkg, sizeof(MSG_MANAGER_EXT_MSG_SSOV) - MSG_MANAGER_CRC16_LEN));
 
+#if 0
     if(usCalcCrc16 != ntohs(pstExtMsgSsov->usCrc16))
     {
         PrintError("Error! crc16 usCalcCrc16[0x%04x] != pstExtMsgSsov->usCrc16[0x%04x]", usCalcCrc16, ntohs(pstExtMsgSsov->usCrc16));
     }
+#endif
+    PrintError("Error! crc16 usCalcCrc16[0x%04x]", usCalcCrc16);
 
     if(s_unV2xMsgTxLen != 0)
     {
@@ -1451,6 +1455,8 @@ static int32_t P_MSG_MANAGER_ProcessSsovPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEvent
             {
                 memset(pstDbV2x, 0, usExtMsgSsovLength);
                 memcpy(pstDbV2x, pstExtMsgSsov->ucPayload, sizeof(DB_V2X_T));
+
+                P_MSG_MANAGER_PrintMsgData(pstDbV2x, sizeof(DB_V2X_T) + ulRxPayloadLength + 4);
 
                 ulRxPayloadLength = ntohl(pstDbV2x->ulPayloadLength);
 
