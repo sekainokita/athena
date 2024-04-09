@@ -766,7 +766,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
         pstTxSsovPkg = (MSG_MANAGER_EXT_MSG_SSOV*)((uint8_t*)pstExtMsgOverall + sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL) + unExtMsgPkgLen);
 
         pstExtMsgOverall->ucNumOfPkg++;
-        unExtMsgPkgLen += unDbV2xPacketLength;
+        unExtMsgPkgLen = unExtMsgPkgLen + 8 + unDbV2xPacketLength;
         pstExtMsgOverall->usLenOfPkg = htons(unExtMsgPkgLen);
         pstExtMsgOverall->usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgOverall, sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL) - MSG_MANAGER_CRC16_LEN));
 
