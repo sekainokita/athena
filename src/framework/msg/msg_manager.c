@@ -780,7 +780,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
         pusCrc16 = (uint16_t*)((uint8_t*)pstTxSsovPkg + (sizeof(pstTxSsovPkg->unType) + sizeof(pstTxSsovPkg->usLength)) + unDbV2xPacketLength);
         *pusCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstTxSsovPkg, sizeof(pstTxSsovPkg->unType) + sizeof(pstTxSsovPkg->usLength) + unDbV2xPacketLength));
 
-        P_MSG_MANAGER_PrintMsgData(pstTxSsovPkg, ntohs(pstTxSsovPkg->usLength) + 4 + 2 + 2);
+        P_MSG_MANAGER_PrintMsgData(pstTxSsovPkg, ntohs(pstTxSsovPkg->usLength) + sizeof(pstTxSsovPkg->unType) + sizeof(pstTxSsovPkg->usLength));
 
         PrintDebug("unType[%d], usLength[%d], usCrc16[0x%x]", ntohl(pstTxSsovPkg->unType), ntohs(pstTxSsovPkg->usLength), *pusCrc16);
     }
@@ -1389,31 +1389,38 @@ static int32_t P_MSG_MANAGER_ProcessSsovPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEvent
     int32_t nRet = FRAMEWORK_ERROR;
 
     MSG_MANAGER_EXT_MSG_SSOV *pstExtMsgSsov;
-    uint16_t usCalcCrc16;
     uint16_t usExtMsgSsovLength;
 
     DB_V2X_T *pstDbV2x = NULL;
     uint32_t ulDbV2xTotalPacketCrc32 = 0, ulCompDbV2xTotalPacketCrc32 = 0, ulTempDbV2xTotalPacketCrc32 = 0;
     DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
     uint32_t ulRxPayloadLength = 0;
+    uint16_t usExtMsgSsovCrc16 = 0, usCalcCrc16 = 0, usTempExtMsgSsovCrc16 = 0;
 
     pstExtMsgSsov = (MSG_MANAGER_EXT_MSG_SSOV*)pvExtMsgPkg;
     usExtMsgSsovLength = ntohs(pstExtMsgSsov->usLength);
 
     PrintDebug("unType[%d], usLength[%d]", ntohl(pstExtMsgSsov->unType), ntohs(pstExtMsgSsov->usLength));
 
-    P_MSG_MANAGER_PrintMsgData(pstExtMsgSsov, usExtMsgSsovLength + 4 + 2 + 2);
+    P_MSG_MANAGER_PrintMsgData(pstExtMsgSsov, usExtMsgSsovLength + (sizeof(pstExtMsgSsov->unType) + sizeof(pstExtMsgSsov->usLength)));
 
-    usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgSsov, 4 + 2 + usExtMsgSsovLength);	// T, L, V 길이
-//    pstTxSsovPkg->usCrc16 = htons(CLI_UTIL_GetCrc16((uint8_t*)pstTxSsovPkg, sizeof(MSG_MANAGER_EXT_MSG_SSOV) - MSG_MANAGER_CRC16_LEN));
-
-#if 0
-    if(usCalcCrc16 != ntohs(pstExtMsgSsov->usCrc16))
+    for(int j=0; j<100; j++)
     {
-        PrintError("Error! crc16 usCalcCrc16[0x%04x] != pstExtMsgSsov->usCrc16[0x%04x]", usCalcCrc16, ntohs(pstExtMsgSsov->usCrc16));
+        memcpy(&usTempExtMsgSsovCrc16, pstExtMsgSsov->ucPayload + j, sizeof(uint16_t));
+        usExtMsgSsovCrc16 = ntohl(usTempExtMsgSsovCrc16);
+        PrintDebug("j[%d], [usExtMsgSsovCrc16:%d]", j, usExtMsgSsovCrc16);
     }
-#endif
-    PrintError("Error! crc16 usCalcCrc16[0x%04x]", usCalcCrc16);
+
+//    pusCrc16 = (uint16_t*)((uint8_t*)pstExtMsgSsov + (sizeof(pstExtMsgSsov->unType) + sizeof(pstExtMsgSsov->usLength)) + usExtMsgSsovLength);
+    PrintDebug("Get Total size(%d), pusCrc16[0x%x]", (sizeof(pstExtMsgSsov->unType) + sizeof(pstExtMsgSsov->usLength)) + usExtMsgSsovLength, usExtMsgSsovCrc16);
+
+    usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgSsov, usExtMsgSsovLength + (sizeof(pstExtMsgSsov->unType) + sizeof(pstExtMsgSsov->usLength)) - sizeof(uint16_t));
+    PrintDebug("Calculated pusCrc16[0x%x]", usCalcCrc16);
+
+    if(usCalcCrc16 != usExtMsgSsovCrc16)
+    {
+        PrintError("Error! crc16 usCalcCrc16[0x%04x] != usExtMsgSsovCrc16[0x%04x]", usCalcCrc16, usExtMsgSsovCrc16);
+    }
 
     if(s_unV2xMsgTxLen != 0)
     {
