@@ -1395,28 +1395,25 @@ static int32_t P_MSG_MANAGER_ProcessSsovPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEvent
     uint32_t ulDbV2xTotalPacketCrc32 = 0, ulCompDbV2xTotalPacketCrc32 = 0, ulTempDbV2xTotalPacketCrc32 = 0;
     DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
     uint32_t ulRxPayloadLength = 0;
+    uint32_t ulExtMsgSsovCrcBuf = 0;
     uint16_t usExtMsgSsovCrc16 = 0, usCalcCrc16 = 0, usTempExtMsgSsovCrc16 = 0;
+    uint32_t ulExtMsgSsovTotalPkgSize = 0;
 
     pstExtMsgSsov = (MSG_MANAGER_EXT_MSG_SSOV*)pvExtMsgPkg;
     usExtMsgSsovLength = ntohs(pstExtMsgSsov->usLength);
+    ulExtMsgSsovTotalPkgSize = sizeof(pstExtMsgSsov->unType) + sizeof(pstExtMsgSsov->usLength) + usExtMsgSsovLength;
 
-    PrintDebug("unType[%d], usLength[%d]", ntohl(pstExtMsgSsov->unType), ntohs(pstExtMsgSsov->usLength));
+    memcpy(&usTempExtMsgSsovCrc16, pstExtMsgSsov->ucPayload + usExtMsgSsovLength - sizeof(uint16_t), sizeof(uint16_t));
+    usExtMsgSsovCrc16 = ntohs(usTempExtMsgSsovCrc16);
 
-    P_MSG_MANAGER_PrintMsgData(pstExtMsgSsov, usExtMsgSsovLength + (sizeof(pstExtMsgSsov->unType) + sizeof(pstExtMsgSsov->usLength)));
-
-    for(int j=0; j<100; j++)
+    if(s_bMsgMgrLog == TRUE)
     {
-        memcpy(&usTempExtMsgSsovCrc16, pstExtMsgSsov->ucPayload + j, sizeof(uint16_t));
-        usExtMsgSsovCrc16 = ntohl(usTempExtMsgSsovCrc16);
-        PrintDebug("j[%d], [usExtMsgSsovCrc16:%d]", j, usExtMsgSsovCrc16);
+        PrintDebug("unType[%d], usLength[%d]", ntohl(pstExtMsgSsov->unType), ntohs(pstExtMsgSsov->usLength));
+        PrintDebug("ulExtMsgSsovTotalPkgSize(%d), ulExtMsgSsovCrcBuf[0x%x], usExtMsgSsovCrc16[0x%x]", ulExtMsgSsovTotalPkgSize, ulExtMsgSsovCrcBuf, usExtMsgSsovCrc16);
+        P_MSG_MANAGER_PrintMsgData(pstExtMsgSsov, ulExtMsgSsovTotalPkgSize);
     }
 
-//    pusCrc16 = (uint16_t*)((uint8_t*)pstExtMsgSsov + (sizeof(pstExtMsgSsov->unType) + sizeof(pstExtMsgSsov->usLength)) + usExtMsgSsovLength);
-    PrintDebug("Get Total size(%d), pusCrc16[0x%x]", (sizeof(pstExtMsgSsov->unType) + sizeof(pstExtMsgSsov->usLength)) + usExtMsgSsovLength, usExtMsgSsovCrc16);
-
-    usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgSsov, usExtMsgSsovLength + (sizeof(pstExtMsgSsov->unType) + sizeof(pstExtMsgSsov->usLength)) - sizeof(uint16_t));
-    PrintDebug("Calculated pusCrc16[0x%x]", usCalcCrc16);
-
+    usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgSsov, ulExtMsgSsovTotalPkgSize - sizeof(uint16_t));
     if(usCalcCrc16 != usExtMsgSsovCrc16)
     {
         PrintError("Error! crc16 usCalcCrc16[0x%04x] != usExtMsgSsovCrc16[0x%04x]", usCalcCrc16, usExtMsgSsovCrc16);
@@ -1430,9 +1427,7 @@ static int32_t P_MSG_MANAGER_ProcessSsovPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEvent
             PrintTrace("Update s_unV2xMsgTxLen[%d] => s_unV2xMsgRxLen[%d]", s_unV2xMsgTxLen, s_unV2xMsgRxLen);
         }
 
-        PrintDebug("s_unV2xMsgTxLen[%d], s_unV2xMsgRxLen[%d], usLength[%d]", s_unV2xMsgTxLen, s_unV2xMsgRxLen, usExtMsgSsovLength);
-
-        if(s_unV2xMsgRxLen != usExtMsgSsovLength - MSG_MANAGER_CRC16_LEN)
+        if(s_unV2xMsgRxLen != (usExtMsgSsovLength - MSG_MANAGER_CRC16_LEN))
         {
             PrintError("Tx and Rx size does not matched!! check s_unV2xMsgRxLen[%d] != ntohs(pstExtMsgSsov->usLength)[%d]", s_unV2xMsgRxLen, usExtMsgSsovLength);
             nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
@@ -1462,21 +1457,16 @@ static int32_t P_MSG_MANAGER_ProcessSsovPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEvent
             {
                 memset(pstDbV2x, 0, usExtMsgSsovLength);
                 memcpy(pstDbV2x, pstExtMsgSsov->ucPayload, sizeof(DB_V2X_T));
-
-                P_MSG_MANAGER_PrintMsgData(pstDbV2x, sizeof(DB_V2X_T) + ulRxPayloadLength + 4);
-
                 ulRxPayloadLength = ntohl(pstDbV2x->ulPayloadLength);
 
+                P_MSG_MANAGER_PrintMsgData(pstExtMsgSsov->ucPayload, sizeof(DB_V2X_T) + ulRxPayloadLength);
                 memcpy(&ulTempDbV2xTotalPacketCrc32, pstExtMsgSsov->ucPayload + sizeof(DB_V2X_T) + ulRxPayloadLength, sizeof(uint32_t));
                 ulDbV2xTotalPacketCrc32 = ntohl(ulTempDbV2xTotalPacketCrc32);
 
                 ulCompDbV2xTotalPacketCrc32 = CLI_UTIL_GetCrc32((uint8_t*)&pstExtMsgSsov->ucPayload[0], sizeof(DB_V2X_T) + ulRxPayloadLength);
-//                if(ulDbV2xTotalPacketCrc32 != ulCompDbV2xTotalPacketCrc32)
-                if(0)
+                if(ulDbV2xTotalPacketCrc32 != ulCompDbV2xTotalPacketCrc32)
                 {
                     PrintError("CRC32 does not matched!! check Get:ulDbV2xTotalPacketCrc32[0x%x] != Calculate:ulCompDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32, ulCompDbV2xTotalPacketCrc32);
-//                    PrintError("Check nRecvLen[%d], sizeof(Ext_V2X_RxPDU_t)[%ld]+pstV2xRxPdu->v2x_msg.length[%d]", nRecvLen, sizeof(Ext_V2X_RxPDU_t), ntohs(pstExtMsgSsov->usLength));
-
                     nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
                     if(nRet != FRAMEWORK_OK)
                     {
