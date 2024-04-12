@@ -64,20 +64,22 @@
 
 /***************************** Definition ************************************/
 
-#define DB_MANAGER_DB_TEMP_PATH    "/tmp/"
+#define DB_MANAGER_DB_TEMP_PATH         "/tmp/"
 
-#define DB_MANAGER_TXT_TX_FILE     DB_MANAGER_DB_TEMP_PATH"db_v2x_tx_temp_writing.txt"
-#define DB_MANAGER_TXT_RX_FILE     DB_MANAGER_DB_TEMP_PATH"db_v2x_rx_temp_writing.txt"
+#define DB_MANAGER_TXT_TX_FILE          DB_MANAGER_DB_TEMP_PATH"db_v2x_tx_temp_writing.txt"
+#define DB_MANAGER_TXT_RX_FILE          DB_MANAGER_DB_TEMP_PATH"db_v2x_rx_temp_writing.txt"
 
-#define DB_MANAGER_CSV_TX_FILE     DB_MANAGER_DB_TEMP_PATH"db_v2x_tx_temp_writing.csv"
-#define DB_MANAGER_CSV_RX_FILE     DB_MANAGER_DB_TEMP_PATH"db_v2x_rx_temp_writing.csv"
+#define DB_MANAGER_CSV_TX_FILE          DB_MANAGER_DB_TEMP_PATH"db_v2x_tx_temp_writing.csv"
+#define DB_MANAGER_CSV_RX_FILE          DB_MANAGER_DB_TEMP_PATH"db_v2x_rx_temp_writing.csv"
 
 #if defined(CONFIG_SQLITE)
-#define DB_MANAGER_SQL_TX_FILE     DB_MANAGER_DB_TEMP_PATH"db_v2x_tx_temp_writing.db"
-#define DB_MANAGER_SQL_RX_FILE     DB_MANAGER_DB_TEMP_PATH"db_v2x_rx_temp_writing.db"
+#define DB_MANAGER_SQL_TX_FILE          DB_MANAGER_DB_TEMP_PATH"db_v2x_tx_temp_writing.db"
+#define DB_MANAGER_SQL_RX_FILE          DB_MANAGER_DB_TEMP_PATH"db_v2x_rx_temp_writing.db"
 #endif
 
-//#define DB_MGR_TEST                (1)
+#define MSG_MGR_PDR_PER_CONVERT_RATE    (100000)
+#define MSG_MGR_MAX_CONT_CNT            (100)
+//#define DB_MGR_TEST                   (1)
 
 /***************************** Enum and Structure ****************************/
 
@@ -105,6 +107,39 @@ static int32_t P_DB_MANAGER_GetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus
 
 /***************************** Function  *************************************/
 
+static int32_t P_DB_MANAGER_PrintStatus(DB_V2X_STATUS_TX_T *pstDbV2xStatusTx, DB_V2X_STATUS_RX_T *pstDbV2xStatusRx)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
+
+    if(pstDbV2xStatusTx == NULL)
+    {
+        PrintError("pstDbV2xStatusTx is NULL!");
+        return nRet;
+    }
+
+    if(pstDbV2xStatusRx == NULL)
+    {
+        PrintError("pstDbV2xStatusRx is NULL!");
+        return nRet;
+    }
+
+    nRet = P_DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+    }
+    else
+    {
+        nRet = FRAMEWORK_OK;
+        if(stDbV2xStatus.unCurrentContCnt == MSG_MGR_MAX_CONT_CNT)
+        {
+            PrintDebug("(Tx)unSeqNum[%d], (Rx)ulTotalPacketCnt[%ld], unPdr[%.3f], unPer[%.3f], ulTotalErrCnt[%ld]", pstDbV2xStatusTx->unSeqNum, pstDbV2xStatusRx->ulTotalPacketCnt, (float)(pstDbV2xStatusRx->unPdr/1000.0f), (float)(pstDbV2xStatusRx->unPer/1000.0f), pstDbV2xStatusRx->ulTotalErrCnt);
+        }
+    }
+    return nRet;
+}
+
 static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB_V2X_STATUS_TX_T *pstDbV2xStatusTx, DB_V2X_STATUS_RX_T *pstDbV2xStatusRx)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -112,6 +147,12 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     DI_T *pstDi;
     DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
     float fTemp = 0.0f;
+
+    if(pstEventMsg == NULL)
+    {
+        PrintError("pstEventMsg is NULL!");
+        return nRet;
+    }
 
     if(pstDbV2xStatusTx == NULL)
     {
@@ -233,12 +274,9 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     }
 
     pstDbV2xStatusRx->ulTotalErrCnt = stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt;
-
     fTemp = (float)pstDbV2xStatusRx->ulTotalPacketCnt/(float)pstDbV2xStatusTx->unSeqNum;
-    pstDbV2xStatusRx->unPdr = (uint32_t)(fTemp*100*100); /* divide /100 at the writing db */
-
-    fTemp = (float)pstDbV2xStatusRx->ulTotalErrCnt/(float)pstDbV2xStatusTx->unSeqNum;
-    pstDbV2xStatusRx->unPer = (uint32_t)(fTemp*100*100); /* divide /100 at the writing db */
+    pstDbV2xStatusRx->unPdr = (uint32_t)(fTemp*MSG_MGR_PDR_PER_CONVERT_RATE);
+    pstDbV2xStatusRx->unPer = MSG_MGR_PDR_PER_CONVERT_RATE - pstDbV2xStatusRx->unPdr;
 
     nRet = P_DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
     if(nRet != FRAMEWORK_OK)
@@ -1297,6 +1335,12 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
         PrintDebug("[%ld]-[%ld]=[%ld]", stDbV2xStatusRx.ulRxTimeStampL3, stDbV2xStatusTx.ulTxTimeStampL3, stDbV2xStatusRx.ulRxTimeStampL3-stDbV2xStatusTx.ulTxTimeStampL3);
     }
 
+    nRet = P_DB_MANAGER_PrintStatus(&stDbV2xStatusTx, &stDbV2xStatusRx);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_PrintStatus() is failed! [unRet:%d]", nRet);
+    }
+
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulRxTimeStampL1);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulRxTimeStampL2);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulRxTimeStampL3);
@@ -1340,10 +1384,10 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.ucErrIndicator);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulTotalPacketCnt);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulTotalErrCnt);
-    fTemp = (float)stDbV2xStatusRx.unPdr / 100.0f;
-    fprintf(sh_pDbMgrRxMsg, "%.2f,", fTemp);
-    fTemp = (float)stDbV2xStatusRx.unPer / 100.0f;
-    fprintf(sh_pDbMgrRxMsg, "%.2f", fTemp);
+    fTemp = (float)stDbV2xStatusRx.unPdr / 1000.0f;
+    fprintf(sh_pDbMgrRxMsg, "%.3f,", fTemp);
+    fTemp = (float)stDbV2xStatusRx.unPer / 1000.0f;
+    fprintf(sh_pDbMgrRxMsg, "%.3f", fTemp);
 
     fprintf(sh_pDbMgrRxMsg, "\r\n");
 
@@ -2164,7 +2208,7 @@ int32_t DB_MANAGER_UploadFile(DB_MANAGER_T *pstDbManager)
             else if(strcmp("Rx", pstDbManager->stDbFile.pchTxRxType) == 0)
             {
                 nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", DB_V2X_CP_PORT, DB_V2X_FOLDER_DIR, chFileName, DB_V2X_CP_IP, DB_V2X_CP_STORAGE);
-                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", DB_V2X_CP_YEAR, DB_V2X_CP_MONTH);            
+                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", DB_V2X_CP_YEAR, DB_V2X_CP_MONTH);
             }
             else
             {
