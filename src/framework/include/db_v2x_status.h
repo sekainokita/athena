@@ -57,8 +57,10 @@
 
 /***************************** Definition ************************************/
 
-#define DB_V2X_STATUS_SEQ_NUM_MAX               4294967295 /* maximum value of uint32 */
-#define DB_V2X_STATUS_CONT_CNT_MAX              100
+#define DB_V2X_STATUS_SEQ_NUM_MAX               (4294967295) /* maximum value of uint32 */
+#define DB_V2X_STATUS_CONT_CNT_MAX              (100)
+#define DB_V2X_GPS_VALUE_CONVERT                (1000000)
+#define DB_V2X_GPS_VALUE_CONVERT_DOUBLE         (1000000.0f)
 
 /***************************** Enum and Structure ****************************/
 /**
@@ -110,12 +112,29 @@ typedef enum {
 } DB_V2X_STATUS_BANDWIDTH_E;
 
 /**
+* @details DB V2X Struct of Tx Status
+* @param ulTimeStampNow                         The current timestamp
+* @param nLatitudeNow                           The current latitude
+* @param nLongitudeNow                          The current longitude
+* @param ulTimeStampLast                        The last timestamp
+* @param nLatitudeLast                          The last latitude
+* @param nLongitudeLast                         The last longitude
+*/
+typedef struct DB_V2X_STATUS_SPEED_t {
+    uint64_t                                    ulTimeStampNow;
+    int32_t                                     nLatitudeNow;
+    int32_t                                     nLongitudeNow;
+    uint64_t                                    ulTimeStampLast;
+    int32_t                                     nLatitudeLast;
+    int32_t                                     nLongitudeLast;
+} __attribute__((__packed__)) DB_V2X_SPEED_T;
+
+/**
 * @details DB V2X Struct of Rx Position
 * @param usCommDistance                         The distance to transmission device (based on GPS signal of communication device)
 * @param nRxLatitude                            (The Latitude of the Rx device) units of 1/10 micro degree, Providing a range of ± 90 degrees (1 degree = 1,000,000 micro degree)
 * @param nRxLongitude                           (The Longitude of the Rx device) units of 1/10 micro degree, Providing a range of ± 180 degrees (1 degree = 1,000,000 micro degree)
 * @param nRxAttitude                            (The Attitude of the Rx device)
-
 */
 typedef struct DB_V2X_POSITION_RX_t {
     uint32_t                                    unCommDistance;

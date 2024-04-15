@@ -49,6 +49,7 @@
 #include "type.h"
 #include "di.h"
 #include "di_gps_xsens.h"
+#include "db_v2x_status.h"
 
 /***************************** Definition ************************************/
 
@@ -123,6 +124,7 @@ int32_t DI_GPS_Start(DI_GPS_T *pstDiGps);
 int32_t DI_GPS_Stop(DI_GPS_T *pstDiGps);
 
 double DI_GPS_CalculateDistance(double dRxLat, double dRxLon, double dTxLat, double dTxLon);
+uint16_t DI_GPS_CalculateSpeed(DB_V2X_SPEED_T *pstV2xSpeed);
 
 void DI_GPS_Status(DI_GPS_T *pstDiGps);
 int32_t DI_GPS_Init(DI_GPS_T *pstDiGps);

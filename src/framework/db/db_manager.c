@@ -147,6 +147,7 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     DI_T *pstDi;
     DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
     float fTemp = 0.0f;
+    double dRxlat, dRxLon, dTxLat, dTxLon, dDistMeter;
 
     if(pstEventMsg == NULL)
     {
@@ -202,7 +203,6 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusRx->ulLatencyL2 = pstDbV2xStatusRx->ulRxTimeStampL2 - pstDbV2xStatusTx->ulTxTimeStampL2;
     pstDbV2xStatusRx->ulLatencyL3 = pstDbV2xStatusRx->ulRxTimeStampL3 - pstDbV2xStatusTx->ulTxTimeStampL3;
     pstDbV2xStatusRx->unTxDeviceId = pstEventMsg->pstDbV2x->unDeviceId;
-    pstDbV2xStatusRx->unRxVehicleSpeed = DB_MGR_DEFAULT_VEHICLE_SPEED;
     pstDbV2xStatusRx->unTotalCommDevCnt = DB_MGR_DEFAULT_COMM_DEV_CNT;
     pstDbV2xStatusRx->usRssi = 0;
     pstDbV2xStatusRx->eRsvLevel = 0;
@@ -220,8 +220,6 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
         PrintError("DI_GPS_Get() is failed! [nRet:%d]", nRet);
     }
 
-    double dRxlat, dRxLon, dTxLat, dTxLon, dDistMeter;
-
     dRxlat = (double)pstDi->stDiGps.stDiGpsData.fLatitude;
     dRxLon = (double)pstDi->stDiGps.stDiGpsData.fLongitude;
     dTxLat = (double)pstDbV2xStatusTx->stTxPosition.nTxLatitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
@@ -233,6 +231,19 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusRx->stRxPosition.nRxLatitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLatitude * SVC_CP_GPS_VALUE_CONVERT);
     pstDbV2xStatusRx->stRxPosition.nRxLongitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLongitude * SVC_CP_GPS_VALUE_CONVERT);
     pstDbV2xStatusRx->stRxPosition.nRxAttitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fAltitude * SVC_CP_GPS_VALUE_CONVERT);
+
+    if(stDbV2xStatus.bFirstPacket == TRUE)
+    {
+        pstDbV2xStatusRx->unRxVehicleSpeed = DB_MGR_DEFAULT_VEHICLE_SPEED;
+        PrintWarn("stDbV2xStatus.bFirstPacket's speed is the default value [%d]", pstDbV2xStatusRx->unRxVehicleSpeed);
+    }
+    else
+    {
+        stDbV2xStatus.stV2xSpeedRx.nLatitudeNow = pstDbV2xStatusRx->stRxPosition.nRxLatitude;
+        stDbV2xStatus.stV2xSpeedRx.nLongitudeNow = pstDbV2xStatusRx->stRxPosition.nRxLongitude;
+        stDbV2xStatus.stV2xSpeedRx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
+        pstDbV2xStatusRx->unRxVehicleSpeed = DI_GPS_CalculateSpeed(&stDbV2xStatus.stV2xSpeedRx);
+    }
 
     stDbV2xStatus.unCurrentContCnt = pstDbV2xStatusTx->unContCnt;
 
@@ -277,6 +288,10 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     fTemp = (float)pstDbV2xStatusRx->ulTotalPacketCnt/(float)pstDbV2xStatusTx->unSeqNum;
     pstDbV2xStatusRx->unPdr = (uint32_t)(fTemp*MSG_MGR_PDR_PER_CONVERT_RATE);
     pstDbV2xStatusRx->unPer = MSG_MGR_PDR_PER_CONVERT_RATE - pstDbV2xStatusRx->unPdr;
+
+    stDbV2xStatus.stV2xSpeedRx.nLatitudeLast = pstDbV2xStatusRx->stRxPosition.nRxLatitude;
+    stDbV2xStatus.stV2xSpeedRx.nLongitudeLast = pstDbV2xStatusRx->stRxPosition.nRxLongitude;
+    stDbV2xStatus.stV2xSpeedRx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
 
     nRet = P_DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
     if(nRet != FRAMEWORK_OK)
