@@ -56,6 +56,12 @@
 
 /***************************** Definition ************************************/
 #define PI 3.14159265358979323846
+#define DB_V2X_GPS_MIN_MAX      (60)
+#define DB_V2X_GPS_SEC_MAX      (60)
+#define DB_V2X_GPS_MS           (1000)
+#define DB_V2X_GPS_CONVERT_KM   (1000)
+#define DB_V2X_GPS_NS           (100) /* Cut *10 */
+
 
 /***************************** Enum and Structure ****************************/
 
@@ -222,19 +228,30 @@ static double P_DI_GPS_CalculateDistance(double dRxLat, double dRxLon, double dT
     return dDistanceMeters;
 }
 
-
 uint16_t DI_GPS_CalculateSpeed(DB_V2X_SPEED_T *pstV2xSpeed)
 {
     double dDistMeter;
     uint16_t usSpeed;
-    uint64_t ulDiffTime;
+    double dDiffTimeNs;
+    double dDiffTimeMs;
+    double dDiffTimeS;
+    double dDiffTimeM;
+    double dDiffTimeH;
 
-    dDistMeter = P_DI_GPS_CalculateDistance((double)pstV2xSpeed->nLatitudeNow / DB_V2X_GPS_VALUE_CONVERT_DOUBLE, (double)pstV2xSpeed->nLongitudeNow / DB_V2X_GPS_VALUE_CONVERT_DOUBLE,
-        (double)pstV2xSpeed->nLatitudeLast / DB_V2X_GPS_VALUE_CONVERT_DOUBLE, (double)pstV2xSpeed->nLongitudeLast / DB_V2X_GPS_VALUE_CONVERT_DOUBLE);
-    ulDiffTime = pstV2xSpeed->ulTimeStampNow - pstV2xSpeed->ulTimeStampLast;
-    usSpeed = (uint16_t)dDistMeter/ulDiffTime;
+    dDistMeter = (P_DI_GPS_CalculateDistance((double)pstV2xSpeed->nLatitudeNow / DB_V2X_GPS_VALUE_CONVERT_DOUBLE, (double)pstV2xSpeed->nLongitudeNow / DB_V2X_GPS_VALUE_CONVERT_DOUBLE,
+        (double)pstV2xSpeed->nLatitudeLast / DB_V2X_GPS_VALUE_CONVERT_DOUBLE, (double)pstV2xSpeed->nLongitudeLast / DB_V2X_GPS_VALUE_CONVERT_DOUBLE)) / DB_V2X_GPS_CONVERT_KM;
+    dDiffTimeNs = (pstV2xSpeed->ulTimeStampNow - pstV2xSpeed->ulTimeStampLast);
+    dDiffTimeMs = dDiffTimeNs/DB_V2X_GPS_NS;
+    dDiffTimeS = dDiffTimeMs/DB_V2X_GPS_MS;
+    dDiffTimeM = dDiffTimeS/DB_V2X_GPS_SEC_MAX;
+    dDiffTimeH = dDiffTimeM/DB_V2X_GPS_MIN_MAX;
 
-    PrintDebug("Distance [%lf] meters, ulDiffTime[%ld], speed[%d]", dDistMeter, ulDiffTime, usSpeed);
+    usSpeed = (uint16_t)dDistMeter/dDiffTimeH;
+
+    PrintDebug("dDiffTimeNs[%lf], dDiffTimeMs[%lf], dDiffTimeS[%lf], dDiffTimeM[%lf], dDiffTimeH[%lf]", dDiffTimeNs, dDiffTimeMs, dDiffTimeS, dDiffTimeM, dDiffTimeH);
+    PrintDebug("nLatitudeNow[%d], nLongitudeNow[%d], ulTimeStampNow[%ld]", pstV2xSpeed->nLatitudeNow, pstV2xSpeed->nLongitudeNow, pstV2xSpeed->ulTimeStampNow);
+    PrintDebug("nLatitudeLast[%d], nLongitudeLast[%d], ulTimeStampLast[%ld]", pstV2xSpeed->nLatitudeLast, pstV2xSpeed->nLongitudeLast, pstV2xSpeed->ulTimeStampLast);
+    PrintDebug("Distance [%lf] meters, dDiffTime[%lf], speed[%d]", dDistMeter, dDiffTimeH, usSpeed);
 
     return usSpeed;
 }

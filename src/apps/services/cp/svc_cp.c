@@ -74,6 +74,8 @@ static pthread_t sh_SvcCpTask;
 static pthread_t sh_SvcCpTaskTx;
 
 static SVC_CP_T s_stSvcCp;
+static DB_V2X_STATUS_TX_T s_stDbV2xStatusTx;
+static bool s_bFirstMsg = TRUE;
 
 static char s_chStrBufTxRxType[SVC_CP_STR_BUF_LEN];
 static char s_chStrBufDevType[SVC_CP_STR_BUF_LEN];
@@ -334,6 +336,7 @@ static void *P_SVC_CP_TaskTx(void *arg)
 {
     UNUSED(arg);
     TIME_MANAGER_T *pstTimeManager;
+    DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
     char *pchPayload = NULL;
     int32_t nFrameWorkRet = FRAMEWORK_ERROR;
     bool bMsgTx = TRUE;
@@ -393,10 +396,31 @@ static void *P_SVC_CP_TaskTx(void *arg)
             s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLatitude * SVC_CP_GPS_VALUE_CONVERT);
             s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLongitude * SVC_CP_GPS_VALUE_CONVERT);
             s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxAttitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fAltitude * SVC_CP_GPS_VALUE_CONVERT);
+            PrintDebug("TxLatitude [%d], TxLongitude [%d], nTxAttitude [%d]", s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude, s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude, s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxAttitude);
 
             memcpy(pchPayload, (char*)&s_stSvcCp.stDbV2xStatusTx, sizeof(char)*s_stSvcCp.stDbV2x.ulPayloadLength);
 
+            if(s_bFirstMsg == TRUE)
+            {
+                s_stDbV2xStatusTx.unTxVehicleSpeed = DB_MGR_DEFAULT_VEHICLE_SPEED;
+                s_bFirstMsg = FALSE;
+                PrintWarn("stDbV2xStatus.bFirstPacket's speed is the default value [%d]", s_stDbV2xStatusTx.unTxVehicleSpeed);
+            }
+            else
+            {
+                stDbV2xStatus.stV2xSpeedTx.nLatitudeNow = s_stDbV2xStatusTx.stTxPosition.nTxLatitude;
+                stDbV2xStatus.stV2xSpeedTx.nLongitudeNow = s_stDbV2xStatusTx.stTxPosition.nTxLongitude;
+                stDbV2xStatus.stV2xSpeedTx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
+                s_stDbV2xStatusTx.unTxVehicleSpeed = DI_GPS_CalculateSpeed(&stDbV2xStatus.stV2xSpeedTx);
+                PrintDebug("Tx_nLatitudeNow [%d], Tx_nLongitudeNow [%d], Tx_ulTimeStampNow [%ld]", stDbV2xStatus.stV2xSpeedTx.nLatitudeNow,stDbV2xStatus.stV2xSpeedTx.nLongitudeNow, stDbV2xStatus.stV2xSpeedTx.ulTimeStampNow);
+                PrintDebug("unTxVehicleSpeed [%d]", s_stDbV2xStatusTx.unTxVehicleSpeed);
+            }
+
             s_stSvcCp.stDbV2x.ulReserved = 0;
+
+            stDbV2xStatus.stV2xSpeedTx.nLatitudeLast = s_stDbV2xStatusTx.stTxPosition.nTxLatitude;
+            stDbV2xStatus.stV2xSpeedTx.nLongitudeLast = s_stDbV2xStatusTx.stTxPosition.nTxLongitude;
+            stDbV2xStatus.stV2xSpeedTx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
 
             if(bMsgTx == TRUE)
             {
