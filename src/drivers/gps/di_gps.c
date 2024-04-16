@@ -254,7 +254,7 @@ uint16_t DI_GPS_CalculateSpeed(DB_V2X_SPEED_T *pstV2xSpeed)
     dSpeed = dDistKiloMeter / dDiffTimeH;
     usSpeed = (uint16_t)dSpeed;
 
-    if(s_bLogOnOff == TRUE)
+    if(s_bDiGpsLog == TRUE)
     {
         PrintDebug("%lfm/%lfs=%lfm/s, %lfkm/%lfh=%lfkm/h, usSpeed[%d]km/h", dDistMeter, dDiffTimeS, dDistMeter/dDiffTimeS, dDistKiloMeter, dDiffTimeH, dSpeed, usSpeed);
     }

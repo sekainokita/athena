@@ -166,6 +166,42 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                         }
                     }
                 }
+                else if(IS_CMD(pcCmd, "log"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        if(IS_CMD(pcCmd, "on"))
+                        {
+                            pstDi->stDiGps.bLogLevel = ON;
+                            nRet = DI_GPS_SetLog(&pstDi->stDiGps);
+                            if (nRet != DI_OK)
+                            {
+                                PrintError("DI_GPS_SetLog() is failed! [nRet:%d]", nRet);
+                                return nRet;
+                            }
+                        }
+                        else if(IS_CMD(pcCmd, "off"))
+                        {
+                            pstDi->stDiGps.bLogLevel = OFF;
+                            nRet = DI_GPS_SetLog(&pstDi->stDiGps);
+                            if (nRet != DI_OK)
+                            {
+                                PrintError("DI_GPS_SetLog() is failed! [nRet:%d]", nRet);
+                                return nRet;
+                            }
+                        }
+                        else
+                        {
+                            PrintError("msg log on/off, e.g. msg log on, or msg log off");
+                        }
+                    }
+                    else
+                    {
+                        PrintError("msg log on/off, e.g. msg log on, or msg log off");
+                    }
+                }
+
                 else
                 {
                     return CLI_CMD_Showusage(pstCmd);
