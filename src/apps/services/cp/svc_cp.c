@@ -59,6 +59,7 @@
 #include "di.h"
 
 /***************************** Definition ************************************/
+#define SVC_CP_GPS_SPEED_CAL_CNT_MAX    (10)
 
 /***************************** Enum and Structure ****************************/
 
@@ -76,6 +77,9 @@ static pthread_t sh_SvcCpTaskTx;
 static SVC_CP_T s_stSvcCp;
 static DB_MANAGER_V2X_STATUS_T s_stDbV2xStatus;
 static bool s_bFirstMsg = TRUE;
+
+static uint16_t s_usGpsSpeedCalCnt = 0;
+static uint32_t s_usLastSpeed;
 
 static char s_chStrBufTxRxType[SVC_CP_STR_BUF_LEN];
 static char s_chStrBufDevType[SVC_CP_STR_BUF_LEN];
@@ -341,6 +345,7 @@ static void *P_SVC_CP_TaskTx(void *arg)
     bool bMsgTx = TRUE;
     DI_T *pstDi;
     int32_t nRet = APP_ERROR;
+    uint32_t nCurrSpeed = 0;
 
     while (1)
     {
@@ -407,18 +412,38 @@ static void *P_SVC_CP_TaskTx(void *arg)
             }
             else
             {
-                s_stDbV2xStatus.stV2xSpeedTx.nLatitudeNow = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
-                s_stDbV2xStatus.stV2xSpeedTx.nLongitudeNow = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
-                s_stDbV2xStatus.stV2xSpeedTx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
+                if(s_usGpsSpeedCalCnt == SVC_CP_GPS_SPEED_CAL_CNT_MAX)
+                {
+                    s_stDbV2xStatus.stV2xSpeedTx.nLatitudeNow = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
+                    s_stDbV2xStatus.stV2xSpeedTx.nLongitudeNow = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
+                    s_stDbV2xStatus.stV2xSpeedTx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
 
-                s_stSvcCp.stDbV2xStatusTx.unTxVehicleSpeed = DI_GPS_CalculateSpeed(&s_stDbV2xStatus.stV2xSpeedTx);
+                    nCurrSpeed = DI_GPS_CalculateSpeed(&s_stDbV2xStatus.stV2xSpeedTx);
+                    if(nCurrSpeed == 0)
+                    {
+                        s_stSvcCp.stDbV2xStatusTx.unTxVehicleSpeed = s_usLastSpeed;
+                    }
+                    else
+                    {
+                        s_stSvcCp.stDbV2xStatusTx.unTxVehicleSpeed = nCurrSpeed;
+                    }
+
+                    s_usLastSpeed = nCurrSpeed;
+
+                    s_usGpsSpeedCalCnt = 0;
+                }
             }
 
-            s_stSvcCp.stDbV2x.ulReserved = 0;
+            if(s_usGpsSpeedCalCnt == 0)
+            {
+                s_stDbV2xStatus.stV2xSpeedTx.nLatitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
+                s_stDbV2xStatus.stV2xSpeedTx.nLongitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
+                s_stDbV2xStatus.stV2xSpeedTx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
+            }
 
-            s_stDbV2xStatus.stV2xSpeedTx.nLatitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
-            s_stDbV2xStatus.stV2xSpeedTx.nLongitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
-            s_stDbV2xStatus.stV2xSpeedTx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
+            s_usGpsSpeedCalCnt++;
+
+            s_stSvcCp.stDbV2x.ulReserved = 0;
 
             if(bMsgTx == TRUE)
             {
