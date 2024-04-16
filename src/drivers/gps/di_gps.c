@@ -231,6 +231,8 @@ static double P_DI_GPS_CalculateDistance(double dRxLat, double dRxLon, double dT
 uint16_t DI_GPS_CalculateSpeed(DB_V2X_SPEED_T *pstV2xSpeed)
 {
     double dDistMeter;
+    double dDistKiloMeter;
+    double dSpeed;
     uint16_t usSpeed;
     double dDiffTimeNs;
     double dDiffTimeMs;
@@ -239,19 +241,23 @@ uint16_t DI_GPS_CalculateSpeed(DB_V2X_SPEED_T *pstV2xSpeed)
     double dDiffTimeH;
 
     dDistMeter = (P_DI_GPS_CalculateDistance((double)pstV2xSpeed->nLatitudeNow / DB_V2X_GPS_VALUE_CONVERT_DOUBLE, (double)pstV2xSpeed->nLongitudeNow / DB_V2X_GPS_VALUE_CONVERT_DOUBLE,
-        (double)pstV2xSpeed->nLatitudeLast / DB_V2X_GPS_VALUE_CONVERT_DOUBLE, (double)pstV2xSpeed->nLongitudeLast / DB_V2X_GPS_VALUE_CONVERT_DOUBLE)) / DB_V2X_GPS_CONVERT_KM;
+        (double)pstV2xSpeed->nLatitudeLast / DB_V2X_GPS_VALUE_CONVERT_DOUBLE, (double)pstV2xSpeed->nLongitudeLast / DB_V2X_GPS_VALUE_CONVERT_DOUBLE));
+
+    dDistKiloMeter = dDistMeter / DB_V2X_GPS_CONVERT_KM;
+
     dDiffTimeNs = (pstV2xSpeed->ulTimeStampNow - pstV2xSpeed->ulTimeStampLast);
-    dDiffTimeMs = dDiffTimeNs/DB_V2X_GPS_NS;
-    dDiffTimeS = dDiffTimeMs/DB_V2X_GPS_MS;
-    dDiffTimeM = dDiffTimeS/DB_V2X_GPS_SEC_MAX;
-    dDiffTimeH = dDiffTimeM/DB_V2X_GPS_MIN_MAX;
+    dDiffTimeMs = dDiffTimeNs / DB_V2X_GPS_NS;
+    dDiffTimeS = dDiffTimeMs / DB_V2X_GPS_MS;
+    dDiffTimeM = dDiffTimeS / DB_V2X_GPS_SEC_MAX;
+    dDiffTimeH = dDiffTimeM / DB_V2X_GPS_MIN_MAX;
 
-    usSpeed = (uint16_t)dDistMeter/dDiffTimeH;
+    dSpeed = dDistKiloMeter / dDiffTimeH;
+    usSpeed = (uint16_t)dSpeed;
 
-    PrintDebug("dDiffTimeNs[%lf], dDiffTimeMs[%lf], dDiffTimeS[%lf], dDiffTimeM[%lf], dDiffTimeH[%lf]", dDiffTimeNs, dDiffTimeMs, dDiffTimeS, dDiffTimeM, dDiffTimeH);
-    PrintDebug("nLatitudeNow[%d], nLongitudeNow[%d], ulTimeStampNow[%ld]", pstV2xSpeed->nLatitudeNow, pstV2xSpeed->nLongitudeNow, pstV2xSpeed->ulTimeStampNow);
-    PrintDebug("nLatitudeLast[%d], nLongitudeLast[%d], ulTimeStampLast[%ld]", pstV2xSpeed->nLatitudeLast, pstV2xSpeed->nLongitudeLast, pstV2xSpeed->ulTimeStampLast);
-    PrintDebug("Distance [%lf] meters, dDiffTime[%lf], speed[%d]", dDistMeter, dDiffTimeH, usSpeed);
+    if(s_bLogOnOff == TRUE)
+    {
+        PrintDebug("%lfm/%lfs=%lfm/s, %lfkm/%lfh=%lfkm/h, usSpeed[%d]km/h", dDistMeter, dDiffTimeS, dDistMeter/dDiffTimeS, dDistKiloMeter, dDiffTimeH, dSpeed, usSpeed);
+    }
 
     return usSpeed;
 }
