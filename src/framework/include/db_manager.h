@@ -60,7 +60,7 @@
 #define CLI_DB_V2X_DEFAULT_BUF_LEN                20
 
 #define DB_MGR_FILE_MAX_LENGTH                    100
-#define DB_MGR_SYSTEM_CALL_MAX_LENGTH             200
+#define DB_MGR_SYSTEM_CALL_MAX_LENGTH             300
 
 #define DB_MGR_DEFAULT_VEHICLE_SPEED              60
 #define DB_MGR_DEFAULT_COMM_DEV_CNT               1
@@ -195,8 +195,8 @@ typedef struct DB_MANAGER_FILE_t {
 */
 typedef struct DB_MANAGER_V2X_STATUS_t {
     DB_V2X_STATUS_RX_T      stV2xStatusRx;
-    DB_V2X_SPEED_T          stV2xSpeedTx;
-    DB_V2X_SPEED_T          stV2xSpeedRx;
+    DB_V2X_GPS_INFO_T       stV2xGpsInfoTx;
+    DB_V2X_GPS_INFO_T       stV2xGpsInfoRx;
     uint64_t                ulTxTimeStamp;
     uint32_t                unLastContCnt;
     uint32_t                unCurrentContCnt;

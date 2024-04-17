@@ -55,13 +55,14 @@
 #include <math.h>
 
 /***************************** Definition ************************************/
-#define PI 3.14159265358979323846
-#define DB_V2X_GPS_MIN_MAX      (60)
-#define DB_V2X_GPS_SEC_MAX      (60)
-#define DB_V2X_GPS_MS           (1000)
-#define DB_V2X_GPS_CONVERT_KM   (1000)
-#define DB_V2X_GPS_NS           (100) /* Cut *10 */
-
+#define PI                      (3.14159265358979323846)
+#define DI_GPS_MIN_MAX          (60)
+#define DI_GPS_SEC_MAX          (60)
+#define DI_GPS_MS               (1000)
+#define DI_GPS_CONVERT_KM       (1000)
+#define DI_GPS_NS               (100) /* Cut x10, it is deleted when Tx because of the length of data size */
+#define DI_GPS_STRAIGHT_ANGLES  (180.0)
+#define DI_GPS_FULL_ANGLES      (360.0)
 
 /***************************** Enum and Structure ****************************/
 
@@ -71,6 +72,15 @@ static DI_GPS_XSENS_T s_stDiGpsDev;
 static bool s_bLogOnOff = FALSE;
 
 /***************************** Function  *************************************/
+
+static inline double P_DI_GPS_ConvertDegreeToRadian(double dTheta)
+{
+    return (dTheta * M_PI) / DI_GPS_STRAIGHT_ANGLES;
+}
+
+static inline double P_DI_GPS_ConvertRadianToDegree(double dTheta){
+    return (dTheta * DI_GPS_STRAIGHT_ANGLES) / M_PI;
+}
 
 static int32_t P_DI_GPS_Init(DI_GPS_T *pstDiGps)
 {
@@ -228,7 +238,45 @@ static double P_DI_GPS_CalculateDistance(double dRxLat, double dRxLon, double dT
     return dDistanceMeters;
 }
 
-uint16_t DI_GPS_CalculateSpeed(DB_V2X_SPEED_T *pstV2xSpeed)
+double DI_GPS_CalculateHeading(DB_V2X_GPS_INFO_T *pstV2xGpsInfo)
+{
+    double dHeading = 0.0f;
+    double dLat1, dLat2, dLon1, dLon2;
+
+    if(pstV2xGpsInfo == NULL)
+    {
+        PrintError("pstV2xSpeed == NULL!!");
+        return 0.0f;
+    }
+
+    dLat1 = pstV2xGpsInfo->nLatitudeNow;
+    dLon1 = pstV2xGpsInfo->nLongitudeNow;
+
+    dLat2 = pstV2xGpsInfo->nLatitudeLast;
+    dLon2 = pstV2xGpsInfo->nLongitudeLast;
+
+    dLat1 = P_DI_GPS_ConvertDegreeToRadian(dLat1);
+    dLon1 = P_DI_GPS_ConvertDegreeToRadian(dLon1);
+    dLat2 = P_DI_GPS_ConvertDegreeToRadian(dLat2);
+    dLon2 = P_DI_GPS_ConvertDegreeToRadian(dLon2);
+
+    double dTempLon = dLon2 - dLon1;
+    double X = cos(dLat2) * sin(dTempLon);
+    double Y = cos(dLat1) * sin(dLat2) - sin(dLat1) * cos(dLat2) * cos(dTempLon);
+
+    dHeading = atan2(X,Y);
+
+    dHeading = P_DI_GPS_ConvertRadianToDegree(dHeading);
+    if (dHeading < 0)
+    {
+        /* a uniform heading of >=0 and <360 */
+        dHeading = 360.0 + dHeading;
+    }
+
+    return dHeading;
+}
+
+uint16_t DI_GPS_CalculateSpeed(DB_V2X_GPS_INFO_T *pstV2xGpsInfo)
 {
     double dDistMeter;
     double dDistKiloMeter;
@@ -240,16 +288,22 @@ uint16_t DI_GPS_CalculateSpeed(DB_V2X_SPEED_T *pstV2xSpeed)
     double dDiffTimeM;
     double dDiffTimeH;
 
-    dDistMeter = (P_DI_GPS_CalculateDistance((double)pstV2xSpeed->nLatitudeNow / DB_V2X_GPS_VALUE_CONVERT_DOUBLE, (double)pstV2xSpeed->nLongitudeNow / DB_V2X_GPS_VALUE_CONVERT_DOUBLE,
-        (double)pstV2xSpeed->nLatitudeLast / DB_V2X_GPS_VALUE_CONVERT_DOUBLE, (double)pstV2xSpeed->nLongitudeLast / DB_V2X_GPS_VALUE_CONVERT_DOUBLE));
+    if(pstV2xGpsInfo == NULL)
+    {
+        PrintError("pstV2xSpeed == NULL!!");
+        return 0;
+    }
 
-    dDistKiloMeter = dDistMeter / DB_V2X_GPS_CONVERT_KM;
+    dDistMeter = (P_DI_GPS_CalculateDistance((double)pstV2xGpsInfo->nLatitudeNow / DB_V2X_GPS_VALUE_CONVERT_DOUBLE, (double)pstV2xGpsInfo->nLongitudeNow / DB_V2X_GPS_VALUE_CONVERT_DOUBLE,
+        (double)pstV2xGpsInfo->nLatitudeLast / DB_V2X_GPS_VALUE_CONVERT_DOUBLE, (double)pstV2xGpsInfo->nLongitudeLast / DB_V2X_GPS_VALUE_CONVERT_DOUBLE));
 
-    dDiffTimeNs = (pstV2xSpeed->ulTimeStampNow - pstV2xSpeed->ulTimeStampLast);
-    dDiffTimeMs = dDiffTimeNs / DB_V2X_GPS_NS;
-    dDiffTimeS = dDiffTimeMs / DB_V2X_GPS_MS;
-    dDiffTimeM = dDiffTimeS / DB_V2X_GPS_SEC_MAX;
-    dDiffTimeH = dDiffTimeM / DB_V2X_GPS_MIN_MAX;
+    dDistKiloMeter = dDistMeter / DI_GPS_CONVERT_KM;
+
+    dDiffTimeNs = (pstV2xGpsInfo->ulTimeStampNow - pstV2xGpsInfo->ulTimeStampLast);
+    dDiffTimeMs = dDiffTimeNs / DI_GPS_NS;
+    dDiffTimeS = dDiffTimeMs / DI_GPS_MS;
+    dDiffTimeM = dDiffTimeS / DI_GPS_SEC_MAX;
+    dDiffTimeH = dDiffTimeM / DI_GPS_MIN_MAX;
 
     dSpeed = dDistKiloMeter / dDiffTimeH;
     usSpeed = (uint16_t)dSpeed;

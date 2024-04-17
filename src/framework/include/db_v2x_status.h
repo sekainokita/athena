@@ -112,7 +112,7 @@ typedef enum {
 } DB_V2X_STATUS_BANDWIDTH_E;
 
 /**
-* @details DB V2X Struct of Tx Status
+* @details GPS Info
 * @param ulTimeStampNow                         The current timestamp
 * @param nLatitudeNow                           The current latitude
 * @param nLongitudeNow                          The current longitude
@@ -120,14 +120,14 @@ typedef enum {
 * @param nLatitudeLast                          The last latitude
 * @param nLongitudeLast                         The last longitude
 */
-typedef struct DB_V2X_STATUS_SPEED_t {
+typedef struct DB_V2X_STATUS_GPS_INFO_t {
     uint64_t                                    ulTimeStampNow;
     int32_t                                     nLatitudeNow;
     int32_t                                     nLongitudeNow;
     uint64_t                                    ulTimeStampLast;
     int32_t                                     nLatitudeLast;
     int32_t                                     nLongitudeLast;
-} __attribute__((__packed__)) DB_V2X_SPEED_T;
+} __attribute__((__packed__)) DB_V2X_GPS_INFO_T;
 
 /**
 * @details DB V2X Struct of Rx Position

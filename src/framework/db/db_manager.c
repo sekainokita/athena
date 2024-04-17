@@ -239,10 +239,10 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     }
     else
     {
-        stDbV2xStatus.stV2xSpeedRx.nLatitudeNow = pstDbV2xStatusRx->stRxPosition.nRxLatitude;
-        stDbV2xStatus.stV2xSpeedRx.nLongitudeNow = pstDbV2xStatusRx->stRxPosition.nRxLongitude;
-        stDbV2xStatus.stV2xSpeedRx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
-        pstDbV2xStatusRx->unRxVehicleSpeed = DI_GPS_CalculateSpeed(&stDbV2xStatus.stV2xSpeedRx);
+        stDbV2xStatus.stV2xGpsInfoRx.nLatitudeNow = pstDbV2xStatusRx->stRxPosition.nRxLatitude;
+        stDbV2xStatus.stV2xGpsInfoRx.nLongitudeNow = pstDbV2xStatusRx->stRxPosition.nRxLongitude;
+        stDbV2xStatus.stV2xGpsInfoRx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
+        pstDbV2xStatusRx->unRxVehicleSpeed = DI_GPS_CalculateSpeed(&stDbV2xStatus.stV2xGpsInfoRx);
     }
 
     stDbV2xStatus.unCurrentContCnt = pstDbV2xStatusTx->unContCnt;
@@ -289,9 +289,9 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusRx->unPdr = (uint32_t)(fTemp*MSG_MGR_PDR_PER_CONVERT_RATE);
     pstDbV2xStatusRx->unPer = MSG_MGR_PDR_PER_CONVERT_RATE - pstDbV2xStatusRx->unPdr;
 
-    stDbV2xStatus.stV2xSpeedRx.nLatitudeLast = pstDbV2xStatusRx->stRxPosition.nRxLatitude;
-    stDbV2xStatus.stV2xSpeedRx.nLongitudeLast = pstDbV2xStatusRx->stRxPosition.nRxLongitude;
-    stDbV2xStatus.stV2xSpeedRx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
+    stDbV2xStatus.stV2xGpsInfoRx.nLatitudeLast = pstDbV2xStatusRx->stRxPosition.nRxLatitude;
+    stDbV2xStatus.stV2xGpsInfoRx.nLongitudeLast = pstDbV2xStatusRx->stRxPosition.nRxLongitude;
+    stDbV2xStatus.stV2xGpsInfoRx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
 
     nRet = P_DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
     if(nRet != FRAMEWORK_OK)
