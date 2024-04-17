@@ -267,11 +267,11 @@ double DI_GPS_CalculateHeading(DB_V2X_GPS_INFO_T *pstV2xGpsInfo)
     dHeading = atan2(X,Y);
 
     dHeading = P_DI_GPS_ConvertRadianToDegree(dHeading);
-    if (dHeading < 0)
-    {
+    //if (dHeading < 0)
+    //{
         /* a uniform heading of >=0 and <360 */
-        dHeading = 360.0 + dHeading;
-    }
+      //  dHeading = 360.0 + dHeading;
+    //}
 
     return dHeading;
 }

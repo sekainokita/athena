@@ -197,6 +197,8 @@ typedef struct DB_MANAGER_V2X_STATUS_t {
     DB_V2X_STATUS_RX_T      stV2xStatusRx;
     DB_V2X_GPS_INFO_T       stV2xGpsInfoTx;
     DB_V2X_GPS_INFO_T       stV2xGpsInfoRx;
+	DB_V2X_GPS_INFO_T		stV2xGpsInfoHeadingTx;
+	DB_V2X_GPS_INFO_T		stV2xGpsInfoHeadingRx;
     uint64_t                ulTxTimeStamp;
     uint32_t                unLastContCnt;
     uint32_t                unCurrentContCnt;

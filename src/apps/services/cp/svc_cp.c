@@ -429,9 +429,6 @@ static void *P_SVC_CP_TaskTx(void *arg)
                         s_stSvcCp.stDbV2xStatusTx.unTxVehicleSpeed = nCurrSpeed;
                     }
 
-                    dHeading = DI_GPS_CalculateHeading(&s_stDbV2xStatus.stV2xGpsInfoTx);
-                    PrintDebug("dHeading[%lf]", dHeading);
-
                     s_usLastSpeed = nCurrSpeed;
 
                     s_usGpsSpeedCalCnt = 0;
@@ -446,6 +443,17 @@ static void *P_SVC_CP_TaskTx(void *arg)
             }
 
             s_usGpsSpeedCalCnt++;
+
+			s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLatitudeNow = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
+            s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLongitudeNow = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
+            s_stDbV2xStatus.stV2xGpsInfoHeadingTx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
+
+			dHeading = DI_GPS_CalculateHeading(&s_stDbV2xStatus.stV2xGpsInfoHeadingTx);
+			PrintDebug("dHeading[%lf]", dHeading);
+
+			s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLatitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
+            s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLongitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
+            s_stDbV2xStatus.stV2xGpsInfoHeadingTx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
 
             s_stSvcCp.stDbV2x.ulReserved = 0;
 
