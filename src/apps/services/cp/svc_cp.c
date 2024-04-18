@@ -79,7 +79,7 @@ static DB_MANAGER_V2X_STATUS_T s_stDbV2xStatus;
 static bool s_bFirstMsg = TRUE;
 
 static uint16_t s_usGpsSpeedCalCnt = 0;
-static uint32_t s_usLastSpeed;
+static uint32_t s_usLastSpeedTx;
 
 static char s_chStrBufTxRxType[SVC_CP_STR_BUF_LEN];
 static char s_chStrBufDevType[SVC_CP_STR_BUF_LEN];
@@ -422,14 +422,14 @@ static void *P_SVC_CP_TaskTx(void *arg)
                     nCurrSpeed = DI_GPS_CalculateSpeed(&s_stDbV2xStatus.stV2xGpsInfoTx);
                     if(nCurrSpeed == 0)
                     {
-                        s_stSvcCp.stDbV2xStatusTx.unTxVehicleSpeed = s_usLastSpeed;
+                        s_stSvcCp.stDbV2xStatusTx.unTxVehicleSpeed = s_usLastSpeedTx;
                     }
                     else
                     {
                         s_stSvcCp.stDbV2xStatusTx.unTxVehicleSpeed = nCurrSpeed;
                     }
 
-                    s_usLastSpeed = nCurrSpeed;
+                    s_usLastSpeedTx = nCurrSpeed;
 
                     s_usGpsSpeedCalCnt = 0;
                 }

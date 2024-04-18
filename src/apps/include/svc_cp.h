@@ -128,6 +128,7 @@ typedef struct SVC_CP_t {
     MSG_MANAGER_RX_T        stMsgManagerRx;
     DB_V2X_T                stDbV2x;
     DB_V2X_STATUS_TX_T      stDbV2xStatusTx;
+    DB_V2X_STATUS_RX_T      stDbV2xStatusRx;
     char                    *pchIfaceName;
     uint32_t                unPsid;
     char                    *pchDeviceName;
