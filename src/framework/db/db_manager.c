@@ -907,6 +907,7 @@ static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
             fprintf(sh_pDbMgrTxMsg, "unSeqNum,");
             fprintf(sh_pDbMgrTxMsg, "unContCnt,");
             fprintf(sh_pDbMgrTxMsg, "unTxVehicleSpeed,");
+            fprintf(sh_pDbMgrTxMsg, "dTxVehicleHeading,");
             fprintf(sh_pDbMgrTxMsg, "unTotalPacketCrc32");
         }
         else if(pstDbManager->eSvcType == DB_MANAGER_SVC_TYPE_BASE)
@@ -962,6 +963,7 @@ static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
             fprintf(sh_pDbMgrRxMsg, "unSeqNum,");
             fprintf(sh_pDbMgrRxMsg, "unContCnt,");
             fprintf(sh_pDbMgrRxMsg, "unTxVehicleSpeed,");
+            fprintf(sh_pDbMgrRxMsg, "dTxVehicleHeading,");
             fprintf(sh_pDbMgrRxMsg, "unTotalPacketCrc32,");
 
             /* Rx */
@@ -1229,7 +1231,7 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusTx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.unSeqNum);
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.unContCnt);
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.unTxVehicleSpeed);
-
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.unTxVehicleHeading);
     fprintf(sh_pDbMgrTxMsg, "0x%x", pstEventMsg->pstDbManagerWrite->unCrc32);
     fprintf(sh_pDbMgrTxMsg, "\r\n");
 
@@ -1390,6 +1392,7 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.unSeqNum);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.unContCnt);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.unTxVehicleSpeed);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.unTxVehicleHeading);
 
     fprintf(sh_pDbMgrRxMsg, "0x%x,", pstEventMsg->pstDbManagerWrite->unCrc32);
 

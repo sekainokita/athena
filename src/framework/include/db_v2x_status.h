@@ -209,6 +209,7 @@ typedef struct DB_V2X_POSITION_TX_t {
 * @param unSeqNum                               sequence number (Sequential transmission of values ​​from 0 to N)
 * @param unContCnt                              continuity counter Sequential transmission of values ​​from 0 to 100, The Rx device checks and stores the values ​​of 0 to 100 transmitted from Tx sequentially transmitted Tx Continuity Counter (sequence number)
 * @param unTxVehicleSpeed                       Tx vehicle speed (Tx vehicle speed (if available), if not available, set the experimental value manually, default 60km/h)
+* @param unTxVehicleHeading                     Tx vehicle heading (0~360, 0(S), 90(E), -90(W), N(+-180))
 */
 typedef struct DB_V2X_STATUS_TX_t {
     uint64_t                                    ulReserved0;
@@ -225,6 +226,7 @@ typedef struct DB_V2X_STATUS_TX_t {
     uint32_t                                    unSeqNum;
     uint32_t                                    unContCnt;
     uint32_t                                    unTxVehicleSpeed;
+    uint32_t                                    unTxVehicleHeading;
 } __attribute__((__packed__)) DB_V2X_STATUS_TX_T;
 /***************************** Function Protype ******************************/
 
