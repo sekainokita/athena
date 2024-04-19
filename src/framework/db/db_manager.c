@@ -907,7 +907,7 @@ static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
             fprintf(sh_pDbMgrTxMsg, "unSeqNum,");
             fprintf(sh_pDbMgrTxMsg, "unContCnt,");
             fprintf(sh_pDbMgrTxMsg, "unTxVehicleSpeed,");
-            fprintf(sh_pDbMgrTxMsg, "dTxVehicleHeading,");
+            fprintf(sh_pDbMgrTxMsg, "unTxVehicleHeading,");
             fprintf(sh_pDbMgrTxMsg, "unTotalPacketCrc32");
         }
         else if(pstDbManager->eSvcType == DB_MANAGER_SVC_TYPE_BASE)
@@ -963,7 +963,7 @@ static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
             fprintf(sh_pDbMgrRxMsg, "unSeqNum,");
             fprintf(sh_pDbMgrRxMsg, "unContCnt,");
             fprintf(sh_pDbMgrRxMsg, "unTxVehicleSpeed,");
-            fprintf(sh_pDbMgrRxMsg, "dTxVehicleHeading,");
+            fprintf(sh_pDbMgrRxMsg, "unTxVehicleHeading,");
             fprintf(sh_pDbMgrRxMsg, "unTotalPacketCrc32,");
 
             /* Rx */
