@@ -144,14 +144,26 @@ typedef struct DB_V2X_POSITION_RX_t {
 } __attribute__((__packed__)) DB_V2X_POSITION_RX_T;
 
 /**
+* @details DB_V2X_DEV_INFO_T
+* @param unDevId                                the device ID
+* @param usHwVer                                the HW version
+* @param usSwVer                                the SW version
+* @param ulTimeStamp                            the timestamp, value at which the communication device transmitted the message (need to change to future UTF time, C-ITS communication time compatibility)
+* @param ulLatency                              the latency
+*/
+typedef struct DB_V2X_DEV_INFO_t {
+    uint32_t                                    unDevId;
+    uint16_t                                    usHwVer;
+    uint16_t                                    usSwVer;
+    uint64_t                                    ulTimeStamp;
+    uint64_t                                    ulLatency;
+} __attribute__((__packed__)) DB_V2X_DEV_INFO_T;
+
+/**
 * @details DB V2X Struct of Rx Status
-* @param ulRxTimeStampL1                        The system layer 1 time value at which the communication device transmitted the message (need to change to future UTF time, C-ITS communication time compatibility)
-* @param ulRxTimeStampL2                        The system layer 2 time value at which the OBU/RSU/Control Units transmitted the message (Optional, if the devices are separated from model IP)
-* @param ulRxTimeStampL2                        The system layer 3 time value at which the application device transmitted the message (Optional, if the devices are separated OBU/RSU)
-* @param ulLatencyL1                            [L1] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second)
-* @param ulLatencyL2                            [L2] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second)
-* @param ulLatencyL3                            [L3] rTimestamp - tTimestamp = latency, synchronized with GPS PPS (Pulse Per Second)
-* @param unTxDeviceId                           The unique ID (Serial Number) of the transfer device
+* @param stDbV2xDevL1                           The system layer 1 device info
+* @param stDbV2xDevL2                           The system layer 2 device info
+* @param stDbV2xDevL3                           The system layer 3 device info
 * @param unRxVehicleSpeed                       Rx vehicle speed (Rx vehicle speed (if available), if not available, set the experimental value manually, default 60km/h)
 * @param unTotalCommDevCnt                      The total number of devices that are currently simultaneously connected and transmitting/receiving (the count number of all device IDs currently received and stored by the Rx device)
 * @param usRssi                                 Receive Signal Strength Indication, The total signal strength of the antenna at the time the message was received
@@ -164,13 +176,9 @@ typedef struct DB_V2X_POSITION_RX_t {
 * @param unPer                                  Packet Error Ratio (PER)
 */
 typedef struct DB_V2X_STATUS_RX_t {
-    uint64_t                                    ulRxTimeStampL1;
-    uint64_t                                    ulRxTimeStampL2;
-    uint64_t                                    ulRxTimeStampL3;
-    uint64_t                                    ulLatencyL1;
-    uint64_t                                    ulLatencyL2;
-    uint64_t                                    ulLatencyL3;
-    uint32_t                                    unTxDeviceId;
+    DB_V2X_DEV_INFO_T                           stDbV2xDevL1;
+    DB_V2X_DEV_INFO_T                           stDbV2xDevL2;
+    DB_V2X_DEV_INFO_T                           stDbV2xDevL3;
     uint16_t                                    unRxVehicleSpeed;
     uint32_t                                    unTotalCommDevCnt;
     uint16_t                                    usRssi;
@@ -195,12 +203,13 @@ typedef struct DB_V2X_POSITION_TX_t {
     int32_t                                     nTxAttitude;
 } __attribute__((__packed__)) DB_V2X_POSITION_TX_T;
 
+
 /**
 * @details DB V2X Struct of Tx Status
-* @param ulTxTimeStampL1                        The system layer 1 time value at which the communication device transmitted the message (need to change to future UTF time, C-ITS communication time compatibility)
-* @param ulTxTimeStampL2                        The system layer 2 time value at which the OBU/RSU/Control Units transmitted the message (Optional, if the devices are separated from model IP)
-* @param ulTxTimeStampL2                        The system layer 3 time value at which the application device transmitted the message (Optional, if the devices are separated OBU/RSU)
-* @param unRxDeviceId                           Unique Serial Number of the device to which you want to send the message; there can be more than one transfer destination
+* @param stDbV2xDevL1                           The system layer 1 device info
+* @param stDbV2xDevL2                           The system layer 2 device info
+* @param stDbV2xDevL3                           The system layer 3 device info
+* @param unRxTargetDeviceId                     Unique Serial Number of the device to which you want to send the message; there can be more than one transfer destination
 * @param eChannel                               Transmission channel number
 * @param sPower                                 Transmission strength (dBm)
 * @param eBandwidth                             Communication frequency bandwidth, Communication frequency bandwidth status at the time the message is received
@@ -214,10 +223,10 @@ typedef struct DB_V2X_POSITION_TX_t {
 typedef struct DB_V2X_STATUS_TX_t {
     uint64_t                                    ulReserved0;
     uint64_t                                    ulReserved1;
-    uint64_t                                    ulTxTimeStampL1;
-    uint64_t                                    ulTxTimeStampL2;
-    uint64_t                                    ulTxTimeStampL3;
-    uint32_t                                    unRxDeviceId;
+    DB_V2X_DEV_INFO_T                           stDbV2xDevL1;
+    DB_V2X_DEV_INFO_T                           stDbV2xDevL2;
+    DB_V2X_DEV_INFO_T                           stDbV2xDevL3;
+    uint32_t                                    unRxTargetDeviceId;
     DB_V2X_STATUS_CHANNEL_E                     eChannel;
     int16_t                                     sPower;
     DB_V2X_STATUS_BANDWIDTH_E                   eBandwidth;

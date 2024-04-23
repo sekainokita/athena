@@ -432,9 +432,9 @@ static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
     {
         pstSvcCp->stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
 
-        pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL1 = 19840919;
-        pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL2 = 19850501;
-        pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL3 = pstTimeManager->ulTimeStamp;
+        pstSvcCp->stDbV2xStatusTx.stDbV2xDevL1.ulTimeStamp = 19840919;
+        pstSvcCp->stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp = 19850501;
+        pstSvcCp->stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp = pstTimeManager->ulTimeStamp;
     }
 
     memcpy(pchPayload, (char*)&pstSvcCp->stDbV2xStatusTx, sizeof(char)*pstSvcCp->stDbV2x.ulPayloadLength);

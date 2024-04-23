@@ -173,10 +173,10 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
 
     pstSvcCp->pchIfaceName = SVC_CP_DEFAULT_ETH_DEV;
     pstSvcCp->unPsid = SVC_CP_V2V_PSID;
-    pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL1 = 0;
-    pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL2 = 0;
-    pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL3 = 0;
-    pstSvcCp->stDbV2xStatusTx.unRxDeviceId = 0;
+    pstSvcCp->stDbV2xStatusTx.stDbV2xDevL1.ulTimeStamp = 0;
+    pstSvcCp->stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp = 0;
+    pstSvcCp->stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp = 0;
+    pstSvcCp->stDbV2xStatusTx.unRxTargetDeviceId = 0;
     pstSvcCp->stDbV2xStatusTx.eChannel = DB_V2X_STATUS_CHANNEL_5_895_5_905;
     pstSvcCp->stDbV2xStatusTx.sPower = MSG_MANAGER_V2X_TX_POWER;
     pstSvcCp->stDbV2xStatusTx.eBandwidth = DB_V2X_STATUS_BANDWIDTH_20MHZ;
@@ -371,8 +371,8 @@ static void *P_SVC_CP_TaskTx(void *arg)
             }
 
             /* Todo, when the device ready to share its timestamp */
-            s_stSvcCp.stDbV2xStatusTx.ulTxTimeStampL1 = 19840919;
-            s_stSvcCp.stDbV2xStatusTx.ulTxTimeStampL2 = 19850501;
+            s_stSvcCp.stDbV2xStatusTx.stDbV2xDevL1.ulTimeStamp = 19840919;
+            s_stSvcCp.stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp = 19850501;
 
             nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
             if(nFrameWorkRet != FRAMEWORK_OK)
@@ -384,7 +384,7 @@ static void *P_SVC_CP_TaskTx(void *arg)
                 s_stSvcCp.stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
 
                 /* Set the application timestamp before sending */
-                s_stSvcCp.stDbV2xStatusTx.ulTxTimeStampL3 = pstTimeManager->ulTimeStamp;
+                s_stSvcCp.stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp = pstTimeManager->ulTimeStamp;
             }
 
             pstDi = APP_GetDiInstance();
@@ -734,10 +734,10 @@ void SVC_CP_ShowSettings(SVC_CP_T *pstSvcCp)
     PrintDebug("unDbTotalWrittenTime [%d]", pstSvcCp->unDbTotalWrittenTime);
 
     PrintWarn("V2X Status Tx Info>");
-    PrintDebug(" ulTxTimeStampL1 [%ld]", pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL1);
-    PrintDebug(" ulTxTimeStampL2 [%ld]", pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL2);
-    PrintDebug(" ulTxTimeStampL3 [%ld]", pstSvcCp->stDbV2xStatusTx.ulTxTimeStampL3);
-    PrintDebug(" unRxDeviceId [%d]", pstSvcCp->stDbV2xStatusTx.unRxDeviceId);
+    PrintDebug(" stDbV2xDevL1.ulTimeStamp [%ld]", pstSvcCp->stDbV2xStatusTx.stDbV2xDevL1.ulTimeStamp);
+    PrintDebug(" stDbV2xDevL2.ulTimeStamp [%ld]", pstSvcCp->stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp);
+    PrintDebug(" stDbV2xDevL3.ulTimeStamp [%ld]", pstSvcCp->stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp);
+    PrintDebug(" unRxTargetDeviceId [%d]", pstSvcCp->stDbV2xStatusTx.unRxTargetDeviceId);
     PrintDebug(" eChannel [%d]", pstSvcCp->stDbV2xStatusTx.eChannel);
     PrintDebug(" sPower [%d]", pstSvcCp->stDbV2xStatusTx.sPower);
     PrintDebug(" eBandwidth [%d]", pstSvcCp->stDbV2xStatusTx.eBandwidth);

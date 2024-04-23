@@ -1118,6 +1118,240 @@ static int32_t P_MSG_MANAGER_SendRxMsgToDbMgr(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
 }
 
 #if defined(CONFIG_EXT_DATA_FORMAT)
+static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMsg, void *pvExtMsgPkg)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX *pstExtMsgModemTx;
+    MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_RX *pstExtMsgModemRx;
+    MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT *pstExtMsgComm;
+    MSG_MANAGER_EXT_MSG_TLVC_CONTROL_UNIT *pstExtMsgCtrl;
+    uint8_t *pucDeviceType = (uint8_t*)pvExtMsgPkg + 6;	// T, L 뒤에 dev_type 존재
+    uint16_t usCalcCrc16;
+    uint8_t ucStatus;
+    DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
+
+    if(pstEventMsg == NULL)
+    {
+        PrintError("pstEventMsg is NULL");
+        return nRet;
+    }
+
+    if(pvExtMsgPkg == NULL)
+    {
+        PrintError("pvExtMsgPkg is NULL");
+        return nRet;
+    }
+
+    if(pucDeviceType == NULL)
+    {
+        PrintError("pucDeviceType is NULL");
+        return nRet;
+    }
+
+    switch(*pucDeviceType)
+    {
+        case eMSG_MANAGER_EXT_MSG_DEV_TYPE_OBU_MODEM:
+        {
+            pstExtMsgModemTx = (MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX*)pvExtMsgPkg;
+            pstExtMsgModemRx = (MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_RX*)pvExtMsgPkg;
+            ucStatus = pstExtMsgModemTx->ucStatus;
+
+            if (ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX)
+            {
+                PrintDebug("OBU Modem : Tx");
+                PrintDebug("unDevId[%u]", htonl(pstExtMsgModemTx->unDevId));
+                PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgModemTx->usHwVer), htons(pstExtMsgModemTx->usSwVer));
+                PrintDebug("ucTxPwr[%d], usTxFreq[%d], ucTxBw[%d], ucMcs[%d], ucScs[%d]", pstExtMsgModemTx->ucTxPwr, htons(pstExtMsgModemTx->usTxFreq), pstExtMsgModemTx->ucTxBw, pstExtMsgModemTx->ucMcs, pstExtMsgModemTx->ucScs);
+                PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemTx->nLatitude), htonl(pstExtMsgModemTx->nLongitude));
+
+                usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemTx, htons(pstExtMsgModemTx->usLenth) + 4); // T, L, V 길이
+                if(usCalcCrc16 != ntohs(pstExtMsgModemTx->usCrc16))
+                {
+                    PrintError("[Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgModemTx->usCrc16), usCalcCrc16);
+                }
+
+                nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                if(nRet != FRAMEWORK_OK)
+                {
+                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                }
+
+                stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.ulTimeStamp = ntohll(pstExtMsgModemTx->ulTimeStamp);
+
+                nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                if(nRet != FRAMEWORK_OK)
+                {
+                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                }
+            }
+            else if (ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_RX)
+            {
+                PrintDebug("OBU Modem : Rx");
+                PrintDebug("unDevId[%u]", htonl(pstExtMsgModemRx->unDevId));
+                PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgModemRx->usHwVer), htons(pstExtMsgModemRx->usSwVer));
+                PrintDebug("nRssi[%d], ucRcpi[%d]", pstExtMsgModemRx->nRssi, pstExtMsgModemRx->ucRcpi);
+                PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemRx->nLatitude), htonl(pstExtMsgModemRx->nLongitude));
+
+                usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemRx, htons(pstExtMsgModemRx->usLenth) + 4);	// T, L, V 길이
+                if(usCalcCrc16 != ntohs(pstExtMsgModemRx->usCrc16))
+                {
+                    PrintError("[Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgModemRx->usCrc16), usCalcCrc16);
+                }
+
+                nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                if(nRet != FRAMEWORK_OK)
+                {
+                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                }
+
+                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.ulTimeStamp = ntohll(pstExtMsgModemRx->ulTimeStamp);
+
+                nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                if(nRet != FRAMEWORK_OK)
+                {
+                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                }
+            }
+            else
+            {
+                PrintError("Error type [ucStatus:%d]\n", ucStatus);
+                return nRet;
+            }
+
+            break;
+        }
+
+        case eMSG_MANAGER_EXT_MSG_DEV_TYPE_OBU:
+        {
+            pstExtMsgComm = (MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT*)pvExtMsgPkg;
+
+            PrintDebug("unDevId[%d]", htonl(pstExtMsgComm->unDevId));
+            PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgComm->usHwVer), htons(pstExtMsgComm->usSwVer));
+
+            nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+            if(nRet != FRAMEWORK_OK)
+            {
+                PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+            }
+
+            if(pstExtMsgComm->ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX)
+            {
+                stDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.ulTimeStamp = ntohll(pstExtMsgComm->ulTimeStamp);
+            }
+            else
+            {
+                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.ulTimeStamp = ntohll(pstExtMsgComm->ulTimeStamp);
+            }
+
+            nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+            if(nRet != FRAMEWORK_OK)
+            {
+                PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+            }
+
+            usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgComm, htons(pstExtMsgComm->usLenth) + 4);	// T, L, V 길이
+            if(usCalcCrc16 != ntohs(pstExtMsgComm->usCrc16))
+            {
+                PrintError("[Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgComm->usCrc16), usCalcCrc16);
+            }
+
+            break;
+        }
+
+        case eMSG_MANAGER_EXT_MSG_DEV_TYPE_RSU:
+        {
+            pstExtMsgComm = (MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT*)pvExtMsgPkg;
+
+            PrintDebug("RSU AP : %s", (pstExtMsgComm->ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX) ? "Tx":"Rx");
+            PrintDebug("unDevId[%d]", htonl(pstExtMsgComm->unDevId));
+            PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgComm->usHwVer), htons(pstExtMsgComm->usSwVer));
+            PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgComm->ulTimeStamp));
+
+            usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgComm, htons(pstExtMsgComm->usLenth) + 4);	// T, L, V 길이
+            if(usCalcCrc16 != ntohs(pstExtMsgComm->usCrc16))
+            {
+                PrintError("[Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgComm->usCrc16), usCalcCrc16);
+            }
+
+            break;
+        }
+
+        case eMSG_MANAGER_EXT_MSG_DEV_TYPE_RSU_MODEM:
+        {
+            pstExtMsgModemTx = (MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX*)pvExtMsgPkg;
+            pstExtMsgModemRx = (MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_RX*)pvExtMsgPkg;
+            ucStatus = pstExtMsgModemTx->ucStatus;
+
+            if (ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX)
+            {
+                PrintDebug("RSU Modem : Tx");
+                PrintDebug("unDevId[%u]", htonl(pstExtMsgModemTx->unDevId));
+                PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgModemTx->usHwVer), htons(pstExtMsgModemTx->usSwVer));
+                PrintDebug("ucTxPwr[%d], usTxFreq[%d], ucTxBw[%d], ucMcs[%d], ucScs[%d]", pstExtMsgModemTx->ucTxPwr, htons(pstExtMsgModemTx->usTxFreq), pstExtMsgModemTx->ucTxBw, pstExtMsgModemTx->ucMcs, pstExtMsgModemTx->ucScs);
+                PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemTx->nLatitude), htonl(pstExtMsgModemTx->nLongitude));
+                PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgModemTx->ulTimeStamp));
+
+                usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemTx, htons(pstExtMsgModemTx->usLenth) + 4);	// T, L, V 길이
+                if(usCalcCrc16 != ntohs(pstExtMsgModemTx->usCrc16))
+                {
+                    PrintError("[Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgModemTx->usCrc16), usCalcCrc16);
+                }
+            }
+            else if (ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_RX)
+            {
+                PrintDebug("RSU Modem : Rx");
+                PrintDebug("unDevId[%u]", htonl(pstExtMsgModemRx->unDevId));
+                PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgModemRx->usHwVer), htons(pstExtMsgModemRx->usSwVer));
+                PrintDebug("nRssi[%d], ucRcpi[%d]", pstExtMsgModemRx->nRssi, pstExtMsgModemRx->ucRcpi);
+                PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemRx->nLatitude), htonl(pstExtMsgModemRx->nLongitude));
+                PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgModemRx->ulTimeStamp));
+
+                usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemRx, htons(pstExtMsgModemRx->usLenth) + 4);	// T, L, V 길이
+                if(usCalcCrc16 != ntohs(pstExtMsgModemRx->usCrc16))
+                {
+                    PrintError("[Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgModemRx->usCrc16), usCalcCrc16);
+                }
+            }
+            else
+            {
+                PrintError("Error type [ucStatus:%d]\n", ucStatus);
+                return nRet;
+            }
+
+            break;
+        }
+
+        case eMSG_MANAGER_EXT_MSG_DEV_TYPE_RSU_CTL:
+        {
+            pstExtMsgCtrl = (MSG_MANAGER_EXT_MSG_TLVC_CONTROL_UNIT*)pvExtMsgPkg;
+
+            PrintDebug("RSU Controller : %s", (pstExtMsgCtrl->ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX) ? "Tx":"Rx");
+            PrintDebug("unDevId[%d]", htonl(pstExtMsgCtrl->unDevId));
+            PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgCtrl->usHwVer), htons(pstExtMsgCtrl->usSwVer));
+            PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgCtrl->ulTimeStamp));
+
+            usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgCtrl, htons(pstExtMsgCtrl->usLenth) + 4);	// T, L, V 길이
+            if(usCalcCrc16 != ntohs(pstExtMsgCtrl->usCrc16))
+            {
+                PrintError("Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMsgCtrl->usCrc16), usCalcCrc16);
+            }
+
+            break;
+        }
+
+        default:
+        {
+            PrintError("Error! unknown device type[%d]", *pucDeviceType);
+            break;
+        }
+    }
+
+    nRet = FRAMEWORK_OK;
+
+	return nRet;
+}
+
 static void P_MSG_MANAGER_PrintExtMsgPkg(void *pvExtMsgPkg)
 {
     MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX *pstExtMsgModemTx;
@@ -1127,6 +1361,18 @@ static void P_MSG_MANAGER_PrintExtMsgPkg(void *pvExtMsgPkg)
     uint8_t *pucDeviceType = (uint8_t*)pvExtMsgPkg + 6;	// T, L 뒤에 dev_type 존재
     uint16_t usCalcCrc16;
     uint8_t ucStatus;
+
+    if(pvExtMsgPkg == NULL)
+    {
+        PrintError("pstEventMsg is NULL");
+        return;
+    }
+
+    if(pucDeviceType == NULL)
+    {
+        PrintError("pucDeviceType is NULL");
+        return;
+    }
 
     switch(*pucDeviceType)
     {
@@ -1299,7 +1545,17 @@ static int32_t P_MSG_MANAGER_AnalyzeRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
     uint32_t unType;
     MSG_MANAGER_EXT_MSG_TLVC *pstRxPkg;
 
-    UNUSED(pstEventMsg);
+    if(pstEventMsg == NULL)
+    {
+        PrintError("pstEventMsg is NULL");
+        return nRet;
+    }
+
+    if(pucMsg == NULL)
+    {
+        PrintError("pucMsg is NULL");
+        return nRet;
+    }
 
     if (nRxLen > 0)
     {
@@ -1404,6 +1660,18 @@ static int32_t P_MSG_MANAGER_ProcessSsovPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEvent
     uint32_t ulExtMsgSsovCrcBuf = 0;
     uint16_t usExtMsgSsovCrc16 = 0, usCalcCrc16 = 0, usTempExtMsgSsovCrc16 = 0;
     uint32_t ulExtMsgSsovTotalPkgSize = 0;
+
+    if(pstEventMsg == NULL)
+    {
+        PrintError("pstEventMsg is NULL");
+        return nRet;
+    }
+
+    if(pvExtMsgPkg == NULL)
+    {
+        PrintError("pvExtMsgPkg is NULL");
+        return nRet;
+    }
 
     pstExtMsgSsov = (MSG_MANAGER_EXT_MSG_SSOV*)pvExtMsgPkg;
     usExtMsgSsovLength = ntohs(pstExtMsgSsov->usLength);
@@ -1700,7 +1968,12 @@ static int32_t P_MSG_MANAGER_ProcessRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
                 if(s_bMsgMgrLog == ON)
                 {
                     PrintWarn("Package : %d (Status Package)", ucNumPkgCnt);
-                    P_MSG_MANAGER_PrintExtMsgPkg(pvNextRxPkg);
+                }
+
+                nRet = P_MSG_MANAGER_ProcessExtMsgPkg(pstEventMsg, pvNextRxPkg);
+                if(nRet != FRAMEWORK_OK)
+                {
+                    PrintError("P_MSG_MANAGER_ProcessExtMsgPkg() is failed! [nRet:%d]", nRet);
                 }
             }
             else if (unType == MSG_MANAGER_EXT_MSG_SSOV_PKG)
@@ -1709,7 +1982,11 @@ static int32_t P_MSG_MANAGER_ProcessRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
                 {
                     PrintWarn("SSOV Package : %d\n\tPSID : %d, TLV lenth : %d", ucNumPkgCnt, unType, unTlvcPkgLen + 6);
                 }
-                P_MSG_MANAGER_ProcessSsovPkg(pstEventMsg, pvNextRxPkg);
+                nRet = P_MSG_MANAGER_ProcessSsovPkg(pstEventMsg, pvNextRxPkg);
+                if(nRet != FRAMEWORK_OK)
+                {
+                    PrintError("P_MSG_MANAGER_ProcessSsovPkg() is failed! [nRet:%d]", nRet);
+                }
             }
             else
             {
