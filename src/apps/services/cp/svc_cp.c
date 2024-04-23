@@ -370,9 +370,9 @@ static void *P_SVC_CP_TaskTx(void *arg)
                 PrintError("pstTimeManager is NULL!");
             }
 
-            /* Todo, when the device ready to share its timestamp */
-            s_stSvcCp.stDbV2xStatusTx.stDbV2xDevL1.ulTimeStamp = 19840919;
-            s_stSvcCp.stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp = 19850501;
+            /* Set at the Rx Device by Using Ext Msg */
+            s_stSvcCp.stDbV2xStatusTx.stDbV2xDevL1.ulTimeStamp = 0;
+            s_stSvcCp.stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp = 0;
 
             nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
             if(nFrameWorkRet != FRAMEWORK_OK)

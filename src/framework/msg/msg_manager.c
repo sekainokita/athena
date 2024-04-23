@@ -1205,7 +1205,7 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
                     PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                 }
 
-                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.ulTimeStamp = ntohll(pstExtMsgModemRx->ulTimeStamp);
+                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.ulTimeStamp = ntohll(pstExtMsgModemRx->ulTimeStamp);
 
                 nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
                 if(nRet != FRAMEWORK_OK)

@@ -214,12 +214,12 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusRx->stDbV2xDevL2.ulLatency = pstDbV2xStatusRx->stDbV2xDevL2.ulTimeStamp - pstDbV2xStatusTx->stDbV2xDevL2.ulTimeStamp;
     pstDbV2xStatusRx->stDbV2xDevL3.ulLatency = pstDbV2xStatusRx->stDbV2xDevL3.ulTimeStamp - pstDbV2xStatusTx->stDbV2xDevL3.ulTimeStamp;
 
-    if(s_bDbMgrLog  == TRUE)
+    if(s_bDbMgrLog == TRUE)
     {
         /* L1 e.g. 2023-09-14:13:40:10.8606 - 2023-09-14-13:00:10.7814 = 792us */
-        PrintTrace("Latency of Layer #1: Rx[%ld]-Tx[%ld]=[%ld]us->[%.3lf]ms", pstDbV2xStatusRx->stDbV2xDevL1.ulTimeStamp, pstDbV2xStatusTx->stDbV2xDevL1.ulTimeStamp, pstDbV2xStatusRx->stDbV2xDevL1.ulLatency, (float)pstDbV2xStatusRx->stDbV2xDevL1.ulLatency/1000.f);
-        PrintTrace("Latency of Layer #2: Rx[%ld]-Tx[%ld]=[%ld]us->[%.3lf]ms", pstDbV2xStatusRx->stDbV2xDevL2.ulTimeStamp, pstDbV2xStatusTx->stDbV2xDevL2.ulTimeStamp, pstDbV2xStatusRx->stDbV2xDevL2.ulLatency, (float)pstDbV2xStatusRx->stDbV2xDevL2.ulLatency/1000.f);
-        PrintTrace("Latency of Layer #3: Rx[%ld]-Tx[%ld]=[%ld]us->[%.3lf]ms", pstDbV2xStatusRx->stDbV2xDevL3.ulTimeStamp, pstDbV2xStatusTx->stDbV2xDevL3.ulTimeStamp, pstDbV2xStatusRx->stDbV2xDevL1.ulLatency, (float)pstDbV2xStatusRx->stDbV2xDevL3.ulLatency/1000.f);
+        PrintTrace("Latency of Layer #1: Rx[%ld]-Tx[%ld]=[%ld]us", pstDbV2xStatusRx->stDbV2xDevL1.ulTimeStamp, pstDbV2xStatusTx->stDbV2xDevL1.ulTimeStamp, pstDbV2xStatusRx->stDbV2xDevL1.ulLatency);
+        PrintTrace("Latency of Layer #2: Rx[%ld]-Tx[%ld]=[%ld]us", pstDbV2xStatusRx->stDbV2xDevL2.ulTimeStamp, pstDbV2xStatusTx->stDbV2xDevL2.ulTimeStamp, pstDbV2xStatusRx->stDbV2xDevL2.ulLatency);
+        PrintTrace("Latency of Layer #3: Rx[%ld]-Tx[%ld]=[%ld]us", pstDbV2xStatusRx->stDbV2xDevL3.ulTimeStamp, pstDbV2xStatusTx->stDbV2xDevL3.ulTimeStamp, pstDbV2xStatusRx->stDbV2xDevL3.ulLatency);
     }
 
     /* Todo */
@@ -1391,6 +1391,18 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
 
     memcpy(&stDbV2xStatusTx, pchPayload, sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
 
+    nRet = P_DB_MANAGER_UpdateStatus(pstEventMsg, &stDbV2xStatusTx, &stDbV2xStatusRx);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_UpdateStatus() is failed! [unRet:%d]", nRet);
+    }
+
+    nRet = P_DB_MANAGER_PrintStatus(&stDbV2xStatusTx, &stDbV2xStatusRx);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_PrintStatus() is failed! [unRet:%d]", nRet);
+    }
+
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusTx.stDbV2xDevL1.ulTimeStamp);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp);
@@ -1413,29 +1425,12 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
 
     fprintf(sh_pDbMgrRxMsg, "0x%x,", pstEventMsg->pstDbManagerWrite->unCrc32);
 
-    nRet = P_DB_MANAGER_UpdateStatus(pstEventMsg, &stDbV2xStatusTx, &stDbV2xStatusRx);
-    if (nRet != FRAMEWORK_OK)
-    {
-        PrintError("P_DB_MANAGER_UpdateStatus() is failed! [unRet:%d]", nRet);
-    }
-
-    if(s_bDbMgrLog == ON)
-    {
-        PrintDebug("[%ld]-[%ld]=[%ld]", stDbV2xStatusRx.stDbV2xDevL3.ulTimeStamp, stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp, stDbV2xStatusRx.stDbV2xDevL3.ulTimeStamp-stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp);
-    }
-
-    nRet = P_DB_MANAGER_PrintStatus(&stDbV2xStatusTx, &stDbV2xStatusRx);
-    if (nRet != FRAMEWORK_OK)
-    {
-        PrintError("P_DB_MANAGER_PrintStatus() is failed! [unRet:%d]", nRet);
-    }
-
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.stDbV2xDevL1.ulTimeStamp);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.stDbV2xDevL2.ulTimeStamp);
     fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.stDbV2xDevL3.ulTimeStamp);
-    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.stDbV2xDevL1.ulTimeStamp);
-    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.stDbV2xDevL2.ulTimeStamp);
-    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.stDbV2xDevL3.ulTimeStamp);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.stDbV2xDevL1.ulLatency);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.stDbV2xDevL2.ulLatency);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.stDbV2xDevL3.ulLatency);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stDbV2xDevL1.unDevId);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stDbV2xDevL2.unDevId);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stDbV2xDevL3.unDevId);
