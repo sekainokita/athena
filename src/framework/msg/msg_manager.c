@@ -1159,9 +1159,6 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
 
             if (ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX)
             {
-                PrintDebug("OBU Modem : Tx");
-                PrintDebug("unDevId[%u]", htonl(pstExtMsgModemTx->unDevId));
-                PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgModemTx->usHwVer), htons(pstExtMsgModemTx->usSwVer));
                 PrintDebug("ucTxPwr[%d], usTxFreq[%d], ucTxBw[%d], ucMcs[%d], ucScs[%d]", pstExtMsgModemTx->ucTxPwr, htons(pstExtMsgModemTx->usTxFreq), pstExtMsgModemTx->ucTxBw, pstExtMsgModemTx->ucMcs, pstExtMsgModemTx->ucScs);
                 PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemTx->nLatitude), htonl(pstExtMsgModemTx->nLongitude));
 
@@ -1178,6 +1175,9 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
                 }
 
                 stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.ulTimeStamp = ntohll(pstExtMsgModemTx->ulTimeStamp);
+                stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.unDevId = htonl(pstExtMsgModemTx->unDevId);
+                stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.usHwVer = htons(pstExtMsgModemTx->usHwVer);
+                stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.usSwVer = htons(pstExtMsgModemTx->usSwVer);
 
                 nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
                 if(nRet != FRAMEWORK_OK)
@@ -1187,9 +1187,6 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
             }
             else if (ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_RX)
             {
-                PrintDebug("OBU Modem : Rx");
-                PrintDebug("unDevId[%u]", htonl(pstExtMsgModemRx->unDevId));
-                PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgModemRx->usHwVer), htons(pstExtMsgModemRx->usSwVer));
                 PrintDebug("nRssi[%d], ucRcpi[%d]", pstExtMsgModemRx->nRssi, pstExtMsgModemRx->ucRcpi);
                 PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemRx->nLatitude), htonl(pstExtMsgModemRx->nLongitude));
 
@@ -1206,6 +1203,9 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
                 }
 
                 stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.ulTimeStamp = ntohll(pstExtMsgModemRx->ulTimeStamp);
+                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.unDevId = htonl(pstExtMsgModemRx->unDevId);
+                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.usHwVer = htons(pstExtMsgModemRx->usHwVer);
+                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.usSwVer = htons(pstExtMsgModemRx->usSwVer);
 
                 nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
                 if(nRet != FRAMEWORK_OK)
@@ -1226,9 +1226,6 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
         {
             pstExtMsgComm = (MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT*)pvExtMsgPkg;
 
-            PrintDebug("unDevId[%d]", htonl(pstExtMsgComm->unDevId));
-            PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgComm->usHwVer), htons(pstExtMsgComm->usSwVer));
-
             nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
             if(nRet != FRAMEWORK_OK)
             {
@@ -1238,10 +1235,16 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
             if(pstExtMsgComm->ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX)
             {
                 stDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.ulTimeStamp = ntohll(pstExtMsgComm->ulTimeStamp);
+                stDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.unDevId = htonl(pstExtMsgComm->unDevId);
+                stDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.usHwVer = htons(pstExtMsgComm->usHwVer);
+                stDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.usSwVer = htons(pstExtMsgComm->usSwVer);
             }
             else
             {
                 stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.ulTimeStamp = ntohll(pstExtMsgComm->ulTimeStamp);
+                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.unDevId = htonl(pstExtMsgComm->unDevId);
+                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.usHwVer = htons(pstExtMsgComm->usHwVer);
+                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.usSwVer = htons(pstExtMsgComm->usSwVer);
             }
 
             nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
