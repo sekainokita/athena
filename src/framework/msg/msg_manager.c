@@ -438,6 +438,9 @@ int32_t P_MSG_MANAGER_SetV2xWsrSetting(MSG_MANAGER_T *pstMsgManager)
         }
 	}
 
+    /* Temp : Will be Fixed by OBU */
+    nRet = FRAMEWORK_OK;
+
 	return nRet;
 }
 #else
@@ -1160,7 +1163,6 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
             if (ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX)
             {
                 PrintDebug("ucTxPwr[%d], usTxFreq[%d], ucTxBw[%d], ucMcs[%d], ucScs[%d]", pstExtMsgModemTx->ucTxPwr, htons(pstExtMsgModemTx->usTxFreq), pstExtMsgModemTx->ucTxBw, pstExtMsgModemTx->ucMcs, pstExtMsgModemTx->ucScs);
-                PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemTx->nLatitude), htonl(pstExtMsgModemTx->nLongitude));
 
                 usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemTx, htons(pstExtMsgModemTx->usLenth) + 4); // T, L, V 길이
                 if(usCalcCrc16 != ntohs(pstExtMsgModemTx->usCrc16))
@@ -1178,6 +1180,8 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
                 stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.unDevId = htonl(pstExtMsgModemTx->unDevId);
                 stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.usHwVer = htons(pstExtMsgModemTx->usHwVer);
                 stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.usSwVer = htons(pstExtMsgModemTx->usSwVer);
+                stDbV2xStatus.stV2xGpsInfoTx.nLatitudeNow = htonl(pstExtMsgModemTx->nLatitude);
+                stDbV2xStatus.stV2xGpsInfoTx.nLongitudeNow = htonl(pstExtMsgModemTx->nLongitude);
 
                 nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
                 if(nRet != FRAMEWORK_OK)
@@ -1188,7 +1192,6 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
             else if (ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_RX)
             {
                 PrintDebug("nRssi[%d], ucRcpi[%d]", pstExtMsgModemRx->nRssi, pstExtMsgModemRx->ucRcpi);
-                PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemRx->nLatitude), htonl(pstExtMsgModemRx->nLongitude));
 
                 usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemRx, htons(pstExtMsgModemRx->usLenth) + 4);	// T, L, V 길이
                 if(usCalcCrc16 != ntohs(pstExtMsgModemRx->usCrc16))
@@ -1206,6 +1209,8 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
                 stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.unDevId = htonl(pstExtMsgModemRx->unDevId);
                 stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.usHwVer = htons(pstExtMsgModemRx->usHwVer);
                 stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.usSwVer = htons(pstExtMsgModemRx->usSwVer);
+                stDbV2xStatus.stV2xGpsInfoRx.nLatitudeNow = htonl(pstExtMsgModemRx->nLatitude);
+                stDbV2xStatus.stV2xGpsInfoRx.nLongitudeNow = htonl(pstExtMsgModemRx->nLongitude);
 
                 nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
                 if(nRet != FRAMEWORK_OK)

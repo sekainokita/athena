@@ -224,7 +224,7 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
 
     pstDbV2xStatusRx->stDbV2xDevL1.unDevId = stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.unDevId;
     pstDbV2xStatusRx->stDbV2xDevL2.unDevId = stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.unDevId;
-    pstDbV2xStatusRx->stDbV2xDevL3.unDevId = pstEventMsg->pstDbV2x->unDeviceId;
+    pstDbV2xStatusRx->stDbV2xDevL3.unDevId = stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.unDevId; /* TODO-Update App Dev ID */
 
     pstDbV2xStatusRx->stDbV2xDevL1.usSwVer = stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.usSwVer;
     pstDbV2xStatusRx->stDbV2xDevL2.usSwVer = stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.usSwVer;
@@ -233,6 +233,10 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusRx->stDbV2xDevL1.usHwVer = stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.unDevId;
     pstDbV2xStatusRx->stDbV2xDevL2.usHwVer = stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.unDevId;
     pstDbV2xStatusRx->stDbV2xDevL3.usHwVer = pstEventMsg->pstDbV2x->usHwVer;
+
+    pstDbV2xStatusTx->stDbV2xDevL1.unDevId = stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.unDevId;
+    pstDbV2xStatusTx->stDbV2xDevL2.unDevId = stDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.unDevId;
+    pstDbV2xStatusTx->stDbV2xDevL3.unDevId = stDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.unDevId; /* TODO-Update App Dev ID */
 
     pstDbV2xStatusTx->stDbV2xDevL1.usSwVer = stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.usSwVer;
     pstDbV2xStatusTx->stDbV2xDevL2.usSwVer = stDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.usSwVer;
@@ -244,6 +248,27 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusRx->usRssi = 0;
     pstDbV2xStatusRx->eRsvLevel = 0;
 
+#if defined(CONFIG_GPS_OBU)
+    UNUSED(pstDi);
+
+    dRxlat = (double)stDbV2xStatus.stV2xGpsInfoRx.nLatitudeNow / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    dRxLon = (double)stDbV2xStatus.stV2xGpsInfoRx.nLongitudeNow / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+
+    dTxLat = (double)stDbV2xStatus.stV2xGpsInfoTx.nLatitudeNow / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    dTxLon = (double)stDbV2xStatus.stV2xGpsInfoTx.nLatitudeNow / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+
+    dDistMeter = DI_GPS_CalculateDistance(dRxlat, dRxLon, dTxLat, dTxLon);
+
+    pstDbV2xStatusTx->stTxPosition.nTxLatitude = stDbV2xStatus.stV2xGpsInfoTx.nLatitudeNow;
+    pstDbV2xStatusTx->stTxPosition.nTxLongitude = stDbV2xStatus.stV2xGpsInfoTx.nLatitudeNow;
+    pstDbV2xStatusTx->stTxPosition.nTxAttitude = 0;
+
+    pstDbV2xStatusRx->stRxPosition.unCommDistance = (uint32_t)(dDistMeter * SVC_CP_GPS_VALUE_CONVERT);
+
+    pstDbV2xStatusRx->stRxPosition.nRxLatitude = stDbV2xStatus.stV2xGpsInfoRx.nLatitudeNow;
+    pstDbV2xStatusRx->stRxPosition.nRxLongitude = stDbV2xStatus.stV2xGpsInfoRx.nLongitudeNow;
+    pstDbV2xStatusRx->stRxPosition.nRxAttitude = 0;
+#else
     pstDi = APP_GetDiInstance();
     if(pstDi == NULL)
     {
@@ -259,6 +284,7 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
 
     dRxlat = (double)pstDi->stDiGps.stDiGpsData.fLatitude;
     dRxLon = (double)pstDi->stDiGps.stDiGpsData.fLongitude;
+
     dTxLat = (double)pstDbV2xStatusTx->stTxPosition.nTxLatitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
     dTxLon = (double)pstDbV2xStatusTx->stTxPosition.nTxLongitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
 
@@ -267,10 +293,13 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusTx->stTxPosition.nTxLatitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLatitude * SVC_CP_GPS_VALUE_CONVERT);
     pstDbV2xStatusTx->stTxPosition.nTxLongitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLongitude * SVC_CP_GPS_VALUE_CONVERT);
     pstDbV2xStatusTx->stTxPosition.nTxAttitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fAltitude * SVC_CP_GPS_VALUE_CONVERT);
+
     pstDbV2xStatusRx->stRxPosition.unCommDistance = (uint32_t)(dDistMeter * SVC_CP_GPS_VALUE_CONVERT);
+
     pstDbV2xStatusRx->stRxPosition.nRxLatitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLatitude * SVC_CP_GPS_VALUE_CONVERT);
     pstDbV2xStatusRx->stRxPosition.nRxLongitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLongitude * SVC_CP_GPS_VALUE_CONVERT);
     pstDbV2xStatusRx->stRxPosition.nRxAttitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fAltitude * SVC_CP_GPS_VALUE_CONVERT);
+#endif
 
     if(stDbV2xStatus.bFirstPacket == TRUE)
     {
