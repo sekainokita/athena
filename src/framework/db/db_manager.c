@@ -260,7 +260,7 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     dDistMeter = DI_GPS_CalculateDistance(dRxlat, dRxLon, dTxLat, dTxLon);
 
     pstDbV2xStatusTx->stTxPosition.nTxLatitude = stDbV2xStatus.stV2xGpsInfoTx.nLatitudeNow;
-    pstDbV2xStatusTx->stTxPosition.nTxLongitude = stDbV2xStatus.stV2xGpsInfoTx.nLatitudeNow;
+    pstDbV2xStatusTx->stTxPosition.nTxLongitude = stDbV2xStatus.stV2xGpsInfoTx.nLongitudeNow;
     pstDbV2xStatusTx->stTxPosition.nTxAttitude = 0;
 
     pstDbV2xStatusRx->stRxPosition.unCommDistance = (uint32_t)(dDistMeter * SVC_CP_GPS_VALUE_CONVERT);
