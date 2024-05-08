@@ -244,6 +244,12 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusTx->stDbV2xDevL1.usHwVer = stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.usHwVer;
     pstDbV2xStatusTx->stDbV2xDevL2.usHwVer = stDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.usHwVer;
 
+    pstDbV2xStatusTx->ucTxPwr = stDbV2xStatus.stV2xStatusTx.ucTxPwr;
+    pstDbV2xStatusTx->usTxFreq = stDbV2xStatus.stV2xStatusTx.usTxFreq;
+    pstDbV2xStatusTx->ucTxBw = stDbV2xStatus.stV2xStatusTx.ucTxBw;
+    pstDbV2xStatusTx->ucScs = stDbV2xStatus.stV2xStatusTx.ucScs;
+    pstDbV2xStatusTx->ucMcs = stDbV2xStatus.stV2xStatusTx.ucMcs;
+
     pstDbV2xStatusRx->unTotalCommDevCnt = DB_MGR_DEFAULT_COMM_DEV_CNT;
     pstDbV2xStatusRx->usRssi = 0;
     pstDbV2xStatusRx->eRsvLevel = 0;
@@ -955,9 +961,11 @@ static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
             fprintf(sh_pDbMgrTxMsg, "ulTxTimeStampL2,");
             fprintf(sh_pDbMgrTxMsg, "ulTxTimeStampL3,");
             fprintf(sh_pDbMgrTxMsg, "unRxTargetDeviceId,");
-            fprintf(sh_pDbMgrTxMsg, "eChannel,");
-            fprintf(sh_pDbMgrTxMsg, "sPower,");
-            fprintf(sh_pDbMgrTxMsg, "eBandwidth,");
+            fprintf(sh_pDbMgrTxMsg, "usTxFreq,");
+            fprintf(sh_pDbMgrTxMsg, "ucTxPwr,");
+            fprintf(sh_pDbMgrTxMsg, "ucTxBw,");
+            fprintf(sh_pDbMgrTxMsg, "ucScs,");
+            fprintf(sh_pDbMgrTxMsg, "ucMcs,");
             fprintf(sh_pDbMgrTxMsg, "usTxRatio,");
             fprintf(sh_pDbMgrTxMsg, "nTxLatitude,");
             fprintf(sh_pDbMgrTxMsg, "nTxLongitude,");
@@ -1020,9 +1028,11 @@ static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
             fprintf(sh_pDbMgrRxMsg, "usTxHwVerL2,");
             fprintf(sh_pDbMgrRxMsg, "usTxHwVerL3,");
             fprintf(sh_pDbMgrRxMsg, "unRxTargetDeviceId,");
-            fprintf(sh_pDbMgrRxMsg, "eChannel,");
-            fprintf(sh_pDbMgrRxMsg, "sPower,");
-            fprintf(sh_pDbMgrRxMsg, "eBandwidth,");
+            fprintf(sh_pDbMgrRxMsg, "usTxFreq,");
+            fprintf(sh_pDbMgrRxMsg, "ucTxPwr,");
+            fprintf(sh_pDbMgrRxMsg, "ucTxBw,");
+            fprintf(sh_pDbMgrRxMsg, "ucScs,");
+            fprintf(sh_pDbMgrRxMsg, "ucMcs,");
             fprintf(sh_pDbMgrRxMsg, "usTxRatio,");
             fprintf(sh_pDbMgrRxMsg, "nTxLatitude,");
             fprintf(sh_pDbMgrRxMsg, "nTxLongitude,");
@@ -1292,9 +1302,11 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusTx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrTxMsg, "%ld,", stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp);
     fprintf(sh_pDbMgrTxMsg, "%ld,", stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp);
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.unRxTargetDeviceId);
-    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.eChannel);
-    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.sPower);
-    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.eBandwidth);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.usTxFreq);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.ucTxPwr);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.ucTxBw);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.ucScs);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.ucMcs);
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.usTxRatio);
     dTemp = (double)stDbV2xStatusTx.stTxPosition.nTxLatitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
     fprintf(sh_pDbMgrTxMsg, "%lf,", dTemp);
@@ -1474,9 +1486,11 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.stDbV2xDevL2.usHwVer);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.stDbV2xDevL3.usHwVer);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.unRxTargetDeviceId);
-    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.eChannel);
-    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.sPower);
-    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.eBandwidth);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.usTxFreq);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.ucTxPwr);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.ucTxBw);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.ucScs);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.ucMcs);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.usTxRatio);
 
     dTemp = (double)stDbV2xStatusTx.stTxPosition.nTxLatitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;

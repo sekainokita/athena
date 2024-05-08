@@ -177,9 +177,12 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
     pstSvcCp->stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp = 0;
     pstSvcCp->stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp = 0;
     pstSvcCp->stDbV2xStatusTx.unRxTargetDeviceId = 0;
-    pstSvcCp->stDbV2xStatusTx.eChannel = DB_V2X_STATUS_CHANNEL_5_895_5_905;
-    pstSvcCp->stDbV2xStatusTx.sPower = MSG_MANAGER_V2X_TX_POWER;
-    pstSvcCp->stDbV2xStatusTx.eBandwidth = DB_V2X_STATUS_BANDWIDTH_20MHZ;
+    pstSvcCp->stDbV2xStatusTx.usTxFreq = MSG_MANAGER_V2X_TX_FREQ;
+    pstSvcCp->stDbV2xStatusTx.ucTxPwr = MSG_MANAGER_V2X_TX_POWER;
+    pstSvcCp->stDbV2xStatusTx.ucTxBw = MSG_MANAGER_V2X_TX_BW;
+    pstSvcCp->stDbV2xStatusTx.ucScs = 0;
+    pstSvcCp->stDbV2xStatusTx.ucMcs = 0;
+
     pstSvcCp->stDbV2xStatusTx.usTxRatio = pstSvcCp->stMsgManagerTx.unTxDelay;
     pstSvcCp->stDbV2xStatusTx.stTxPosition.nTxLatitude = 0;
     pstSvcCp->stDbV2xStatusTx.stTxPosition.nTxLongitude = 0;
@@ -738,10 +741,11 @@ void SVC_CP_ShowSettings(SVC_CP_T *pstSvcCp)
     PrintDebug(" stDbV2xDevL2.ulTimeStamp [%ld]", pstSvcCp->stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp);
     PrintDebug(" stDbV2xDevL3.ulTimeStamp [%ld]", pstSvcCp->stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp);
     PrintDebug(" unRxTargetDeviceId [%d]", pstSvcCp->stDbV2xStatusTx.unRxTargetDeviceId);
-    PrintDebug(" eChannel [%d]", pstSvcCp->stDbV2xStatusTx.eChannel);
-    PrintDebug(" sPower [%d]", pstSvcCp->stDbV2xStatusTx.sPower);
-    PrintDebug(" eBandwidth [%d]", pstSvcCp->stDbV2xStatusTx.eBandwidth);
-    PrintDebug(" eChannel [%d]", pstSvcCp->stDbV2xStatusTx.eChannel);
+    PrintDebug(" usTxFreq [%d]", pstSvcCp->stDbV2xStatusTx.usTxFreq);
+    PrintDebug(" ucTxPwr [%d]", pstSvcCp->stDbV2xStatusTx.ucTxPwr);
+    PrintDebug(" ucTxBw [%d]", pstSvcCp->stDbV2xStatusTx.ucTxBw);
+    PrintDebug(" ucScs [%d]", pstSvcCp->stDbV2xStatusTx.ucScs);
+    PrintDebug(" ucMcs [%d]", pstSvcCp->stDbV2xStatusTx.ucMcs);
     PrintDebug(" usTxRatio [%d]", pstSvcCp->stDbV2xStatusTx.usTxRatio);
     PrintDebug(" nTxLatitude [%d]", pstSvcCp->stDbV2xStatusTx.stTxPosition.nTxLatitude);
     PrintDebug(" nTxLongitude [%d]", pstSvcCp->stDbV2xStatusTx.stTxPosition.nTxLongitude);

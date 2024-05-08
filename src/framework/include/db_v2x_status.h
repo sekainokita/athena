@@ -210,9 +210,11 @@ typedef struct DB_V2X_POSITION_TX_t {
 * @param stDbV2xDevL2                           The system layer 2 device info
 * @param stDbV2xDevL3                           The system layer 3 device info
 * @param unRxTargetDeviceId                     Unique Serial Number of the device to which you want to send the message; there can be more than one transfer destination
-* @param eChannel                               Transmission channel number
-* @param sPower                                 Transmission strength (dBm)
-* @param eBandwidth                             Communication frequency bandwidth, Communication frequency bandwidth status at the time the message is received
+* @param usTxFreq                               Transmission frequency
+* @param ucTxPwr                                Transmission strength (dBm)
+* @param ucTxBw                                 Communication frequency bandwidth, Communication frequency bandwidth status at the time the message is received
+* @param ucScs                                  SCS
+* @param ucMcs                                  MCS
 * @param usTxRatio                              Tx packet trasmisstion ratio (frequency) (10ms, 100ms, etc)
 * @param stTxPosition                           see DB_V2X_POSITION_TX_T
 * @param unSeqNum                               sequence number (Sequential transmission of values ​​from 0 to N)
@@ -227,9 +229,11 @@ typedef struct DB_V2X_STATUS_TX_t {
     DB_V2X_DEV_INFO_T                           stDbV2xDevL2;
     DB_V2X_DEV_INFO_T                           stDbV2xDevL3;
     uint32_t                                    unRxTargetDeviceId;
-    DB_V2X_STATUS_CHANNEL_E                     eChannel;
-    int16_t                                     sPower;
-    DB_V2X_STATUS_BANDWIDTH_E                   eBandwidth;
+    uint8_t                                     ucTxPwr;
+    uint16_t                                    usTxFreq;
+    uint8_t                                     ucTxBw;
+    uint8_t                                     ucScs;
+    uint8_t                                     ucMcs;
     uint16_t                                    usTxRatio;
     DB_V2X_POSITION_TX_T                        stTxPosition;
     uint32_t                                    unSeqNum;

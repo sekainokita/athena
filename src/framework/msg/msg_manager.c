@@ -1180,6 +1180,12 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
                 stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.unDevId = htonl(pstExtMsgModemTx->unDevId);
                 stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.usHwVer = htons(pstExtMsgModemTx->usHwVer);
                 stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.usSwVer = htons(pstExtMsgModemTx->usSwVer);
+                stDbV2xStatus.stV2xStatusTx.ucTxPwr = pstExtMsgModemTx->ucTxPwr;
+                stDbV2xStatus.stV2xStatusTx.usTxFreq = htons(pstExtMsgModemTx->usTxFreq);
+                stDbV2xStatus.stV2xStatusTx.ucTxBw = pstExtMsgModemTx->ucTxBw;
+
+                stDbV2xStatus.stV2xStatusTx.ucScs = pstExtMsgModemTx->ucScs;
+                stDbV2xStatus.stV2xStatusTx.ucMcs = pstExtMsgModemTx->ucMcs;
                 stDbV2xStatus.stV2xGpsInfoTx.nLatitudeNow = htonl(pstExtMsgModemTx->nLatitude);
                 stDbV2xStatus.stV2xGpsInfoTx.nLongitudeNow = htonl(pstExtMsgModemTx->nLongitude);
 

@@ -57,6 +57,8 @@
 * @param MSG_MANAGER_V2X_TX_POWER       DSRC (0 ~ 23, Korea 20), C-V2X (-30~23)
 */
 #define MSG_MANAGER_V2X_TX_POWER                    (20)
+#define MSG_MANAGER_V2X_TX_BW                       (20)
+#define MSG_MANAGER_V2X_TX_FREQ                     (5915)
 
 #define MSG_MANAGER_V2X_TX_PROFILE_ID               (100)
 #define MSG_MANAGER_V2X_TX_PEER_L2_ID               (0)
