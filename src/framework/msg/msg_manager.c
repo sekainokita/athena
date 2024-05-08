@@ -1162,8 +1162,6 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
 
             if (ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX)
             {
-                PrintDebug("ucTxPwr[%d], usTxFreq[%d], ucTxBw[%d], ucMcs[%d], ucScs[%d]", pstExtMsgModemTx->ucTxPwr, htons(pstExtMsgModemTx->usTxFreq), pstExtMsgModemTx->ucTxBw, pstExtMsgModemTx->ucMcs, pstExtMsgModemTx->ucScs);
-
                 usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemTx, htons(pstExtMsgModemTx->usLenth) + 4); // T, L, V 길이
                 if(usCalcCrc16 != ntohs(pstExtMsgModemTx->usCrc16))
                 {
@@ -1197,8 +1195,6 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
             }
             else if (ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_RX)
             {
-                PrintDebug("nRssi[%d], ucRcpi[%d]", pstExtMsgModemRx->nRssi, pstExtMsgModemRx->ucRcpi);
-
                 usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemRx, htons(pstExtMsgModemRx->usLenth) + 4);	// T, L, V 길이
                 if(usCalcCrc16 != ntohs(pstExtMsgModemRx->usCrc16))
                 {
@@ -1215,6 +1211,9 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
                 stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.unDevId = htonl(pstExtMsgModemRx->unDevId);
                 stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.usHwVer = htons(pstExtMsgModemRx->usHwVer);
                 stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.usSwVer = htons(pstExtMsgModemRx->usSwVer);
+                stDbV2xStatus.stV2xStatusRx.nRssi = pstExtMsgModemRx->nRssi;
+                stDbV2xStatus.stV2xStatusRx.ucRcpi = pstExtMsgModemRx->ucRcpi;
+
                 stDbV2xStatus.stV2xGpsInfoRx.nLatitudeNow = htonl(pstExtMsgModemRx->nLatitude);
                 stDbV2xStatus.stV2xGpsInfoRx.nLongitudeNow = htonl(pstExtMsgModemRx->nLongitude);
 

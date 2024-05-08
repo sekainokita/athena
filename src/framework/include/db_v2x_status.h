@@ -166,7 +166,8 @@ typedef struct DB_V2X_DEV_INFO_t {
 * @param stDbV2xDevL3                           The system layer 3 device info
 * @param unRxVehicleSpeed                       Rx vehicle speed (Rx vehicle speed (if available), if not available, set the experimental value manually, default 60km/h)
 * @param unTotalCommDevCnt                      The total number of devices that are currently simultaneously connected and transmitting/receiving (the count number of all device IDs currently received and stored by the Rx device)
-* @param usRssi                                 Receive Signal Strength Indication, The total signal strength of the antenna at the time the message was received
+* @param nRssi                                  Receive Signal Strength Indication, The total signal strength of the antenna at the time the message was received
+* @param ucRcpi                                 RCPI
 * @param eRsvLevel                              Receive signal level, the level of the received signal strength of the mobile communication at the time the message is received (antenna signal)
 * @param stRxPosition                           see DB_V2X_POSITION_RX_T
 * @param ucErrIndicator                         If an error occurs in the sequence in the Tx Continuity Counter transmitted to Tx, an error is displayed (ok : 0, error : 1)
@@ -181,7 +182,8 @@ typedef struct DB_V2X_STATUS_RX_t {
     DB_V2X_DEV_INFO_T                           stDbV2xDevL3;
     uint16_t                                    unRxVehicleSpeed;
     uint32_t                                    unTotalCommDevCnt;
-    uint16_t                                    usRssi;
+    uint16_t                                    nRssi;
+    uint8_t                                     ucRcpi;
     DB_V2X_STATUS_RSV_LEVEL_E                   eRsvLevel;
     DB_V2X_POSITION_RX_T                        stRxPosition;
     uint8_t                                     ucErrIndicator;

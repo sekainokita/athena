@@ -251,7 +251,8 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusTx->ucMcs = stDbV2xStatus.stV2xStatusTx.ucMcs;
 
     pstDbV2xStatusRx->unTotalCommDevCnt = DB_MGR_DEFAULT_COMM_DEV_CNT;
-    pstDbV2xStatusRx->usRssi = 0;
+    pstDbV2xStatusRx->nRssi = 0;
+    pstDbV2xStatusRx->ucRcpi = 0;
     pstDbV2xStatusRx->eRsvLevel = 0;
 
 #if defined(CONFIG_GPS_OBU)
@@ -1061,7 +1062,8 @@ static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
             fprintf(sh_pDbMgrRxMsg, "usRxHwVerL3,");
             fprintf(sh_pDbMgrRxMsg, "unRxVehicleSpeed,");
             fprintf(sh_pDbMgrRxMsg, "unTotalCommDevCnt,");
-            fprintf(sh_pDbMgrRxMsg, "usRssi,");
+            fprintf(sh_pDbMgrRxMsg, "nRssi,");
+            fprintf(sh_pDbMgrRxMsg, "ucRcpi,");
             fprintf(sh_pDbMgrRxMsg, "eRsvLevel,");
             fprintf(sh_pDbMgrRxMsg, "usCommDistance,");
             fprintf(sh_pDbMgrRxMsg, "nRxLatitude,");
@@ -1523,7 +1525,8 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stDbV2xDevL3.usHwVer);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unRxVehicleSpeed);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unTotalCommDevCnt);
-    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.usRssi);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.nRssi);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.ucRcpi);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.eRsvLevel);
 
     pstDi = APP_GetDiInstance();
