@@ -7,6 +7,8 @@ import QtQuick.Controls
 import QtLocation
 import QtPositioning
 import Venus
+import Qt.LogFilePositionSource
+
 
 ApplicationWindow {
     id: appWindow
@@ -14,6 +16,8 @@ ApplicationWindow {
     property variant minimap
     property variant plugin
     property variant parameters
+    property variant addLocation: 0.000001
+    property LogFilePositionSource gpsClass: LogFilePositionSource{}
 
     //defaults
     //! [routecoordinate]
@@ -60,7 +64,7 @@ ApplicationWindow {
             mapview.map.slidersExpanded = panelExpanded
         } else {
             // Use an integer ZL to enable nearest interpolation, if possible.
-            mapview.map.zoomLevel = Math.floor((mapview.map.maximumZoomLevel - mapview.map.minimumZoomLevel)/2)
+            mapview.map.zoomLevel = Math.floor((mapview.map.maximumZoomLevel))
             // defaulting to 45 degrees, if possible.
             mapview.map.fieldOfView = Math.min(Math.max(45.0, mapview.map.minimumFieldOfView), mapview.maximumFieldOfView)
         }
@@ -97,9 +101,13 @@ ApplicationWindow {
         }
     }
 
-    title: qsTr("Venus")
-    height: 640
-    width: 360
+    LogFilePositionSource {
+        id: vehiclePositionSrc
+    }
+
+    title: qsTr("KETI Copyright - VENUS APPLICATION")
+    height: 1080
+    width: 1920
     visible: true
     menuBar: mainMenu
 
@@ -270,6 +278,27 @@ ApplicationWindow {
         }
     }
 
+    // Allow outside access (optional)
+    property alias timer: timer
+
+    Timer {
+        id: timer
+
+        // Start the timer and execute the provided callback on every X milliseconds
+        function startTimer(callback, milliseconds) {
+            timer.interval = milliseconds;
+            timer.repeat = true;
+            timer.triggered.connect(callback);
+            timer.start();
+        }
+
+        // Stop the timer and unregister the callback
+        function stopTimer(callback) {
+            timer.stop();
+            timer.triggered.disconnect(callback);
+        }
+    }
+
     MarkerPopupMenu {
         id: markerPopupMenu
 
@@ -297,6 +326,50 @@ ApplicationWindow {
             stackView.pop(page)
         }
 
+        function updatePosition()
+        {
+            var getLatitude;
+            var getLongitude;
+
+            getLatitude = gpsClass.getGpsLatitude()
+            getLongitude = gpsClass.getGpsLongitude()
+            console.log("getLatitude:", getLatitude, "getLongitude", getLongitude);
+
+            //mapview.markers[mapview.currentMarker].coordinate.latitude = mapview.markers[mapview.currentMarker].coordinate.latitude + addLocation
+            //mapview.markers[mapview.currentMarker].coordinate.longitude = mapview.markers[mapview.currentMarker].coordinate.longitude + addLocation
+
+            mapview.markers[mapview.currentMarker].coordinate.latitude = getLatitude
+            mapview.markers[mapview.currentMarker].coordinate.longitude = getLongitude
+
+            mapview.map.center.latitude = mapview.markers[mapview.currentMarker].coordinate.latitude;
+            mapview.map.center.longitude = mapview.markers[mapview.currentMarker].coordinate.longitude;
+        }
+
+        function coordinateGpsInfo(latitude, longitude)
+        {
+            for (var i = 0; i < 5; i++)
+            {
+                latitude = latitude+0.00001
+                longitude = longitude+0.00001
+                console.log(i, latitude, longitude)
+
+                mapview.markers[mapview.currentMarker].coordinate.latitude = latitude
+                mapview.markers[mapview.currentMarker].coordinate.longitude = longitude
+                mapview.map.center.latitude = latitude;
+                mapview.map.center.longitude = longitude;
+            }
+
+            //vehiclePositionSrc.positionUpdated(coordinate)
+            //var coord = coordinate;
+            //console.log("Coordinate:", coord.longitude, coord.latitude);
+            var getLatitude;
+            var getLongitude;
+            //getLatitude = gpsClass.getGpsInfo(latitude, longitude)
+            getLatitude = gpsClass.getGpsLatitude()
+            getLongitude = gpsClass.getGpsLongitude()
+            console.log("getLatitude:", getLatitude, "getLongitude", getLongitude);
+        }
+
         onItemClicked: (item) => {
             stackView.pop(page)
             switch (item) {
@@ -309,6 +382,15 @@ ApplicationWindow {
                 break;
             case "moveMarkerTo":
                 askForCoordinate()
+                break;
+            case "coordinateGpsInfo":
+                coordinateGpsInfo(mapview.markers[mapview.currentMarker].coordinate.latitude, mapview.markers[mapview.currentMarker].coordinate.longitude)
+                break;
+            case "updatePositionStart":
+                timer.startTimer(updatePosition, 10)
+                break;
+            case "updatePositionStop":
+                timer.stopTimer(updatePosition)
                 break;
             case "routeToNextPoint":
             case "routeToNextPoints":
