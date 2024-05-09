@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 #else
     engine.rootContext()->setContextProperty("supportsSsl", false);
 #endif
-    engine.loadFromModule("MapViewer", "Main");
+    engine.loadFromModule("Venus", "Main");
 
     auto *item = engine.rootObjects().value(0);
     if (item == nullptr)

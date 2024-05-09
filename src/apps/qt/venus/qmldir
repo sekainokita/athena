@@ -1,5 +1,5 @@
-module MapViewer
-prefer :/qt/qml/MapViewer/
+module Venus
+prefer :/qt/qml/Venus/
 Main 1.0 Main.qml
 Helper 1.0 helper.js
 MapComponent 1.0 map/MapComponent.qml

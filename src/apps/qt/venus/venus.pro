@@ -39,7 +39,7 @@ qml_resources.files = \
     resources/scale.png \
     resources/scale_end.png
 
-qml_resources.prefix = /qt/qml/MapViewer
+qml_resources.prefix = /qt/qml/Venus
 
 RESOURCES = qml_resources
 

@@ -30,7 +30,7 @@ target_link_libraries(qml_location_mapviewer PUBLIC
 )
 
 qt_add_qml_module(qml_location_mapviewer
-    URI MapViewer
+    URI Venus
     VERSION 1.0
     QML_FILES
         "forms/Geocode.qml"
