@@ -1,0 +1,34 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/qt/qml/MapViewer">
+<file alias="qmldir">/home/bman/work/athena/src/apps/qt/mapviewer/qmldir</file>
+<file alias="Main.qml">/home/bman/work/athena/src/apps/qt/mapviewer/Main.qml</file>
+<file alias="helper.js">/home/bman/work/athena/src/apps/qt/mapviewer/helper.js</file>
+<file alias="map/MapComponent.qml">/home/bman/work/athena/src/apps/qt/mapviewer/map/MapComponent.qml</file>
+<file alias="map/MapSliders.qml">/home/bman/work/athena/src/apps/qt/mapviewer/map/MapSliders.qml</file>
+<file alias="map/Marker.qml">/home/bman/work/athena/src/apps/qt/mapviewer/map/Marker.qml</file>
+<file alias="map/MiniMap.qml">/home/bman/work/athena/src/apps/qt/mapviewer/map/MiniMap.qml</file>
+<file alias="menus/ItemPopupMenu.qml">/home/bman/work/athena/src/apps/qt/mapviewer/menus/ItemPopupMenu.qml</file>
+<file alias="menus/MainMenu.qml">/home/bman/work/athena/src/apps/qt/mapviewer/menus/MainMenu.qml</file>
+<file alias="menus/MapPopupMenu.qml">/home/bman/work/athena/src/apps/qt/mapviewer/menus/MapPopupMenu.qml</file>
+<file alias="menus/MarkerPopupMenu.qml">/home/bman/work/athena/src/apps/qt/mapviewer/menus/MarkerPopupMenu.qml</file>
+<file alias="forms/Geocode.qml">/home/bman/work/athena/src/apps/qt/mapviewer/forms/Geocode.qml</file>
+<file alias="forms/GeocodeForm.ui.qml">/home/bman/work/athena/src/apps/qt/mapviewer/forms/GeocodeForm.ui.qml</file>
+<file alias="forms/Message.qml">/home/bman/work/athena/src/apps/qt/mapviewer/forms/Message.qml</file>
+<file alias="forms/MessageForm.ui.qml">/home/bman/work/athena/src/apps/qt/mapviewer/forms/MessageForm.ui.qml</file>
+<file alias="forms/ReverseGeocode.qml">/home/bman/work/athena/src/apps/qt/mapviewer/forms/ReverseGeocode.qml</file>
+<file alias="forms/ReverseGeocodeForm.ui.qml">/home/bman/work/athena/src/apps/qt/mapviewer/forms/ReverseGeocodeForm.ui.qml</file>
+<file alias="forms/RouteCoordinate.qml">/home/bman/work/athena/src/apps/qt/mapviewer/forms/RouteCoordinate.qml</file>
+<file alias="forms/Locale.qml">/home/bman/work/athena/src/apps/qt/mapviewer/forms/Locale.qml</file>
+<file alias="forms/LocaleForm.ui.qml">/home/bman/work/athena/src/apps/qt/mapviewer/forms/LocaleForm.ui.qml</file>
+<file alias="forms/RouteAddress.qml">/home/bman/work/athena/src/apps/qt/mapviewer/forms/RouteAddress.qml</file>
+<file alias="forms/RouteAddressForm.ui.qml">/home/bman/work/athena/src/apps/qt/mapviewer/forms/RouteAddressForm.ui.qml</file>
+<file alias="forms/RouteCoordinateForm.ui.qml">/home/bman/work/athena/src/apps/qt/mapviewer/forms/RouteCoordinateForm.ui.qml</file>
+<file alias="forms/RouteList.qml">/home/bman/work/athena/src/apps/qt/mapviewer/forms/RouteList.qml</file>
+<file alias="forms/RouteListDelegate.qml">/home/bman/work/athena/src/apps/qt/mapviewer/forms/RouteListDelegate.qml</file>
+<file alias="forms/RouteListHeader.qml">/home/bman/work/athena/src/apps/qt/mapviewer/forms/RouteListHeader.qml</file>
+<file alias="resources/marker.png">/home/bman/work/athena/src/apps/qt/mapviewer/resources/marker.png</file>
+<file alias="resources/marker_blue.png">/home/bman/work/athena/src/apps/qt/mapviewer/resources/marker_blue.png</file>
+<file alias="resources/scale.png">/home/bman/work/athena/src/apps/qt/mapviewer/resources/scale.png</file>
+<file alias="resources/scale_end.png">/home/bman/work/athena/src/apps/qt/mapviewer/resources/scale_end.png</file>
+</qresource>
+</RCC>
