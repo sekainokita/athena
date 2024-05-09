@@ -18,7 +18,7 @@ LogFilePositionSource::LogFilePositionSource(QObject *parent)
 {
     connect(timer, &QTimer::timeout, this, &LogFilePositionSource::readNextPosition);
 
-    logFile->setFileName("../ui/simplelog.txt");
+    logFile->setFileName(":/simplelog.txt");
     if (!logFile->open(QIODevice::ReadOnly))
     {
         qWarning() << "Error: cannot open source file" << logFile->fileName();

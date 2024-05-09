@@ -48,7 +48,9 @@ qml_resources.files = \
 
 qml_resources.prefix = /qt/qml/Venus
 
-RESOURCES = qml_resources
+RESOURCES += \
+    qml_resources \
+    logfile.qrc
 
 target.path = $$[QT_INSTALL_EXAMPLES]/location/venus
 INSTALLS += target
