@@ -1,7 +1,7 @@
 # Generated from mapviewer.pro.
 
 cmake_minimum_required(VERSION 3.16)
-project(qml_location_mapviewer LANGUAGES CXX)
+project(venus LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -15,11 +15,11 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Network Quick Positioning Loca
 
 qt_standard_project_setup(REQUIRES 6.5)
 
-qt_add_executable(qml_location_mapviewer WIN32 MACOSX_BUNDLE
+qt_add_executable(venus WIN32 MACOSX_BUNDLE
     main.cpp
 )
 
-target_link_libraries(qml_location_mapviewer PUBLIC
+target_link_libraries(venus PUBLIC
     Qt::Core
     Qt::Gui
     Qt::Location
@@ -29,7 +29,7 @@ target_link_libraries(qml_location_mapviewer PUBLIC
     Qt::Quick
 )
 
-qt_add_qml_module(qml_location_mapviewer
+qt_add_qml_module(venus
     URI Venus
     VERSION 1.0
     QML_FILES
@@ -66,7 +66,7 @@ qt_add_qml_module(qml_location_mapviewer
     )
 
 if(QT_FEATURE_geoservices_maplibregl)
-    target_link_libraries(qml_location_mapviewer PUBLIC
+    target_link_libraries(venus PUBLIC
         Qt::Sql
     )
 endif()
@@ -82,10 +82,10 @@ if (ANDROID)
     FetchContent_MakeAvailable(android_openssl)
 
     include(${android_openssl_SOURCE_DIR}/android_openssl.cmake)
-    add_android_openssl_libraries(qml_location_mapviewer)
+    add_android_openssl_libraries(venus)
 endif()
 
-install(TARGETS qml_location_mapviewer
+install(TARGETS venus
     RUNTIME DESTINATION "${INSTALL_EXAMPLEDIR}"
     BUNDLE DESTINATION "${INSTALL_EXAMPLEDIR}"
     LIBRARY DESTINATION "${INSTALL_EXAMPLEDIR}"

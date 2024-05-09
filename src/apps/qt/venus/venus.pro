@@ -1,4 +1,4 @@
-TARGET = qml_location_mapviewer
+TARGET = venus
 TEMPLATE = app
 
 QT += qml network quick positioning location
