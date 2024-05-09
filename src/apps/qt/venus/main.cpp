@@ -5,6 +5,8 @@
 #include <QtQml/QQmlContext>
 
 #include <QtGui/QGuiApplication>
+#include "clientapplication.h"
+#include "logfilepositionsource.h"
 
 #if QT_CONFIG(ssl)
 #include <QtNetwork/QSslSocket>
@@ -52,7 +54,7 @@ int main(int argc, char *argv[])
 #endif
 
     QGuiApplication application(argc, argv);
-    QCoreApplication::setApplicationName(u"QtLocation Mapviewer example"_s);
+    QCoreApplication::setApplicationName(u"KETI Venus Application"_s);
 
     QStringList args = QCoreApplication::arguments();
     args.removeFirst();
@@ -64,6 +66,10 @@ int main(int argc, char *argv[])
     QVariantMap parameters = parseArgs(args);
     if (!parameters.contains(u"osm.useragent"_s))
         parameters.insert(u"osm.useragent"_s, QCoreApplication::applicationName());
+
+    // add Class to QML
+    qmlRegisterType<LogFilePositionSource>("Qt.LogFilePositionSource", 1, 0, "LogFilePositionSource");
+    qRegisterMetaType<QGeoPositionInfo>();
 
     QQmlApplicationEngine engine;
 #if QT_CONFIG(ssl)

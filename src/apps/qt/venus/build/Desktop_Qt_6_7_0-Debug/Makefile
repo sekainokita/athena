@@ -14,10 +14,10 @@ EQ            = =
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DQT_QML_DEBUG -DQT_LOCATION_LIB -DQT_POSITIONINGQUICK_LIB -DQT_QUICKSHAPES_LIB -DQT_QUICK_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_QMLMODELS_LIB -DQT_QML_LIB -DQT_QMLINTEGRATION_LIB -DQT_NETWORK_LIB -DQT_POSITIONING_LIB -DQT_CORE_LIB -DQT_QMLBUILTINS_LIB
+DEFINES       = -DQT_QML_DEBUG -DQT_LOCATION_LIB -DQT_POSITIONINGQUICK_LIB -DQT_QUICKSHAPES_LIB -DQT_QUICK_LIB -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_QMLMODELS_LIB -DQT_QML_LIB -DQT_QMLINTEGRATION_LIB -DQT_NETWORK_LIB -DQT_POSITIONING_LIB -DQT_CORE_LIB -DQT_QMLBUILTINS_LIB
 CFLAGS        = -pipe -g -Wall -Wextra -D_REENTRANT $(DEFINES)
 CXXFLAGS      = -pipe -g -std=gnu++1z -Wall -Wextra -D_REENTRANT $(DEFINES)
-INCPATH       = -I../../../venus -I. -I/data/ssd1/Qt/6.7.0/gcc_arm64/include -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtLocation -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioningQuick -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuickShapes -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuickShapes/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuickShapes/6.7.0/QtQuickShapes -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuick/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuick/6.7.0/QtQuick -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuick -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtOpenGL -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/6.7.0/QtGui -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlModels/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlModels/6.7.0/QtQmlModels -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlModels -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQml/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQml/6.7.0/QtQml -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQml -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlIntegration -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtNetwork -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/6.7.0/QtCore -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlBuiltins/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlBuiltins/6.7.0/QtQmlBuiltins -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlBuiltins -I. -I/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/linux-g++
+INCPATH       = -I../../../venus -I. -I/data/ssd1/Qt/6.7.0/gcc_arm64/include -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtLocation -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioningQuick -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuickShapes -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuickShapes/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuickShapes/6.7.0/QtQuickShapes -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuick/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuick/6.7.0/QtQuick -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuick -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtOpenGL -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/6.7.0/QtGui -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlModels/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlModels/6.7.0/QtQmlModels -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlModels -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQml/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQml/6.7.0/QtQml -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQml -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlIntegration -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtNetwork -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/6.7.0/QtPositioning -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/6.7.0/QtCore -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlBuiltins/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlBuiltins/6.7.0/QtQmlBuiltins -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlBuiltins -I. -I/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/linux-g++
 QMAKE         = /data/ssd1/Qt/6.7.0/gcc_arm64/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -40,7 +40,7 @@ DISTNAME      = venus1.0.0
 DISTDIR = /home/bman/work/athena/src/apps/qt/venus/build/Desktop_Qt_6_7_0-Debug/.tmp/venus1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-rpath,/data/ssd1/Qt/6.7.0/gcc_arm64/lib -Wl,-rpath-link,/data/ssd1/Qt/6.7.0/gcc_arm64/lib
-LIBS          = $(SUBLIBS) /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Location.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6PositioningQuick.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6QuickShapes.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Quick.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6OpenGL.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Gui.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6QmlModels.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Qml.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Network.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Positioning.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6QmlBuiltins.a /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Core.so -pthread -lpthread -lxkbcommon -lGL   
+LIBS          = $(SUBLIBS) /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Location.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6PositioningQuick.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6QuickShapes.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Quick.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6OpenGL.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Widgets.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Gui.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6QmlModels.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Qml.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Network.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Positioning.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6QmlBuiltins.a /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Core.so -pthread -lpthread -lxkbcommon -lGL   
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -52,9 +52,17 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = ../../main.cpp qrc_qmake_qml_resources.cpp
+SOURCES       = ../../main.cpp \
+		../../logfilepositionsource.cpp \
+		../../clientapplication.cpp qrc_qmake_qml_resources.cpp \
+		moc_logfilepositionsource.cpp \
+		moc_clientapplication.cpp
 OBJECTS       = main.o \
-		qrc_qmake_qml_resources.o
+		logfilepositionsource.o \
+		clientapplication.o \
+		qrc_qmake_qml_resources.o \
+		moc_logfilepositionsource.o \
+		moc_clientapplication.o
 DIST          = /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/spec_pre.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/common/unix.conf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/common/linux.conf \
@@ -402,6 +410,7 @@ DIST          = /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/spec_pre.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/resources.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/moc.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/unix/opengl.prf \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/uic.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/unix/thread.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/qmake_use.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/file_copies.prf \
@@ -409,7 +418,10 @@ DIST          = /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/spec_pre.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/exceptions.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/yacc.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/lex.prf \
-		../../../../venus.pro  ../../main.cpp
+		../../../../venus.pro ../../logfilepositionsource.h \
+		../../clientapplication.h ../../main.cpp \
+		../../logfilepositionsource.cpp \
+		../../clientapplication.cpp
 QMAKE_TARGET  = venus
 DESTDIR       = 
 TARGET        = venus
@@ -768,6 +780,7 @@ Makefile: ../../venus.pro /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/linux-g++/qmake.
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/resources.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/moc.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/unix/opengl.prf \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/uic.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/unix/thread.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/qmake_use.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/file_copies.prf \
@@ -782,6 +795,7 @@ Makefile: ../../venus.pro /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/linux-g++/qmake.
 		/data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6QuickShapes.prl \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Quick.prl \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6OpenGL.prl \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Widgets.prl \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Gui.prl \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6QmlModels.prl \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Qml.prl \
@@ -1137,6 +1151,7 @@ Makefile: ../../venus.pro /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/linux-g++/qmake.
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/resources.prf:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/moc.prf:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/unix/opengl.prf:
+/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/uic.prf:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/unix/thread.prf:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/qmake_use.prf:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/file_copies.prf:
@@ -1151,6 +1166,7 @@ qmake_qml_resources.qrc:
 /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6QuickShapes.prl:
 /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Quick.prl:
 /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6OpenGL.prl:
+/data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Widgets.prl:
 /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Gui.prl:
 /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6QmlModels.prl:
 /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Qml.prl:
@@ -1174,7 +1190,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents qmake_qml_resources.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../../main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../../logfilepositionsource.h ../../clientapplication.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../../main.cpp ../../logfilepositionsource.cpp ../../clientapplication.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -1242,19 +1259,349 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -std=gnu++1z -Wall -Wextra -dM -E -o moc_predefs.h /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all:
+compiler_moc_header_make_all: moc_logfilepositionsource.cpp moc_clientapplication.cpp
 compiler_moc_header_clean:
+	-$(DEL_FILE) moc_logfilepositionsource.cpp moc_clientapplication.cpp
+moc_logfilepositionsource.cpp: ../../logfilepositionsource.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/qgeopositioninfosource.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/QGeoPositionInfo \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/qgeopositioninfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/QGeoCoordinate \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/qgeocoordinate.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QMetaType \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmetatype.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qglobal.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtversionchecks.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtconfiginclude.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qconfig.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtcore-config.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtconfigmacros.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtcoreexports.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcompilerdetection.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsystemdetection.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qprocessordetection.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtdeprecationmarkers.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtpreprocessorsupport.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qassert.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtnoop.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtypes.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtversion.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtclasshelpermacros.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtypeinfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcontainerfwd.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsysinfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qlogging.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qflags.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcompare_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qatomic.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbasicatomic.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qatomic_cxx11.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qgenericatomic.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qyieldcpu.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qconstructormacros.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdarwinhelpers.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qexceptionhandling.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qforeach.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qttypetraits.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfunctionpointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qglobalstatic.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmalloc.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qminmax.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qnumeric.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qoverload.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qswap.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtenvironmentvariables.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtresource.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qttranslation.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qversiontagging.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbytearray.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qrefcount.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qnamespace.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtmetamacros.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qarraydata.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qpair.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qarraydatapointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qarraydataops.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcontainertools_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qxptype_traits.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/q20functional.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/q20memory.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbytearrayalgorithms.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbytearrayview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringfwd.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/q20type_traits.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcompare.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcomparehelpers.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdatastream.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qscopedpointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qiodevicebase.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfloat16.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qhashfunctions.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstring.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qchar.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringliteral.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringalgorithms.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qlatin1stringview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qanystringview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qutf8stringview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringtokenizer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringbuilder.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringconverter.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringconverter_base.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmath.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qalgorithms.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qiterable.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmetacontainer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcontainerinfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtaggedpointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qobjectdefs.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qobjectdefs_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfunctionaltools_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qscopeguard.h \
+		../../map \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QString \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QSharedDataPointer \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qshareddata.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QDebug \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdebug.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtextstream.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcontiguouscache.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsharedpointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsharedpointer_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qlist.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qiterator.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbytearraylist.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringlist.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringmatcher.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmap.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qshareddata_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qset.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qhash.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qvarlengtharray.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/qpositioningglobal.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/qtpositioningexports.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QExplicitlySharedDataPointer \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QDateTime \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdatetime.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcalendar.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qlocale.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qvariant.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/q23utility.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qobject.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcoreevent.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qobject_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbindingstorage.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QObject \
+		moc_predefs.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/libexec/moc
+	/data/ssd1/Qt/6.7.0/gcc_arm64/libexec/moc $(DEFINES) --include /home/bman/work/athena/src/apps/qt/venus/build/Desktop_Qt_6_7_0-Debug/moc_predefs.h -I/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/linux-g++ -I/home/bman/work/athena/src/apps/qt/venus -I/data/ssd1/Qt/6.7.0/gcc_arm64/include -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtLocation -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioningQuick -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuickShapes -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuickShapes/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuickShapes/6.7.0/QtQuickShapes -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuick/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuick/6.7.0/QtQuick -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuick -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtOpenGL -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/6.7.0/QtGui -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlModels/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlModels/6.7.0/QtQmlModels -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlModels -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQml/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQml/6.7.0/QtQml -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQml -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlIntegration -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtNetwork -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/6.7.0/QtPositioning -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/6.7.0/QtCore -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlBuiltins/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlBuiltins/6.7.0/QtQmlBuiltins -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlBuiltins -I. -I/usr/include/c++/9 -I/usr/include/aarch64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/aarch64-linux-gnu/9/include -I/usr/local/include -I/usr/include/aarch64-linux-gnu -I/usr/include ../../logfilepositionsource.h -o moc_logfilepositionsource.cpp
+
+moc_clientapplication.cpp: ../../clientapplication.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qmainwindow.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qtwidgetsglobal.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qtguiglobal.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qglobal.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtversionchecks.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtconfiginclude.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qconfig.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtcore-config.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtconfigmacros.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtcoreexports.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcompilerdetection.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsystemdetection.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qprocessordetection.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtdeprecationmarkers.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtpreprocessorsupport.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qassert.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtnoop.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtypes.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtversion.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtclasshelpermacros.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtypeinfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcontainerfwd.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsysinfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qlogging.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qflags.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcompare_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qatomic.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbasicatomic.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qatomic_cxx11.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qgenericatomic.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qyieldcpu.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qconstructormacros.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdarwinhelpers.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qexceptionhandling.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qforeach.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qttypetraits.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfunctionpointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qglobalstatic.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmalloc.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qminmax.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qnumeric.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qoverload.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qswap.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtenvironmentvariables.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtresource.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qttranslation.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qversiontagging.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qtgui-config.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qtguiexports.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qtwidgets-config.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qtwidgetsexports.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qwidget.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qwindowdefs.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qobjectdefs.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qnamespace.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtmetamacros.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qobjectdefs_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfunctionaltools_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qobject.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstring.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qchar.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbytearray.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qrefcount.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qarraydata.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qpair.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qarraydatapointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qarraydataops.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcontainertools_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qxptype_traits.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/q20functional.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/q20memory.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbytearrayalgorithms.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbytearrayview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringfwd.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/q20type_traits.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringliteral.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringalgorithms.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qlatin1stringview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qanystringview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qutf8stringview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringtokenizer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringbuilder.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringconverter.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringconverter_base.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qlist.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qhashfunctions.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qiterator.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbytearraylist.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringlist.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qalgorithms.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringmatcher.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcoreevent.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qscopedpointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmetatype.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcompare.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcomparehelpers.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdatastream.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qiodevicebase.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfloat16.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmath.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qiterable.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmetacontainer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcontainerinfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtaggedpointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qscopeguard.h \
+		../../map \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qobject_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbindingstorage.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmargins.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/q23utility.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qaction.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qkeysequence.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qicon.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsize.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qpixmap.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qpaintdevice.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qrect.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qpoint.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qcolor.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qrgb.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qrgba64.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qshareddata.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qimage.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qpixelformat.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qtransform.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qpolygon.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qregion.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qline.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qvariant.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdebug.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtextstream.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcontiguouscache.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsharedpointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsharedpointer_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmap.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qshareddata_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qset.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qhash.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qvarlengtharray.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qpalette.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qbrush.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qfont.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qendian.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qfontmetrics.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qfontinfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qsizepolicy.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qcursor.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qbitmap.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qevent.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qiodevice.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qurl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qeventpoint.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qvector2d.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qvectornd.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qpointingdevice.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qinputdevice.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qscreen.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QList \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QObject \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QRect \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QSize \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QSizeF \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/QTransform \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qnativeinterface.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qscreen_platform.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qguiapplication.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcoreapplication.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdeadlinetimer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qelapsedtimer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qeventloop.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcoreapplication_platform.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfuture.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfutureinterface.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmutex.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtsan_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qresultstore.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfuture_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qthreadpool.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qthread.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qrunnable.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qexception.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qpromise.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qinputmethod.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qlocale.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qguiapplication_platform.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qtabwidget.h \
+		moc_predefs.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/libexec/moc
+	/data/ssd1/Qt/6.7.0/gcc_arm64/libexec/moc $(DEFINES) --include /home/bman/work/athena/src/apps/qt/venus/build/Desktop_Qt_6_7_0-Debug/moc_predefs.h -I/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/linux-g++ -I/home/bman/work/athena/src/apps/qt/venus -I/data/ssd1/Qt/6.7.0/gcc_arm64/include -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtLocation -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioningQuick -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuickShapes -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuickShapes/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuickShapes/6.7.0/QtQuickShapes -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuick/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuick/6.7.0/QtQuick -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQuick -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtOpenGL -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/6.7.0/QtGui -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlModels/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlModels/6.7.0/QtQmlModels -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlModels -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQml/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQml/6.7.0/QtQml -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQml -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlIntegration -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtNetwork -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/6.7.0/QtPositioning -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/6.7.0/QtCore -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlBuiltins/6.7.0 -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlBuiltins/6.7.0/QtQmlBuiltins -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQmlBuiltins -I. -I/usr/include/c++/9 -I/usr/include/aarch64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/aarch64-linux-gnu/9/include -I/usr/local/include -I/usr/include/aarch64-linux-gnu -I/usr/include ../../clientapplication.h -o moc_clientapplication.cpp
+
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
+compiler_uic_make_all:
+compiler_uic_clean:
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
 compiler_yacc_impl_make_all:
 compiler_yacc_impl_clean:
 compiler_lex_make_all:
 compiler_lex_clean:
-compiler_clean: compiler_rcc_clean compiler_moc_predefs_clean 
+compiler_clean: compiler_rcc_clean compiler_moc_predefs_clean compiler_moc_header_clean 
 
 ####### Compile
 
@@ -1447,8 +1794,366 @@ main.o: ../../main.cpp /data/ssd1/Qt/6.7.0/gcc_arm64/include/QtQml/QQmlApplicati
 		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QFlags
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../../main.cpp
 
+logfilepositionsource.o: ../../logfilepositionsource.cpp ../../logfilepositionsource.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/qgeopositioninfosource.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/QGeoPositionInfo \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/qgeopositioninfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/QGeoCoordinate \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/qgeocoordinate.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QMetaType \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmetatype.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qglobal.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtversionchecks.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtconfiginclude.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qconfig.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtcore-config.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtconfigmacros.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtcoreexports.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcompilerdetection.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsystemdetection.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qprocessordetection.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtdeprecationmarkers.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtpreprocessorsupport.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qassert.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtnoop.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtypes.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtversion.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtclasshelpermacros.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtypeinfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcontainerfwd.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsysinfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qlogging.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qflags.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcompare_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qatomic.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbasicatomic.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qatomic_cxx11.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qgenericatomic.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qyieldcpu.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qconstructormacros.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdarwinhelpers.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qexceptionhandling.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qforeach.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qttypetraits.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfunctionpointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qglobalstatic.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmalloc.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qminmax.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qnumeric.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qoverload.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qswap.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtenvironmentvariables.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtresource.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qttranslation.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qversiontagging.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbytearray.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qrefcount.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qnamespace.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtmetamacros.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qarraydata.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qpair.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qarraydatapointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qarraydataops.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcontainertools_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qxptype_traits.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/q20functional.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/q20memory.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbytearrayalgorithms.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbytearrayview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringfwd.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/q20type_traits.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcompare.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcomparehelpers.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdatastream.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qscopedpointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qiodevicebase.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfloat16.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qhashfunctions.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstring.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qchar.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringliteral.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringalgorithms.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qlatin1stringview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qanystringview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qutf8stringview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringtokenizer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringbuilder.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringconverter.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringconverter_base.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmath.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qalgorithms.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qiterable.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmetacontainer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcontainerinfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtaggedpointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qobjectdefs.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qobjectdefs_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfunctionaltools_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qscopeguard.h \
+		../../map \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QString \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QSharedDataPointer \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qshareddata.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QDebug \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdebug.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtextstream.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcontiguouscache.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsharedpointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsharedpointer_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qlist.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qiterator.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbytearraylist.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringlist.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringmatcher.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmap.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qshareddata_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qset.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qhash.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qvarlengtharray.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/qpositioningglobal.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/qtpositioningexports.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QExplicitlySharedDataPointer \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QDateTime \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdatetime.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcalendar.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qlocale.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qvariant.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/q23utility.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qobject.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcoreevent.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qobject_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbindingstorage.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QObject \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfile.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfiledevice.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qiodevice.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtimer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbasictimer.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o logfilepositionsource.o ../../logfilepositionsource.cpp
+
+clientapplication.o: ../../clientapplication.cpp ../../clientapplication.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qmainwindow.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qtwidgetsglobal.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qtguiglobal.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qglobal.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtversionchecks.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtconfiginclude.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qconfig.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtcore-config.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtconfigmacros.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtcoreexports.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcompilerdetection.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsystemdetection.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qprocessordetection.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtdeprecationmarkers.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtpreprocessorsupport.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qassert.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtnoop.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtypes.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtversion.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtclasshelpermacros.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtypeinfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcontainerfwd.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsysinfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qlogging.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qflags.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcompare_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qatomic.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbasicatomic.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qatomic_cxx11.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qgenericatomic.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qyieldcpu.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qconstructormacros.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdarwinhelpers.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qexceptionhandling.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qforeach.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qttypetraits.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfunctionpointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qglobalstatic.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmalloc.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qminmax.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qnumeric.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qoverload.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qswap.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtenvironmentvariables.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtresource.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qttranslation.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qversiontagging.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qtgui-config.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qtguiexports.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qtwidgets-config.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qtwidgetsexports.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qwidget.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qwindowdefs.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qobjectdefs.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qnamespace.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtmetamacros.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qobjectdefs_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfunctionaltools_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qobject.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstring.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qchar.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbytearray.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qrefcount.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qarraydata.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qpair.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qarraydatapointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qarraydataops.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcontainertools_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qxptype_traits.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/q20functional.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/q20memory.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbytearrayalgorithms.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbytearrayview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringfwd.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/q20type_traits.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringliteral.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringalgorithms.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qlatin1stringview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qanystringview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qutf8stringview.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringtokenizer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringbuilder.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringconverter.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringconverter_base.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qlist.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qhashfunctions.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qiterator.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbytearraylist.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringlist.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qalgorithms.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qstringmatcher.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcoreevent.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qscopedpointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmetatype.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcompare.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcomparehelpers.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdatastream.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qiodevicebase.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfloat16.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmath.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qiterable.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmetacontainer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcontainerinfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtaggedpointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qscopeguard.h \
+		../../map \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qobject_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qbindingstorage.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmargins.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/q23utility.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qaction.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qkeysequence.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qicon.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsize.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qpixmap.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qpaintdevice.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qrect.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qpoint.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qcolor.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qrgb.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qrgba64.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qshareddata.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qimage.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qpixelformat.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qtransform.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qpolygon.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qregion.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qline.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qvariant.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdebug.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtextstream.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcontiguouscache.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsharedpointer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qsharedpointer_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmap.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qshareddata_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qset.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qhash.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qvarlengtharray.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qpalette.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qbrush.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qfont.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qendian.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qfontmetrics.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qfontinfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qsizepolicy.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qcursor.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qbitmap.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qevent.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qiodevice.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qurl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qeventpoint.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qvector2d.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qvectornd.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qpointingdevice.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qinputdevice.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qscreen.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QList \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QObject \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QRect \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QSize \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QSizeF \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/QTransform \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qnativeinterface.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qscreen_platform.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qguiapplication.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcoreapplication.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdeadlinetimer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qelapsedtimer.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qeventloop.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcoreapplication_platform.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfuture.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfutureinterface.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qmutex.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qtsan_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qresultstore.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qfuture_impl.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qthreadpool.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qthread.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qrunnable.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qexception.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qpromise.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qinputmethod.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qlocale.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qguiapplication_platform.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qtabwidget.h \
+		../../logfilepositionsource.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/qgeopositioninfosource.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/QGeoPositionInfo \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/qgeopositioninfo.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/QGeoCoordinate \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/qgeocoordinate.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QMetaType \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QString \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QSharedDataPointer \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QDebug \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/qpositioningglobal.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning/qtpositioningexports.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QExplicitlySharedDataPointer \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QDateTime \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qdatetime.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/qcalendar.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qtextedit.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qabstractscrollarea.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qframe.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qtextdocument.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qtextoption.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qtextcursor.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qtextformat.h \
+		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui/qpen.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o clientapplication.o ../../clientapplication.cpp
+
 qrc_qmake_qml_resources.o: qrc_qmake_qml_resources.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o qrc_qmake_qml_resources.o qrc_qmake_qml_resources.cpp
+
+moc_logfilepositionsource.o: moc_logfilepositionsource.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_logfilepositionsource.o moc_logfilepositionsource.cpp
+
+moc_clientapplication.o: moc_clientapplication.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_clientapplication.o moc_clientapplication.cpp
 
 ####### Install
 
