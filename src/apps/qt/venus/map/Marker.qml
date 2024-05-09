@@ -40,6 +40,8 @@ MapQuickItem {
         id: image
 //! [mqi-anchor]
         source: "../resources/vehicle.png"
+        sourceSize.width: 30
+        sourceSize.height: 30
         opacity: hoverHandler.hovered ? 0.6 : 1.0
         transform: Rotation { angle: 45}
 
@@ -49,7 +51,7 @@ MapQuickItem {
             width: image.width
             color: "white"
             font.bold: true
-            font.pixelSize: 14
+            font.pixelSize: 11
             horizontalAlignment: Text.AlignHCenter
             Component.onCompleted: {
                 text = mapview.markerCounter
