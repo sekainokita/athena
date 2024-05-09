@@ -1,4 +1,4 @@
-# Generated from mapviewer.pro.
+# Generated from venus.pro.
 
 cmake_minimum_required(VERSION 3.16)
 project(venus LANGUAGES CXX)
@@ -9,7 +9,7 @@ if(NOT DEFINED INSTALL_EXAMPLESDIR)
   set(INSTALL_EXAMPLESDIR "examples")
 endif()
 
-set(INSTALL_EXAMPLEDIR "${INSTALL_EXAMPLESDIR}/location/mapviewer")
+set(INSTALL_EXAMPLEDIR "${INSTALL_EXAMPLESDIR}/location/venus")
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Network Quick Positioning Location)
 

@@ -97,7 +97,7 @@ ApplicationWindow {
         }
     }
 
-    title: qsTr("Mapviewer")
+    title: qsTr("Venus")
     height: 640
     width: 360
     visible: true
@@ -444,7 +444,7 @@ support"
                     var title = qsTr("ProviderError")
                     var message =  mapview.errorString + "<br/><br/><b>" + qsTr("Try to select other provider") + "</b>"
                     if (map.error == mapview.MissingRequiredParameterError)
-                        message += "<br/>" + qsTr("or see") + " \'mapviewer --help\' "
+                        message += "<br/>" + qsTr("or see") + " \'venus --help\' "
                                 + qsTr("how to pass plugin parameters.")
                     stackView.showMessage(title,message);
                 }
