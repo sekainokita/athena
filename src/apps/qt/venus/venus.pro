@@ -36,6 +36,7 @@ qml_resources.files = \
     forms/RouteListHeader.qml \
     resources/marker.png \
     resources/marker_blue.png \
+    resources/vehicle.png \
     resources/scale.png \
     resources/scale_end.png
 

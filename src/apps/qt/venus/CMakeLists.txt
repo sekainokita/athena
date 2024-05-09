@@ -61,6 +61,7 @@ qt_add_qml_module(venus
     RESOURCES
         "resources/marker.png"
         "resources/marker_blue.png"
+        "resources/vehicle.png"
         "resources/scale.png"
         "resources/scale_end.png"
     )

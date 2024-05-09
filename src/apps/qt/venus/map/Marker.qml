@@ -39,12 +39,13 @@ MapQuickItem {
     sourceItem: Image {
         id: image
 //! [mqi-anchor]
-        source: "../resources/marker.png"
+        source: "../resources/vehicle.png"
         opacity: hoverHandler.hovered ? 0.6 : 1.0
+        transform: Rotation { angle: 45}
 
         Text{
             id: number
-            y: image.height/10
+            y: image.height/3
             width: image.width
             color: "white"
             font.bold: true
