@@ -450,9 +450,7 @@ ApplicationWindow {
 
             Text {
                 visible: !supportsSsl && map && mapview.activeMapType && activeMapType.metadata.isHTTPS
-                text: "The active map type\n
-requires (missing) SSL\n
-support"
+                text: "KETI\n"
                 horizontalAlignment: Text.AlignHCenter
                 font.pixelSize: appWindow.width / 12
                 font.bold: true
@@ -461,6 +459,7 @@ support"
                 z: 12
             }
         }
+
 
         function showMessage(title,message,backPage)
         {
