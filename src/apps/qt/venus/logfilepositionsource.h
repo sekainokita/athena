@@ -4,6 +4,7 @@
 #define LOGFILEPOSITIONSOURCE_H
 
 #include <QtPositioning/qgeopositioninfosource.h>
+#include <QDebug>
 
 QT_BEGIN_NAMESPACE
 class QFile;

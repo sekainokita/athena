@@ -340,8 +340,6 @@ ApplicationWindow {
 
             mapview.markers[mapview.currentMarker].coordinate.latitude = getLatitude
             mapview.markers[mapview.currentMarker].coordinate.longitude = getLongitude
-            //mapview.markers[mapview.currentMarker].image.angle = 15
-            mapview.markers[mapview.currentMarker].angle = 15
 
             mapview.map.center.latitude = mapview.markers[mapview.currentMarker].coordinate.latitude;
             mapview.map.center.longitude = mapview.markers[mapview.currentMarker].coordinate.longitude;
@@ -389,7 +387,7 @@ ApplicationWindow {
                 coordinateGpsInfo(mapview.markers[mapview.currentMarker].coordinate.latitude, mapview.markers[mapview.currentMarker].coordinate.longitude)
                 break;
             case "updatePositionStart":
-                timer.startTimer(updatePosition, 10)
+                timer.startTimer(updatePosition, 100)
                 break;
             case "updatePositionStop":
                 timer.stopTimer(updatePosition)

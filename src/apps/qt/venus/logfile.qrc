@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>simplelog.txt</file>
+        <file>db_v2x_rx_temp_writing.csv</file>
     </qresource>
 </RCC>

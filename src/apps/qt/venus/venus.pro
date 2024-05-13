@@ -54,3 +54,6 @@ RESOURCES += \
 
 target.path = $$[QT_INSTALL_EXAMPLES]/location/venus
 INSTALLS += target
+
+DISTFILES += \
+    db_v2x_rx_temp_writing.csv

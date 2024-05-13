@@ -37,7 +37,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = logfilepositionsource1.0.0
-DISTDIR = /home/bman/work/athena/src/apps/qt/logfilepositionsource/build/Desktop_Qt_6_7_0-Debug/.tmp/logfilepositionsource1.0.0
+DISTDIR = /home/kng05157/work/athena/src/apps/qt/examples/logfilepositionsource/build/Desktop_Qt_6_7_0-Debug/.tmp/logfilepositionsource1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-rpath,/data/ssd1/Qt/6.7.0/gcc_arm64/lib -Wl,-rpath-link,/data/ssd1/Qt/6.7.0/gcc_arm64/lib
 LIBS          = $(SUBLIBS) /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Positioning.so -pthread /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Widgets.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Gui.so /data/ssd1/Qt/6.7.0/gcc_arm64/lib/libQt6Core.so -lpthread -lGL   
@@ -119,8 +119,6 @@ DIST          = /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/spec_pre.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_datavisualizationqml_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_dbus.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_dbus_private.pri \
-		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_declarativeopcua.pri \
-		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_declarativeopcua_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_designer.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_designer_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_designercomponents_private.pri \
@@ -180,8 +178,6 @@ DIST          = /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/spec_pre.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_networkauth_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_nfc.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_nfc_private.pri \
-		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_opcua.pri \
-		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_opcua_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_opengl.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_opengl_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_openglwidgets.pri \
@@ -328,8 +324,6 @@ DIST          = /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/spec_pre.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_sensors_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_sensorsquick.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_sensorsquick_private.pri \
-		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_serialbus.pri \
-		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_serialbus_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_serialport.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_serialport_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_shadertools.pri \
@@ -396,6 +390,7 @@ DIST          = /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/spec_pre.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/qt_config.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/linux-g++/qmake.conf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/spec_post.prf \
+		../../.qmake.stash \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/exclusive_builds.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/toolchain.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/default_pre.prf \
@@ -488,8 +483,6 @@ Makefile: ../../logfilepositionsource.pro /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_datavisualizationqml_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_dbus.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_dbus_private.pri \
-		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_declarativeopcua.pri \
-		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_declarativeopcua_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_designer.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_designer_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_designercomponents_private.pri \
@@ -549,8 +542,6 @@ Makefile: ../../logfilepositionsource.pro /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_networkauth_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_nfc.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_nfc_private.pri \
-		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_opcua.pri \
-		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_opcua_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_opengl.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_opengl_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_openglwidgets.pri \
@@ -697,8 +688,6 @@ Makefile: ../../logfilepositionsource.pro /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_sensors_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_sensorsquick.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_sensorsquick_private.pri \
-		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_serialbus.pri \
-		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_serialbus_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_serialport.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_serialport_private.pri \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_shadertools.pri \
@@ -765,6 +754,7 @@ Makefile: ../../logfilepositionsource.pro /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/qt_config.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/linux-g++/qmake.conf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/exclusive_builds.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/toolchain.prf \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/default_pre.prf \
@@ -849,8 +839,6 @@ Makefile: ../../logfilepositionsource.pro /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_datavisualizationqml_private.pri:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_dbus.pri:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_dbus_private.pri:
-/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_declarativeopcua.pri:
-/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_declarativeopcua_private.pri:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_designer.pri:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_designer_private.pri:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_designercomponents_private.pri:
@@ -910,8 +898,6 @@ Makefile: ../../logfilepositionsource.pro /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_networkauth_private.pri:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_nfc.pri:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_nfc_private.pri:
-/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_opcua.pri:
-/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_opcua_private.pri:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_opengl.pri:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_opengl_private.pri:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_openglwidgets.pri:
@@ -1058,8 +1044,6 @@ Makefile: ../../logfilepositionsource.pro /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_sensors_private.pri:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_sensorsquick.pri:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_sensorsquick_private.pri:
-/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_serialbus.pri:
-/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_serialbus_private.pri:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_serialport.pri:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_serialport_private.pri:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/modules/qt_lib_shadertools.pri:
@@ -1126,6 +1110,7 @@ Makefile: ../../logfilepositionsource.pro /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/qt_config.prf:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/linux-g++/qmake.conf:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/exclusive_builds.prf:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/toolchain.prf:
 /data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/features/default_pre.prf:
@@ -1343,7 +1328,7 @@ moc_logfilepositionsource.cpp: ../../logfilepositionsource.h \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore/QObject \
 		moc_predefs.h \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/libexec/moc
-	/data/ssd1/Qt/6.7.0/gcc_arm64/libexec/moc $(DEFINES) --include /home/bman/work/athena/src/apps/qt/logfilepositionsource/build/Desktop_Qt_6_7_0-Debug/moc_predefs.h -I/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/linux-g++ -I/home/bman/work/athena/src/apps/qt/logfilepositionsource -I/data/ssd1/Qt/6.7.0/gcc_arm64/include -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore -I. -I/usr/include/c++/9 -I/usr/include/aarch64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/aarch64-linux-gnu/9/include -I/usr/local/include -I/usr/include/aarch64-linux-gnu -I/usr/include ../../logfilepositionsource.h -o moc_logfilepositionsource.cpp
+	/data/ssd1/Qt/6.7.0/gcc_arm64/libexec/moc $(DEFINES) --include /home/kng05157/work/athena/src/apps/qt/examples/logfilepositionsource/build/Desktop_Qt_6_7_0-Debug/moc_predefs.h -I/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/linux-g++ -I/home/kng05157/work/athena/src/apps/qt/examples/logfilepositionsource -I/data/ssd1/Qt/6.7.0/gcc_arm64/include -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore -I. -I/usr/include/c++/9 -I/usr/include/aarch64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/aarch64-linux-gnu/9/include -I/usr/local/include -I/usr/include/aarch64-linux-gnu -I/usr/include ../../logfilepositionsource.h -o moc_logfilepositionsource.cpp
 
 moc_clientapplication.cpp: ../../clientapplication.h \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qmainwindow.h \
@@ -1534,7 +1519,7 @@ moc_clientapplication.cpp: ../../clientapplication.h \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets/qtabwidget.h \
 		moc_predefs.h \
 		/data/ssd1/Qt/6.7.0/gcc_arm64/libexec/moc
-	/data/ssd1/Qt/6.7.0/gcc_arm64/libexec/moc $(DEFINES) --include /home/bman/work/athena/src/apps/qt/logfilepositionsource/build/Desktop_Qt_6_7_0-Debug/moc_predefs.h -I/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/linux-g++ -I/home/bman/work/athena/src/apps/qt/logfilepositionsource -I/data/ssd1/Qt/6.7.0/gcc_arm64/include -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore -I. -I/usr/include/c++/9 -I/usr/include/aarch64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/aarch64-linux-gnu/9/include -I/usr/local/include -I/usr/include/aarch64-linux-gnu -I/usr/include ../../clientapplication.h -o moc_clientapplication.cpp
+	/data/ssd1/Qt/6.7.0/gcc_arm64/libexec/moc $(DEFINES) --include /home/kng05157/work/athena/src/apps/qt/examples/logfilepositionsource/build/Desktop_Qt_6_7_0-Debug/moc_predefs.h -I/data/ssd1/Qt/6.7.0/gcc_arm64/mkspecs/linux-g++ -I/home/kng05157/work/athena/src/apps/qt/examples/logfilepositionsource -I/data/ssd1/Qt/6.7.0/gcc_arm64/include -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtPositioning -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtWidgets -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtGui -I/data/ssd1/Qt/6.7.0/gcc_arm64/include/QtCore -I. -I/usr/include/c++/9 -I/usr/include/aarch64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/aarch64-linux-gnu/9/include -I/usr/local/include -I/usr/include/aarch64-linux-gnu -I/usr/include ../../clientapplication.h -o moc_clientapplication.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:

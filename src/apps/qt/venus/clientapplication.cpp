@@ -19,6 +19,7 @@ ClientApplication::ClientApplication(QWidget *parent)
 
     qDebug() << "ClientApplication() is initialized.";
 
+
     source->startUpdates();
 }
 
