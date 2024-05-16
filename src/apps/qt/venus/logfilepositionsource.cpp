@@ -20,7 +20,7 @@ LogFilePositionSource::LogFilePositionSource(QObject *parent)
 {
     connect(timer, &QTimer::timeout, this, &LogFilePositionSource::readNextPosition);
 
-    logFile->setFileName(":/db_v2x_rx_temp_writing.csv");
+    logFile->setFileName("/tmp/db_v2x_rx_temp_writing.csv");
     if (!logFile->open(QIODevice::ReadOnly))
     {
         qWarning() << "Error: cannot open source file" << logFile->fileName();
