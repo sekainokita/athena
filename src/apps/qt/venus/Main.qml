@@ -448,13 +448,13 @@ ApplicationWindow {
 
             Text {
                 visible: !supportsSsl && map && mapview.activeMapType && activeMapType.metadata.isHTTPS
-                text: "KETI\n"
+                text: "K  E  T  I\n"
                 horizontalAlignment: Text.AlignHCenter
                 font.pixelSize: appWindow.width / 12
                 font.bold: true
                 color: "grey"
                 anchors.centerIn: parent
-                z: 12
+                z: 24
             }
         }
 
