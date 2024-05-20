@@ -6,12 +6,9 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qtimer.h>
-//#include <iostream>
-//#include <fstream>
 
 static double s_dLatitude = 37.40611064950719;
 static double s_dLongitude = 127.10226288596837;
-//static double s_dAddPosition = 0.000001;
 
 LogFilePositionSource::LogFilePositionSource(QObject *parent)
     : QGeoPositionInfoSource(parent),
@@ -95,7 +92,6 @@ double LogFilePositionSource::getGpsLatitude(void)
         s_dLongitude = longitude;
     }
 
-    //s_dLatitude = s_dLatitude + s_dAddPosition;
     qDebug() << "s_dLatitude" << s_dLatitude;
     return s_dLatitude;
 }
@@ -126,7 +122,7 @@ double LogFilePositionSource::getGpsLongitude(void)
         s_dLatitude = latitude;
         s_dLongitude = longitude;
     }
-    //s_dLongitude = s_dLongitude + s_dAddPosition;
+
     qDebug() << "s_dLongitude" << s_dLongitude;
     return s_dLongitude;
 }
@@ -148,7 +144,6 @@ void LogFilePositionSource::requestUpdate(int /*timeout*/)
         emit QGeoPositionInfoSource::errorOccurred(lastError);
     }
 }
-
 
 void LogFilePositionSource::readNextPosition()
 {
@@ -177,8 +172,8 @@ void LogFilePositionSource::readNextPosition()
     }
 }
 
-
 QGeoPositionInfoSource::Error LogFilePositionSource::error() const
 {
     return lastError;
 }
+

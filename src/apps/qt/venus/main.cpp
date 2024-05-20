@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
         parameters.insert(u"osm.useragent"_s, QCoreApplication::applicationName());
     }
 
-//    parameters.insert(u"osm.mapping.providersrepository.address"_s, "https://tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=15bb234f9b46448abd2f2b656f166270");
+    //parameters.insert(u"osm.mapping.providersrepository.address"_s, "https://tile.thunderforest.com/cycle/%z/%x/%y.png?apikey=15bb234f9b46448abd2f2b656f166270");
 
     // add Class to QML
     qmlRegisterType<LogFilePositionSource>("Qt.LogFilePositionSource", 1, 0, "LogFilePositionSource");
