@@ -6,17 +6,18 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qtimer.h>
+//#include <iostream>
+//#include <fstream>
 
 static double s_dLatitude = 37.40611064950719;
 static double s_dLongitude = 127.10226288596837;
+//static double s_dAddPosition = 0.000001;
 
 LogFilePositionSource::LogFilePositionSource(QObject *parent)
     : QGeoPositionInfoSource(parent),
       logFile(new QFile(this)),
       timer(new QTimer(this))
 {
-    connect(timer, &QTimer::timeout, this, &LogFilePositionSource::readNextPosition);
-
     logFile->setFileName("/tmp/db_v2x_rx_temp_writing.csv");
     if (!logFile->open(QIODevice::ReadOnly))
     {
@@ -26,50 +27,40 @@ LogFilePositionSource::LogFilePositionSource(QObject *parent)
     {
         qDebug() << "opened file: db_v2x_rx_temp_writing.csv";
     }
+
     qDebug() << "LogFilePositionSource() is initialized.";
 }
 
 QGeoPositionInfo LogFilePositionSource::lastKnownPosition(bool /*satelliteMethodsOnly*/) const
 {
+    /* Not Used */
     return lastPosition;
 }
 
 LogFilePositionSource::PositioningMethods LogFilePositionSource::supportedPositioningMethods() const
 {
+    /* Not Used */
     return AllPositioningMethods;
 }
 
 int LogFilePositionSource::minimumUpdateInterval() const
 {
-    return 500;
+    /* Not Used */
+    return 0;
 }
 
 void LogFilePositionSource::startUpdates()
 {
-    lastError = QGeoPositionInfoSource::NoError;
-    int interval = updateInterval();
-
-    qDebug() << "interval" << interval;
-
-    if (interval < minimumUpdateInterval())
-        interval = minimumUpdateInterval();
-
-    qDebug() << "minimum interval" << interval;
-
-    timer->start(interval);
-}
-
-double LogFilePositionSource::getGpsInfo(double dLatitude, double dLongitude)
-{
-    qDebug() << "getGpsInfo lantitude" << dLatitude << "longitude" << dLongitude;
-
-    return 111.111;
+    /* Not Used */
+    return;
 }
 
 double LogFilePositionSource::getGpsLatitude(void)
 {
     QByteArray line = logFile->readLine().trimmed();
-    if (!line.isEmpty()) {
+
+    if (!line.isEmpty())
+    {
         QList<QByteArray> data = line.split(',');
         double latitude;
         double longitude;
@@ -80,14 +71,17 @@ double LogFilePositionSource::getGpsLatitude(void)
         longitude = data.value(62).toDouble(&hasLongitude);
         qDebug() << "getGps lantitude" << latitude << "longitude" << longitude;
 
-        if (hasLatitude && hasLongitude && timestamp.isValid()) {
+        if (hasLatitude && hasLongitude && timestamp.isValid())
+        {
             QGeoCoordinate coordinate(latitude, longitude);
             QGeoPositionInfo info(coordinate, timestamp);
-            if (info.isValid()) {
+            if (info.isValid())
+            {
                 lastPosition = info;
                 emit positionUpdated(info);
             }
         }
+
         s_dLatitude = latitude;
         s_dLongitude = longitude;
     }
@@ -99,8 +93,10 @@ double LogFilePositionSource::getGpsLatitude(void)
 double LogFilePositionSource::getGpsLongitude(void)
 {
     QByteArray line = logFile->readLine().trimmed();
+
     //if (!line.isEmpty()) {
-    while (!line.end()) {
+    while (!line.end())
+    {
         QList<QByteArray> data = line.split(',');
         double latitude;
         double longitude;
@@ -111,14 +107,17 @@ double LogFilePositionSource::getGpsLongitude(void)
         longitude = data.value(62).toDouble(&hasLongitude);
         qDebug() << "getGps lantitude" << latitude << "longitude" << longitude;
 
-        if (hasLatitude && hasLongitude && timestamp.isValid()) {
+        if (hasLatitude && hasLongitude && timestamp.isValid())
+        {
             QGeoCoordinate coordinate(latitude, longitude);
             QGeoPositionInfo info(coordinate, timestamp);
-            if (info.isValid()) {
+            if (info.isValid())
+            {
                 lastPosition = info;
                 emit positionUpdated(info);
             }
         }
+
         s_dLatitude = latitude;
         s_dLongitude = longitude;
     }
@@ -129,51 +128,24 @@ double LogFilePositionSource::getGpsLongitude(void)
 
 void LogFilePositionSource::stopUpdates()
 {
-    timer->stop();
+    /* Not Used */
+    return;
 }
 
 void LogFilePositionSource::requestUpdate(int /*timeout*/)
 {
-    // For simplicity, ignore timeout - assume that if data is not available
-    // now, no data will be added to the file later
-    lastError = QGeoPositionInfoSource::NoError;
-    if (logFile->canReadLine()) {
-        readNextPosition();
-    } else {
-        lastError = QGeoPositionInfoSource::UpdateTimeoutError;
-        emit QGeoPositionInfoSource::errorOccurred(lastError);
-    }
+    /* Not Used */
+    return;
 }
 
 void LogFilePositionSource::readNextPosition()
 {
-    QByteArray line = logFile->readLine().trimmed();
-    if (!line.isEmpty()) {
-        QList<QByteArray> data = line.split(',');
-        double latitude;
-        double longitude;
-        bool hasLatitude = false;
-        bool hasLongitude = false;
-        QDateTime timestamp = QDateTime::fromString(QString(data.value(3)), Qt::ISODate);
-        latitude = data.value(21).toDouble(&hasLatitude);
-        longitude = data.value(22).toDouble(&hasLongitude);
-        //qDebug() << "getGps lantitude" << latitude << "longitude" << longitude;
-        //qDebug("latitude :%lf, longitude :%lf", latitude, longitude);
-        qDebug("dfd");
-
-        if (hasLatitude && hasLongitude && timestamp.isValid()) {
-            QGeoCoordinate coordinate(latitude, longitude);
-            QGeoPositionInfo info(coordinate, timestamp);
-            if (info.isValid()) {
-                lastPosition = info;
-                emit positionUpdated(info);
-            }
-        }
-    }
+    /* Not Used */
+    return;
 }
 
 QGeoPositionInfoSource::Error LogFilePositionSource::error() const
 {
+    /* Not Used */
     return lastError;
 }
-

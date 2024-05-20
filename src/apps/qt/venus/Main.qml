@@ -361,12 +361,8 @@ ApplicationWindow {
                 mapview.map.center.longitude = longitude;
             }
 
-            //vehiclePositionSrc.positionUpdated(coordinate)
-            //var coord = coordinate;
-            //console.log("Coordinate:", coord.longitude, coord.latitude);
             var getLatitude;
             var getLongitude;
-            //getLatitude = gpsClass.getGpsInfo(latitude, longitude)
             getLatitude = gpsClass.getGpsLatitude()
             getLongitude = gpsClass.getGpsLongitude()
             console.log("getLatitude:", getLatitude, "getLongitude", getLongitude);

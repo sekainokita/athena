@@ -32,7 +32,6 @@ public:
 public slots:
     virtual void startUpdates() override;
     virtual void stopUpdates() override;
-    virtual double getGpsInfo(double lan, double lon);
     virtual double getGpsLatitude(void);
     virtual double getGpsLongitude(void);
 
