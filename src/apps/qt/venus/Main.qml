@@ -343,6 +343,8 @@ ApplicationWindow {
 
             mapview.map.center.latitude = mapview.markers[mapview.currentMarker].coordinate.latitude;
             mapview.map.center.longitude = mapview.markers[mapview.currentMarker].coordinate.longitude;
+
+            mapview.markers[mapview.currentMarker].rotation = 180
         }
 
         function coordinateGpsInfo(latitude, longitude)
