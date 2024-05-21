@@ -115,6 +115,12 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                         return nRet;
                     }
                 }
+                else if(IS_CMD(pcCmd, "heading"))
+                {
+                    double dHeading;
+                    dHeading = DI_GPS_GetHeading(&pstDi->stDiGps);
+                    PrintDebug("dHeading[%lf]", dHeading);
+                }
                 else if(IS_CMD(pcCmd, "get"))
                 {
                     nRet = DI_GPS_Get(&pstDi->stDiGps);
@@ -230,6 +236,7 @@ int32_t CLI_DI_InitCmds(void)
                "of available commands. For more details on a command, type and enter 'di'\n"
                "and the command name.\n\n"
                "di test             test di command\n"
+               "di gps heading      get heading of device\n"
                "di gps open         open a GPS device\n"
                "di gps log on/off   show gps logs (on, off)\n"
                "di gps close        close a GPS device\n"
