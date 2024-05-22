@@ -6,12 +6,9 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qtimer.h>
-//#include <iostream>
-//#include <fstream>
 
 static double s_dLatitude = 37.40611064950719;
 static double s_dLongitude = 127.10226288596837;
-//static double s_dAddPosition = 0.000001;
 
 LogFilePositionSource::LogFilePositionSource(QObject *parent)
     : QGeoPositionInfoSource(parent),
@@ -66,10 +63,10 @@ double LogFilePositionSource::getGpsLatitude(void)
         double longitude;
         bool hasLatitude = false;
         bool hasLongitude = false;
-        QDateTime timestamp = QDateTime::fromString(QString(data.value(3)), Qt::ISODate);
-        latitude = data.value(61).toDouble(&hasLatitude);
-        longitude = data.value(62).toDouble(&hasLongitude);
-        qDebug() << "getGps lantitude" << latitude << "longitude" << longitude;
+        QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
+        qDebug() << "time" << timestamp;
+        latitude = data.value(DB_LATITUDE_COLUMN).toDouble(&hasLatitude);
+        longitude = data.value(DB_LONGITUDE_COLUMN).toDouble(&hasLongitude);
 
         if (hasLatitude && hasLongitude && timestamp.isValid())
         {
@@ -85,8 +82,6 @@ double LogFilePositionSource::getGpsLatitude(void)
         s_dLatitude = latitude;
         s_dLongitude = longitude;
     }
-
-    qDebug() << "s_dLatitude" << s_dLatitude;
     return s_dLatitude;
 }
 
@@ -94,18 +89,16 @@ double LogFilePositionSource::getGpsLongitude(void)
 {
     QByteArray line = logFile->readLine().trimmed();
 
-    //if (!line.isEmpty()) {
-    while (!line.end())
+    if (!line.isEmpty())
     {
         QList<QByteArray> data = line.split(',');
         double latitude;
         double longitude;
         bool hasLatitude = false;
         bool hasLongitude = false;
-        QDateTime timestamp = QDateTime::fromString(QString(data.value(3)), Qt::ISODate);
-        latitude = data.value(61).toDouble(&hasLatitude);
-        longitude = data.value(62).toDouble(&hasLongitude);
-        qDebug() << "getGps lantitude" << latitude << "longitude" << longitude;
+        QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
+        latitude = data.value(DB_LATITUDE_COLUMN).toDouble(&hasLatitude);
+        longitude = data.value(DB_LONGITUDE_COLUMN).toDouble(&hasLongitude);
 
         if (hasLatitude && hasLongitude && timestamp.isValid())
         {
@@ -121,8 +114,6 @@ double LogFilePositionSource::getGpsLongitude(void)
         s_dLatitude = latitude;
         s_dLongitude = longitude;
     }
-
-    qDebug() << "s_dLongitude" << s_dLongitude;
     return s_dLongitude;
 }
 
