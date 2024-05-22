@@ -157,6 +157,7 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
     float fTemp = 0.0f;
     double dRxlat, dRxLon, dTxLat, dTxLon, dDistMeter;
+    double dHeading;
 
     if(pstEventMsg == NULL)
     {
@@ -275,6 +276,8 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusRx->stRxPosition.nRxLatitude = stDbV2xStatus.stV2xGpsInfoRx.nLatitudeNow;
     pstDbV2xStatusRx->stRxPosition.nRxLongitude = stDbV2xStatus.stV2xGpsInfoRx.nLongitudeNow;
     pstDbV2xStatusRx->stRxPosition.nRxAttitude = 0;
+
+    UNUSED(dHeading);
 #else
     pstDi = APP_GetDiInstance();
     if(pstDi == NULL)
@@ -306,6 +309,14 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusRx->stRxPosition.nRxLatitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLatitude * SVC_CP_GPS_VALUE_CONVERT);
     pstDbV2xStatusRx->stRxPosition.nRxLongitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLongitude * SVC_CP_GPS_VALUE_CONVERT);
     pstDbV2xStatusRx->stRxPosition.nRxAttitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fAltitude * SVC_CP_GPS_VALUE_CONVERT);
+
+    dHeading = DI_GPS_GetHeading(&pstDi->stDiGps);
+    if (nRet != DI_OK)
+    {
+        PrintError("DI_GPS_GetHeading() is failed! [nRet:%d]", nRet);
+    }
+
+    PrintDebug("dHeading[%lf]", dHeading);
 #endif
 
     if(stDbV2xStatus.bFirstPacket == TRUE)

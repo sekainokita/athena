@@ -123,6 +123,7 @@ int32_t DI_GPS_Close(DI_GPS_T *pstDiGps);
 int32_t DI_GPS_Start(DI_GPS_T *pstDiGps);
 int32_t DI_GPS_Stop(DI_GPS_T *pstDiGps);
 
+double DI_GPS_GetHeading(DI_GPS_T *pstDiGps);
 double DI_GPS_CalculateHeading(DB_V2X_GPS_INFO_T *pstV2xGpsInfo);
 double DI_GPS_CalculateDistance(double dRxLat, double dRxLon, double dTxLat, double dTxLon);
 uint16_t DI_GPS_CalculateSpeed(DB_V2X_GPS_INFO_T *pstV2xGpsInfo);

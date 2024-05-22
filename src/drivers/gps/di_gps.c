@@ -416,6 +416,51 @@ int32_t DI_GPS_SetLog(DI_GPS_T *pstDiGps)
     return nRet;
 }
 
+double DI_GPS_GetHeading(DI_GPS_T *pstDiGps)
+{
+    int32_t nRet = DI_ERROR;
+    double dHeadingDegree = 0.0f;
+
+    if(pstDiGps == NULL)
+    {
+        PrintError("pstDiGps == NULL!!");
+        return nRet;
+    }
+
+    if (pstDiGps->bGpsNotAvailable == TRUE)
+    {
+        (void*)memset(&pstDiGps->stDiGpsData, 0x00, sizeof(DI_GPS_DATA_T));
+
+        nRet = DI_OK;
+        return nRet;
+    }
+
+    if(pstDiGps->eDiGpsStatus >= DI_GPS_STATUS_OPENED)
+    {
+#if defined(CONFIG_GPS_XSENS)
+        nRet = DI_GPS_XSENS_Get(&s_stDiGpsDev);
+        if(nRet != DI_OK)
+        {
+            PrintError("DI_GPS_XSENS_Get() is failed! [unRet:%d]", nRet);
+            return nRet;
+        }
+#endif
+        dHeadingDegree = s_stDiGpsDev.fEulerYaw; //;s_stDiGpsDev.fEulerYaw * 180.0 / M_PI;
+        if(dHeadingDegree < 0)
+        {
+            dHeadingDegree += 360.0;/* convert negative to positive angles */
+        }
+
+        PrintDebug("s_stDiGpsDev.fEulerYaw[%lf], dHeadingDegree[%lf]", s_stDiGpsDev.fEulerYaw, dHeadingDegree);
+    }
+    else
+    {
+        PrintWarn("check the status of GPS [%d]", pstDiGps->eDiGpsStatus);
+    }
+
+    return dHeadingDegree;
+}
+
 int32_t DI_GPS_Get(DI_GPS_T *pstDiGps)
 {
     int32_t nRet = DI_ERROR;
