@@ -70,8 +70,18 @@ int main(int argc, char *argv[])
         parameters.insert(u"osm.useragent"_s, QCoreApplication::applicationName());
     }
 
-    //parameters.insert(u"osm.mapping.providersrepository.address"_s, "https://tile.thunderforest.com/cycle/%z/%x/%y.png?apikey=15bb234f9b46448abd2f2b656f166270");
+    parameters.insert(u"osm.mapping.custom.host"_s, "https://tile.thunderforest.com/cycle/%z/%x/%y.png?apikey=15bb234f9b46448abd2f2b656f166270");
+    parameters.insert(u"osm.mapping.custom.host"_s, "https://tile.thunderforest.com/transport/%z/%x/%y.png?apikey=15bb234f9b46448abd2f2b656f166270");
+    parameters.insert(u"osm.mapping.custom.host"_s, "https://tile.thunderforest.com/landscape/%z/%x/%y.png?apikey=15bb234f9b46448abd2f2b656f166270");
+    parameters.insert(u"osm.mapping.custom.host"_s, "https://tile.thunderforest.com/outdoors/%z/%x/%y.png?apikey=15bb234f9b46448abd2f2b656f166270");
+    parameters.insert(u"osm.mapping.custom.host"_s, "https://tile.thunderforest.com/transport-dark/%z/%x/%y.png?apikey=15bb234f9b46448abd2f2b656f166270");
+    parameters.insert(u"osm.mapping.custom.host"_s, "https://tile.thunderforest.com/spinal-map/%z/%x/%y.png?apikey=15bb234f9b46448abd2f2b656f166270");
+    parameters.insert(u"osm.mapping.custom.host"_s, "https://tile.thunderforest.com/pioneer/%z/%x/%y.png?apikey=15bb234f9b46448abd2f2b656f166270");
+    parameters.insert(u"osm.mapping.custom.host"_s, "https://tile.thunderforest.com/mobile-atlas/%z/%x/%y.png?apikey=15bb234f9b46448abd2f2b656f166270");
+    parameters.insert(u"osm.mapping.custom.host"_s, "https://tile.thunderforest.com/neighbourhood/%z/%x/%y.png?apikey=15bb234f9b46448abd2f2b656f166270");
+    parameters.insert(u"osm.mapping.custom.host"_s, "https://tile.thunderforest.com/atlas/%z/%x/%y.png?apikey=15bb234f9b46448abd2f2b656f166270");
 
+    //parameters.insert(u"osm.mapping.providersrepository.address"_s, "https://tile.thunderforest.com/cycle/%z/%x/%y.png?apikey=15bb234f9b46448abd2f2b656f166270");
     // add Class to QML
     qmlRegisterType<LogFilePositionSource>("Qt.LogFilePositionSource", 1, 0, "LogFilePositionSource");
     qRegisterMetaType<QGeoPositionInfo>();
