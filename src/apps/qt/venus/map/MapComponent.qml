@@ -189,6 +189,10 @@ MapView {
         if (view.followme) view.map.center = positionSource.position.coordinate
     }
 
+    map.onSupportedMapTypesChanged: {
+        map.activeMapType = map.supportedMapTypes[map.supportedMapTypes.length - 1]
+    }
+
     onWidthChanged:{
         scaleTimer.restart()
     }
