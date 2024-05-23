@@ -5,7 +5,7 @@
 
 #define DB_LATITUDE_COLUMN  (61)
 #define DB_LONGITUDE_COLUMN (62)
-#define DB_TIME_COLUMN      (3)
+#define DB_TIME_COLUMN      (40)
 
 #include <QtPositioning/qgeopositioninfosource.h>
 #include <QDebug>

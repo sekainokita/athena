@@ -119,4 +119,18 @@ MenuBar {
             onTriggered: selectTool("Clear")
         }
     }
+
+    Menu {
+        id: platooningMenu
+        title: qsTr("Platooning")
+
+        MenuItem {
+            text: qsTr("Start Platooning")
+        }
+
+        MenuItem {
+            text: qsTr("Stop Platooning")
+
+        }
+    }
 }
