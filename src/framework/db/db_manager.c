@@ -142,6 +142,7 @@ static int32_t P_DB_MANAGER_PrintStatus(DB_V2X_STATUS_TX_T *pstDbV2xStatusTx, DB
         if(stDbV2xStatus.unCurrentContCnt == MSG_MGR_MAX_CONT_CNT)
         {
             PrintDebug("(Tx)unSeqNum[%d], (Rx)ulTotalPacketCnt[%ld], unPdr[%.3f], unPer[%.3f], ulTotalErrCnt[%ld]", pstDbV2xStatusTx->unSeqNum, pstDbV2xStatusRx->ulTotalPacketCnt, (float)(pstDbV2xStatusRx->unPdr/1000.0f), (float)(pstDbV2xStatusRx->unPer/1000.0f), pstDbV2xStatusRx->ulTotalErrCnt);
+            PrintDebug("(Tx)unTxVehicleSpeed[%d], unTxVehicleHeading[%d], (Rx)unRxVehicleSpeed[%d], unRxVehicleHeading[%d]", pstDbV2xStatusTx->unTxVehicleSpeed, pstDbV2xStatusTx->unTxVehicleHeading, pstDbV2xStatusRx->unRxVehicleSpeed, pstDbV2xStatusRx->unRxVehicleHeading);
         }
     }
     return nRet;
@@ -331,8 +332,6 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     }
 
     pstDbV2xStatusRx->unRxVehicleHeading = (uint32_t)dHeading;
-
-    PrintDebug("pstDbV2xStatusRx->unRxVehicleHeading[%d]", pstDbV2xStatusRx->unRxVehicleHeading);
 #endif
 
     if(stDbV2xStatus.bFirstPacket == TRUE)
