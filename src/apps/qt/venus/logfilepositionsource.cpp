@@ -108,54 +108,54 @@ double LogFilePositionSource::getGpsConnectedvehicleLongitude(void)
 unsigned int LogFilePositionSource::getGpsHeading(void)
 {
     QByteArray line = logFile->readLine().trimmed();
+    unsigned int unheading;
 
     if (!line.isEmpty())
     {
         QList<QByteArray> data = line.split(',');
-        unsigned int unheading;
         bool bHasHeading = false;
 
         unheading = data.value(DB_HEADING_COLUMN).toDouble(&bHasHeading);
-
-        s_unHeading = unheading;
+        qDebug() << "unheading" << unheading;
     }
 
-    return s_unHeading;
+    return unheading;
 }
 
 double LogFilePositionSource::getGpsLatitude(void)
 {
     QByteArray line = logFile->readLine().trimmed();
+    double latitude;
+    bool hasLatitude = false;
 
     if (!line.isEmpty())
     {
         QList<QByteArray> data = line.split(',');
-        double latitude;
-        bool hasLatitude = false;
         QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
         qDebug() << "time" << timestamp;
         latitude = data.value(DB_LATITUDE_COLUMN).toDouble(&hasLatitude);
-
-        s_dLatitude = latitude;
+        qDebug() << "latitude" << latitude;
     }
-    return s_dLatitude;
+
+    return latitude;
 }
 
 double LogFilePositionSource::getGpsLongitude(void)
 {
     QByteArray line = logFile->readLine().trimmed();
+    double longitude;
+    bool hasLongitude = false;
 
     if (!line.isEmpty())
     {
         QList<QByteArray> data = line.split(',');
-        double longitude;
-        bool hasLongitude = false;
         QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
         longitude = data.value(DB_LONGITUDE_COLUMN).toDouble(&hasLongitude);
+        qDebug() << "longitude" << longitude;
 
-        s_dLongitude = longitude;
     }
-    return s_dLongitude;
+
+    return longitude;
 }
 
 void LogFilePositionSource::stopUpdates()
