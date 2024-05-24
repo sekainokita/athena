@@ -105,57 +105,56 @@ double LogFilePositionSource::getGpsConnectedvehicleLongitude(void)
     return s_dConnectedVehicleLongitude[eCONNECTED_VEHICLE_0];
 }
 
-unsigned int LogFilePositionSource::getGpsHeading(void)
+unsigned int LogFilePositionSource::updateGpsPosition(void)
 {
     QByteArray line = logFile->readLine().trimmed();
+
     unsigned int unheading;
-
-    if (!line.isEmpty())
-    {
-        QList<QByteArray> data = line.split(',');
-        bool bHasHeading = false;
-
-        unheading = data.value(DB_HEADING_COLUMN).toDouble(&bHasHeading);
-        qDebug() << "unheading" << unheading;
-    }
-
-    return unheading;
-}
-
-double LogFilePositionSource::getGpsLatitude(void)
-{
-    QByteArray line = logFile->readLine().trimmed();
     double latitude;
-    bool hasLatitude = false;
-
-    if (!line.isEmpty())
-    {
-        QList<QByteArray> data = line.split(',');
-        QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
-        qDebug() << "time" << timestamp;
-        latitude = data.value(DB_LATITUDE_COLUMN).toDouble(&hasLatitude);
-        qDebug() << "latitude" << latitude;
-    }
-
-    return latitude;
-}
-
-double LogFilePositionSource::getGpsLongitude(void)
-{
-    QByteArray line = logFile->readLine().trimmed();
     double longitude;
+
+    bool bHasHeading = false;
+    bool hasLatitude = false;
     bool hasLongitude = false;
 
     if (!line.isEmpty())
     {
         QList<QByteArray> data = line.split(',');
         QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
-        longitude = data.value(DB_LONGITUDE_COLUMN).toDouble(&hasLongitude);
-        qDebug() << "longitude" << longitude;
+        qDebug() << "time" << timestamp;
 
+        unheading = data.value(DB_HEADING_COLUMN).toDouble(&bHasHeading);
+        s_unHeading = unheading;
+
+        latitude = data.value(DB_LATITUDE_COLUMN).toDouble(&hasLatitude);
+        s_dLatitude = latitude;
+        qDebug() << "s_dLatitude" << s_dLatitude;
+
+        longitude = data.value(DB_LONGITUDE_COLUMN).toDouble(&hasLongitude);
+        s_dLongitude = longitude;
+        qDebug() << "s_dLongitude" << s_dLongitude;
     }
 
-    return longitude;
+    return 1;
+}
+
+
+unsigned int LogFilePositionSource::getGpsHeading(void)
+{
+    qDebug() << "s_unHeading" << s_unHeading;
+    return s_unHeading;
+}
+
+double LogFilePositionSource::getGpsLatitude(void)
+{
+    qDebug() << "s_dLatitude" << s_dLatitude;
+    return s_dLatitude;
+}
+
+double LogFilePositionSource::getGpsLongitude(void)
+{
+    qDebug() << "s_dLongitude" << s_dLongitude;
+    return s_dLongitude;
 }
 
 void LogFilePositionSource::stopUpdates()

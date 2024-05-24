@@ -445,7 +445,7 @@ double DI_GPS_GetHeading(DI_GPS_T *pstDiGps)
             return nRet;
         }
 #endif
-        dHeadingDegree = s_stDiGpsDev.fEulerYaw;
+        dHeadingDegree = s_stDiGpsDev.fEulerYaw + 90.0;
         if(dHeadingDegree < 0)
         {
             dHeadingDegree += 360.0; /* convert negative to positive angles */

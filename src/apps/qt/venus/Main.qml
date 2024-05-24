@@ -331,7 +331,9 @@ ApplicationWindow {
             var getLatitude;
             var getLongitude;
             var getHeading;
-            
+            var updatePostionRet;
+
+            updatePostionRet = gpsClass.updateGpsPosition()
             getLatitude = gpsClass.getGpsLatitude()
             getLongitude = gpsClass.getGpsLongitude()
             getHeading = gpsClass.getGpsHeading()

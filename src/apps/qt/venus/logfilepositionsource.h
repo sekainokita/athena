@@ -41,8 +41,8 @@ public slots:
     virtual double getGpsConnectedvehicleLatitude(void);
     virtual double getGpsConnectedvehicleLongitude(void);
 
+    virtual unsigned int updateGpsPosition(void);
     virtual unsigned int getGpsHeading(void);
-
     virtual double getGpsLatitude(void);
     virtual double getGpsLongitude(void);
 
