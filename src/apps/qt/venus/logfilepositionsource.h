@@ -3,8 +3,8 @@
 #ifndef LOGFILEPOSITIONSOURCE_H
 #define LOGFILEPOSITIONSOURCE_H
 
-#define DB_LATITUDE_COLUMN  (61)
-#define DB_LONGITUDE_COLUMN (62)
+#define DB_LATITUDE_COLUMN  (62)
+#define DB_LONGITUDE_COLUMN (63)
 #define DB_TIME_COLUMN      (40)
 
 #include <QtPositioning/qgeopositioninfosource.h>
