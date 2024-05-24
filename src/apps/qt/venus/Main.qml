@@ -337,9 +337,6 @@ ApplicationWindow {
             getHeading = gpsClass.getGpsHeading()
             console.log("getLatitude:", getLatitude, "getLongitude", getLongitude, "getHeading", getHeading);
 
-            //mapview.markers[mapview.currentMarker].coordinate.latitude = mapview.markers[mapview.currentMarker].coordinate.latitude + addLocation
-            //mapview.markers[mapview.currentMarker].coordinate.longitude = mapview.markers[mapview.currentMarker].coordinate.longitude + addLocation
-
             mapview.markers[mapview.currentMarker].coordinate.latitude = getLatitude
             mapview.markers[mapview.currentMarker].coordinate.longitude = getLongitude
 
