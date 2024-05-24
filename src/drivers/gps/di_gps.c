@@ -445,13 +445,11 @@ double DI_GPS_GetHeading(DI_GPS_T *pstDiGps)
             return nRet;
         }
 #endif
-        dHeadingDegree = s_stDiGpsDev.fEulerYaw; //;s_stDiGpsDev.fEulerYaw * 180.0 / M_PI;
+        dHeadingDegree = s_stDiGpsDev.fEulerYaw;
         if(dHeadingDegree < 0)
         {
-            dHeadingDegree += 360.0;/* convert negative to positive angles */
+            dHeadingDegree += 360.0; /* convert negative to positive angles */
         }
-
-        PrintDebug("s_stDiGpsDev.fEulerYaw[%lf], dHeadingDegree[%lf]", s_stDiGpsDev.fEulerYaw, dHeadingDegree);
     }
     else
     {

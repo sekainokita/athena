@@ -165,6 +165,7 @@ typedef struct DB_V2X_DEV_INFO_t {
 * @param stDbV2xDevL2                           The system layer 2 device info
 * @param stDbV2xDevL3                           The system layer 3 device info
 * @param unRxVehicleSpeed                       Rx vehicle speed (Rx vehicle speed (if available), if not available, set the experimental value manually, default 60km/h)
+* @param unRxVehicleHeading                     Rx vehicle heading (0~360, 0(S), 90(E), -90(W), N(+-180))
 * @param unTotalCommDevCnt                      The total number of devices that are currently simultaneously connected and transmitting/receiving (the count number of all device IDs currently received and stored by the Rx device)
 * @param nRssi                                  Receive Signal Strength Indication, The total signal strength of the antenna at the time the message was received
 * @param ucRcpi                                 RCPI
@@ -181,6 +182,7 @@ typedef struct DB_V2X_STATUS_RX_t {
     DB_V2X_DEV_INFO_T                           stDbV2xDevL2;
     DB_V2X_DEV_INFO_T                           stDbV2xDevL3;
     uint16_t                                    unRxVehicleSpeed;
+    uint32_t                                    unRxVehicleHeading;
     uint32_t                                    unTotalCommDevCnt;
     uint16_t                                    nRssi;
     uint8_t                                     ucRcpi;

@@ -448,11 +448,23 @@ static void *P_SVC_CP_TaskTx(void *arg)
 
             s_usGpsSpeedCalCnt++;
 
+#if defined(CONFIG_GPS_OBU)
 			s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLatitudeNow = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
             s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLongitudeNow = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
             s_stDbV2xStatus.stV2xGpsInfoHeadingTx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
 
 			dHeading = DI_GPS_CalculateHeading(&s_stDbV2xStatus.stV2xGpsInfoHeadingTx);
+            if (dHeading < 0)
+            {
+                PrintError("DI_GPS_CalculateHeading() is failed! [dHeading:%lf]", dHeading);
+            }
+#else
+            dHeading = DI_GPS_GetHeading(&pstDi->stDiGps);
+            if (dHeading < 0)
+            {
+                PrintError("DI_GPS_GetHeading() is failed! [dHeading:%lf]", dHeading);
+            }
+#endif
             s_stSvcCp.stDbV2xStatusTx.unTxVehicleHeading = (uint32_t)dHeading;
 
 			s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLatitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;

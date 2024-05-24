@@ -277,7 +277,21 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusRx->stRxPosition.nRxLongitude = stDbV2xStatus.stV2xGpsInfoRx.nLongitudeNow;
     pstDbV2xStatusRx->stRxPosition.nRxAttitude = 0;
 
-    UNUSED(dHeading);
+    stDbV2xStatus.stV2xGpsInfoHeadingRx.nLatitudeNow = pstDbV2xStatusRx->stRxPosition.nRxLatitude;
+    stDbV2xStatus.stV2xGpsInfoHeadingRx.nLongitudeNow = pstDbV2xStatusRx->stRxPosition.nRxLongitude;
+    stDbV2xStatus.stV2xGpsInfoHeadingRx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
+
+    dHeading = DI_GPS_CalculateHeading(&s_stDbV2xStatus.stV2xGpsInfoHeadingTx);
+    if (dHeading < 0)
+    {
+        PrintError("DI_GPS_CalculateHeading() is failed! [dHeading:%lf]", dHeading);
+    }
+
+    pstDbV2xStatusRx->unRxVehicleHeading = (uint32_t)dHeading;
+
+	stDbV2xStatus.stV2xGpsInfoHeadingRx.nLatitudeLast = pstDbV2xStatusRx->stRxPosition.nRxLatitude;
+    stDbV2xStatus.stV2xGpsInfoHeadingRx.nLongitudeLast = pstDbV2xStatusRx->stRxPosition.nRxLongitude;
+    stDbV2xStatus.stV2xGpsInfoHeadingRx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
 #else
     pstDi = APP_GetDiInstance();
     if(pstDi == NULL)
@@ -316,7 +330,9 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
         PrintError("DI_GPS_GetHeading() is failed! [nRet:%d]", nRet);
     }
 
-    PrintDebug("dHeading[%lf]", dHeading);
+    pstDbV2xStatusRx->unRxVehicleHeading = (uint32_t)dHeading;
+
+    PrintDebug("pstDbV2xStatusRx->unRxVehicleHeading[%d]", pstDbV2xStatusRx->unRxVehicleHeading);
 #endif
 
     if(stDbV2xStatus.bFirstPacket == TRUE)
@@ -1072,6 +1088,7 @@ static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
             fprintf(sh_pDbMgrRxMsg, "usRxHwVerL2,");
             fprintf(sh_pDbMgrRxMsg, "usRxHwVerL3,");
             fprintf(sh_pDbMgrRxMsg, "unRxVehicleSpeed,");
+            fprintf(sh_pDbMgrRxMsg, "unRxVehicleHeading,");
             fprintf(sh_pDbMgrRxMsg, "unTotalCommDevCnt,");
             fprintf(sh_pDbMgrRxMsg, "nRssi,");
             fprintf(sh_pDbMgrRxMsg, "ucRcpi,");
@@ -1535,6 +1552,7 @@ static int32_t P_DB_MANAGER_WriteCsvV2xStatusRx(DB_MANAGER_EVENT_MSG_T *pstEvent
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stDbV2xDevL2.usHwVer);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stDbV2xDevL3.usHwVer);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unRxVehicleSpeed);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unRxVehicleHeading);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unTotalCommDevCnt);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.nRssi);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.ucRcpi);
