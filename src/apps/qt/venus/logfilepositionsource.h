@@ -3,9 +3,10 @@
 #ifndef LOGFILEPOSITIONSOURCE_H
 #define LOGFILEPOSITIONSOURCE_H
 
-#define DB_LATITUDE_COLUMN  (62)
-#define DB_LONGITUDE_COLUMN (63)
-#define DB_TIME_COLUMN      (40)
+#define DB_TIME_COLUMN          (40)
+#define DB_HEADING_COLUMN       (56)
+#define DB_LATITUDE_COLUMN      (62)
+#define DB_LONGITUDE_COLUMN     (63)
 
 #include <QtPositioning/qgeopositioninfosource.h>
 #include <QDebug>
@@ -36,6 +37,12 @@ public:
 public slots:
     virtual void startUpdates() override;
     virtual void stopUpdates() override;
+
+    virtual double getGpsConnectedvehicleLatitude(void);
+    virtual double getGpsConnectedvehicleLongitude(void);
+
+    virtual unsigned int getGpsHeading(void);
+
     virtual double getGpsLatitude(void);
     virtual double getGpsLongitude(void);
 

@@ -7,8 +7,26 @@
 #include <QtCore/qfile.h>
 #include <QtCore/qtimer.h>
 
+#define CONNECTED_VEHICLE_MAX_CNT 5
+
+typedef enum {
+    eCONNECTED_VEHICLE_0 = 0,
+    eCONNECTED_VEHICLE_1,
+    eCONNECTED_VEHICLE_2,
+    eCONNECTED_VEHICLE_3,
+    eCONNECTED_VEHICLE_4,
+    eCONNECTED_VEHICLE_MAX
+} CONNECTED_VEHICLE_Es;
+
 static double s_dLatitude = 37.40611064950719;
 static double s_dLongitude = 127.10226288596837;
+
+static double s_dConnectedVehicleLatitude[CONNECTED_VEHICLE_MAX_CNT] = {37.40611064950719, 127.10226288596837};
+static double s_dConnectedVehicleLongitude[CONNECTED_VEHICLE_MAX_CNT] = {37.40611064950719, 127.10226288596837};
+
+static unsigned int s_unHeading = 0;
+
+static double s_dConnectedVehicleHeading[CONNECTED_VEHICLE_MAX_CNT] = {37.40611064950719, 127.10226288596837};
 
 LogFilePositionSource::LogFilePositionSource(QObject *parent)
     : QGeoPositionInfoSource(parent),
@@ -50,6 +68,89 @@ void LogFilePositionSource::startUpdates()
 {
     /* Not Used */
     return;
+}
+
+double LogFilePositionSource::getGpsConnectedvehicleLatitude(void)
+{
+    QByteArray line = logFile->readLine().trimmed();
+
+    if (!line.isEmpty())
+    {
+        QList<QByteArray> data = line.split(',');
+        double latitude;
+        double longitude;
+        bool hasLatitude = false;
+        bool hasLongitude = false;
+        QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
+        qDebug() << "time" << timestamp;
+        latitude = data.value(DB_LATITUDE_COLUMN).toDouble(&hasLatitude);
+        longitude = data.value(DB_LONGITUDE_COLUMN).toDouble(&hasLongitude);
+
+        if (hasLatitude && hasLongitude && timestamp.isValid())
+        {
+            QGeoCoordinate coordinate(latitude, longitude);
+            QGeoPositionInfo info(coordinate, timestamp);
+            if (info.isValid())
+            {
+                lastPosition = info;
+                emit positionUpdated(info);
+            }
+        }
+
+        s_dConnectedVehicleLatitude[eCONNECTED_VEHICLE_0] = latitude;
+        s_dConnectedVehicleLongitude[eCONNECTED_VEHICLE_0] = longitude;
+    }
+    return s_dConnectedVehicleLatitude[eCONNECTED_VEHICLE_0];
+}
+
+double LogFilePositionSource::getGpsConnectedvehicleLongitude(void)
+{
+    QByteArray line = logFile->readLine().trimmed();
+
+    if (!line.isEmpty())
+    {
+        QList<QByteArray> data = line.split(',');
+        double latitude;
+        double longitude;
+        bool hasLatitude = false;
+        bool hasLongitude = false;
+        QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
+        latitude = data.value(DB_LATITUDE_COLUMN).toDouble(&hasLatitude);
+        longitude = data.value(DB_LONGITUDE_COLUMN).toDouble(&hasLongitude);
+
+        if (hasLatitude && hasLongitude && timestamp.isValid())
+        {
+            QGeoCoordinate coordinate(latitude, longitude);
+            QGeoPositionInfo info(coordinate, timestamp);
+            if (info.isValid())
+            {
+                lastPosition = info;
+                emit positionUpdated(info);
+            }
+        }
+
+        s_dConnectedVehicleLatitude[eCONNECTED_VEHICLE_0] = latitude;
+        s_dConnectedVehicleLongitude[eCONNECTED_VEHICLE_0] = longitude;
+    }
+    return s_dConnectedVehicleLongitude[eCONNECTED_VEHICLE_0];
+}
+
+unsigned int LogFilePositionSource::getGpsHeading(void)
+{
+    QByteArray line = logFile->readLine().trimmed();
+
+    if (!line.isEmpty())
+    {
+        QList<QByteArray> data = line.split(',');
+        unsigned int unheading;
+        bool bHasHeading = false;
+
+        unheading = data.value(DB_HEADING_COLUMN).toDouble(&bHasHeading);
+
+        s_unHeading = unheading;
+    }
+
+    return s_unHeading;
 }
 
 double LogFilePositionSource::getGpsLatitude(void)

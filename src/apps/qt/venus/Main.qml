@@ -330,10 +330,12 @@ ApplicationWindow {
         {
             var getLatitude;
             var getLongitude;
-
+            var getHeading;
+            
             getLatitude = gpsClass.getGpsLatitude()
             getLongitude = gpsClass.getGpsLongitude()
-            console.log("getLatitude:", getLatitude, "getLongitude", getLongitude);
+            getHeading = gpsClass.getGpsHeading()
+            console.log("getLatitude:", getLatitude, "getLongitude", getLongitude, "getHeading", getHeading);
 
             //mapview.markers[mapview.currentMarker].coordinate.latitude = mapview.markers[mapview.currentMarker].coordinate.latitude + addLocation
             //mapview.markers[mapview.currentMarker].coordinate.longitude = mapview.markers[mapview.currentMarker].coordinate.longitude + addLocation
@@ -344,7 +346,7 @@ ApplicationWindow {
             mapview.map.center.latitude = mapview.markers[mapview.currentMarker].coordinate.latitude;
             mapview.map.center.longitude = mapview.markers[mapview.currentMarker].coordinate.longitude;
 
-            mapview.markers[mapview.currentMarker].rotation = 0
+            mapview.markers[mapview.currentMarker].rotation = getHeading
         }
 
         function coordinateGpsInfo(latitude, longitude)
