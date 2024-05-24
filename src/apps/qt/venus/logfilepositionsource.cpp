@@ -78,27 +78,12 @@ double LogFilePositionSource::getGpsConnectedvehicleLatitude(void)
     {
         QList<QByteArray> data = line.split(',');
         double latitude;
-        double longitude;
         bool hasLatitude = false;
-        bool hasLongitude = false;
         QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
         qDebug() << "time" << timestamp;
         latitude = data.value(DB_LATITUDE_COLUMN).toDouble(&hasLatitude);
-        longitude = data.value(DB_LONGITUDE_COLUMN).toDouble(&hasLongitude);
-
-        if (hasLatitude && hasLongitude && timestamp.isValid())
-        {
-            QGeoCoordinate coordinate(latitude, longitude);
-            QGeoPositionInfo info(coordinate, timestamp);
-            if (info.isValid())
-            {
-                lastPosition = info;
-                emit positionUpdated(info);
-            }
-        }
 
         s_dConnectedVehicleLatitude[eCONNECTED_VEHICLE_0] = latitude;
-        s_dConnectedVehicleLongitude[eCONNECTED_VEHICLE_0] = longitude;
     }
     return s_dConnectedVehicleLatitude[eCONNECTED_VEHICLE_0];
 }
@@ -110,26 +95,11 @@ double LogFilePositionSource::getGpsConnectedvehicleLongitude(void)
     if (!line.isEmpty())
     {
         QList<QByteArray> data = line.split(',');
-        double latitude;
         double longitude;
-        bool hasLatitude = false;
         bool hasLongitude = false;
         QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
-        latitude = data.value(DB_LATITUDE_COLUMN).toDouble(&hasLatitude);
         longitude = data.value(DB_LONGITUDE_COLUMN).toDouble(&hasLongitude);
 
-        if (hasLatitude && hasLongitude && timestamp.isValid())
-        {
-            QGeoCoordinate coordinate(latitude, longitude);
-            QGeoPositionInfo info(coordinate, timestamp);
-            if (info.isValid())
-            {
-                lastPosition = info;
-                emit positionUpdated(info);
-            }
-        }
-
-        s_dConnectedVehicleLatitude[eCONNECTED_VEHICLE_0] = latitude;
         s_dConnectedVehicleLongitude[eCONNECTED_VEHICLE_0] = longitude;
     }
     return s_dConnectedVehicleLongitude[eCONNECTED_VEHICLE_0];
@@ -161,27 +131,12 @@ double LogFilePositionSource::getGpsLatitude(void)
     {
         QList<QByteArray> data = line.split(',');
         double latitude;
-        double longitude;
         bool hasLatitude = false;
-        bool hasLongitude = false;
         QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
         qDebug() << "time" << timestamp;
         latitude = data.value(DB_LATITUDE_COLUMN).toDouble(&hasLatitude);
-        longitude = data.value(DB_LONGITUDE_COLUMN).toDouble(&hasLongitude);
-
-        if (hasLatitude && hasLongitude && timestamp.isValid())
-        {
-            QGeoCoordinate coordinate(latitude, longitude);
-            QGeoPositionInfo info(coordinate, timestamp);
-            if (info.isValid())
-            {
-                lastPosition = info;
-                emit positionUpdated(info);
-            }
-        }
 
         s_dLatitude = latitude;
-        s_dLongitude = longitude;
     }
     return s_dLatitude;
 }
@@ -193,26 +148,11 @@ double LogFilePositionSource::getGpsLongitude(void)
     if (!line.isEmpty())
     {
         QList<QByteArray> data = line.split(',');
-        double latitude;
         double longitude;
-        bool hasLatitude = false;
         bool hasLongitude = false;
         QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
-        latitude = data.value(DB_LATITUDE_COLUMN).toDouble(&hasLatitude);
         longitude = data.value(DB_LONGITUDE_COLUMN).toDouble(&hasLongitude);
 
-        if (hasLatitude && hasLongitude && timestamp.isValid())
-        {
-            QGeoCoordinate coordinate(latitude, longitude);
-            QGeoPositionInfo info(coordinate, timestamp);
-            if (info.isValid())
-            {
-                lastPosition = info;
-                emit positionUpdated(info);
-            }
-        }
-
-        s_dLatitude = latitude;
         s_dLongitude = longitude;
     }
     return s_dLongitude;
