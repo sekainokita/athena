@@ -282,7 +282,7 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     stDbV2xStatus.stV2xGpsInfoHeadingRx.nLongitudeNow = pstDbV2xStatusRx->stRxPosition.nRxLongitude;
     stDbV2xStatus.stV2xGpsInfoHeadingRx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
 
-    dHeading = DI_GPS_CalculateHeading(&s_stDbV2xStatus.stV2xGpsInfoHeadingTx);
+    dHeading = DI_GPS_CalculateHeading(&stDbV2xStatus.stV2xGpsInfoHeadingTx);
     if (dHeading < 0)
     {
         PrintError("DI_GPS_CalculateHeading() is failed! [dHeading:%lf]", dHeading);
