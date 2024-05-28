@@ -346,13 +346,16 @@ ApplicationWindow {
             getCvHeading = gpsClass.getGpsCvHeading()
             console.log("getCvLatitude:", getLatitude, "getCvLongitude", getLongitude, "getCvHeading", getHeading);
 
-            mapview.markers[mapview.currentMarker].coordinate.latitude = getLatitude
-            mapview.markers[mapview.currentMarker].coordinate.longitude = getLongitude
+            mapview.markers[0].coordinate.latitude = getLatitude
+            mapview.markers[0].coordinate.longitude = getLongitude
+            mapview.markers[0].rotation = getHeading
 
-            mapview.map.center.latitude = mapview.markers[mapview.currentMarker].coordinate.latitude;
-            mapview.map.center.longitude = mapview.markers[mapview.currentMarker].coordinate.longitude;
+            mapview.markers[1].coordinate.latitude = getCvLatitude
+            mapview.markers[1].coordinate.longitude = getCvLongitude
+            mapview.markers[1].rotation = getCvHeading
 
-            mapview.markers[mapview.currentMarker].rotation = getHeading
+            mapview.map.center.latitude = mapview.markers[0].coordinate.latitude;
+            mapview.map.center.longitude = mapview.markers[0].coordinate.longitude;
         }
 
         function coordinateGpsInfo(latitude, longitude)
