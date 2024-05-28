@@ -7,7 +7,8 @@
 #include <QtCore/qfile.h>
 #include <QtCore/qtimer.h>
 
-#define CONNECTED_VEHICLE_MAX_CNT 5
+//#define CONFIG_DEBUG (1)
+#define CONNECTED_VEHICLE_MAX_CNT (5)
 
 typedef enum {
     eCONNECTED_VEHICLE_0 = 0,
@@ -26,7 +27,7 @@ static double s_dConnectedVehicleLongitude[CONNECTED_VEHICLE_MAX_CNT] = {37.4061
 
 static unsigned int s_unHeading = 0;
 
-static double s_dConnectedVehicleHeading[CONNECTED_VEHICLE_MAX_CNT] = {37.40611064950719, 127.10226288596837};
+static double s_dConnectedVehicleHeading[CONNECTED_VEHICLE_MAX_CNT] = {0,};
 
 LogFilePositionSource::LogFilePositionSource(QObject *parent)
     : QGeoPositionInfoSource(parent),
@@ -70,52 +71,25 @@ void LogFilePositionSource::startUpdates()
     return;
 }
 
-double LogFilePositionSource::getGpsConnectedvehicleLatitude(void)
-{
-    QByteArray line = logFile->readLine().trimmed();
-
-    if (!line.isEmpty())
-    {
-        QList<QByteArray> data = line.split(',');
-        double latitude;
-        bool hasLatitude = false;
-        QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
-        qDebug() << "time" << timestamp;
-        latitude = data.value(DB_LATITUDE_COLUMN).toDouble(&hasLatitude);
-
-        s_dConnectedVehicleLatitude[eCONNECTED_VEHICLE_0] = latitude;
-    }
-    return s_dConnectedVehicleLatitude[eCONNECTED_VEHICLE_0];
-}
-
-double LogFilePositionSource::getGpsConnectedvehicleLongitude(void)
-{
-    QByteArray line = logFile->readLine().trimmed();
-
-    if (!line.isEmpty())
-    {
-        QList<QByteArray> data = line.split(',');
-        double longitude;
-        bool hasLongitude = false;
-        QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
-        longitude = data.value(DB_LONGITUDE_COLUMN).toDouble(&hasLongitude);
-
-        s_dConnectedVehicleLongitude[eCONNECTED_VEHICLE_0] = longitude;
-    }
-    return s_dConnectedVehicleLongitude[eCONNECTED_VEHICLE_0];
-}
-
 unsigned int LogFilePositionSource::updateGpsPosition(void)
 {
     QByteArray line = logFile->readLine().trimmed();
 
     unsigned int unheading;
-    double latitude;
-    double longitude;
+    double dLatitude;
+    double dLongitude;
 
     bool bHasHeading = false;
-    bool hasLatitude = false;
-    bool hasLongitude = false;
+    bool bHasLatitude = false;
+    bool bHasLongitude = false;
+
+    unsigned int aunCvHeading[CONNECTED_VEHICLE_MAX_CNT];
+    double adCvLatitude[CONNECTED_VEHICLE_MAX_CNT];
+    double adCvLongitude[CONNECTED_VEHICLE_MAX_CNT];
+
+    bool abHasCvHeading[CONNECTED_VEHICLE_MAX_CNT] = {false,};
+    bool abHasCvLatitude[CONNECTED_VEHICLE_MAX_CNT] = {false,};
+    bool abHasCvLongitude[CONNECTED_VEHICLE_MAX_CNT] = {false,};
 
     if (!line.isEmpty())
     {
@@ -123,38 +97,76 @@ unsigned int LogFilePositionSource::updateGpsPosition(void)
         QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
         qDebug() << "time" << timestamp;
 
+        /* Rx Vehicle */
         unheading = data.value(DB_HEADING_COLUMN).toDouble(&bHasHeading);
         s_unHeading = unheading;
 
-        latitude = data.value(DB_LATITUDE_COLUMN).toDouble(&hasLatitude);
-        s_dLatitude = latitude;
-        qDebug() << "s_dLatitude" << s_dLatitude;
+        dLatitude = data.value(DB_LATITUDE_COLUMN).toDouble(&bHasLatitude);
+        s_dLatitude = dLatitude;
 
-        longitude = data.value(DB_LONGITUDE_COLUMN).toDouble(&hasLongitude);
-        s_dLongitude = longitude;
-        qDebug() << "s_dLongitude" << s_dLongitude;
+        dLongitude = data.value(DB_LONGITUDE_COLUMN).toDouble(&bHasLongitude);
+        s_dLongitude = dLongitude;
+
+        /* Tx Vehicle */
+        aunCvHeading[eCONNECTED_VEHICLE_0] = data.value(DB_HEADING_COLUMN).toDouble(&abHasCvHeading[eCONNECTED_VEHICLE_0]);
+        s_dConnectedVehicleHeading[eCONNECTED_VEHICLE_0] = aunCvHeading[eCONNECTED_VEHICLE_0];
+
+        adCvLatitude[eCONNECTED_VEHICLE_0] = data.value(DB_LATITUDE_COLUMN).toDouble(&abHasCvLatitude[eCONNECTED_VEHICLE_0]);
+        s_dConnectedVehicleLatitude[eCONNECTED_VEHICLE_0] = adCvLatitude[eCONNECTED_VEHICLE_0];
+
+        adCvLongitude[eCONNECTED_VEHICLE_0] = data.value(DB_LONGITUDE_COLUMN).toDouble(&abHasCvLongitude[eCONNECTED_VEHICLE_0]);
+        s_dConnectedVehicleLongitude[eCONNECTED_VEHICLE_0] = adCvLongitude[eCONNECTED_VEHICLE_0];
     }
 
     return 1;
 }
 
-
 unsigned int LogFilePositionSource::getGpsHeading(void)
 {
+#if defined(CONFIG_DEBUG)
     qDebug() << "s_unHeading" << s_unHeading;
+#endif
     return s_unHeading;
 }
 
 double LogFilePositionSource::getGpsLatitude(void)
 {
+#if defined(CONFIG_DEBUG)
     qDebug() << "s_dLatitude" << s_dLatitude;
+#endif
     return s_dLatitude;
 }
 
 double LogFilePositionSource::getGpsLongitude(void)
 {
+#if defined(CONFIG_DEBUG)
     qDebug() << "s_dLongitude" << s_dLongitude;
+#endif
     return s_dLongitude;
+}
+
+double LogFilePositionSource::getGpsCvHeading(void)
+{
+#if defined(CONFIG_DEBUG)
+    qDebug() << "getGpsCvHeading" << s_unHeading;
+#endif
+    return s_dConnectedVehicleLatitude[eCONNECTED_VEHICLE_0];
+}
+
+double LogFilePositionSource::getGpsCvLatitude(void)
+{
+#if defined(CONFIG_DEBUG)
+    qDebug() << "getGpsCvLatitude" << s_unHeading;
+#endif
+    return s_dConnectedVehicleLatitude[eCONNECTED_VEHICLE_0];
+}
+
+double LogFilePositionSource::getGpsCvLongitude(void)
+{
+#if defined(CONFIG_DEBUG)
+    qDebug() << "getGpsCvLongitude" << s_unHeading;
+#endif
+    return s_dConnectedVehicleLongitude[eCONNECTED_VEHICLE_0];
 }
 
 void LogFilePositionSource::stopUpdates()

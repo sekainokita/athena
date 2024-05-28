@@ -38,13 +38,15 @@ public slots:
     virtual void startUpdates() override;
     virtual void stopUpdates() override;
 
-    virtual double getGpsConnectedvehicleLatitude(void);
-    virtual double getGpsConnectedvehicleLongitude(void);
-
     virtual unsigned int updateGpsPosition(void);
+
     virtual unsigned int getGpsHeading(void);
     virtual double getGpsLatitude(void);
     virtual double getGpsLongitude(void);
+
+    virtual double getGpsCvHeading(void);
+    virtual double getGpsCvLatitude(void);
+    virtual double getGpsCvLongitude(void);
 
     virtual void requestUpdate(int timeout = 5000) override;
 
