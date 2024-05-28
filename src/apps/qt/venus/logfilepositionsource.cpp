@@ -17,7 +17,7 @@ typedef enum {
     eCONNECTED_VEHICLE_3,
     eCONNECTED_VEHICLE_4,
     eCONNECTED_VEHICLE_MAX
-} CONNECTED_VEHICLE_Es;
+} CONNECTED_VEHICLE_E;
 
 static double s_dLatitude = 37.40611064950719;
 static double s_dLongitude = 127.10226288596837;
