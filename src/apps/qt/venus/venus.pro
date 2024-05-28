@@ -7,7 +7,8 @@ SOURCES += main.cpp
 SOURCES += logfilepositionsource.cpp
 SOURCES += clientapplication.cpp
 
-HEADERS += logfilepositionsource.h
+HEADERS += logfilepositionsource.h \
+    linegraph.h
 HEADERS += clientapplication.h
 HEADERS += linegraph.h
 
@@ -57,5 +58,6 @@ target.path = $$[QT_INSTALL_EXAMPLES]/location/venus
 INSTALLS += target
 
 DISTFILES += \
-    db_v2x_rx_temp_writing.csv
+    db_v2x_rx_temp_writing.csv \
+    map/linegraph.qml
     map/LineGraph.qml
