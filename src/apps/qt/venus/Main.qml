@@ -14,6 +14,7 @@ ApplicationWindow {
     id: appWindow
     property variant mapview
     property variant minimap
+    property variant linegraph
     property variant plugin
     property variant parameters
     property variant addLocation: 0.000001
@@ -35,6 +36,11 @@ ApplicationWindow {
         if (minimap) {
             minimap.destroy()
             minimap = null
+        }
+
+        if (linegraph) {
+            linegraph.destroy()
+            linegraph = null
         }
 
         var zoomLevel = null
@@ -145,6 +151,17 @@ ApplicationWindow {
             }
         }
 
+        function toggleLineGraphState()
+        {
+            console.log("Line Graph")
+            if (linegraph) {
+                linegraph.destroy()
+                linegraph = null
+            } else {
+                linegraph = Qt.createQmlObject('import "graph"; Line Graph{ z:mapview.z + 2 }', mapview)
+            }
+        }
+
         function setLanguage(lang)
         {
             mapview.map.plugin.locales = lang;
@@ -218,6 +235,9 @@ ApplicationWindow {
             case "Clear":
                 mapview.map.clearData()
                 break
+            case "LineGraph":
+                Component: "LineGraph.qml"
+            break
             case "Prefetch":
                 mapview.map.prefetchData()
                 break

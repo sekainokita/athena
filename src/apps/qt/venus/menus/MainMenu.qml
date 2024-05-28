@@ -13,6 +13,7 @@ MenuBar {
     property variant plugin
     property alias isFollowMe: toolsMenu.isFollowMe
     property alias isMiniMap: toolsMenu.isMiniMap
+    property alias isLineGraph: toolsMenu.isLineGraph
 
     signal selectProvider(string providerName)
     signal selectMapType(variant mapType)
@@ -74,6 +75,7 @@ MenuBar {
         id: toolsMenu
         property bool isFollowMe: false;
         property bool isMiniMap: false;
+        property bool isLineGraph: false;
         property variant plugin: menuBar.plugin
 
         title: qsTr("Tools")
@@ -101,6 +103,10 @@ MenuBar {
         MenuItem {
             text: isMiniMap ? qsTr("Hide minimap") : qsTr("Minimap")
             onTriggered: toggleMapState("MiniMap")
+        }
+        MenuItem {
+            text: isLineGraph ? qsTr("Hide Line Graph") : qsTr("Line Graph")
+            onTriggered: selectTool("LineGraph")
         }
         MenuItem {
             text: isFollowMe ? qsTr("Stop following") : qsTr("Follow me")

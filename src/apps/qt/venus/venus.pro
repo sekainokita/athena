@@ -1,7 +1,7 @@
 TARGET = venus
 TEMPLATE = app
 
-QT += core qml network quick positioning positioning-private location widgets gui location
+QT += core qml network quick positioning positioning-private location widgets gui location charts
 
 SOURCES += main.cpp
 SOURCES += logfilepositionsource.cpp
@@ -9,6 +9,7 @@ SOURCES += clientapplication.cpp
 
 HEADERS += logfilepositionsource.h
 HEADERS += clientapplication.h
+HEADERS += linegraph.h
 
 # Workaround for QTBUG-38735
 QT_FOR_CONFIG += location-private
@@ -57,3 +58,4 @@ INSTALLS += target
 
 DISTFILES += \
     db_v2x_rx_temp_writing.csv
+    map/LineGraph.qml
