@@ -364,7 +364,7 @@ ApplicationWindow {
             getCvLatitude = gpsClass.getGpsCvLatitude()
             getCvLongitude = gpsClass.getGpsCvLongitude()
             getCvHeading = gpsClass.getGpsCvHeading()
-            console.log("getCvLatitude:", getLatitude, "getCvLongitude", getLongitude, "getCvHeading", getHeading);
+            console.log("getCvLatitude:", getCvLatitude, "getCvLongitude", getCvLongitude, "getCvHeading", getCvHeading);
 
             mapview.markers[0].coordinate.latitude = getLatitude
             mapview.markers[0].coordinate.longitude = getLongitude
