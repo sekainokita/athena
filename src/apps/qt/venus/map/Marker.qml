@@ -57,6 +57,18 @@ MapQuickItem {
             }
         }
 
+    Text{
+            id: device
+            y: image.height/100
+            width: image.width
+            color: "black"
+            font.bold: true
+            font.pixelSize: 11
+            horizontalAlignment: Text.AlignHCenter
+            Component.onCompleted: {
+                text = "^"
+            }
+        }
 //! [mqi-closeimage]
     }
 //! [mqi-closeimage]
