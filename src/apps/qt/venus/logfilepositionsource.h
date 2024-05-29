@@ -8,6 +8,10 @@
 #define DB_LATITUDE_COLUMN      (62)
 #define DB_LONGITUDE_COLUMN     (63)
 
+#define DB_HEADING_COLUMN       (38)
+#define DB_LATITUDE_COLUMN      (32)
+#define DB_LONGITUDE_COLUMN     (33)
+
 #include <QtPositioning/qgeopositioninfosource.h>
 #include <QDebug>
 
