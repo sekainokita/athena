@@ -1,0 +1,3 @@
+catkin_create_pkg opencv_edu rospy std_msgs
+catkin_make
+. ./devel/setup.bash
