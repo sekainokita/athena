@@ -296,6 +296,24 @@ MapView {
     }
 
     Item {
+        id: pdr
+        z: view.map.z
+        visible: pdrText.text
+        anchors.bottom: parent.bottom;
+        anchors.right: parent.right
+        anchors.margins: 40
+        height: pdrText.height * 2
+        width: scaleImage.width
+
+        Label {
+            id: pdrText
+            color: "#0070FB"
+            anchors.centerIn: parent
+            text: "5G-NR-V2X"
+        }
+    }
+
+    Item {
         id: scale
         z: view.map.z + 3
         visible: scaleText.text !== "0 m"
