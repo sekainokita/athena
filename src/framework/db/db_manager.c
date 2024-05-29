@@ -314,11 +314,6 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     dTxLon = (double)pstDbV2xStatusTx->stTxPosition.nTxLongitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
 
     dDistMeter = DI_GPS_CalculateDistance(dRxlat, dRxLon, dTxLat, dTxLon);
-
-    pstDbV2xStatusTx->stTxPosition.nTxLatitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLatitude * SVC_CP_GPS_VALUE_CONVERT);
-    pstDbV2xStatusTx->stTxPosition.nTxLongitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLongitude * SVC_CP_GPS_VALUE_CONVERT);
-    pstDbV2xStatusTx->stTxPosition.nTxAttitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fAltitude * SVC_CP_GPS_VALUE_CONVERT);
-
     pstDbV2xStatusRx->stRxPosition.unCommDistance = (uint32_t)(dDistMeter * SVC_CP_GPS_VALUE_CONVERT);
 
     pstDbV2xStatusRx->stRxPosition.nRxLatitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLatitude * SVC_CP_GPS_VALUE_CONVERT);
