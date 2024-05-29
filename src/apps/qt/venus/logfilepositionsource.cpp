@@ -108,13 +108,13 @@ unsigned int LogFilePositionSource::updateGpsPosition(void)
         s_dLongitude = dLongitude;
 
         /* Tx Vehicle */
-        aunCvHeading[eCONNECTED_VEHICLE_0] = data.value(DB_HEADING_COLUMN).toDouble(&abHasCvHeading[eCONNECTED_VEHICLE_0]);
+        aunCvHeading[eCONNECTED_VEHICLE_0] = data.value(DB_CV_HEADING_COLUMN).toDouble(&abHasCvHeading[eCONNECTED_VEHICLE_0]);
         s_dConnectedVehicleHeading[eCONNECTED_VEHICLE_0] = aunCvHeading[eCONNECTED_VEHICLE_0];
 
-        adCvLatitude[eCONNECTED_VEHICLE_0] = data.value(DB_LATITUDE_COLUMN).toDouble(&abHasCvLatitude[eCONNECTED_VEHICLE_0]);
+        adCvLatitude[eCONNECTED_VEHICLE_0] = data.value(DB_CV_LATITUDE_COLUMN).toDouble(&abHasCvLatitude[eCONNECTED_VEHICLE_0]);
         s_dConnectedVehicleLatitude[eCONNECTED_VEHICLE_0] = adCvLatitude[eCONNECTED_VEHICLE_0];
 
-        adCvLongitude[eCONNECTED_VEHICLE_0] = data.value(DB_LONGITUDE_COLUMN).toDouble(&abHasCvLongitude[eCONNECTED_VEHICLE_0]);
+        adCvLongitude[eCONNECTED_VEHICLE_0] = data.value(DB_CV_LONGITUDE_COLUMN).toDouble(&abHasCvLongitude[eCONNECTED_VEHICLE_0]);
         s_dConnectedVehicleLongitude[eCONNECTED_VEHICLE_0] = adCvLongitude[eCONNECTED_VEHICLE_0];
     }
 
