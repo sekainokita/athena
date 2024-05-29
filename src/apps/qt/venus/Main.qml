@@ -114,7 +114,9 @@ ApplicationWindow {
     title: qsTr("KETI Copyright - VENUS APPLICATION")
     height: 720
     width: 1280
+    color: "#1E1E1E"
     visible: true
+    //visibility: "FullScreen"
     menuBar: mainMenu
 
     //! [geocode0]
