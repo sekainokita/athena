@@ -1,0 +1,14 @@
+*.o
+*.a
+*.log
+*.txt
+*.csv
+*.db
+*.pcap
+*.mtb
+.DS_Store
+app-v2x
+plat-chem-obu-compact-app
+athena
+build/
+objs/
