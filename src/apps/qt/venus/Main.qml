@@ -371,10 +371,12 @@ ApplicationWindow {
             mapview.markers[0].coordinate.latitude = getLatitude
             mapview.markers[0].coordinate.longitude = getLongitude
             mapview.markers[0].rotation = getHeading
+            mapview.markers[0].deviceIdtext = getHeading
 
             mapview.markers[1].coordinate.latitude = getCvLatitude
             mapview.markers[1].coordinate.longitude = getCvLongitude
             mapview.markers[1].rotation = getCvHeading
+            mapview.markers[1].deviceIdtext = getCvHeading
 
             mapview.map.center.latitude = mapview.markers[0].coordinate.latitude;
             mapview.map.center.longitude = mapview.markers[0].coordinate.longitude;

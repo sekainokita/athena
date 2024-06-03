@@ -8,7 +8,7 @@ import QtLocation
 MapQuickItem {
     id: marker
 //! [mqi-top]
-
+    property alias deviceIdtext: deviceId.text
 //! [mqi-anchor]
     anchorPoint.x: image.width/4
     anchorPoint.y: image.height
@@ -57,32 +57,32 @@ MapQuickItem {
             }
         }
 
-    Text{
-            id: device
-            y: image.height/100
-            width: image.width
-            color: "black"
-            font.bold: true
-            font.pixelSize: 11
-            horizontalAlignment: Text.AlignHCenter
-            Component.onCompleted: {
-                text = "^"
+        Text{
+                id: pdr
+                y: image.height/100 - 30
+                width: image.width
+                color: "blue"
+                font.bold: true
+                font.pixelSize: 11
+                horizontalAlignment: Text.AlignHCenter
+                Component.onCompleted: {
+                    text = "99.999"
+                }
             }
-        }
 
-    Text{
-            rotation: -parent.rotation
-            id: deviceId
-            y: image.height/100 - 25
-            width: image.width
-            color: "black"
-            font.bold: true
-            font.pixelSize: 11
-            horizontalAlignment: Text.AlignHCenter
-            Component.onCompleted: {
-                text = "KETI"
+        Text{
+                rotation: -parent.rotation
+                id: deviceId
+                y: image.height/100 - 15
+                width: image.width
+                color: "black"
+                font.bold: true
+                font.pixelSize: 11
+                horizontalAlignment: Text.AlignHCenter
+                Component.onCompleted: {
+                    text = "KETI"
+                }
             }
-        }
 //! [mqi-closeimage]
     }
 //! [mqi-closeimage]

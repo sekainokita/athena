@@ -150,7 +150,7 @@ double LogFilePositionSource::getGpsCvHeading(void)
 #if defined(CONFIG_DEBUG)
     qDebug() << "getGpsCvHeading" << s_unHeading;
 #endif
-    return s_dConnectedVehicleLatitude[eCONNECTED_VEHICLE_0];
+    return s_dConnectedVehicleHeading[eCONNECTED_VEHICLE_0];
 }
 
 double LogFilePositionSource::getGpsCvLatitude(void)
