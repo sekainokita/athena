@@ -69,6 +69,20 @@ MapQuickItem {
                 text = "^"
             }
         }
+
+    Text{
+            rotation: -parent.rotation
+            id: deviceId
+            y: image.height/100 - 25
+            width: image.width
+            color: "black"
+            font.bold: true
+            font.pixelSize: 11
+            horizontalAlignment: Text.AlignHCenter
+            Component.onCompleted: {
+                text = "KETI"
+            }
+        }
 //! [mqi-closeimage]
     }
 //! [mqi-closeimage]
