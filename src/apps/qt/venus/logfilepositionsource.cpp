@@ -29,6 +29,8 @@ static unsigned int s_unHeading = 0;
 
 static double s_dConnectedVehicleHeading[CONNECTED_VEHICLE_MAX_CNT] = {0,};
 
+static QString s_chDeviceId;
+
 LogFilePositionSource::LogFilePositionSource(QObject *parent)
     : QGeoPositionInfoSource(parent),
       logFile(new QFile(this)),
@@ -78,10 +80,12 @@ unsigned int LogFilePositionSource::updateGpsPosition(void)
     unsigned int unheading;
     double dLatitude;
     double dLongitude;
+    QString chDeviceId;
 
     bool bHasHeading = false;
     bool bHasLatitude = false;
     bool bHasLongitude = false;
+    bool bHasDeviceId = false;
 
     unsigned int aunCvHeading[CONNECTED_VEHICLE_MAX_CNT];
     double adCvLatitude[CONNECTED_VEHICLE_MAX_CNT];
@@ -106,6 +110,11 @@ unsigned int LogFilePositionSource::updateGpsPosition(void)
 
         dLongitude = data.value(DB_LONGITUDE_COLUMN).toDouble(&bHasLongitude);
         s_dLongitude = dLongitude;
+
+        chDeviceId = data.value(DB_DEVICEID_COLUMN);
+        s_chDeviceId = chDeviceId;
+
+
 
         /* Tx Vehicle */
         aunCvHeading[eCONNECTED_VEHICLE_0] = data.value(DB_CV_HEADING_COLUMN).toDouble(&abHasCvHeading[eCONNECTED_VEHICLE_0]);
@@ -143,6 +152,14 @@ double LogFilePositionSource::getGpsLongitude(void)
     qDebug() << "s_dLongitude" << s_dLongitude;
 #endif
     return s_dLongitude;
+}
+
+QString LogFilePositionSource::getGpsDeviceId(void)
+{
+#if defined(CONFIG_DEBUG)
+    qDebug() << "s_chDeviceId" << s_chDeviceId;
+#endif
+    return s_chDeviceId;
 }
 
 double LogFilePositionSource::getGpsCvHeading(void)

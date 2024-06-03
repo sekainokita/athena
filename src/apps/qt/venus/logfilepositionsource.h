@@ -7,10 +7,12 @@
 #define DB_HEADING_COLUMN       (56)
 #define DB_LATITUDE_COLUMN      (62)
 #define DB_LONGITUDE_COLUMN     (63)
+#define DB_DEVICEID_COLUMN      (47)
 
 #define DB_CV_HEADING_COLUMN       (38)
 #define DB_CV_LATITUDE_COLUMN      (32)
 #define DB_CV_LONGITUDE_COLUMN     (33)
+#define DB_CV_DEVICEID_COLUMN      (17)
 
 #include <QtPositioning/qgeopositioninfosource.h>
 #include <QDebug>
@@ -47,6 +49,7 @@ public slots:
     virtual unsigned int getGpsHeading(void);
     virtual double getGpsLatitude(void);
     virtual double getGpsLongitude(void);
+    virtual QString getGpsDeviceId(void);
 
     virtual double getGpsCvHeading(void);
     virtual double getGpsCvLatitude(void);
