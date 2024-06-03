@@ -19,17 +19,22 @@ typedef enum {
     eCONNECTED_VEHICLE_MAX
 } CONNECTED_VEHICLE_E;
 
-static double s_dLatitude = 37.40611064950719;
-static double s_dLongitude = 127.10226288596837;
+static double s_dLatitude = 37.40611064950719f;
+static double s_dLongitude = 127.10226288596837f;
 
-static double s_dConnectedVehicleLatitude[CONNECTED_VEHICLE_MAX_CNT] = {37.40611064950719, 127.10226288596837};
-static double s_dConnectedVehicleLongitude[CONNECTED_VEHICLE_MAX_CNT] = {37.40611064950719, 127.10226288596837};
+static double s_dCvLatitude[CONNECTED_VEHICLE_MAX_CNT] = {37.40611064950719f, 127.10226288596837f};
+static double s_dCvLongitude[CONNECTED_VEHICLE_MAX_CNT] = {37.40611064950719f, 127.10226288596837f};
+
+static unsigned int s_unSpeed = 0;
+static unsigned int s_unDistance = 0;
 
 static unsigned int s_unHeading = 0;
+static double s_dCvHeading[CONNECTED_VEHICLE_MAX_CNT] = {0,};
 
 static double s_dConnectedVehicleHeading[CONNECTED_VEHICLE_MAX_CNT] = {0,};
 
 static QString s_qStrDeviceId;
+static double s_dPdr = 0.0f;
 
 static QString s_dConnectedVehicleDeviceId[CONNECTED_VEHICLE_MAX_CNT] = {0,};
 
@@ -79,7 +84,10 @@ unsigned int LogFilePositionSource::updateGpsPosition(void)
 {
     QByteArray line = logFile->readLine().trimmed();
 
-    unsigned int unheading;
+    unsigned int unHeading;
+    unsigned int unSpeed;
+    unsigned int unDistance;
+    double dPdr;
     double dLatitude;
     double dLongitude;
     QString qStrDeviceId;
@@ -87,6 +95,10 @@ unsigned int LogFilePositionSource::updateGpsPosition(void)
     bool bHasHeading = false;
     bool bHasLatitude = false;
     bool bHasLongitude = false;
+    bool bHasDeviceId = false;
+    bool bHasPdr = false;
+    bool bHasDistance = false;
+    bool bHasSpeed = false;
 
     unsigned int aunCvHeading[CONNECTED_VEHICLE_MAX_CNT];
     double adCvLatitude[CONNECTED_VEHICLE_MAX_CNT];
@@ -104,8 +116,8 @@ unsigned int LogFilePositionSource::updateGpsPosition(void)
         qDebug() << "time" << timestamp;
 
         /* Rx Vehicle */
-        unheading = data.value(DB_HEADING_COLUMN).toDouble(&bHasHeading);
-        s_unHeading = unheading;
+        unHeading = data.value(DB_HEADING_COLUMN).toDouble(&bHasHeading);
+        s_unHeading = unHeading;
 
         dLatitude = data.value(DB_LATITUDE_COLUMN).toDouble(&bHasLatitude);
         s_dLatitude = dLatitude;
@@ -116,17 +128,24 @@ unsigned int LogFilePositionSource::updateGpsPosition(void)
         qStrDeviceId = data.value(DB_DEVICEID_COLUMN);
         s_qStrDeviceId = qStrDeviceId;
 
+        dPdr = data.value(DB_PDR_COLUMN).toDouble(&bHasPdr);
+        s_dPdr = dPdr;
 
+        unDistance = data.value(DB_DISTANCE_COLUMN).toDouble(&bHasDistance);
+        s_unDistance = unDistance;
+
+        unSpeed = data.value(DB_SPEED_COLUMN).toDouble(&bHasSpeed);
+        s_unSpeed = unSpeed;
 
         /* Tx Vehicle */
         aunCvHeading[eCONNECTED_VEHICLE_0] = data.value(DB_CV_HEADING_COLUMN).toDouble(&abHasCvHeading[eCONNECTED_VEHICLE_0]);
-        s_dConnectedVehicleHeading[eCONNECTED_VEHICLE_0] = aunCvHeading[eCONNECTED_VEHICLE_0];
+        s_dCvHeading[eCONNECTED_VEHICLE_0] = aunCvHeading[eCONNECTED_VEHICLE_0];
 
         adCvLatitude[eCONNECTED_VEHICLE_0] = data.value(DB_CV_LATITUDE_COLUMN).toDouble(&abHasCvLatitude[eCONNECTED_VEHICLE_0]);
-        s_dConnectedVehicleLatitude[eCONNECTED_VEHICLE_0] = adCvLatitude[eCONNECTED_VEHICLE_0];
+        s_dCvLatitude[eCONNECTED_VEHICLE_0] = adCvLatitude[eCONNECTED_VEHICLE_0];
 
         adCvLongitude[eCONNECTED_VEHICLE_0] = data.value(DB_CV_LONGITUDE_COLUMN).toDouble(&abHasCvLongitude[eCONNECTED_VEHICLE_0]);
-        s_dConnectedVehicleLongitude[eCONNECTED_VEHICLE_0] = adCvLongitude[eCONNECTED_VEHICLE_0];
+        s_dCvLongitude[eCONNECTED_VEHICLE_0] = adCvLongitude[eCONNECTED_VEHICLE_0];
 
         aqStrCvDeviceId[eCONNECTED_VEHICLE_0] = data.value(DB_CV_DEVICEID_COLUMN);
         s_dConnectedVehicleDeviceId[eCONNECTED_VEHICLE_0] = aqStrCvDeviceId[eCONNECTED_VEHICLE_0];
@@ -141,6 +160,30 @@ unsigned int LogFilePositionSource::getGpsHeading(void)
     qDebug() << "s_unHeading" << s_unHeading;
 #endif
     return s_unHeading;
+}
+
+unsigned int LogFilePositionSource::getGpsSpeed(void)
+{
+#if defined(CONFIG_DEBUG)
+    qDebug() << "s_unSpeed" << s_unSpeed;
+#endif
+    return s_unSpeed;
+}
+
+unsigned int LogFilePositionSource::getGpsDistance(void)
+{
+#if defined(CONFIG_DEBUG)
+    qDebug() << "s_unDistance" << s_unDistance;
+#endif
+    return s_unDistance;
+}
+
+double LogFilePositionSource::getGpsPdr(void)
+{
+#if defined(CONFIG_DEBUG)
+    qDebug() << "s_dPdr" << s_dPdr;
+#endif
+    return s_dPdr;
 }
 
 double LogFilePositionSource::getGpsLatitude(void)
@@ -167,28 +210,28 @@ QString LogFilePositionSource::getGpsDeviceId(void)
     return s_qStrDeviceId;
 }
 
-double LogFilePositionSource::getGpsCvHeading(void)
+unsigned int LogFilePositionSource::getGpsCvHeading(void)
 {
 #if defined(CONFIG_DEBUG)
-    qDebug() << "getGpsCvHeading" << s_unHeading;
+    qDebug() << "s_unHeading" << s_unHeading;
 #endif
-    return s_dConnectedVehicleHeading[eCONNECTED_VEHICLE_0];
+    return s_dCvHeading[eCONNECTED_VEHICLE_0];
 }
 
 double LogFilePositionSource::getGpsCvLatitude(void)
 {
 #if defined(CONFIG_DEBUG)
-    qDebug() << "getGpsCvLatitude" << s_unHeading;
+    qDebug() << "s_dCvLatitude" << s_dCvLatitude[eCONNECTED_VEHICLE_0];
 #endif
-    return s_dConnectedVehicleLatitude[eCONNECTED_VEHICLE_0];
+    return s_dCvLatitude[eCONNECTED_VEHICLE_0];
 }
 
 double LogFilePositionSource::getGpsCvLongitude(void)
 {
 #if defined(CONFIG_DEBUG)
-    qDebug() << "getGpsCvLongitude" << s_unHeading;
+    qDebug() << "s_dCvLongitude" << s_dCvLongitude[eCONNECTED_VEHICLE_0];
 #endif
-    return s_dConnectedVehicleLongitude[eCONNECTED_VEHICLE_0];
+    return s_dCvLongitude[eCONNECTED_VEHICLE_0];
 }
 
 QString LogFilePositionSource::getGpsCvDeviceId(void)

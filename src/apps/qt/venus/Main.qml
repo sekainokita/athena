@@ -350,10 +350,16 @@ ApplicationWindow {
 
         function updatePosition()
         {
+            /* Rx Vehicle (Own Vehicle) */
             var getLatitude;
             var getLongitude;
             var getHeading;
             var getDeviceId;
+            var getPdr;
+            var getDistance;
+            var getSpeed;
+
+            /* Tx Vehicle (Connected Vehicle) */
             var getCvLatitude;
             var getCvLongitude;
             var getCvHeading;
@@ -366,6 +372,12 @@ ApplicationWindow {
             getHeading = gpsClass.getGpsHeading()
             getDeviceId = gpsClass.getGpsDeviceId()
             console.log("getLatitude:", getLatitude, "getLongitude", getLongitude, "getHeading", getHeading);
+
+            getPdr = gpsClass.getGpsPdr()
+            getDistance = gpsClass.getGpsDistance()
+            getSpeed = gpsClass.getGpsSpeed()
+            console.log("getPdr:", getPdr, "getDistance", getDistance, "getSpeed", getSpeed);
+
             getCvLatitude = gpsClass.getGpsCvLatitude()
             getCvLongitude = gpsClass.getGpsCvLongitude()
             getCvHeading = gpsClass.getGpsCvHeading()
@@ -375,12 +387,14 @@ ApplicationWindow {
             mapview.markers[0].coordinate.latitude = getLatitude
             mapview.markers[0].coordinate.longitude = getLongitude
             mapview.markers[0].rotation = getHeading
-            mapview.markers[0].deviceIdtext = getDeviceId
+            mapview.markers[0].deviceIdText = getDeviceId
+            mapview.markers[0].infoText = getPdr
 
             mapview.markers[1].coordinate.latitude = getCvLatitude
             mapview.markers[1].coordinate.longitude = getCvLongitude
             mapview.markers[1].rotation = getCvHeading
-            mapview.markers[1].deviceIdtext = getCvDeviceId
+            mapview.markers[1].deviceIdText = getCvDeviceId
+            mapview.markers[1].infoText = getDistance
 
             mapview.map.center.latitude = mapview.markers[0].coordinate.latitude;
             mapview.map.center.longitude = mapview.markers[0].coordinate.longitude;

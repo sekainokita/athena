@@ -4,10 +4,13 @@
 #define LOGFILEPOSITIONSOURCE_H
 
 #define DB_TIME_COLUMN          (40)
+#define DB_SPEED_COLUMN             (55)
 #define DB_HEADING_COLUMN       (56)
 #define DB_LATITUDE_COLUMN      (62)
 #define DB_LONGITUDE_COLUMN     (63)
 #define DB_DEVICEID_COLUMN      (47)
+#define DB_PDR_COLUMN               (68)
+#define DB_DISTANCE_COLUMN          (61)
 
 #define DB_CV_HEADING_COLUMN       (38)
 #define DB_CV_LATITUDE_COLUMN      (32)
@@ -46,12 +49,18 @@ public slots:
 
     virtual unsigned int updateGpsPosition(void);
 
+    virtual unsigned int getGpsSpeed(void);
+    virtual unsigned int getGpsDistance(void);
+
     virtual unsigned int getGpsHeading(void);
+
+    virtual double getGpsPdr(void);
+
     virtual double getGpsLatitude(void);
     virtual double getGpsLongitude(void);
     virtual QString getGpsDeviceId(void);
 
-    virtual double  getGpsCvHeading(void);
+    virtual unsigned int getGpsCvHeading(void);
     virtual double  getGpsCvLatitude(void);
     virtual double  getGpsCvLongitude(void);
     virtual QString getGpsCvDeviceId(void);

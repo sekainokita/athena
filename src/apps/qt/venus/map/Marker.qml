@@ -8,7 +8,8 @@ import QtLocation
 MapQuickItem {
     id: marker
 //! [mqi-top]
-    property alias deviceIdtext: deviceId.text
+    property alias deviceIdText: deviceId.text
+    property alias infoText: info.text
 //! [mqi-anchor]
     anchorPoint.x: image.width/4
     anchorPoint.y: image.height
@@ -58,7 +59,7 @@ MapQuickItem {
         }
 
         Text{
-                id: pdr
+                id: info
                 y: image.height/100 - 30
                 width: image.width
                 color: "blue"
@@ -66,7 +67,7 @@ MapQuickItem {
                 font.pixelSize: 11
                 horizontalAlignment: Text.AlignHCenter
                 Component.onCompleted: {
-                    text = "99.999"
+                    text = "Info"
                 }
             }
 
