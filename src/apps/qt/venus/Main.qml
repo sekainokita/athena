@@ -357,6 +357,7 @@ ApplicationWindow {
             var getCvLatitude;
             var getCvLongitude;
             var getCvHeading;
+            var getCvDeviceId;
             var updatePostionRet;
 
             updatePostionRet = gpsClass.updateGpsPosition()
@@ -368,6 +369,7 @@ ApplicationWindow {
             getCvLatitude = gpsClass.getGpsCvLatitude()
             getCvLongitude = gpsClass.getGpsCvLongitude()
             getCvHeading = gpsClass.getGpsCvHeading()
+            getCvDeviceId = gpsClass.getGpsCvDeviceId()
             console.log("getCvLatitude:", getCvLatitude, "getCvLongitude", getCvLongitude, "getCvHeading", getCvHeading);
 
             mapview.markers[0].coordinate.latitude = getLatitude
@@ -378,7 +380,7 @@ ApplicationWindow {
             mapview.markers[1].coordinate.latitude = getCvLatitude
             mapview.markers[1].coordinate.longitude = getCvLongitude
             mapview.markers[1].rotation = getCvHeading
-            mapview.markers[1].deviceIdtext = getCvHeading
+            mapview.markers[1].deviceIdtext = getCvDeviceId
 
             mapview.map.center.latitude = mapview.markers[0].coordinate.latitude;
             mapview.map.center.longitude = mapview.markers[0].coordinate.longitude;

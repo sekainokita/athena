@@ -51,9 +51,10 @@ public slots:
     virtual double getGpsLongitude(void);
     virtual QString getGpsDeviceId(void);
 
-    virtual double getGpsCvHeading(void);
-    virtual double getGpsCvLatitude(void);
-    virtual double getGpsCvLongitude(void);
+    virtual double  getGpsCvHeading(void);
+    virtual double  getGpsCvLatitude(void);
+    virtual double  getGpsCvLongitude(void);
+    virtual QString getGpsCvDeviceId(void);
 
     virtual void requestUpdate(int timeout = 5000) override;
 
