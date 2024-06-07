@@ -1,4 +1,4 @@
-prefix=/home/bman/catkin_ws/devel
+prefix=/home/bman/work/athena/src/platform/catkin_ws/devel
 
 Name: gnss_pose_to_socket
 Description: Description of gnss_pose_to_socket

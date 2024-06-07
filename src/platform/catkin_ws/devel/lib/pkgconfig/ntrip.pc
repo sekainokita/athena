@@ -1,4 +1,4 @@
-prefix=/home/bman/catkin_ws/devel
+prefix=/home/bman/work/athena/src/platform/catkin_ws/devel
 
 Name: ntrip
 Description: Description of ntrip

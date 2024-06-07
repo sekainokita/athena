@@ -1,8 +1,8 @@
-prefix=/home/bman/catkin_ws/devel
+prefix=/home/bman/work/athena/src/platform/catkin_ws/devel
 
 Name: xsens_mti_driver
 Description: Description of xsens_mti_driver
 Version: 1.1.0
-Cflags: -I/home/bman/catkin_ws/devel/include
+Cflags: -I/home/bman/work/athena/src/platform/catkin_ws/devel/include
 Libs: -L${prefix}/lib 
 Requires: message_runtime roscpp tf2 tf2_ros nmea_msgs sensor_msgs std_msgs geometry_msgs
