@@ -1,0 +1,8 @@
+prefix=/home/bman/catkin_ws/devel
+
+Name: gnss_pose_to_socket
+Description: Description of gnss_pose_to_socket
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

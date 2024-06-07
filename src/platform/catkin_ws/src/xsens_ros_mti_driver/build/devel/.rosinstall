@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/bman/work/Xsens_MTi_ROS_Driver_and_Ntrip_Client/src/xsens_ros_mti_driver/build/devel/setup.sh
