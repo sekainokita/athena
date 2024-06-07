@@ -58,6 +58,10 @@ target.path = $$[QT_INSTALL_EXAMPLES]/location/venus
 INSTALLS += target
 
 DISTFILES += \
+    db/Rx_OBU_CKCOX23120002_20240529-10-26-50_20240529-11-16-38_2988secs.csv \
+    db/Rx_OBU_CKCOX23120002_20240529-11-17-22_20240529-11-36-13_1131secs.csv \
+    db/rx_db_sample_1.csv \
+    db/rx_db_sample_2.csv \
     db_v2x_rx_temp_writing.csv \
     map/linegraph.qml
     map/LineGraph.qml
