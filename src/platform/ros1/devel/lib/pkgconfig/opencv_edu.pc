@@ -1,8 +1,0 @@
-prefix=/home/bman/work/autonomous_driving_service_dev/src/platform/ros1/devel
-
-Name: opencv_edu
-Description: Description of opencv_edu
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
