@@ -98,29 +98,35 @@ pip3 install pygccxml
 pip3 install pybind11 pybind11-global thrift thrift-tools
 
 # ROS
-sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-apt-get install -y curl
+sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-noetic.list'
+apt install -y curl
 curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
 apt-get install -y libcurl4-openssl-dev
 apt-get install -y libglfw3-dev
 apt-get install -y libuv1-dev
 apt-get install -y libpng-dev
 apt-get install -y libjpeg-dev
-apt-get update
+apt update
 apt install -y ros-noetic-desktop-full
 apt search ros-noetic
 
-ROS_PATH=$HOME/work/autonomous_driving_service_dev/src/platform/ros1/devel/setup.bash
-ROS_IP=$(hostname -I | awk '{ print $1 }')
+apt install -y python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
+apt install -y ros-noetic-nmea-msgs
+apt install -y ros-noetic-mavros-msgs
+
+echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
+
+ROS_PATH=$HOME/work/athena/src/platform/catkin_ws/devel/setup.bash
+#ROS_IP=$(hostname -I | awk '{ print $1 }')
 
 echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
 echo "ROS_PATH=${ROS_PATH}" >>~/.bashrc
 echo "echo ROS_PATH=${ROS_PATH}" >> ~/.bashrc
 echo "echo change own ROS path" >> ~/.bashrc
 echo "echo mind update $ . ~/.bashrc" >> ~/.bashrc
-echo "export ROS_IP=${ROS_IP}" >> ~/.bashrc
-echo "export ROS_MASTER_URI=http://localhost:11311" >> ~/.bashrc
-echo "export ROS_HOSTNAME=${ROS_IP}" >> ~/.bashrc
+#echo "export ROS_IP=${ROS_IP}" >> ~/.bashrc
+#echo "export ROS_MASTER_URI=http://localhost:11311" >> ~/.bashrc
+#echo "export ROS_HOSTNAME=${ROS_IP}" >> ~/.bashrc
 echo "source ${ROS_PATH}" >> ~/.bashrc
 . ~/.bashrc
 
