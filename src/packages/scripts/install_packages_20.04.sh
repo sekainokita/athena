@@ -114,8 +114,6 @@ apt install -y python3-rosdep python3-rosinstall python3-rosinstall-generator py
 apt install -y ros-noetic-nmea-msgs
 apt install -y ros-noetic-mavros-msgs
 
-echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
-
 ROS_PATH=$HOME/work/athena/src/platform/catkin_ws/devel/setup.bash
 #ROS_IP=$(hostname -I | awk '{ print $1 }')
 
