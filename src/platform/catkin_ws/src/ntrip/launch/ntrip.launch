@@ -4,7 +4,7 @@
         <param name="port" type="int" value="2101" />  <!-- Change to your port number for WGS84 -->
         <param name="user" type="string" value="seoul" /> <!-- Change to your username -->
         <param name="passwd" type = "string" value="seoul" /> <!-- Change to your password -->
-        <param name="mountpoint" type = "string" value="SONP-RTCM32" /> <!-- Change to your mountpoint -->
+        <param name="mountpoint" type = "string" value="SONP-RTCM31" /> <!-- Change to your mountpoint -->
         <param name="report_interval" type = "int" value="1" /> <!-- the report interval to the NTRIP Caster, default is 1 sec -->
     </node>
 </launch>

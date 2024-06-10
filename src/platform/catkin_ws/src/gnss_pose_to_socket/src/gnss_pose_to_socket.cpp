@@ -1,7 +1,7 @@
 // gnss_pose_to_socket.cpp
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/Vector3Stamped.h>
+#include <geometry_msgs/Vector3Stamped.h> // euler 데이터를 포함하는 메시지 타입
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -69,4 +69,3 @@ int main(int argc, char** argv) {
     close(sockfd);
     return 0;
 }
-
