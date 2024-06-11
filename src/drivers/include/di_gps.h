@@ -53,24 +53,7 @@
 
 /***************************** Definition ************************************/
 #define DI_GPS_TASK_MSG_KEY               (0x240531)
-
-/***************************** Enum and Structure ****************************/
-
-/**
-* @details SVC_PLATOONING_SETTING_T
-* @param unReserved
-*/
-typedef struct DI_GPS_SETTING_t {
-    uint32_t                     unReserved;
-} DI_GPS_SETTING_T;
-
-/**
-* @details DI_GPS_EVENT_MSG_T
-* @param pstTimeMgrSetting
-*/
-typedef struct DI_GPS_EVENT_MSG_t {
-    DI_GPS_SETTING_T            *pstDiGpsSetting;
-} DI_GPS_EVENT_MSG_T;
+#define DI_GPS_SERVER_PORT                (8080)
 
 /***************************** Enum and Structure ****************************/
 /**
@@ -86,6 +69,21 @@ typedef enum {
     DI_GPS_STATUS_STOPPED                      = 5,
     DI_GPS_STATUS_MAX                          = 255,
 } DI_GPS_STATUS_E;
+
+/**
+* @details DI_GPS_EVENT_E
+* @param DI_GPS_EVENT_START
+* @param DI_GPS_EVENT_STOP
+*/
+typedef enum {
+    eDI_GPS_EVENT_UNKNOWN                    = 0x0000,
+    eDI_GPS_EVENT_START                      = 0x0001,
+    eDI_GPS_EVENT_STOP                       = 0x0002,
+    eDI_GPS_EVENT_UNDEFINED_1,
+    eDI_GPS_EVENT_UNDEFINED_2,
+    eDI_GPS_EVENT_MAX                        = 0xFFFF
+} DI_GPS_EVENT_E;
+
 
 /**
 * @details DI_GPS_DATA_T
@@ -117,6 +115,14 @@ typedef struct DI_GPS_DATA_t {
 } DI_GPS_DATA_T;
 
 /**
+* @details DI_GPS_EVENT_MSG_T
+* @param eEventType
+*/
+typedef struct DI_GPS_EVENT_MSG_t {
+    DI_GPS_EVENT_E          eEventType;
+} DI_GPS_EVENT_MSG_T;
+
+/**
 * @details DI_GPS_T
 * @param unReserved
 */
@@ -146,6 +152,8 @@ double DI_GPS_GetHeading(DI_GPS_T *pstDiGps);
 double DI_GPS_CalculateHeading(DB_V2X_GPS_INFO_T *pstV2xGpsInfo);
 double DI_GPS_CalculateDistance(double dRxLat, double dRxLon, double dTxLat, double dTxLon);
 uint16_t DI_GPS_CalculateSpeed(DB_V2X_GPS_INFO_T *pstV2xGpsInfo);
+
+int32_t DI_GPS_StartSocketServer(DI_GPS_T *pstDiGps);
 
 void DI_GPS_Status(DI_GPS_T *pstDiGps);
 int32_t DI_GPS_Init(DI_GPS_T *pstDiGps);

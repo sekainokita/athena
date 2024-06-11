@@ -107,9 +107,7 @@ typedef enum {
 
 /**
 * @details SVC_CP_EVENT_MSG_T
-* @param pstTimeMgrSetting
 * @param eEventType
-* @param eStatusType
 */
 typedef struct SVC_CP_EVENT_MSG_t {
     SVC_CP_EVENT_E          eEventType;

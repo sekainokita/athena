@@ -1,3 +1,4 @@
+
 /******************************************************************************
 *
 * Copyright (C) 2023 - 2028 KETI, All rights reserved.
@@ -172,6 +173,22 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                         }
                     }
                 }
+                else if(IS_CMD(pcCmd, "tcp"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        if(IS_CMD(pcCmd, "server"))
+                        {
+                            nRet = DI_GPS_StartSocketServer(&pstDi->stDiGps);
+                            if (nRet != DI_OK)
+                            {
+                                PrintError("DI_GPS_StartSocketServer() is failed! [nRet:%d]", nRet);
+                                return nRet;
+                            }
+                        }
+                    }
+                }
                 else if(IS_CMD(pcCmd, "log"))
                 {
                     pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
@@ -241,6 +258,7 @@ int32_t CLI_DI_InitCmds(void)
                "di gps log on/off   show gps logs (on, off)\n"
                "di gps close        close a GPS device\n"
                "di gps get          get a GPS data\n"
+               "di gps tcp server   start tcp/ip server of di gps\n"
                "di gps set na       set a GPS device as not available\n",
                "");
     if(nRet != APP_OK)

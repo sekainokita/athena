@@ -56,6 +56,8 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+#include <unistd.h>
+#include <arpa/inet.h>
 
 /***************************** Definition ************************************/
 #define PI                      (3.14159265358979323846)
@@ -66,6 +68,10 @@
 #define DI_GPS_NS               (100) /* Cut x10, it is deleted when Tx because of the length of data size */
 #define DI_GPS_STRAIGHT_ANGLES  (180.0)
 #define DI_GPS_FULL_ANGLES      (360.0)
+#define DI_GPS_BUF_MAX          (1024)
+#define DI_GPS_SCANNED_DATA_MAX (6)
+
+//#define CONFIG_DI_GPS_DEBUG     (1)
 
 /***************************** Enum and Structure ****************************/
 
@@ -73,14 +79,54 @@
 static bool s_bDiGpsLog = OFF;
 static DI_GPS_XSENS_T s_stDiGpsDev;
 static bool s_bLogOnOff = FALSE;
+static int32_t s_nSocketHandle = -1;
 
 static int s_nDiGpsTaskMsgId;
-
 static key_t s_DiGpsTaskMsgKey = DI_GPS_TASK_MSG_KEY;
-
 static pthread_t sh_DiGpsTask;
+static pthread_mutex_t s_stDiGpsMutex = PTHREAD_MUTEX_INITIALIZER;
+static DI_GPS_DATA_T s_stDiGpsData;
 
 /***************************** Function  *************************************/
+
+
+void* P_DI_GPS_GetRosData(void)
+{
+    char chBuffer[DI_GPS_BUF_MAX];
+    int nValRead;
+    int nScanned;
+
+    while ((nValRead = read(s_nSocketHandle, chBuffer, DI_GPS_BUF_MAX)) > 0)
+    {
+        chBuffer[nValRead] = '\0';
+
+        pthread_mutex_lock(&s_stDiGpsMutex);
+
+#if defined(CONFIG_DI_GPS_DEBUG)
+        PrintDebug("Received data: %s", chBuffer);
+#endif
+        nScanned = sscanf(chBuffer, "Position - x: %f, y: %f, z: %f\nEuler - roll: %f, pitch: %f, yaw: %f\n",
+               &s_stDiGpsData.fLatitude, &s_stDiGpsData.fLongitude, &s_stDiGpsData.fAltitude,
+               &s_stDiGpsData.fEulerRoll, &s_stDiGpsData.fEulerPitch, &s_stDiGpsData.fEulerYaw);
+
+        pthread_mutex_unlock(&s_stDiGpsMutex);
+
+        if (nScanned == DI_GPS_SCANNED_DATA_MAX)
+        {
+#if defined(CONFIG_DI_GPS_DEBUG)
+            PrintDebug("Updated GPS Data:");
+            PrintDebug("Latitude: %f, Longitude: %f, Altitude: %f", s_stDiGpsData.fLatitude, s_stDiGpsData.fLongitude, s_stDiGpsData.fAltitude);
+            PrintDebug("Roll: %f, Pitch: %f, Yaw: %f", s_stDiGpsData.fEulerRoll, s_stDiGpsData.fEulerPitch, s_stDiGpsData.fEulerYaw);
+#endif
+        }
+        else
+        {
+            PrintError("Error parsing data\n");
+        }
+    }
+
+    return NULL;
+}
 
 static void *P_DI_GPS_Task(void *arg)
 {
@@ -99,8 +145,25 @@ static void *P_DI_GPS_Task(void *arg)
         }
         else
         {
-            PrintError("TODO");
-            nRet = APP_OK;
+            switch(stEventMsg.eEventType)
+            {
+                case eDI_GPS_EVENT_START:
+                {
+                    PrintWarn("eDI_GPS_EVENT_START is received.");
+                    P_DI_GPS_GetRosData();
+                    break;
+                }
+
+                case eDI_GPS_EVENT_STOP:
+                {
+                    PrintWarn("eDI_GPS_EVENT_STOP is received.");
+                    break;
+                }
+
+                default:
+                    PrintWarn("unknown event type [%d]", stEventMsg.eEventType);
+                    break;
+            }
         }
 
         usleep(1000);
@@ -175,6 +238,10 @@ static int32_t P_DI_GPS_Init(DI_GPS_T *pstDiGps)
     }
 
 #if defined(CONFIG_GPS_XSENS)
+#if defined(CONFIG_ROS)
+    PrintWarn("CONFIG_GPS_XSENS is using CONFIG_ROS");
+    nRet = DI_OK;
+#else
     (void*)memset(&s_stDiGpsDev, 0x00, sizeof(DI_GPS_XSENS_T));
 
     nRet = DI_GPS_XSENS_Init(&s_stDiGpsDev);
@@ -183,6 +250,7 @@ static int32_t P_DI_GPS_Init(DI_GPS_T *pstDiGps)
         PrintError("DI_GPS_XSENS_Init() is failed! [unRet:%d]", nRet);
         return nRet;
     }
+#endif
 #else
     nRet = DI_OK;
     PrintWarn("None of GPS devices are supported.");
@@ -224,6 +292,10 @@ static int32_t P_DI_GPS_DeInit(DI_GPS_T *pstDiGps)
     }
 
 #if defined(CONFIG_GPS_XSENS)
+#if defined(CONFIG_ROS)
+    PrintWarn("CONFIG_GPS_XSENS is using CONFIG_ROS");
+    nRet = DI_OK;
+#else
     nRet = DI_GPS_XSENS_DeInit(&s_stDiGpsDev);
     if(nRet != DI_OK)
     {
@@ -232,6 +304,7 @@ static int32_t P_DI_GPS_DeInit(DI_GPS_T *pstDiGps)
     }
 
     (void*)memset(&s_stDiGpsDev, 0x00, sizeof(DI_GPS_XSENS_T));
+#endif
 #else
     nRet = DI_OK;
     PrintWarn("None of GPS devices are supported.");
@@ -327,6 +400,79 @@ static double P_DI_GPS_CalculateDistance(double dRxLat, double dRxLon, double dT
     }
 
     return dDistanceMeters;
+}
+
+int32_t DI_GPS_StartSocketServer(DI_GPS_T *pstDiGps)
+{
+    int32_t nRet = DI_ERROR;
+    int h_nServerFd, h_nRetSocket;
+    struct sockaddr_in stAddress;
+    int nOpt = 1;
+    int nAddrLen = sizeof(stAddress);
+    DI_GPS_EVENT_MSG_T stEventMsg;
+
+    if(pstDiGps == NULL)
+    {
+        PrintError("pstDiGps == NULL!!");
+        return nRet;
+    }
+
+    if ((h_nServerFd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
+    {
+        PrintError("socket() is failed!");
+        return nRet;
+    }
+
+    if (setsockopt(h_nServerFd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &nOpt, sizeof(nOpt)))
+    {
+        PrintError("setsockopt() is failed!");
+        return nRet;
+    }
+
+    stAddress.sin_family = AF_INET;
+    stAddress.sin_addr.s_addr = INADDR_ANY;
+    stAddress.sin_port = htons(DI_GPS_SERVER_PORT);
+
+    if (bind(h_nServerFd, (struct sockaddr *)&stAddress, sizeof(stAddress)) < 0)
+    {
+        PrintError("bind() is failed!");
+        return nRet;
+    }
+
+    if (listen(h_nServerFd, 3) < 0)
+    {
+        PrintError("listen() is failed!");
+        return nRet;
+    }
+
+    if((h_nRetSocket = accept(h_nServerFd, (struct sockaddr *)&stAddress, (socklen_t*)&nAddrLen)) < 0)
+    {
+        PrintError("accept() is failed!");
+        return nRet;
+    }
+    else
+    {
+        PrintTrace("accept() is OK, client is attached.");
+    }
+
+    s_nSocketHandle = h_nRetSocket;
+
+    (void*)memset(&stEventMsg, 0x00, sizeof(DI_GPS_EVENT_MSG_T));
+
+    stEventMsg.eEventType = eDI_GPS_EVENT_START;
+
+    nRet = msgsnd(s_nDiGpsTaskMsgId, &stEventMsg, sizeof(DI_GPS_EVENT_MSG_T), IPC_NOWAIT);
+    if(nRet < 0)
+    {
+        PrintError("msgsnd() is failed!!, [nRet:%d]", nRet);
+        return nRet;
+    }
+    else
+    {
+        nRet = DI_OK;
+    }
+
+    return nRet;
 }
 
 double DI_GPS_CalculateHeading(DB_V2X_GPS_INFO_T *pstV2xGpsInfo)
@@ -529,6 +675,11 @@ double DI_GPS_GetHeading(DI_GPS_T *pstDiGps)
     if(pstDiGps->eDiGpsStatus >= DI_GPS_STATUS_OPENED)
     {
 #if defined(CONFIG_GPS_XSENS)
+#if defined(CONFIG_ROS)
+        dHeadingDegree = s_stDiGpsData.fEulerYaw;
+        nRet = DI_OK;
+#else
+
         nRet = DI_GPS_XSENS_Get(&s_stDiGpsDev);
         if(nRet != DI_OK)
         {
@@ -536,7 +687,8 @@ double DI_GPS_GetHeading(DI_GPS_T *pstDiGps)
             return nRet;
         }
 #endif
-        dHeadingDegree = s_stDiGpsDev.fEulerYaw + 90.0;
+#endif
+        dHeadingDegree = s_stDiGpsDev.fEulerYaw;
         if(dHeadingDegree < 0)
         {
             dHeadingDegree += 360.0; /* convert negative to positive angles */
@@ -571,12 +723,16 @@ int32_t DI_GPS_Get(DI_GPS_T *pstDiGps)
     if(pstDiGps->eDiGpsStatus >= DI_GPS_STATUS_OPENED)
     {
 #if defined(CONFIG_GPS_XSENS)
+#if defined(CONFIG_ROS)
+        nRet = DI_OK;
+#else
         nRet = DI_GPS_XSENS_Get(&s_stDiGpsDev);
         if(nRet != DI_OK)
         {
             PrintError("DI_GPS_XSENS_Get() is failed! [unRet:%d]", nRet);
             return nRet;
         }
+#endif
 #endif
         pstDiGps->stDiGpsData.fAccX = s_stDiGpsDev.fAccX;
         pstDiGps->stDiGpsData.fAccY = s_stDiGpsDev.fAccY;
@@ -595,12 +751,21 @@ int32_t DI_GPS_Get(DI_GPS_T *pstDiGps)
         pstDiGps->stDiGpsData.fQuaternionY = s_stDiGpsDev.fQuaternionY;
         pstDiGps->stDiGpsData.fQuaternionZ = s_stDiGpsDev.fQuaternionZ;
 
+#if defined(CONFIG_ROS)
+        pstDiGps->stDiGpsData.fEulerRoll = s_stDiGpsData.fEulerRoll;
+        pstDiGps->stDiGpsData.fEulerPitch = s_stDiGpsData.fEulerPitch;
+        pstDiGps->stDiGpsData.fEulerYaw = s_stDiGpsData.fEulerYaw;
+        pstDiGps->stDiGpsData.fLatitude = s_stDiGpsData.fLatitude;
+        pstDiGps->stDiGpsData.fLongitude = s_stDiGpsData.fLongitude;
+        pstDiGps->stDiGpsData.fAltitude = s_stDiGpsData.fAltitude;
+#else
         pstDiGps->stDiGpsData.fEulerRoll = s_stDiGpsDev.fEulerRoll;
         pstDiGps->stDiGpsData.fEulerPitch = s_stDiGpsDev.fEulerPitch;
         pstDiGps->stDiGpsData.fEulerYaw = s_stDiGpsDev.fEulerYaw;
         pstDiGps->stDiGpsData.fLatitude = s_stDiGpsDev.fLatitude;
         pstDiGps->stDiGpsData.fLongitude = s_stDiGpsDev.fLongitude;
         pstDiGps->stDiGpsData.fAltitude = s_stDiGpsDev.fAltitude;
+#endif
         pstDiGps->stDiGpsData.fVelocityEast = s_stDiGpsDev.fVelocityEast;
         pstDiGps->stDiGpsData.fVelocityNorth = s_stDiGpsDev.fVelocityNorth;
         pstDiGps->stDiGpsData.fVelocityUp = s_stDiGpsDev.fVelocityUp;
@@ -653,12 +818,17 @@ int32_t DI_GPS_Open(DI_GPS_T *pstDiGps)
     if((pstDiGps->eDiGpsStatus == DI_GPS_STATUS_INITIALIZED) || (pstDiGps->eDiGpsStatus == DI_GPS_STATUS_CLOSED))
     {
 #if defined(CONFIG_GPS_XSENS)
+#if defined(CONFIG_ROS)
+        PrintWarn("CONFIG_GPS_XSENS is using CONFIG_ROS");
+        nRet = DI_OK;
+#else
         nRet = DI_GPS_XSENS_Open(&s_stDiGpsDev);
         if(nRet != DI_OK)
         {
             PrintError("DI_GPS_XSENS_Open() is failed! [unRet:%d]", nRet);
             return nRet;
         }
+#endif
 #else
         nRet = DI_OK;
         PrintWarn("None of GPS devices are supported.");
@@ -700,12 +870,17 @@ int32_t DI_GPS_Close(DI_GPS_T *pstDiGps)
     if(pstDiGps->eDiGpsStatus == DI_GPS_STATUS_OPENED)
     {
 #if defined(CONFIG_GPS_XSENS)
+#if defined(CONFIG_ROS)
+        PrintWarn("CONFIG_GPS_XSENS is using CONFIG_ROS");
+        nRet = DI_OK;
+#else
         nRet = DI_GPS_XSENS_Close(&s_stDiGpsDev);
         if(nRet != DI_OK)
         {
             PrintError("DI_GPS_XSENS_Close() is failed! [unRet:%d]", nRet);
             return nRet;
         }
+#endif
 #else
         nRet = DI_OK;
         PrintWarn("None of GPS devices are supported.");
