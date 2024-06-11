@@ -52,6 +52,25 @@
 #include "db_v2x_status.h"
 
 /***************************** Definition ************************************/
+#define DI_GPS_TASK_MSG_KEY               (0x240531)
+
+/***************************** Enum and Structure ****************************/
+
+/**
+* @details SVC_PLATOONING_SETTING_T
+* @param unReserved
+*/
+typedef struct DI_GPS_SETTING_t {
+    uint32_t                     unReserved;
+} DI_GPS_SETTING_T;
+
+/**
+* @details DI_GPS_EVENT_MSG_T
+* @param pstTimeMgrSetting
+*/
+typedef struct DI_GPS_EVENT_MSG_t {
+    DI_GPS_SETTING_T            *pstDiGpsSetting;
+} DI_GPS_EVENT_MSG_T;
 
 /***************************** Enum and Structure ****************************/
 /**

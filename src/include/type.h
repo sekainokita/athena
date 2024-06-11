@@ -74,6 +74,7 @@
 #define PLATFORM_OK         0
 #define PLATFORM_ERROR      1
 
+#define DI_MSG_ERR          -1
 #define DI_OK               0
 #define DI_ERROR            1
 

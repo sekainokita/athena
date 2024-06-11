@@ -53,6 +53,9 @@
 #include "di_gps.h"
 #include "di_gps_xsens.h"
 #include <math.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
 
 /***************************** Definition ************************************/
 #define PI                      (3.14159265358979323846)
@@ -71,7 +74,79 @@ static bool s_bDiGpsLog = OFF;
 static DI_GPS_XSENS_T s_stDiGpsDev;
 static bool s_bLogOnOff = FALSE;
 
+static int s_nDiGpsTaskMsgId;
+
+static key_t s_DiGpsTaskMsgKey = DI_GPS_TASK_MSG_KEY;
+
+static pthread_t sh_DiGpsTask;
+
 /***************************** Function  *************************************/
+
+static void *P_DI_GPS_Task(void *arg)
+{
+    DI_GPS_EVENT_MSG_T stEventMsg;
+    int32_t nRet = APP_ERROR;
+    memset(&stEventMsg, 0, sizeof(DI_GPS_EVENT_MSG_T));
+
+    UNUSED(arg);
+    UNUSED(nRet);
+
+    while (1)
+    {
+        if(msgrcv(s_nDiGpsTaskMsgId, &stEventMsg, sizeof(DI_GPS_EVENT_MSG_T), 0, MSG_NOERROR) == APP_MSG_ERR)
+        {
+            PrintError("msgrcv() is failed!");
+        }
+        else
+        {
+            PrintError("TODO");
+            nRet = APP_OK;
+        }
+
+        usleep(1000);
+    }
+
+    return NULL;
+}
+
+static void P_DI_GPS_PrintMsgInfo(int msqid)
+{
+    struct msqid_ds m_stat;
+
+    PrintDebug("========== Messege Queue Infomation =============");
+
+    if(msgctl(msqid, IPC_STAT, &m_stat) == DI_MSG_ERR)
+    {
+        PrintError("msgctl() is failed!!");
+    }
+
+    PrintDebug("msg_lspid : %d", m_stat.msg_lspid);
+    PrintDebug("msg_qnum : %ld", m_stat.msg_qnum);
+    PrintDebug("msg_stime : %ld", m_stat.msg_stime);
+
+    PrintDebug("=================================================");
+}
+
+int32_t P_DI_GPS_CreateTask(void)
+{
+	int32_t nRet = APP_ERROR;
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
+    nRet = pthread_create(&sh_DiGpsTask, &attr, P_DI_GPS_Task, NULL);
+    if (nRet != APP_OK)
+    {
+        PrintError("pthread_join() is failed!! (P_DI_GPS_Task) [nRet:%d]", nRet);
+    }
+    else
+    {
+        PrintTrace("P_DI_GPS_Task() is successfully created.");
+        nRet = APP_OK;
+    }
+
+	return nRet;
+}
 
 static inline double P_DI_GPS_ConvertDegreeToRadian(double dTheta)
 {
@@ -112,6 +187,22 @@ static int32_t P_DI_GPS_Init(DI_GPS_T *pstDiGps)
     nRet = DI_OK;
     PrintWarn("None of GPS devices are supported.");
 #endif
+
+    if((s_nDiGpsTaskMsgId = msgget(s_DiGpsTaskMsgKey, IPC_CREAT|0666)) == DI_MSG_ERR)
+    {
+        PrintError("msgget() is failed!");
+        return nRet;
+    }
+    else
+    {
+        P_DI_GPS_PrintMsgInfo(s_nDiGpsTaskMsgId);
+    }
+
+    nRet = P_DI_GPS_CreateTask();
+    if (nRet != APP_OK)
+    {
+        PrintError("P_DI_GPS_CreateTask() is failed! [nRet:%d]", nRet);
+    }
 
     return nRet;
 }
