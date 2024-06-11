@@ -41,8 +41,8 @@ LogFilePositionSource::LogFilePositionSource(QObject *parent)
       logFile(new QFile(this)),
       timer(new QTimer(this))
 {
-    //logFile->setFileName("/tmp/db_v2x_rx_temp_writing.csv");
-    logFile->setFileName("/home/bman/work/athena/src/apps/qt/venus/db/rx_db_sample_1.csv");
+    logFile->setFileName("/tmp/db_v2x_rx_temp_writing.csv");
+    //logFile->setFileName("/home/bman/work/athena/src/apps/qt/venus/db/rx_db_sample_1.csv");
     if (!logFile->open(QIODevice::ReadOnly))
     {
         qWarning() << "Error: cannot open source file" << logFile->fileName();
