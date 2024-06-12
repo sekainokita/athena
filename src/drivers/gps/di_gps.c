@@ -686,9 +686,10 @@ double DI_GPS_GetHeading(DI_GPS_T *pstDiGps)
             PrintError("DI_GPS_XSENS_Get() is failed! [unRet:%d]", nRet);
             return nRet;
         }
-#endif
-#endif
+
         dHeadingDegree = s_stDiGpsDev.fEulerYaw;
+#endif
+#endif
         if(dHeadingDegree < 0)
         {
             dHeadingDegree += 360.0; /* convert negative to positive angles */
