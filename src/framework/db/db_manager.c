@@ -253,9 +253,9 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusTx->ucMcs = stDbV2xStatus.stV2xStatusTx.ucMcs;
 
     pstDbV2xStatusRx->unTotalCommDevCnt = DB_MGR_DEFAULT_COMM_DEV_CNT;
-    pstDbV2xStatusRx->nRssi = 0;
-    pstDbV2xStatusRx->ucRcpi = 0;
-    pstDbV2xStatusRx->eRsvLevel = 0;
+    pstDbV2xStatusRx->nRssi = stDbV2xStatus.stV2xStatusRx.nRssi;
+    pstDbV2xStatusRx->ucRcpi = stDbV2xStatus.stV2xStatusRx.ucRcpi;
+    pstDbV2xStatusRx->eRsvLevel = stDbV2xStatus.stV2xStatusRx.eRsvLevel;
 
 #if defined(CONFIG_GPS_OBU)
     UNUSED(pstDi);
