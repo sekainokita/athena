@@ -184,7 +184,7 @@ typedef struct DB_V2X_STATUS_RX_t {
     uint16_t                                    unRxVehicleSpeed;
     uint32_t                                    unRxVehicleHeading;
     uint32_t                                    unTotalCommDevCnt;
-    uint16_t                                    nRssi;
+    int8_t                                      nRssi;
     uint8_t                                     ucRcpi;
     DB_V2X_STATUS_RSV_LEVEL_E                   eRsvLevel;
     DB_V2X_POSITION_RX_T                        stRxPosition;
