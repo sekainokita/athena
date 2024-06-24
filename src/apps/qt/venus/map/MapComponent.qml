@@ -313,6 +313,7 @@ MapView {
         }
     }
 
+
     Item {
         id: scale
         z: view.map.z + 3
@@ -349,6 +350,16 @@ MapView {
         }
         Component.onCompleted: {
             view.calculateScale();
+        }
+    }
+
+    Item {
+        id: keti_ci
+        anchors.top: parent.top
+        anchors.right: parent.right
+        width: 584; height: 147
+        Image {
+            source: "../resources/keti_ci.png"
         }
     }
 

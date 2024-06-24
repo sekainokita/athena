@@ -46,7 +46,8 @@ qml_resources.files = \
     resources/marker_blue.png \
     resources/vehicle.png \
     resources/scale.png \
-    resources/scale_end.png
+    resources/scale_end.png \
+    resources/keti_ci.png
 
 qml_resources.prefix = /qt/qml/Venus
 
