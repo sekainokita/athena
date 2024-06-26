@@ -12,6 +12,16 @@
 #include <QtNetwork/QSslSocket>
 #endif
 
+#include <QGuiApplication>
+#include <QQuickView>
+#include <QCoreApplication>
+#include <QCommandLineParser>
+#include <QCommandLineOption>
+#include <QVariantMap>
+#include <QMetaObject>
+#include <QQuickItem>
+#include <QQmlContext>
+
 #include <iostream>
 
 using namespace Qt::StringLiterals;
@@ -99,6 +109,11 @@ int main(int argc, char *argv[])
         return -1;
 
     QMetaObject::invokeMethod(item, "initializeProviders", QVariant::fromValue(parameters));
+
+    QQuickView additionalView;
+    additionalView.setSource(QUrl(QStringLiteral("qrc:/forms/graph.qml")));
+    additionalView.setResizeMode(QQuickView::SizeRootObjectToView);
+    additionalView.show();
 
     return application.exec();
 }

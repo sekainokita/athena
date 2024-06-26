@@ -48,6 +48,7 @@ qt_add_qml_module(venus
         "forms/RouteList.qml"
         "forms/RouteListDelegate.qml"
         "forms/RouteListHeader.qml"
+        "forms/graph.qml"
         "helper.js"
         "map/MapComponent.qml"
         "map/MapSliders.qml"

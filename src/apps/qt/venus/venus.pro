@@ -42,6 +42,7 @@ qml_resources.files = \
     forms/RouteList.qml \
     forms/RouteListDelegate.qml \
     forms/RouteListHeader.qml \
+    forms/graph.qml \
     resources/marker.png \
     resources/marker_blue.png \
     resources/vehicle.png \
@@ -64,5 +65,6 @@ DISTFILES += \
     db/rx_db_sample_1.csv \
     db/rx_db_sample_2.csv \
     db_v2x_rx_temp_writing.csv \
+    forms/graph.qml \
     map/linegraph.qml
     map/LineGraph.qml
