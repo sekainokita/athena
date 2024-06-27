@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     QMetaObject::invokeMethod(item, "initializeProviders", QVariant::fromValue(parameters));
 
     QQuickView additionalView;
-    additionalView.setSource(QUrl(QStringLiteral("qrc:/forms/graph.qml")));
+    additionalView.setSource(QUrl(QStringLiteral("qrc:/qt/qml/Venus/forms/graph.qml")));
     additionalView.setResizeMode(QQuickView::SizeRootObjectToView);
     additionalView.show();
 
