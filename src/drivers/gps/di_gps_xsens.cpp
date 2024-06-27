@@ -65,6 +65,14 @@
 #include "di_gps_xsens.h"
 #include "type.h"
 
+#if defined(CONFIG_NVIDIA_JETSON_UTILS)
+#include "videoSource.h"
+#include "videoOutput.h"
+
+#include "logging.h"
+#include "commandLine.h"
+#endif
+
 /***************************** Definition ************************************/
 //#define DI_GPS_XSENS_DEBUG  (1)
 

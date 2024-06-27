@@ -52,6 +52,12 @@ TARGET_CFLAGS += -std=gnu99 -g
 TARGET_CFLAGS += -Wall -Wextra -Wstrict-prototypes -O3 -fomit-frame-pointer -pipe
 TARGET_CFLAGS += -std=c11
 
+ifeq ($(CONFIG_NVIDIA_JETSON_UTILS),y)
+TARGET_CFLAGS += -I/usr/local/include/jetson-inference
+TARGET_CFLAGS += -I/usr/local/include/jetson-utils
+TARGET_CFLAGS += -I/usr/local/cuda-11.4/targets/aarch64-linux/include
+endif
+
 TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_FRAMEWORK) -l$(LIB_PLATFORM) -l$(LIB_DI)
 TARGET_LDFLAGS += -lrt -ldl
 TARGET_LDFLAGS += -pthread
@@ -60,6 +66,10 @@ ifeq ($(CONFIG_SQLITE),y)
 TARGET_LDFLAGS += -lsqlite3
 endif
 # To add Library : -l$(LIB_DB) -l$(LIB_MSG) -l$(LIB_TIME)
+
+ifeq ($(CONFIG_NVIDIA_JETSON_UTILS),y)
+TARGET_LDFLAGS += -L/usr/local/lib -ljetson-utils 
+endif
 
 TARGET_CXXFLAGS = -I$(INC_PATH)
 TARGET_CXXFLAGS += -I$(APP_INC_PATH)
@@ -70,6 +80,12 @@ TARGET_CXXFLAGS += -I$(LIB_PLAT_CHEM_OBU_INC_PATH)
 TARGET_CXXFLAGS += -D_GNU_SOURCE=1
 TARGET_CXXFLAGS += -std=c++11 -g
 TARGET_CXXFLAGS += -Wall -Wextra -O3 -fomit-frame-pointer -pipe
+
+ifeq ($(CONFIG_NVIDIA_JETSON_UTILS),y)
+TARGET_CXXFLAGS += -I/usr/local/include/jetson-inference
+TARGET_CXXFLAGS += -I/usr/local/include/jetson-utils
+TARGET_CXXFLAGS += -I/usr/local/cuda-11.4/targets/aarch64-linux/include
+endif
 
 ifeq ($(CONFIG_ROS),y)
 TARGET_CFLAGS += -DCONFIG_ROS

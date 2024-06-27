@@ -358,8 +358,10 @@ MapView {
         anchors.top: parent.top
         anchors.right: parent.right
         width: 584; height: 147
+ 
         Image {
             source: "../resources/keti_ci.png"
+           
         }
     }
 
