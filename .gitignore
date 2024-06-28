@@ -7,6 +7,7 @@
 *.pcap
 *.mtb
 .DS_Store
+.config
 app-v2x
 plat-chem-obu-compact-app
 athena
