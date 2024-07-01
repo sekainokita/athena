@@ -12,7 +12,8 @@
 #include <QtNetwork/QSslSocket>
 #endif
 
-#include <QGuiApplication>
+//#include <QGuiApplication>
+#include <QApplication>
 #include <QQuickView>
 #include <QCoreApplication>
 #include <QCommandLineParser>
@@ -63,7 +64,8 @@ int main(int argc, char *argv[])
         QCoreApplication::addLibraryPath(p);
 #endif
 
-    QGuiApplication application(argc, argv);
+    //QGuiApplication application(argc, argv);
+    QApplication application(argc, argv);
     QCoreApplication::setApplicationName(u"KETI Venus Application"_s);
 
     QStringList args = QCoreApplication::arguments();

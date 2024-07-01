@@ -11,7 +11,7 @@ endif()
 
 set(INSTALL_EXAMPLEDIR "${INSTALL_EXAMPLESDIR}/location/venus")
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Network Quick Positioning Location Charts)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Network Quick Positioning Location Charts Widgets)
 
 qt_standard_project_setup(REQUIRES 6.5)
 
@@ -30,6 +30,7 @@ target_link_libraries(venus PUBLIC
     Qt::Qml
     Qt::Quick
     Qt::Charts
+    Qt::Widgets
 )
 
 qt_add_qml_module(venus
