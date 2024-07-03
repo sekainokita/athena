@@ -1,28 +1,53 @@
-import QtQuick
-import QtCharts
-import QtQuick.Controls
+//import QtQuick
+//import QtCharts
+//import QtQuick.Controls
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtCharts 2.15
+import Qt.LogFilePositionSource 1.0
 
-Rectangle {
+ApplicationWindow {
+    visible: true
     height: 720
     width: 1280
-    visible: true
+    title: qsTr("PDR Chart")
 
-    Rectangle {
-        width: 640
-        height: 480
+    LogFilePositionSource{
+        id: positionSource
+        onPositionChanged: {
+            var timestamp = new Date(positionSource.timestamp).getTime();
+            lineSeries.append(timestamp, positionSource.pdr);
+        }
+    }
 
-        ChartView {
-            title: "Line Graph"
-            anchors.fill: parent
-            antialiasing: true
+    ChartView {
+        anchors.fill: parent
+        antialiasing: true
 
-            LineSeries {
-                name: "Line"
-                XYPoint {x:0; y:0}
-                XYPoint {x:1; y:2}
-                XYPoint {x:2; y:4}
-                XYPoint {x:3; y:6}
-            }
+        LineSeries {
+            id: lineSeries
+            name: "PDR"
+            useOpenGL: true
+        }
+
+        DateTimeAxis {
+            id: timeAxis
+            format: "hh:mm:ss"
+            titleText: "Time"
+            tickCount: 10
+        }
+
+        ValueAxis {
+            id: pdrAxis
+            min: 0
+            max: 100
+            tickCount: 10
+            titleText: "PDR"
+        }
+
+        LineSeries {
+            axisX: timeAxis
+            axisY: pdrAxis
         }
     }
 }

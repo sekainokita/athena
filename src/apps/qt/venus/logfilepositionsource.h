@@ -19,6 +19,7 @@
 
 #include <QtPositioning/qgeopositioninfosource.h>
 #include <QDebug>
+#include <QDateTime>
 
 QT_BEGIN_NAMESPACE
 class QFile;
@@ -34,6 +35,14 @@ typedef struct GPS_V2X_POSITION_t {
 class LogFilePositionSource : public QGeoPositionInfoSource
 {
     Q_OBJECT
+    Q_PROPERTY(double latitude READ getGpsLatitude NOTIFY positionChanged)
+    Q_PROPERTY(double longitude READ getGpsLongitude NOTIFY positionChanged)
+    Q_PROPERTY(unsigned int speed READ getGpsSpeed NOTIFY positionChanged)
+    Q_PROPERTY(unsigned int heading READ getGpsHeading NOTIFY positionChanged)
+    Q_PROPERTY(unsigned int distance READ getGpsDistance NOTIFY positionChanged)
+    Q_PROPERTY(double pdr READ getGpsPdr NOTIFY positionChanged)
+    Q_PROPERTY(QString timestamp READ getTimestamp NOTIFY positionChanged)
+
 public:
     LogFilePositionSource(QObject *parent = 0);
 
@@ -64,8 +73,12 @@ public slots:
     virtual double  getGpsCvLatitude(void);
     virtual double  getGpsCvLongitude(void);
     virtual QString getGpsCvDeviceId(void);
+    virtual QString getTimestamp(void);
 
     virtual void requestUpdate(int timeout = 5000) override;
+
+signals:
+    void positionChanged();
 
 private slots:
     void readNextPosition();
@@ -75,6 +88,7 @@ private:
     QTimer *timer;
     QGeoPositionInfo lastPosition;
     Error lastError = QGeoPositionInfoSource::NoError;
+    QString m_timestamp;
 };
 
 #endif

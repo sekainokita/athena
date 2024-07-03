@@ -36,6 +36,8 @@ static double s_dPdr = 0.0f;
 
 static QString s_qStrCvDeviceId[CONNECTED_VEHICLE_MAX_CNT] = {0,};
 
+static QString s_timestamp;
+
 LogFilePositionSource::LogFilePositionSource(QObject *parent)
     : QGeoPositionInfoSource(parent),
       logFile(new QFile(this)),
@@ -53,6 +55,9 @@ LogFilePositionSource::LogFilePositionSource(QObject *parent)
     }
 
     qDebug() << "LogFilePositionSource() is initialized.";
+
+    connect(timer, &QTimer::timeout, this, &LogFilePositionSource::readNextPosition);
+    timer->start(1000);
 }
 
 QGeoPositionInfo LogFilePositionSource::lastKnownPosition(bool /*satelliteMethodsOnly*/) const
@@ -76,10 +81,11 @@ int LogFilePositionSource::minimumUpdateInterval() const
 void LogFilePositionSource::startUpdates()
 {
     /* Not Used */
-    return;
+    timer->start();
+    //return;
 }
 
-unsigned int LogFilePositionSource::updateGpsPosition(void)
+unsigned int LogFilePositionSource::updateGpsPosition()
 {
     QByteArray line = logFile->readLine().trimmed();
 
@@ -112,6 +118,7 @@ unsigned int LogFilePositionSource::updateGpsPosition(void)
     {
         QList<QByteArray> data = line.split(',');
         QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
+        s_timestamp = QString::number(timestamp.toMSecsSinceEpoch());
         qDebug() << "time" << timestamp;
 
         /* Rx Vehicle */
@@ -149,6 +156,8 @@ unsigned int LogFilePositionSource::updateGpsPosition(void)
         aqStrCvDeviceId[eCONNECTED_VEHICLE_0] = data.value(DB_CV_DEVICEID_COLUMN);
         s_qStrCvDeviceId[eCONNECTED_VEHICLE_0] = aqStrCvDeviceId[eCONNECTED_VEHICLE_0];
     }
+
+    emit positionChanged();
 
     return 1;
 }
@@ -241,22 +250,29 @@ QString LogFilePositionSource::getGpsCvDeviceId(void)
     return s_qStrCvDeviceId[eCONNECTED_VEHICLE_0];
 }
 
+QString LogFilePositionSource::getTimestamp()
+{
+    return s_timestamp;
+}
+
 void LogFilePositionSource::stopUpdates()
 {
     /* Not Used */
-    return;
+    //return;
+    timer->start();
 }
 
 void LogFilePositionSource::requestUpdate(int /*timeout*/)
 {
     /* Not Used */
-    return;
+    //return;
 }
 
 void LogFilePositionSource::readNextPosition()
 {
     /* Not Used */
-    return;
+    //return;
+    updateGpsPosition();
 }
 
 QGeoPositionInfoSource::Error LogFilePositionSource::error() const

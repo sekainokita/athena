@@ -106,16 +106,11 @@ int main(int argc, char *argv[])
 #endif
     engine.loadFromModule("Venus", "Main");
 
-    auto *item = engine.rootObjects().value(0);
-    if (item == nullptr)
+    engine.load(QUrl(QStringLiteral("qrc:/qt/qml/Venus/forms/graph.qml")));
+    if (engine.rootObjects().isEmpty())
         return -1;
 
+    auto *item = engine.rootObjects().value(0);
     QMetaObject::invokeMethod(item, "initializeProviders", QVariant::fromValue(parameters));
-
-    QQuickView additionalView;
-    additionalView.setSource(QUrl(QStringLiteral("qrc:/qt/qml/Venus/forms/graph.qml")));
-    additionalView.setResizeMode(QQuickView::SizeRootObjectToView);
-    additionalView.show();
-
     return application.exec();
 }

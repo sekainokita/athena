@@ -30,7 +30,7 @@ target_link_libraries(venus PUBLIC
     Qt::Qml
     Qt::Quick
     Qt::Charts
-    Qt::Widgets
+    Qt::Widgetsi
 )
 
 qt_add_qml_module(venus
