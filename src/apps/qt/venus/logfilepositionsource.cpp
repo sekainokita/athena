@@ -259,13 +259,12 @@ void LogFilePositionSource::stopUpdates()
 {
     /* Not Used */
     //return;
-    timer->start();
+    timer->stop();
 }
 
 void LogFilePositionSource::requestUpdate(int /*timeout*/)
 {
-    /* Not Used */
-    //return;
+    readNextPosition();
 }
 
 void LogFilePositionSource::readNextPosition()
@@ -280,3 +279,4 @@ QGeoPositionInfoSource::Error LogFilePositionSource::error() const
     /* Not Used */
     return lastError;
 }
+

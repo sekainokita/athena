@@ -14,7 +14,7 @@ ApplicationWindow {
     id: appWindow
     property variant mapview
     property variant minimap
-    property variant linegraph
+    property variant linegraphWindow
     property variant plugin
     property variant parameters
     property variant addLocation: 0.000001
@@ -36,11 +36,6 @@ ApplicationWindow {
         if (minimap) {
             minimap.destroy()
             minimap = null
-        }
-
-        if (linegraph) {
-            linegraph.destroy()
-            linegraph = null
         }
 
         var zoomLevel = null
@@ -107,6 +102,14 @@ ApplicationWindow {
         }
     }
 
+    function toggleLineGraphState()
+    {
+        if (!linegraphWindow) {
+            linegraphWindow = Qt.createComponent("qrc:/qt/qml/Venus/forms/graph.qml").createObject(appWindow);
+            linegraphWindow.show();
+        }
+    }
+
     LogFilePositionSource {
         id: vehiclePositionSrc
     }
@@ -150,17 +153,6 @@ ApplicationWindow {
                 minimap = null
             } else {
                 minimap = Qt.createQmlObject ('import "map"; MiniMap{ z: mapview.z + 2 }', mapview)
-            }
-        }
-
-        function toggleLineGraphState()
-        {
-            console.log("Line Graph")
-            if (linegraph) {
-                linegraph.destroy()
-                linegraph = null
-            } else {
-                linegraph = Qt.createQmlObject('import "graph"; Line Graph{ z:mapview.z + 2 }', mapview)
             }
         }
 
@@ -237,9 +229,6 @@ ApplicationWindow {
             case "Clear":
                 mapview.map.clearData()
                 break
-            case "LineGraph":
-                Component: "LineGraph.qml"
-            break
             case "Prefetch":
                 mapview.map.prefetchData()
                 break
@@ -438,6 +427,7 @@ ApplicationWindow {
                 coordinateGpsInfo(mapview.markers[mapview.currentMarker].coordinate.latitude, mapview.markers[mapview.currentMarker].coordinate.longitude)
                 break;
             case "updatePositionStart":
+                toggleLineGraphState()
                 timer.startTimer(updatePosition, 100)
                 break;
             case "updatePositionStop":

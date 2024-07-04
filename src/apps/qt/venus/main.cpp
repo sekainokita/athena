@@ -106,11 +106,11 @@ int main(int argc, char *argv[])
 #endif
     engine.loadFromModule("Venus", "Main");
 
-    engine.load(QUrl(QStringLiteral("qrc:/qt/qml/Venus/forms/graph.qml")));
-    if (engine.rootObjects().isEmpty())
+    auto *item = engine.rootObjects().value(0);
+    if (item == nullptr)
         return -1;
 
-    auto *item = engine.rootObjects().value(0);
     QMetaObject::invokeMethod(item, "initializeProviders", QVariant::fromValue(parameters));
+
     return application.exec();
 }

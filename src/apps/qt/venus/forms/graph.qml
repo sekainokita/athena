@@ -12,11 +12,29 @@ ApplicationWindow {
     width: 1280
     title: qsTr("PDR Chart")
 
-    LogFilePositionSource{
+    property int xAxisValue: 0
+    property real maxYAxisValue: 100
+
+    LogFilePositionSource {
         id: positionSource
         onPositionChanged: {
-            var timestamp = new Date(positionSource.timestamp).getTime();
-            lineSeries.append(timestamp, positionSource.pdr);
+            var pdrValue = positionSource.pdr;
+            console.log("PDR value:", pdrValue);
+            if (isFinite(pdrValue)) {
+                xAxisValue += 1;
+                lineSeries.append(xAxisValue, pdrValue);
+                labelPdr.text = "PDR: " + pdrValue.toFixed(2) + "%";
+                console.log(labelPdr.text);
+
+                timeAxis.max = xAxisValue;
+
+                if (pdrValue > maxYAxisValue) {
+                    maxYAxisValue = pdrValue;
+                    pdrAxis.max = maxYAxisValue;
+                }
+            } else {
+                console.log("Ignored NaN, Inf, or -Inf value.");
+            }
         }
     }
 
@@ -28,26 +46,35 @@ ApplicationWindow {
             id: lineSeries
             name: "PDR"
             useOpenGL: true
+            axisX: timeAxis
+            axisY: pdrAxis
         }
 
-        DateTimeAxis {
+        ValueAxis {
             id: timeAxis
-            format: "hh:mm:ss"
-            titleText: "Time"
+            min: 0
+            max: 100  
             tickCount: 10
+            titleText: "Updates"
         }
 
         ValueAxis {
             id: pdrAxis
             min: 0
-            max: 100
+            max: 100  
             tickCount: 10
             titleText: "PDR"
         }
+    }
 
-        LineSeries {
-            axisX: timeAxis
-            axisY: pdrAxis
-        }
+    Label {
+        id: labelPdr
+        text: "PDR: 0.00%"
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.rightMargin: 20
+        anchors.topMargin: 20
+        font.pixelSize: 20
+        color: "blue"
     }
 }
