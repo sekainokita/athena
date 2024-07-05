@@ -20,10 +20,14 @@
 #include <QtPositioning/qgeopositioninfosource.h>
 #include <QDebug>
 #include <QDateTime>
+#include <QFile>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
-class QFile;
-class QTimer;
+//class QFile;
+//class QTimer;
+class QGeoPositionInfoSource;
+class QGeoPositionInfo;
 QT_END_NAMESPACE
 
 typedef struct GPS_V2X_POSITION_t {
@@ -35,16 +39,10 @@ typedef struct GPS_V2X_POSITION_t {
 class LogFilePositionSource : public QGeoPositionInfoSource
 {
     Q_OBJECT
-    Q_PROPERTY(double latitude READ getGpsLatitude NOTIFY positionChanged)
-    Q_PROPERTY(double longitude READ getGpsLongitude NOTIFY positionChanged)
-    Q_PROPERTY(unsigned int speed READ getGpsSpeed NOTIFY positionChanged)
-    Q_PROPERTY(unsigned int heading READ getGpsHeading NOTIFY positionChanged)
-    Q_PROPERTY(unsigned int distance READ getGpsDistance NOTIFY positionChanged)
-    Q_PROPERTY(double pdr READ getGpsPdr NOTIFY positionChanged)
-    Q_PROPERTY(QString timestamp READ getTimestamp NOTIFY positionChanged)
+    Q_PROPERTY(double pdr READ getGpsPdr NOTIFY pdrUpdated)
 
 public:
-    LogFilePositionSource(QObject *parent = 0);
+    explicit LogFilePositionSource(QObject *parent = 0);
 
     QGeoPositionInfo lastKnownPosition(bool satelliteMethodsOnly = false) const override;
 
@@ -55,6 +53,7 @@ public:
 public slots:
     virtual void startUpdates() override;
     virtual void stopUpdates() override;
+    virtual void requestUpdate(int timeout = 5000) override;
 
     virtual unsigned int updateGpsPosition(void);
 
@@ -75,10 +74,9 @@ public slots:
     virtual QString getGpsCvDeviceId(void);
     virtual QString getTimestamp(void);
 
-    virtual void requestUpdate(int timeout = 5000) override;
-
 signals:
     void positionChanged();
+    void pdrUpdated(double pdr);
 
 private slots:
     void readNextPosition();
@@ -88,7 +86,7 @@ private:
     QTimer *timer;
     QGeoPositionInfo lastPosition;
     Error lastError = QGeoPositionInfoSource::NoError;
-    QString m_timestamp;
+    double m_pdr;
 };
 
 #endif

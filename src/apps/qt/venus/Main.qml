@@ -12,6 +12,7 @@ import Qt.LogFilePositionSource
 
 ApplicationWindow {
     id: appWindow
+    property real sharedPdrValue: 0.0
     property variant mapview
     property variant minimap
     property variant linegraphWindow
@@ -363,6 +364,7 @@ ApplicationWindow {
             console.log("getLatitude:", getLatitude, "getLongitude", getLongitude, "getHeading", getHeading);
 
             getPdr = gpsClass.getGpsPdr()
+            appWindow.sharedPdrValue = getPdr;
             getDistance = gpsClass.getGpsDistance()
             getSpeed = gpsClass.getGpsSpeed()
             console.log("getPdr:", getPdr, "getDistance", getDistance, "getSpeed", getSpeed);

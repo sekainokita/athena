@@ -137,6 +137,11 @@ unsigned int LogFilePositionSource::updateGpsPosition()
         dPdr = data.value(DB_PDR_COLUMN).toDouble(&bHasPdr);
         s_dPdr = dPdr;
 
+        if (bHasPdr)
+        {
+            emit pdrUpdated(dPdr);
+        }
+
         unDistance = data.value(DB_DISTANCE_COLUMN).toDouble(&bHasDistance);
         s_unDistance = unDistance;
 

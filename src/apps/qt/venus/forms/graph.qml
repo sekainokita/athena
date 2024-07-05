@@ -15,10 +15,12 @@ ApplicationWindow {
     property int xAxisValue: 0
     property real maxYAxisValue: 100
 
-    LogFilePositionSource {
-        id: positionSource
-        onPositionChanged: {
-            var pdrValue = positionSource.pdr;
+    Timer {
+        interval: 100
+        repeat: true
+        running: true
+        onTriggered: {
+            var pdrValue = appWindow.sharedPdrValue;
             console.log("PDR value:", pdrValue);
             if (isFinite(pdrValue)) {
                 xAxisValue += 1;
