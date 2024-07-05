@@ -21,11 +21,10 @@ ApplicationWindow {
         running: true
         onTriggered: {
             var pdrValue = appWindow.sharedPdrValue;
-            console.log("PDR value:", pdrValue);
             if (isFinite(pdrValue)) {
                 xAxisValue += 1;
                 lineSeries.append(xAxisValue, pdrValue);
-                labelPdr.text = "PDR: " + pdrValue.toFixed(2) + "%";
+                labelPdr.text = "PDR: " + pdrValue.toFixed(3) + "%";
                 console.log(labelPdr.text);
 
                 timeAxis.max = xAxisValue;
@@ -35,7 +34,7 @@ ApplicationWindow {
                     pdrAxis.max = maxYAxisValue;
                 }
             } else {
-                console.log("Ignored NaN, Inf, or -Inf value.");
+                console.log("PDR Chart not received");
             }
         }
     }
@@ -57,7 +56,7 @@ ApplicationWindow {
             min: 0
             max: 100  
             tickCount: 10
-            titleText: "Updates"
+            titleText: "Index"
         }
 
         ValueAxis {
@@ -71,7 +70,7 @@ ApplicationWindow {
 
     Label {
         id: labelPdr
-        text: "PDR: 0.00%"
+        text: "PDR: 0.000%"
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.rightMargin: 20

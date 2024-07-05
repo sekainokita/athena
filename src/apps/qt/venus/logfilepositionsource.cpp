@@ -118,7 +118,6 @@ unsigned int LogFilePositionSource::updateGpsPosition()
     {
         QList<QByteArray> data = line.split(',');
         QDateTime timestamp = QDateTime::fromString(QString(data.value(DB_TIME_COLUMN)).mid(0, 17), "yyyyMMddHHmmsszzz");
-        s_timestamp = QString::number(timestamp.toMSecsSinceEpoch());
         qDebug() << "time" << timestamp;
 
         /* Rx Vehicle */
@@ -262,8 +261,6 @@ QString LogFilePositionSource::getTimestamp()
 
 void LogFilePositionSource::stopUpdates()
 {
-    /* Not Used */
-    //return;
     timer->stop();
 }
 
@@ -274,8 +271,6 @@ void LogFilePositionSource::requestUpdate(int /*timeout*/)
 
 void LogFilePositionSource::readNextPosition()
 {
-    /* Not Used */
-    //return;
     updateGpsPosition();
 }
 

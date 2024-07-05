@@ -7,10 +7,9 @@ SOURCES += main.cpp
 SOURCES += logfilepositionsource.cpp
 SOURCES += clientapplication.cpp
 
-HEADERS += logfilepositionsource.h \
-    linegraph.h
+HEADERS += logfilepositionsource.h
 HEADERS += clientapplication.h
-HEADERS += linegraph.h
+HEADERS +=
 
 # Workaround for QTBUG-38735
 QT_FOR_CONFIG += location-private
@@ -65,6 +64,5 @@ DISTFILES += \
     db/rx_db_sample_1.csv \
     db/rx_db_sample_2.csv \
     db_v2x_rx_temp_writing.csv \
-    forms/graph.qml \
-    map/linegraph.qml
+    forms/graph.qml
     map/LineGraph.qml
