@@ -355,6 +355,8 @@ typedef struct DB_V2X_PLATOONING_FV_t {
     DB_V2X_PT_FV_DRIVE_STATUS_E      eFvDriveStatus;
     DB_V2X_PT_FV_CHANGE_CODE_E       eFvChangeCode;
     DB_V2X_PT_FV_PATH_PLAN_T         stFvPathPlan;
+    uint16_t                         usFvRecommDistance;
+    uint16_t                         usFvRecommSpeed;
 } DB_V2X_PLATOONING_FV_T;
 
 /**
