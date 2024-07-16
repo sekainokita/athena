@@ -55,6 +55,7 @@ CONFIG_MODEM_NO_CO2XGR=no-co2xgr_defconfig
 CONFIG_MODEL_NO_CO2OG=no-co2og_defconfig
 CONFIG_MODEL_NN_CO1XG=nn-co1xg_defconfig
 CONFIG_MODEL_NN_CO2XG=nn-co2xg_defconfig
+CONFIG_MODEL_NN_CO2OG=nn-co2og_defconfig
 CONFIG_MODEL_XILINX=zb-co1xgc_defconfig
 
 echo 
@@ -119,6 +120,12 @@ elif [ "nn-co2xg" = "$1" ]; then
     echo "========================================================================="
     echo -e "$W"
     cp ${CONFIGS_DIR}/${CONFIG_MODEL_NN_CO2XG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+elif [ "nn-co2og" = "$1" ]; then
+    echo -e "$BL"
+        echo "NVIDIA NANO RxAnt.2 MODEM, OBU GPS"
+    echo "========================================================================="
+    echo -e "$W"
+    cp ${CONFIGS_DIR}/${CONFIG_MODEL_NN_CO2OG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
 elif [ "xz-co1xgc" = "$1" ]; then
     echo -e "$BL"
     echo "XILINX"
