@@ -1,5 +1,9 @@
 CONFIG_NVIDIA=y
+<<<<<<< HEAD:src/build/.config
 CONFIG_NVIDIA_JETSON_ORIN=y
+=======
+CONFIG_NVIDIA_NANO=y
+>>>>>>> main:src/build/configs/nn-co2og_defconfig
 # CONFIG_GPS_XSENS is not set
 # CONFIG_GPS_XSENS_MTI_680G is not set
 CONFIG_GPS_OBU=y

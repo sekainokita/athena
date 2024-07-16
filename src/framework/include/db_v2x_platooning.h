@@ -51,20 +51,322 @@
 *
 ******************************************************************************/
 
-
 /***************************** Include ***************************************/
 #include <stdint.h>
 
 /***************************** Definition ************************************/
+#define DB_V2X_PT_LV_VEHICLE_ID_LEN             10
+#define DB_V2X_PT_LV_VEHICLE_NUM_LEN            20
+#define DB_V2X_PT_LV_LANE_LEN                   20
+#define DB_V2X_PT_LV_PATH_PLAN_MAX_LEN          300
+#define DB_V2X_PT_FV_VEHICLE_ID_LEN             10
+#define DB_V2X_PT_FV_VEHICLE_NUM_LEN            20
+#define DB_V2X_PT_FV_LANE_LEN                   20
+#define DB_V2X_PT_FV_PATH_PLAN_MAX_LEN          300
 
 /***************************** Enum and Structure ****************************/
+
+/* LV (Lead Vehicle) */
+/**
+* @details Service ID of the lead vehicle
+* @param DB_V2X_PT_LV_SVC_ID_E
+*/
+typedef enum {
+    eDB_V2X_PT_LV_SVC_ID_UNKNOWN               = 0,
+    eDB_V2X_PT_LV_SVC_ID_PLATOONING            = 1,
+    eDB_V2X_PT_LV_SVC_ID_SENSOR_SHARING        = 2,
+    eDB_V2X_PT_LV_SVC_ID_REMOTE_DRIVING        = 3,
+    eDB_V2X_PT_LV_SVC_ID_ADVANCED_DRIVING      = 4
+} DB_V2X_PT_LV_SVC_ID_E;
+
+/**
+* @details Method ID of the lead vehicle
+* @param DB_V2X_PT_LV_METHOD_ID_E
+*/
+typedef enum {
+    eDB_V2X_PT_LV_METHOD_ID_UNKNOWN            = 0,
+    eDB_V2X_PT_LV_METHOD_ID_V2V                = 1,
+    eDB_V2X_PT_LV_METHOD_ID_V2I                = 2,
+    eDB_V2X_PT_LV_METHOD_ID_V2P                = 3,
+    eDB_V2X_PT_LV_METHOD_ID_V2N                = 4,
+    eDB_V2X_PT_LV_METHOD_ID_I2V                = 5,
+    eDB_V2X_PT_LV_METHOD_ID_I2P                = 6,
+    eDB_V2X_PT_LV_METHOD_ID_I2N                = 7,
+    eDB_V2X_PT_LV_METHOD_ID_P2V                = 8,
+    eDB_V2X_PT_LV_METHOD_ID_P2I                = 9,
+    eDB_V2X_PT_LV_METHOD_ID_P2N                = 10,
+    eDB_V2X_PT_LV_METHOD_ID_N2V                = 11,
+    eDB_V2X_PT_LV_METHOD_ID_N2I                = 12,
+    eDB_V2X_PT_LV_METHOD_ID_N2P                = 13
+} DB_V2X_PT_LV_METHOD_ID_E;
+
+/**
+* @details Communication service method
+* @param DB_V2X_PT_LV_MSG_TYPE_E
+*/
+typedef enum {
+    eDB_V2X_PT_LV_MSG_TYPE_UNKNOWN             = 0,
+    eDB_V2X_PT_LV_MSG_TYPE_BROADCAST           = 1,
+    eDB_V2X_PT_LV_MSG_TYPE_UNICAST             = 2,
+    eDB_V2X_PT_LV_MSG_TYPE_MULTICASST          = 3,
+    eDB_V2X_PT_LV_MSG_TYPE_GRAOUPCAST          = 4
+} DB_V2X_PT_LV_MSG_TYPE_E;
+
+/**
+* @details Platooning Vehicle Type
+* @param DB_V2X_PT_LV_VEHICLE_TYPE_E
+*/
+typedef enum {
+    eDB_V2X_PT_LV_MSG_TYPE_UNKNOWN             = 0,
+    eDB_V2X_PT_LV_MSG_TYPE_LEAD                = 1,
+    eDB_V2X_PT_LV_MSG_TYPE_FOLLOW              = 2
+} DB_V2X_PT_LV_VEHICLE_TYPE_E;
+
+/**
+* @details Message Identifier
+* @param DB_V2X_PT_LV_MSG_ID_E
+*/
+typedef enum {
+    eDB_V2X_PT_LV_MSG_ID_INVALID              = 0,
+    eDB_V2X_PT_LV_MSG_ID_REQ_L2F              = 1,
+    eDB_V2X_PT_LV_MSG_ID_REQ_F2F              = 2,
+    eDB_V2X_PT_LV_MSG_ID_RES_F2L              = 3,
+    eDB_V2X_PT_LV_MSG_ID_RES_F2F              = 4
+} DB_V2X_PT_LV_MSG_ID_E;
+
+/**
+* @details a driving lane
+* @param DB_V2X_PT_LV_DRIVE_STATUS_E
+*/
+typedef enum {
+    eDB_V2X_PT_LV_MSG_ID_STAY_LANE             = 0,
+    eDB_V2X_PT_LV_MSG_ID_CHANGE_LANE           = 1,
+    eDB_V2X_PT_LV_MSG_ID_STOP                  = 2,
+    eDB_V2X_PT_LV_MSG_ID_SLOW                  = 3
+} DB_V2X_PT_LV_DRIVE_STATUS_E;
+
+/**
+* @details Change the path
+* @param DB_V2X_PT_LV_CHANGE_CODE_E
+*/
+typedef enum {
+    eDB_V2X_PT_LV_CHANGE_NO                    = 0,
+    eDB_V2X_PT_LV_CHANGE                       = 1
+} DB_V2X_PT_LV_CHANGE_CODE_E;
+
+/**
+* @details Plan lane change in the
+* @param DB_V2X_PT_LV_PLAN_LANE_E
+*/
+typedef enum {
+    eDB_V2X_PT_LV_STAY_LANE                    = 0,
+    eDB_V2X_PT_LV_CHANGE_LANE                  = 1
+} DB_V2X_PT_LV_LANE_PLAN_E;
+
+/**
+* @details Crossway
+* @param DB_V2X_PT_LV_CROSSWAY_E
+*/
+typedef enum {
+    eDB_V2X_PT_LV_GEN_LANE                     = 0,
+    eDB_V2X_PT_LV_ENTER_CROSSWAY               = 1,
+    eDB_V2X_PT_LV_INSIDE_CROSSWAY              = 2,
+    eDB_V2X_PT_LV_OUT_CROSSWAY                 = 3
+} DB_V2X_PT_LV_CROSSWAY_E;
+
+/**
+* @details Vehicle operation information on the link
+* @param DB_V2X_PT_LV_LANE_MANEUVER_E
+*/
+typedef enum {
+    eDB_V2X_PT_LV_STRAIGHT_LANE                = 0,
+    eDB_V2X_PT_LV_LEFT_LANE                    = 1,
+    eDB_V2X_PT_LV_RIGHT_LANE                   = 2,
+    eDB_V2X_PT_LV_UTURN_LANE                   = 3,
+    eDB_V2X_PT_LV_STRAIGHT_LEFT_LANE           = 4,
+    eDB_V2X_PT_LV_STRAIGHT_RIGHT_LANE          = 5
+} DB_V2X_PT_LV_LANE_MANEUVER_E;
+
+/**
+* @details Provides path of GPS at intervals of 30 centimeters
+* @param DB_V2X_PT_LV_PATH_PLAN_T
+*/
+typedef struct DB_V2X_PT_LV_PATH_PLAN_t {
+    int32_t                          anLvLatitude[DB_V2X_PT_LV_PATH_PLAN_MAX_LEN];
+    int32_t                          anLvLongitude[DB_V2X_PT_LV_PATH_PLAN_MAX_LEN];
+} DB_V2X_PT_LV_PATH_PLAN_T;
+
+/* FV (Follow Vehicle) */
+/**
+* @details Service ID of the follow vehicle
+* @param DB_V2X_PT_FV_SVC_ID_E
+*/
+typedef enum {
+    eDB_V2X_PT_FV_SVC_ID_UNKNOWN               = 0,
+    eDB_V2X_PT_FV_SVC_ID_PLATOONING            = 1,
+    eDB_V2X_PT_FV_SVC_ID_SENSOR_SHARING        = 2,
+    eDB_V2X_PT_FV_SVC_ID_REMOTE_DRIVING        = 3,
+    eDB_V2X_PT_FV_SVC_ID_ADVANCED_DRIVING      = 4
+} DB_V2X_PT_FV_SVC_ID_E;
+
+/**
+* @details Method ID of the follow vehicle
+* @param DB_V2X_PT_FV_METHOD_ID_E
+*/
+typedef enum {
+    eDB_V2X_PT_FV_METHOD_ID_UNKNOWN            = 0,
+    eDB_V2X_PT_FV_METHOD_ID_V2V                = 1,
+    eDB_V2X_PT_FV_METHOD_ID_V2I                = 2,
+    eDB_V2X_PT_FV_METHOD_ID_V2P                = 3,
+    eDB_V2X_PT_FV_METHOD_ID_V2N                = 4,
+    eDB_V2X_PT_FV_METHOD_ID_I2V                = 5,
+    eDB_V2X_PT_FV_METHOD_ID_I2P                = 6,
+    eDB_V2X_PT_FV_METHOD_ID_I2N                = 7,
+    eDB_V2X_PT_FV_METHOD_ID_P2V                = 8,
+    eDB_V2X_PT_FV_METHOD_ID_P2I                = 9,
+    eDB_V2X_PT_FV_METHOD_ID_P2N                = 10,
+    eDB_V2X_PT_FV_METHOD_ID_N2V                = 11,
+    eDB_V2X_PT_FV_METHOD_ID_N2I                = 12,
+    eDB_V2X_PT_FV_METHOD_ID_N2P                = 13
+} DB_V2X_PT_FV_METHOD_ID_E;
+
+/**
+* @details Communication service method
+* @param DB_V2X_PT_FV_MSG_TYPE_E
+*/
+typedef enum {
+    eDB_V2X_PT_FV_MSG_TYPE_UNKNOWN             = 0,
+    eDB_V2X_PT_FV_MSG_TYPE_BROADCAST           = 1,
+    eDB_V2X_PT_FV_MSG_TYPE_UNICAST             = 2,
+    eDB_V2X_PT_FV_MSG_TYPE_MULTICASST          = 3,
+    eDB_V2X_PT_FV_MSG_TYPE_GRAOUPCAST          = 4
+} DB_V2X_PT_FV_MSG_TYPE_E;
+
+/**
+* @details Platooning Vehicle Type
+* @param DB_V2X_PT_FV_VEHICLE_TYPE_E
+*/
+typedef enum {
+    eDB_V2X_PT_FV_MSG_TYPE_UNKNOWN             = 0,
+    eDB_V2X_PT_FV_MSG_TYPE_LEAD                = 1,
+    eDB_V2X_PT_FV_MSG_TYPE_FOLLOW              = 2
+} DB_V2X_PT_FV_VEHICLE_TYPE_E;
+
+/**
+* @details Message Identifier
+* @param DB_V2X_PT_FV_MSG_ID_E
+*/
+typedef enum {
+    eDB_V2X_PT_FV_MSG_ID_INVALID              = 0,
+    eDB_V2X_PT_FV_MSG_ID_REQ_L2F              = 1,
+    eDB_V2X_PT_FV_MSG_ID_REQ_F2F              = 2,
+    eDB_V2X_PT_FV_MSG_ID_RES_F2L              = 3,
+    eDB_V2X_PT_FV_MSG_ID_RES_F2F              = 4
+} DB_V2X_PT_FV_MSG_ID_E;
+
+/**
+* @details a driving lane
+* @param DB_V2X_PT_LV_DRIVE_STATUS_E
+*/
+typedef enum {
+    eDB_V2X_PT_FV_MSG_ID_STAY_LANE             = 0,
+    eDB_V2X_PT_FV_MSG_ID_CHANGE_LANE           = 1,
+    eDB_V2X_PT_FV_MSG_ID_STOP                  = 2,
+    eDB_V2X_PT_FV_MSG_ID_SLOW                  = 3
+} DB_V2X_PT_FV_DRIVE_STATUS_E;
+
+/**
+* @details Change the path
+* @param DB_V2X_PT_FV_CHANGE_CODE_E
+*/
+typedef enum {
+    eDB_V2X_PT_FV_CHANGE_NO                    = 0,
+    eDB_V2X_PT_FV_CHANGE                       = 1
+} DB_V2X_PT_FV_CHANGE_CODE_E;
+
+/**
+* @details Provides path of GPS at intervals of 30 centimeters
+* @param DB_V2X_PT_FV_PATH_PLAN_T
+*/
+typedef struct DB_V2X_PT_FV_PATH_PLAN_t {
+    int32_t                          anFvLatitude[DB_V2X_PT_FV_PATH_PLAN_MAX_LEN];
+    int32_t                          anFvLongitude[DB_V2X_PT_FV_PATH_PLAN_MAX_LEN];
+} DB_V2X_PT_FV_PATH_PLAN_T;
+
+
+/**
+* @details Service ID of the Lead vehicle
+* @param DB_V2X_PLATOONING_LV_T
+*/
+typedef struct DB_V2X_PLATOONING_LV_t {
+    DB_V2X_PT_LV_SVC_ID_E            eLvServiceId;
+    DB_V2X_PT_LV_METHOD_ID_E         eLvMethodId;
+    uint32_t                         unLvLength;
+    uint16_t                         usLvClientId;
+    uint16_t                         usLvSessionId;
+    uint8_t                          ucLvProtocolVer;
+    uint8_t                          ucLvInterfaceVer;
+    DB_V2X_PT_LV_MSG_TYPE_E          eLvMsgType;
+    uint8_t                          ucLvReturnCode;
+    DB_V2X_PT_LV_VEHICLE_TYPE_E      eLvVehicleType;
+    uint8_t                          szLvVehicleId[DB_V2X_PT_LV_VEHICLE_ID_LEN];
+    uint8_t                          szLvVehicleNum[DB_V2X_PT_LV_VEHICLE_NUM_LEN];
+    uint16_t                         usLvMsgCount;
+    DB_V2X_PT_LV_MSG_ID_E            eLvMsgId;
+    int32_t                          nLvLatitude;
+    int32_t                          nLvLongitude;
+    uint16_t                         usLvHeading;
+    uint16_t                         usLvSpeed;
+    uint8_t                          szLvDriveLaneId[DB_V2X_PT_LV_LANE_LEN];
+    DB_V2X_PT_LV_DRIVE_STATUS_E      eLvDriveStatus;
+    DB_V2X_PT_LV_CHANGE_CODE_E       eLvChangeCode;
+    uint16_t                         usLvPathId;
+    uint8_t                          szLvLaneId[DB_V2X_PT_LV_LANE_LEN];
+    DB_V2X_PT_LV_LANE_PLAN_E         eLvLanePlan;
+    DB_V2X_PT_LV_CROSSWAY_E          eLvCrossway;
+    DB_V2X_PT_LV_LANE_MANEUVER_E     eLvLaneManeuver;
+    DB_V2X_PT_LV_PATH_PLAN_T         stLvPathPlan;
+} DB_V2X_PLATOONING_LV_T;
+
+/**
+* @details Service ID of the follow vehicle
+* @param DB_V2X_PLATOONING_FV_T
+*/
+typedef struct DB_V2X_PLATOONING_FV_t {
+    DB_V2X_PT_FV_SVC_ID_E            eFvServiceId;
+    DB_V2X_PT_FV_METHOD_ID_E         eFvMethodId;
+    uint32_t                         unFvLength;
+    uint16_t                         usFvClientId;
+    uint16_t                         usFvSessionId;
+    uint8_t                          ucFvProtocolVer;
+    uint8_t                          ucFvInterfaceVer;
+    DB_V2X_PT_FV_MSG_TYPE_E          eFvMsgType;
+    uint8_t                          ucFvReturnCode;
+    DB_V2X_PT_FV_VEHICLE_TYPE_E      eFvVehicleType;
+    uint8_t                          szFvVehicleId[DB_V2X_PT_FV_VEHICLE_ID_LEN];
+    uint8_t                          szFvVehicleNum[DB_V2X_PT_FV_VEHICLE_NUM_LEN];
+    uint16_t                         usFvMsgCount;
+    DB_V2X_PT_FV_MSG_ID_E            eFvMsgId;
+    int32_t                          nFvLatitude;
+    int32_t                          nFvLongitude;
+    uint16_t                         usFvHeading;
+    uint16_t                         usFvSpeed;
+    uint8_t                          szFvDriveLaneId[DB_V2X_PT_FV_LANE_LEN];
+    DB_V2X_PT_FV_DRIVE_STATUS_E      eFvDriveStatus;
+    DB_V2X_PT_FV_CHANGE_CODE_E       eFvChangeCode;
+    DB_V2X_PT_FV_PATH_PLAN_T         stFvPathPlan;
+    uint16_t                         usFvRecommDistance;
+    uint16_t                         usFvRecommSpeed;
+} DB_V2X_PLATOONING_FV_T;
 
 /**
 * @details DB V2X Platooning Struct
 * @param ulReserved        reserved
 */
 typedef struct DB_V2X_PLATOONING_t {
-    uint32_t                                    ulReserved;
+    DB_V2X_PLATOONING_LV_T           stV2XPtLv;
+    DB_V2X_PLATOONING_FV_T           stV2XPtFv;
+    uint32_t                         ulReserved;
 } DB_V2X_PLATOONING_T;
 
 /***************************** Function Protype ******************************/
