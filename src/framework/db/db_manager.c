@@ -2393,13 +2393,13 @@ int32_t DB_MANAGER_UploadFile(DB_MANAGER_T *pstDbManager)
             nCharCnt += sprintf(chFileName+nCharCnt, "%s", "txt");
             if(strcmp("Tx", pstDbManager->stDbFile.pchTxRxType) == 0)
             {
-                nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", DB_V2X_CP_PORT, DB_V2X_FOLDER_DIR, chFileName, DB_V2X_CP_IP, DB_V2X_CP_STORAGE);
-                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", DB_V2X_CP_YEAR, DB_V2X_CP_MONTH);
+                nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", DB_V2X_PORT, DB_V2X_FOLDER_DIR, chFileName, DB_V2X_IP, DB_V2X_STORAGE);
+                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", DB_V2X_YEAR, DB_V2X_MONTH);
             }
             else if(strcmp("Rx", pstDbManager->stDbFile.pchTxRxType) == 0)
             {
-                nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", DB_V2X_CP_PORT, DB_V2X_FOLDER_DIR, chFileName, DB_V2X_CP_IP, DB_V2X_CP_STORAGE);
-                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", DB_V2X_CP_YEAR, DB_V2X_CP_MONTH);
+                nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", DB_V2X_PORT, DB_V2X_FOLDER_DIR, chFileName, DB_V2X_IP, DB_V2X_STORAGE);
+                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", DB_V2X_YEAR, DB_V2X_MONTH);
             }
             else
             {
@@ -2412,13 +2412,13 @@ int32_t DB_MANAGER_UploadFile(DB_MANAGER_T *pstDbManager)
             nCharCnt += sprintf(chFileName+nCharCnt, "%s", "csv");
             if(strcmp("Tx", pstDbManager->stDbFile.pchTxRxType) == 0)
             {
-                nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", DB_V2X_CP_PORT, DB_V2X_FOLDER_DIR, chFileName, DB_V2X_CP_IP, DB_V2X_CP_STORAGE);
-                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", DB_V2X_CP_YEAR, DB_V2X_CP_MONTH);
+                nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", DB_V2X_PORT, DB_V2X_FOLDER_DIR, chFileName, DB_V2X_IP, DB_V2X_STORAGE);
+                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", DB_V2X_YEAR, DB_V2X_MONTH);
             }
             else if(strcmp("Rx", pstDbManager->stDbFile.pchTxRxType) == 0)
             {
-                nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", DB_V2X_CP_PORT, DB_V2X_FOLDER_DIR, chFileName, DB_V2X_CP_IP, DB_V2X_CP_STORAGE);
-                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", DB_V2X_CP_YEAR, DB_V2X_CP_MONTH);
+                nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", DB_V2X_PORT, DB_V2X_FOLDER_DIR, chFileName, DB_V2X_IP, DB_V2X_STORAGE);
+                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", DB_V2X_YEAR, DB_V2X_MONTH);
             }
             else
             {
@@ -2431,13 +2431,13 @@ int32_t DB_MANAGER_UploadFile(DB_MANAGER_T *pstDbManager)
             nCharCnt += sprintf(chFileName+nCharCnt, "%s", "db");
             if(strcmp("Tx", pstDbManager->stDbFile.pchTxRxType) == 0)
             {
-                nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", DB_V2X_CP_PORT, DB_V2X_FOLDER_DIR, chFileName, DB_V2X_CP_IP, DB_V2X_CP_STORAGE);
-                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", DB_V2X_CP_YEAR, DB_V2X_CP_MONTH);
+                nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", DB_V2X_PORT, DB_V2X_FOLDER_DIR, chFileName, DB_V2X_IP, DB_V2X_STORAGE);
+                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", DB_V2X_YEAR, DB_V2X_MONTH);
             }
             else if(strcmp("Rx", pstDbManager->stDbFile.pchTxRxType) == 0)
             {
-                nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", DB_V2X_CP_PORT, DB_V2X_FOLDER_DIR, chFileName, DB_V2X_CP_IP, DB_V2X_CP_STORAGE);
-                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", DB_V2X_CP_YEAR, DB_V2X_CP_MONTH);
+                nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", DB_V2X_PORT, DB_V2X_FOLDER_DIR, chFileName, DB_V2X_IP, DB_V2X_STORAGE);
+                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", DB_V2X_YEAR, DB_V2X_MONTH);
             }
             else
             {
@@ -2451,7 +2451,7 @@ int32_t DB_MANAGER_UploadFile(DB_MANAGER_T *pstDbManager)
             break;
     }
 
-    PrintTrace("[scp:%s][%s/%s] is successfully send!", DB_V2X_CP_IP, DB_V2X_FOLDER_DIR, chFileName);
+    PrintTrace("[scp:%s][%s/%s] is successfully send!", DB_V2X_IP, DB_V2X_FOLDER_DIR, chFileName);
     PrintDebug("%s", chSysCallStr);
 
     nRet = system(chSysCallStr);
