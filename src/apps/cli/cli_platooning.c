@@ -53,9 +53,122 @@
 /***************************** Definition ************************************/
 
 /***************************** Static Variable *******************************/
-
+static char s_chSetBufDevId[CLI_DB_V2X_DEFAULT_BUF_LEN];
 
 /***************************** Function Protype ******************************/
+
+static int P_CLI_PLATOONING_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
+{
+    int32_t nRet = APP_OK;
+    SVC_PLATOONING_T *pstSvcPlatooning;
+    char *pcCmd;
+    pstSvcPlatooning = APP_GetSvcPlatooningInstance();
+
+    if(pstCmd == NULL)
+    {
+        PrintError("pstCmd == NULL!!");
+        return CLI_CMD_Showusage(pstCmd);
+    }
+
+    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+    if(pcCmd == NULL)
+    {
+        PrintError("pcCmd == NULL!!");
+        return CLI_CMD_Showusage(pstCmd);
+    }
+    else if(strcmp(pcCmd, "dev") == 0)
+    {
+        pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+        if(pcCmd == NULL)
+        {
+            PrintError("pcCmd == NULL!!");
+            return CLI_CMD_Showusage(pstCmd);
+        }
+
+        nRet = SVC_PLATOONING_GetSettings(pstSvcPlatooning);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_PLATOONING_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+
+        pstSvcPlatooning->stDbV2x.unDeviceId = (uint32_t)atoi(pcCmd);
+        sprintf(s_chSetBufDevId, "%s", pcCmd);
+        pstSvcPlatooning->pchDeviceName = s_chSetBufDevId;
+
+        if(strcmp(pstSvcPlatooning->pchDeviceName, DB_MGR_DEFAULT_COMM_DEV_ID) == 0)
+        {
+            PrintWarn("INSERT DEVICE ID is failed!");
+            nRet = APP_ERROR;
+        }
+        else
+        {
+            PrintDebug("SET:unDeviceId[%d]", pstSvcPlatooning->stDbV2x.unDeviceId);
+            PrintDebug("SET:pchDeviceName[%s]", pstSvcPlatooning->pchDeviceName);
+        }
+
+        nRet = SVC_PLATOONING_SetSettings(pstSvcPlatooning);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_PLATOONING_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+    }
+    else if(strcmp(pcCmd, "spd") == 0)
+    {
+        pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+        if(pcCmd == NULL)
+        {
+            PrintError("pcCmd == NULL!!");
+            return CLI_CMD_Showusage(pstCmd);
+        }
+
+        nRet = SVC_PLATOONING_GetSettings(pstSvcPlatooning);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_PLATOONING_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+
+        pstSvcPlatooning->stDbV2xStatusTx.unTxVehicleSpeed = (uint32_t)atoi(pcCmd);
+
+        PrintDebug("SET:unTxVehicleSpeed[%d]", pstSvcPlatooning->stDbV2xStatusTx.unTxVehicleSpeed);
+
+        nRet = SVC_PLATOONING_SetSettings(pstSvcPlatooning);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_PLATOONING_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+    }
+    else if(strcmp(pcCmd, "rg") == 0)
+    {
+        pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+        if(pcCmd == NULL)
+        {
+            PrintError("pcCmd == NULL!!");
+            return CLI_CMD_Showusage(pstCmd);
+        }
+
+        nRet = SVC_PLATOONING_GetSettings(pstSvcPlatooning);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_PLATOONING_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+
+        pstSvcPlatooning->stDbV2x.eRegionId = (uint32_t)atoi(pcCmd);
+
+        PrintDebug("SET:eRegionId[0x%x]", pstSvcPlatooning->stDbV2x.eRegionId);
+
+        nRet = SVC_PLATOONING_SetSettings(pstSvcPlatooning);
+        if(nRet != APP_OK)
+        {
+            PrintError("SVC_PLATOONING_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+    }
+    else
+    {
+        PrintWarn("unknown set type");
+        nRet = APP_ERROR;
+    }
+    return nRet;
+}
 
 static int P_CLI_PLATOONING_StartV2xStatusScenario(void)
 {
@@ -178,10 +291,61 @@ static int P_CLI_PLATOONING(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 return CLI_CMD_Showusage(pstCmd);
             }
         }
+        else if(IS_CMD(pcCmd, "set"))
+        {
+            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+            if (pcCmd != NULL)
+            {
+                if (IS_CMD(pcCmd, "dev"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if (pcCmd != NULL)
+                    {
+                        nRet = P_CLI_PLATOONING_SetV2xStatusScenario(pstCmd);
+                        if(nRet != APP_OK)
+                        {
+                            PrintError("P_CLI_PLATOONING_SetOptV2xStatusScenario() is failed![nRet:%d]", nRet);
+                        }
+                    }
+                }
+                else if(IS_CMD(pcCmd, "spd"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        nRet = P_CLI_PLATOONING_SetV2xStatusScenario(pstCmd);
+                        if(nRet != APP_OK)
+                        {
+                            PrintError("P_CLI_PLATOONING_SetOptV2xStatusScenario() is failed![nRet:%d]", nRet);
+                        }
+                    }
+                }
+                else if(IS_CMD(pcCmd, "rg"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        nRet = P_CLI_PLATOONING_SetV2xStatusScenario(pstCmd);
+                        if(nRet != APP_OK)
+                        {
+                            PrintError("P_CLI_PLATOONING_SetOptV2xStatusScenario() is failed![nRet:%d]", nRet);
+                        }
+                    }
+                }
+                else
+                {
+                    return CLI_CMD_Showusage(pstCmd);
+                }
+            }
+            else
+            {
+                return CLI_CMD_Showusage(pstCmd);
+            }
+        }
         else if(IS_CMD(pcCmd, "start"))
         {
             nRet = P_CLI_PLATOONING_StartV2xStatusScenario();
-            if(nRet != APP_OK)
+            if (nRet != APP_OK)
             {
                 PrintError("P_CLI_PLATOONING_StartV2xStatusScenario() is failed! [nRet:%d]", nRet);
             }
@@ -189,7 +353,7 @@ static int P_CLI_PLATOONING(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         else if(IS_CMD(pcCmd, "stop"))
         {
             nRet = P_CLI_PLATOONING_StopV2xStatusScenario();
-            if(nRet != APP_OK)
+            if (nRet != APP_OK)
             {
                 PrintError("P_CLI_PLATOONING_StopV2xStatusScenario() is failed! [nRet:%d]", nRet);
             }
@@ -224,13 +388,18 @@ int32_t CLI_PLATOONING_InitCmds(void)
                "of available commands. For more details on a command, type and enter 'pt'\n"
                "and the command name.\n\n"
                "pt [OPTIONS]\n"
-               "   test           test pt command\n"
-               "   ready          ready platooning scenario\n"
-               "   start          start platooning scenario (should be set pt ready first)\n"
-               "   stop           stop  platooning scenario\n"
+               "   test                         test pt command\n"
+               "   ready                        ready platooning scenario\n"
+               "   start                        start platooning scenario (should be set pt ready first)\n"
+               "   stop                         stop  platooning scenario\n"
+               "pt set [OPT] [PARAM]\n"
+               "       dev   [id]               set device id\n"
+               "       spd   [speed km/hrs]     set tx / rx vehicle speed\n"
+               "       rg    [region id]        set region ID (1:SEOUL, 2:SEJONG, 3:BUSAN, 4:DAEGEON, 5:INCHEON\n"
+               "                                               6:DAEGU, 7:DAEGU PG, 8:CHEONGJU, 9:SEONGNAM)\n"
                "pt sce [OPTIONS]\n"
-               "  base            start a base platooing scenario\n"
-               "pt info           get a status platooning\n",
+               "  base                          start a base platooing scenario\n"
+               "pt info                         get a status platooning\n",
                "");
     if(nRet != APP_OK)
     {
