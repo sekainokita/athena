@@ -46,6 +46,7 @@
 #include "cli.h"
 #include "app.h"
 #include "db_v2x.h"
+#include "db_v2x_status.h"
 #include "db_manager.h"
 #include "framework.h"
 
@@ -55,6 +56,72 @@
 
 
 /***************************** Function Protype ******************************/
+
+static int P_CLI_PLATOONING_StartV2xStatusScenario(void)
+{
+    int32_t nRet = APP_OK;
+    SVC_PLATOONING_T *pstSvcPlatooning;
+    pstSvcPlatooning = APP_GetSvcPlatooningInstance();
+
+    nRet = SVC_PLATOONING_Start(pstSvcPlatooning);
+    if(nRet != APP_OK)
+    {
+        PrintError("SVC_PLATOONING_Start() is failed! [nRet:%d]", nRet);
+    }
+
+    return nRet;
+}
+
+static int P_CLI_PLATOONING_StopV2xStatusScenario(void)
+{
+    int32_t nRet = APP_OK;
+    SVC_PLATOONING_T *pstSvcPlatooning;
+    pstSvcPlatooning = APP_GetSvcPlatooningInstance();
+
+    nRet = SVC_PLATOONING_Stop(pstSvcPlatooning);
+    if(nRet != APP_OK)
+    {
+        PrintError("SVC_PLATOONING_Stop() is failed! [nRet:%d]", nRet);
+    }
+
+    nRet = SVC_PLATOONING_Close(pstSvcPlatooning);
+    if(nRet != APP_OK)
+    {
+        PrintError("SVC_PLATOONING_Close() is failed! [nRet:%d]", nRet);
+    }
+
+    return nRet;
+}
+
+static int P_CLI_PLATOONING_ReadyV2xStatusScenario(void)
+{
+    int32_t nRet = APP_OK;
+    SVC_PLATOONING_T *pstSvcPlatooning;
+    pstSvcPlatooning = APP_GetSvcPlatooningInstance();
+
+    (void)SVC_PLATOONING_ShowSettings(pstSvcPlatooning);
+
+    nRet = SVC_PLATOONING_Open(pstSvcPlatooning);
+    if (nRet != APP_OK)
+    {
+        PrintError("SVC_PLATOONING_Open() is failed! [nRet:%d]", nRet);
+    }
+
+    nRet = SVC_PLATOONING_GetSettings(pstSvcPlatooning);
+    if (nRet != APP_OK)
+    {
+        PrintError("SVC_PLATOONING_GetSettings() is failed! [nRet:%d]", nRet);
+    }
+
+    nRet = SVC_PLATOONING_SetSettings(pstSvcPlatooning);
+    if (nRet != APP_OK)
+    {
+        PrintError("SVC_PLATOONING_SetSettings() is failed! [nRet:%d]", nRet);
+    }
+
+    return nRet;
+}
+
 
 static int P_CLI_PLATOONING(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
@@ -111,6 +178,30 @@ static int P_CLI_PLATOONING(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 return CLI_CMD_Showusage(pstCmd);
             }
         }
+        else if(IS_CMD(pcCmd, "start"))
+        {
+            nRet = P_CLI_PLATOONING_StartV2xStatusScenario();
+            if(nRet != APP_OK)
+            {
+                PrintError("P_CLI_PLATOONING_StartV2xStatusScenario() is failed! [nRet:%d]", nRet);
+            }
+        }
+        else if(IS_CMD(pcCmd, "stop"))
+        {
+            nRet = P_CLI_PLATOONING_StopV2xStatusScenario();
+            if(nRet != APP_OK)
+            {
+                PrintError("P_CLI_PLATOONING_StopV2xStatusScenario() is failed! [nRet:%d]", nRet);
+            }
+        }
+        else if(IS_CMD(pcCmd, "ready"))
+        {
+            nRet = P_CLI_PLATOONING_ReadyV2xStatusScenario();
+            if (nRet != APP_OK)
+            {
+                PrintError("P_CLI_PLATOONING_ReadyV2xStatusScenario() is failed![nRet:%d]", nRet);
+            }
+        }
         else
         {
             return CLI_CMD_Showusage(pstCmd);
@@ -132,7 +223,11 @@ int32_t CLI_PLATOONING_InitCmds(void)
                "Without any parameters, the 'pt' show a description\n"
                "of available commands. For more details on a command, type and enter 'pt'\n"
                "and the command name.\n\n"
-               "pt test           test pt command\n"
+               "pt [OPTIONS]\n"
+               "   test           test pt command\n"
+               "   ready          ready platooning scenario\n"
+               "   start          start platooning scenario (should be set pt ready first)\n"
+               "   stop           stop  platooning scenario\n"
                "pt sce [OPTIONS]\n"
                "  base            start a base platooing scenario\n"
                "pt info           get a status platooning\n",

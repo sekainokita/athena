@@ -117,9 +117,9 @@ typedef enum {
 * @param DB_V2X_PT_LV_VEHICLE_TYPE_E
 */
 typedef enum {
-    eDB_V2X_PT_LV_MSG_TYPE_UNKNOWN             = 0,
-    eDB_V2X_PT_LV_MSG_TYPE_LEAD                = 1,
-    eDB_V2X_PT_LV_MSG_TYPE_FOLLOW              = 2
+    eDB_V2X_PT_LV_VEHICLE_TYPE_UNKNOWN        = 0,
+    eDB_V2X_PT_LV_VEHICLE_TYPE_LEAD           = 1,
+    eDB_V2X_PT_LV_VEHICLE_TYPE_FOLLOW         = 2
 } DB_V2X_PT_LV_VEHICLE_TYPE_E;
 
 /**
@@ -139,10 +139,10 @@ typedef enum {
 * @param DB_V2X_PT_LV_DRIVE_STATUS_E
 */
 typedef enum {
-    eDB_V2X_PT_LV_MSG_ID_STAY_LANE             = 0,
-    eDB_V2X_PT_LV_MSG_ID_CHANGE_LANE           = 1,
-    eDB_V2X_PT_LV_MSG_ID_STOP                  = 2,
-    eDB_V2X_PT_LV_MSG_ID_SLOW                  = 3
+    eDB_V2X_PT_LV_DRIVE_STATUS_STAY_LANE       = 0,
+    eDB_V2X_PT_LV_DRIVE_STATUS_CHANGE_LANE     = 1,
+    eDB_V2X_PT_LV_DRIVE_STATUS_STOP            = 2,
+    eDB_V2X_PT_LV_DRIVE_STATUS_SLOW            = 3
 } DB_V2X_PT_LV_DRIVE_STATUS_E;
 
 /**
@@ -159,8 +159,8 @@ typedef enum {
 * @param DB_V2X_PT_LV_PLAN_LANE_E
 */
 typedef enum {
-    eDB_V2X_PT_LV_STAY_LANE                    = 0,
-    eDB_V2X_PT_LV_CHANGE_LANE                  = 1
+    eDB_V2X_PT_LV_LANE_STAY                    = 0,
+    eDB_V2X_PT_LV_LANE_CHANGE                  = 1
 } DB_V2X_PT_LV_LANE_PLAN_E;
 
 /**
@@ -247,9 +247,9 @@ typedef enum {
 * @param DB_V2X_PT_FV_VEHICLE_TYPE_E
 */
 typedef enum {
-    eDB_V2X_PT_FV_MSG_TYPE_UNKNOWN             = 0,
-    eDB_V2X_PT_FV_MSG_TYPE_LEAD                = 1,
-    eDB_V2X_PT_FV_MSG_TYPE_FOLLOW              = 2
+    eDB_V2X_PT_FV_VEHICLE_TYPE_UNKNOWN         = 0,
+    eDB_V2X_PT_FV_VEHICLE_TYPE_LEAD            = 1,
+    eDB_V2X_PT_FV_VEHICLE_TYPE_FOLLOW          = 2
 } DB_V2X_PT_FV_VEHICLE_TYPE_E;
 
 /**
@@ -269,10 +269,10 @@ typedef enum {
 * @param DB_V2X_PT_LV_DRIVE_STATUS_E
 */
 typedef enum {
-    eDB_V2X_PT_FV_MSG_ID_STAY_LANE             = 0,
-    eDB_V2X_PT_FV_MSG_ID_CHANGE_LANE           = 1,
-    eDB_V2X_PT_FV_MSG_ID_STOP                  = 2,
-    eDB_V2X_PT_FV_MSG_ID_SLOW                  = 3
+    eDB_V2X_PT_FV_DRIVE_STATUS_STAY_LANE       = 0,
+    eDB_V2X_PT_FV_DRIVE_STATUS_CHANGE_LANE     = 1,
+    eDB_V2X_PT_FV_DRIVE_STATUS_STOP            = 2,
+    eDB_V2X_PT_FV_DRIVE_STATUS_SLOW            = 3
 } DB_V2X_PT_FV_DRIVE_STATUS_E;
 
 /**

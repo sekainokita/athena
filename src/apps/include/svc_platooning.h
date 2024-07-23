@@ -48,27 +48,73 @@
 /***************************** Include ***************************************/
 #include "type.h"
 #include "db_v2x.h"
+#include "db_v2x_status.h"
+#include "db_v2x_platooning.h"
 
 /***************************** Definition ************************************/
 #define SVC_PLATOONING_TASK_MSG_KEY               (0x230531)
+#define SVC_PLATOONING_DEFAULT_ETH_DEV            "eth1"
+#define SVC_PLATOONING_V2V_PSID                   (58200)
+
+#define SVC_PLATOONING_GPS_OPEN_RETRY_CNT         (10)
+#define SVC_PLATOONING_GPS_OPEN_RETRY_DELAY       (1000)
+
+#define SVC_PLATOONING_GPS_VALUE_CONVERT          (1000000)
+#define SVC_PLATOONING_GPS_VALUE_CONVERT_DOUBLE   (1000000.0f)
+
+#define SVC_PLATOONING_STR_BUF_LEN                (20)
+#define SVC_PLATOONING_DATE_LEN                   (8)
+#define SVC_PLATOONING_HOUR_LEN                   (2)
+#define SVC_PLATOONING_MIN_LEN                    (2)
+#define SVC_PLATOONING_SEC_LEN                    (2)
+#define SVC_PLATOONING_DB_TX                      "Tx"
+#define SVC_PLATOONING_DB_RX                      "Rx"
+#define SVC_PLATOONING_DEV_OBU                    "OBU"
+#define SVC_PLATOONING_DEV_RSU                    "RSU"
+#define SVC_PLATOONING_DEV_UNKNOWN                "UNKNOWN"
+
+#if defined(CONFIG_EXT_DATA_FORMAT)
+#define SVC_PLATOONING_DEFAULT_IP                 "192.168.1.11"
+#define SVC_PLATOONING_DEFAULT_PORT               (47347)
+#endif
 
 /***************************** Enum and Structure ****************************/
 
 /**
-* @details SVC_PLATOONING_SETTING_T
-* @param unReserved
+* @details SVC_PLATOONING_EVENT_E
+* @param SVC_PLATOONING_EVENT_START
+* @param SVC_PLATOONING_EVENT_STOP
+
 */
-typedef struct SVC_PLATOONING_SETTING_t {
-    uint32_t                     unReserved;
-} SVC_PLATOONING_SETTING_T;
+typedef enum {
+    SVC_PLATOONING_EVENT_UNKNOWN          = 0x0000,
+    SVC_PLATOONING_EVENT_START            = 0x0001,
+    SVC_PLATOONING_EVENT_STOP             = 0x0002,
+    SVC_PLATOONING_EVENT_UNDEFINED_1,
+    SVC_PLATOONING_EVENT_UNDEFINED_2,
+    SVC_PLATOONING_EVENT_MAX              = 0xFFFF
+} SVC_PLATOONING_EVENT_E;
 
 /**
 * @details SVC_PLATOONING_EVENT_MSG_T
 * @param pstTimeMgrSetting
 */
 typedef struct SVC_PLATOONING_EVENT_MSG_t {
-    SVC_PLATOONING_SETTING_T      *pstSvcPlatooningSetting;
+    SVC_PLATOONING_EVENT_E        eEventType;
 } SVC_PLATOONING_EVENT_MSG_T;
+
+/**
+* @details SVC_PLATOONING_STATUS_E
+* @param SVC_PLATOONING_STATUS_START
+* @param SVC_PLATOONING_STATUS_STOP
+*/
+typedef enum {
+    SVC_PLATOONING_STATUS_IDLE            = 0x0000,
+    SVC_PLATOONING_STATUS_START           = 0x0001,
+    SVC_PLATOONING_STATUS_STOP            = 0x0002,
+    SVC_PLATOONING_STATUS_MAX             = 0xFFFF
+} SVC_PLATOONING_STATUS_E;
+
 
 /**
 * @details SVC_PLATOONING_T
@@ -76,8 +122,23 @@ typedef struct SVC_PLATOONING_EVENT_MSG_t {
 * @param unReserved
 */
 typedef struct SVC_PLATOONING_t {
-    bool                    bLogLevel;
-    uint32_t                unReserved;
+    bool                                  bLogLevel;
+    SVC_PLATOONING_STATUS_E               eSvcPlatooningStatus;
+    DB_MANAGER_WRITE_T                    stDbManagerWrite;
+    MSG_MANAGER_TX_T                      stMsgManagerTx;
+    MSG_MANAGER_RX_T                      stMsgManagerRx;
+    DB_V2X_T                              stDbV2x;
+    DB_V2X_STATUS_TX_T                    stDbV2xStatusTx;
+    DB_V2X_STATUS_RX_T                    stDbV2xStatusRx;
+    char                                  *pchDeviceName;
+    char                                  *pchIfaceName;
+    uint32_t                              unPsid;
+    uint64_t                              ulDbStartTime;
+    uint64_t                              ulDbEndTime;
+    uint32_t                              unDbTotalWrittenTime;
+    uint32_t                              unReserved;
+    char                                  *pchIpAddr;
+    uint32_t                              unPort;
 } SVC_PLATOONING_T;
 
 /***************************** Function Protype ******************************/
@@ -89,6 +150,11 @@ int32_t SVC_PLATOONING_Close(SVC_PLATOONING_T *pstSvcPlatooning);
 int32_t SVC_PLATOONING_Start(SVC_PLATOONING_T *pstSvcPlatooning);
 int32_t SVC_PLATOONING_Stop(SVC_PLATOONING_T *pstSvcPlatooning);
 int32_t SVC_PLATOONING_Status(SVC_PLATOONING_T *pstSvcPlatooning);
+
+void SVC_PLATOONING_ShowSettings(SVC_PLATOONING_T *pstSvcPlatooning);
+
+int32_t SVC_PLATOONING_SetSettings(SVC_PLATOONING_T *pstSvcPlatooning);
+int32_t SVC_PLATOONING_GetSettings(SVC_PLATOONING_T *pstSvcPlatooning);
 
 int32_t SVC_PLATOONING_Init(SVC_PLATOONING_T *pstSvcPlatooning);
 int32_t SVC_PLATOONING_DeInit(SVC_PLATOONING_T *pstSvcPlatooning);
