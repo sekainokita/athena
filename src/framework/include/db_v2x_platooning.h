@@ -323,7 +323,7 @@ typedef struct DB_V2X_PT_FV_PATH_PLAN_t {
 
 
 /**
-* @details Service ID of the Lead vehicle
+* @details Service ID of the Lead vehicle (PTLV)
 * @param DB_V2X_PLATOONING_LV_T
 */
 typedef struct DB_V2X_PLATOONING_LV_t {
@@ -357,7 +357,7 @@ typedef struct DB_V2X_PLATOONING_LV_t {
 } DB_V2X_PLATOONING_LV_T;
 
 /**
-* @details Service ID of the follow vehicle
+* @details Service ID of the follow vehicle (PTFV)
 * @param DB_V2X_PLATOONING_FV_T
 */
 typedef struct DB_V2X_PLATOONING_FV_t {
