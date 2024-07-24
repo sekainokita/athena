@@ -57,7 +57,24 @@ static char s_chSetBufDevId[CLI_DB_V2X_DEFAULT_BUF_LEN];
 
 /***************************** Function Protype ******************************/
 
-static int P_CLI_PLATOONING_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
+static int P_CLI_PLATOONING_CheckPtSvc(void)
+{
+    int32_t nRet = APP_OK;
+    SVC_PLATOONING_T *pstSvcPlatooning;
+    pstSvcPlatooning = APP_GetSvcPlatooningInstance();
+
+    nRet = SVC_PLATOONING_GetSettings(pstSvcPlatooning);
+    if(nRet != APP_OK)
+    {
+        PrintError("SVC_PLATOONING_SetSettings() is failed! [nRet:%d]", nRet);
+    }
+
+    (void)SVC_PLATOONING_ShowSettings(pstSvcPlatooning);
+
+    return nRet;
+}
+
+static int P_CLI_PLATOONING_SetPtSvc(CLI_CMDLINE_T *pstCmd)
 {
     int32_t nRet = APP_OK;
     SVC_PLATOONING_T *pstSvcPlatooning;
@@ -110,6 +127,46 @@ static int P_CLI_PLATOONING_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
         if(nRet != APP_OK)
         {
             PrintError("SVC_PLATOONING_SetSettings() is failed! [nRet:%d]", nRet);
+        }
+    }
+    else if (strcmp(pcCmd, "type") == 0)
+    {
+        pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+        if (strcmp(pcCmd, "lv") == 0)
+        {
+            nRet = SVC_PLATOONING_GetSettings(pstSvcPlatooning);
+            if(nRet != APP_OK)
+            {
+                PrintError("SVC_PLATOONING_GetSettings() is failed! [nRet:%d]", nRet);
+            }
+
+            pstSvcPlatooning->stDbV2xPt.eDbV2XPtType = eDB_V2X_PT_TYPE_LV;
+
+            PrintDebug("SET:eDbV2XPtType[%d]", pstSvcPlatooning->stDbV2xPt.eDbV2XPtType);
+
+            nRet = SVC_PLATOONING_SetSettings(pstSvcPlatooning);
+            if(nRet != APP_OK)
+            {
+                PrintError("SVC_PLATOONING_SetSettings() is failed! [nRet:%d]", nRet);
+            }
+        }
+        else if (strcmp(pcCmd, "fv") == 0)
+        {
+            nRet = SVC_PLATOONING_GetSettings(pstSvcPlatooning);
+            if(nRet != APP_OK)
+            {
+                PrintError("SVC_PLATOONING_GetSettings() is failed! [nRet:%d]", nRet);
+            }
+
+            pstSvcPlatooning->stDbV2xPt.eDbV2XPtType = eDB_V2X_PT_TYPE_FV;
+
+            PrintDebug("SET:eDbV2XPtType[%d]", pstSvcPlatooning->stDbV2xPt.eDbV2XPtType);
+
+            nRet = SVC_PLATOONING_SetSettings(pstSvcPlatooning);
+            if(nRet != APP_OK)
+            {
+                PrintError("SVC_PLATOONING_SetSettings() is failed! [nRet:%d]", nRet);
+            }
         }
     }
     else if(strcmp(pcCmd, "spd") == 0)
@@ -170,7 +227,7 @@ static int P_CLI_PLATOONING_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
     return nRet;
 }
 
-static int P_CLI_PLATOONING_StartV2xStatusScenario(void)
+static int P_CLI_PLATOONING_StartPtSvc(void)
 {
     int32_t nRet = APP_OK;
     SVC_PLATOONING_T *pstSvcPlatooning;
@@ -185,7 +242,7 @@ static int P_CLI_PLATOONING_StartV2xStatusScenario(void)
     return nRet;
 }
 
-static int P_CLI_PLATOONING_StopV2xStatusScenario(void)
+static int P_CLI_PLATOONING_StopPtSvc(void)
 {
     int32_t nRet = APP_OK;
     SVC_PLATOONING_T *pstSvcPlatooning;
@@ -206,7 +263,7 @@ static int P_CLI_PLATOONING_StopV2xStatusScenario(void)
     return nRet;
 }
 
-static int P_CLI_PLATOONING_ReadyV2xStatusScenario(void)
+static int P_CLI_PLATOONING_ReadyPtSvc(void)
 {
     int32_t nRet = APP_OK;
     SVC_PLATOONING_T *pstSvcPlatooning;
@@ -301,10 +358,33 @@ static int P_CLI_PLATOONING(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
                     if (pcCmd != NULL)
                     {
-                        nRet = P_CLI_PLATOONING_SetV2xStatusScenario(pstCmd);
+                        nRet = P_CLI_PLATOONING_SetPtSvc(pstCmd);
                         if(nRet != APP_OK)
                         {
-                            PrintError("P_CLI_PLATOONING_SetOptV2xStatusScenario() is failed![nRet:%d]", nRet);
+                            PrintError("P_CLI_PLATOONING_SetPtSvc() is failed![nRet:%d]", nRet);
+                        }
+                    }
+                }
+                else if(IS_CMD(pcCmd, "type"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if (pcCmd != NULL)
+                    {
+                        if (IS_CMD(pcCmd, "lv"))
+                        {
+                            nRet = P_CLI_PLATOONING_SetPtSvc(pstCmd);
+                            if(nRet != APP_OK)
+                            {
+                                PrintError("P_CLI_PLATOONING_SetPtSvc() is failed![nRet:%d]", nRet);
+                            }
+                        }
+                        else if (IS_CMD(pcCmd, "fv"))
+                        {
+                            nRet = P_CLI_PLATOONING_SetPtSvc(pstCmd);
+                            if(nRet != APP_OK)
+                            {
+                                PrintError("P_CLI_PLATOONING_SetPtSvc() is failed![nRet:%d]", nRet);
+                            }
                         }
                     }
                 }
@@ -313,10 +393,10 @@ static int P_CLI_PLATOONING(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
                     if(pcCmd != NULL)
                     {
-                        nRet = P_CLI_PLATOONING_SetV2xStatusScenario(pstCmd);
+                        nRet = P_CLI_PLATOONING_SetPtSvc(pstCmd);
                         if(nRet != APP_OK)
                         {
-                            PrintError("P_CLI_PLATOONING_SetOptV2xStatusScenario() is failed![nRet:%d]", nRet);
+                            PrintError("P_CLI_PLATOONING_SetPtSvc() is failed![nRet:%d]", nRet);
                         }
                     }
                 }
@@ -325,10 +405,10 @@ static int P_CLI_PLATOONING(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
                     if(pcCmd != NULL)
                     {
-                        nRet = P_CLI_PLATOONING_SetV2xStatusScenario(pstCmd);
+                        nRet = P_CLI_PLATOONING_SetPtSvc(pstCmd);
                         if(nRet != APP_OK)
                         {
-                            PrintError("P_CLI_PLATOONING_SetOptV2xStatusScenario() is failed![nRet:%d]", nRet);
+                            PrintError("P_CLI_PLATOONING_SetPtSvc() is failed![nRet:%d]", nRet);
                         }
                     }
                 }
@@ -344,26 +424,34 @@ static int P_CLI_PLATOONING(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         }
         else if(IS_CMD(pcCmd, "start"))
         {
-            nRet = P_CLI_PLATOONING_StartV2xStatusScenario();
+            nRet = P_CLI_PLATOONING_StartPtSvc();
             if (nRet != APP_OK)
             {
-                PrintError("P_CLI_PLATOONING_StartV2xStatusScenario() is failed! [nRet:%d]", nRet);
+                PrintError("P_CLI_PLATOONING_StartPtSvc() is failed! [nRet:%d]", nRet);
             }
         }
         else if(IS_CMD(pcCmd, "stop"))
         {
-            nRet = P_CLI_PLATOONING_StopV2xStatusScenario();
+            nRet = P_CLI_PLATOONING_StopPtSvc();
             if (nRet != APP_OK)
             {
-                PrintError("P_CLI_PLATOONING_StopV2xStatusScenario() is failed! [nRet:%d]", nRet);
+                PrintError("P_CLI_PLATOONING_StopPtSvc() is failed! [nRet:%d]", nRet);
             }
         }
         else if(IS_CMD(pcCmd, "ready"))
         {
-            nRet = P_CLI_PLATOONING_ReadyV2xStatusScenario();
+            nRet = P_CLI_PLATOONING_ReadyPtSvc();
             if (nRet != APP_OK)
             {
-                PrintError("P_CLI_PLATOONING_ReadyV2xStatusScenario() is failed![nRet:%d]", nRet);
+                PrintError("P_CLI_PLATOONING_ReadyPtSvc() is failed![nRet:%d]", nRet);
+            }
+        }
+        else if(IS_CMD(pcCmd, "check"))
+        {
+            nRet = P_CLI_PLATOONING_CheckPtSvc();
+            if (nRet != APP_OK)
+            {
+                PrintError("P_CLI_PLATOONING_CheckPtSvc() is failed![nRet:%d]", nRet);
             }
         }
         else
@@ -392,7 +480,9 @@ int32_t CLI_PLATOONING_InitCmds(void)
                "   ready                        ready platooning scenario\n"
                "   start                        start platooning scenario (should be set pt ready first)\n"
                "   stop                         stop  platooning scenario\n"
+               "   check                        check platooning scenario\n"
                "pt set [OPT] [PARAM]\n"
+               "       type  [lv/fv]            set vehicle type\n"
                "       dev   [id]               set device id\n"
                "       spd   [speed km/hrs]     set tx / rx vehicle speed\n"
                "       rg    [region id]        set region ID (1:SEOUL, 2:SEJONG, 3:BUSAN, 4:DAEGEON, 5:INCHEON\n"

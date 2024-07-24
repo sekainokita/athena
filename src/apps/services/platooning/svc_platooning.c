@@ -156,6 +156,7 @@ int32_t P_SVC_PLATOONING_SetDefaultSettings(SVC_PLATOONING_T *pstSvcPlatooning)
     pstSvcPlatooning->stMsgManagerTx.unTransmitterProfileId = MSG_MANAGER_V2X_TX_PROFILE_ID;
     pstSvcPlatooning->stMsgManagerTx.unPeerL2Id = MSG_MANAGER_V2X_TX_PEER_L2_ID;
 
+    pstSvcPlatooning->stDbV2xPt.eDbV2XPtType = eDB_V2X_PT_TYPE_NONE;
     pstSvcPlatooning->stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
     pstSvcPlatooning->stDbV2x.eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5_BROADCAST;
     pstSvcPlatooning->stDbV2x.unDeviceId = CLI_DB_V2X_DEFAULT_DEVICE_ID;
@@ -658,7 +659,7 @@ void SVC_PLATOONING_ShowSettings(SVC_PLATOONING_T *pstSvcPlatooning)
     PrintTrace("========================================================");
     PrintWarn("MSG V2X Tx Info>");
     PrintDebug(" ePayloadType[%d]", pstSvcPlatooning->stMsgManagerTx.ePayloadType);
-    PrintDebug(" eCommType[%d]", pstSvcPlatooning->stMsgManagerTx.eCommType);
+    PrintDebug(" eCommType[%d]", pstSvcPlatooning->stMsgManagerTx.eCommType);
     PrintDebug(" eSignId[%d]", pstSvcPlatooning->stMsgManagerTx.eSignId);
     PrintDebug(" eV2xFreq[%d]", pstSvcPlatooning->stMsgManagerTx.eV2xFreq);
     PrintDebug(" ePriority[%d]", pstSvcPlatooning->stMsgManagerTx.ePriority);
@@ -677,6 +678,18 @@ void SVC_PLATOONING_ShowSettings(SVC_PLATOONING_T *pstSvcPlatooning)
     PrintDebug(" unPeerL2Id[%d]", pstSvcPlatooning->stMsgManagerTx.unPeerL2Id);
 
     PrintWarn("DB V2X Info>");
+    if (pstSvcPlatooning->stDbV2xPt.eDbV2XPtType == eDB_V2X_PT_TYPE_LV)
+    {
+        PrintDebug(" eDbV2XPtType [lv]");
+    }
+    else if (pstSvcPlatooning->stDbV2xPt.eDbV2XPtType == eDB_V2X_PT_TYPE_FV)
+    {
+        PrintDebug(" eDbV2XPtType [fv]");
+    }
+    else
+    {
+        PrintDebug(" eDbV2XPtType [none]");
+    }
     PrintDebug(" eDeviceType[%d]", pstSvcPlatooning->stDbV2x.eDeviceType);
     PrintDebug(" eTeleCommType[%d]", pstSvcPlatooning->stDbV2x.eTeleCommType);
     PrintDebug(" unDeviceId[%d]", pstSvcPlatooning->stDbV2x.unDeviceId);

@@ -76,7 +76,8 @@ typedef enum {
     eDB_V2X_PT_LV_SVC_ID_PLATOONING            = 1,
     eDB_V2X_PT_LV_SVC_ID_SENSOR_SHARING        = 2,
     eDB_V2X_PT_LV_SVC_ID_REMOTE_DRIVING        = 3,
-    eDB_V2X_PT_LV_SVC_ID_ADVANCED_DRIVING      = 4
+    eDB_V2X_PT_LV_SVC_ID_ADVANCED_DRIVING      = 4,
+    eDB_V2X_PT_LV_SVC_ID_MAX
 } DB_V2X_PT_LV_SVC_ID_E;
 
 /**
@@ -97,7 +98,8 @@ typedef enum {
     eDB_V2X_PT_LV_METHOD_ID_P2N                = 10,
     eDB_V2X_PT_LV_METHOD_ID_N2V                = 11,
     eDB_V2X_PT_LV_METHOD_ID_N2I                = 12,
-    eDB_V2X_PT_LV_METHOD_ID_N2P                = 13
+    eDB_V2X_PT_LV_METHOD_ID_N2P                = 13,
+    eDB_V2X_PT_LV_METHOD_ID_MAX
 } DB_V2X_PT_LV_METHOD_ID_E;
 
 /**
@@ -109,7 +111,8 @@ typedef enum {
     eDB_V2X_PT_LV_MSG_TYPE_BROADCAST           = 1,
     eDB_V2X_PT_LV_MSG_TYPE_UNICAST             = 2,
     eDB_V2X_PT_LV_MSG_TYPE_MULTICASST          = 3,
-    eDB_V2X_PT_LV_MSG_TYPE_GRAOUPCAST          = 4
+    eDB_V2X_PT_LV_MSG_TYPE_GRAOUPCAST          = 4,
+    eDB_V2X_PT_LV_MSG_TYPE_MAX
 } DB_V2X_PT_LV_MSG_TYPE_E;
 
 /**
@@ -117,9 +120,10 @@ typedef enum {
 * @param DB_V2X_PT_LV_VEHICLE_TYPE_E
 */
 typedef enum {
-    eDB_V2X_PT_LV_VEHICLE_TYPE_UNKNOWN        = 0,
-    eDB_V2X_PT_LV_VEHICLE_TYPE_LEAD           = 1,
-    eDB_V2X_PT_LV_VEHICLE_TYPE_FOLLOW         = 2
+    eDB_V2X_PT_LV_VEHICLE_TYPE_UNKNOWN         = 0,
+    eDB_V2X_PT_LV_VEHICLE_TYPE_LEAD            = 1,
+    eDB_V2X_PT_LV_VEHICLE_TYPE_FOLLOW          = 2,
+    eDB_V2X_PT_LV_VEHICLE_TYPE_MAX
 } DB_V2X_PT_LV_VEHICLE_TYPE_E;
 
 /**
@@ -127,11 +131,12 @@ typedef enum {
 * @param DB_V2X_PT_LV_MSG_ID_E
 */
 typedef enum {
-    eDB_V2X_PT_LV_MSG_ID_INVALID              = 0,
-    eDB_V2X_PT_LV_MSG_ID_REQ_L2F              = 1,
-    eDB_V2X_PT_LV_MSG_ID_REQ_F2F              = 2,
-    eDB_V2X_PT_LV_MSG_ID_RES_F2L              = 3,
-    eDB_V2X_PT_LV_MSG_ID_RES_F2F              = 4
+    eDB_V2X_PT_LV_MSG_ID_INVALID               = 0,
+    eDB_V2X_PT_LV_MSG_ID_REQ_L2F               = 1,
+    eDB_V2X_PT_LV_MSG_ID_REQ_F2F               = 2,
+    eDB_V2X_PT_LV_MSG_ID_RES_F2L               = 3,
+    eDB_V2X_PT_LV_MSG_ID_RES_F2F               = 4,
+    eDB_V2X_PT_LV_MSG_ID_MAX
 } DB_V2X_PT_LV_MSG_ID_E;
 
 /**
@@ -142,7 +147,8 @@ typedef enum {
     eDB_V2X_PT_LV_DRIVE_STATUS_STAY_LANE       = 0,
     eDB_V2X_PT_LV_DRIVE_STATUS_CHANGE_LANE     = 1,
     eDB_V2X_PT_LV_DRIVE_STATUS_STOP            = 2,
-    eDB_V2X_PT_LV_DRIVE_STATUS_SLOW            = 3
+    eDB_V2X_PT_LV_DRIVE_STATUS_SLOW            = 3,
+    eDB_V2X_PT_LV_DRIVE_STATUS_MAX
 } DB_V2X_PT_LV_DRIVE_STATUS_E;
 
 /**
@@ -151,7 +157,8 @@ typedef enum {
 */
 typedef enum {
     eDB_V2X_PT_LV_CHANGE_NO                    = 0,
-    eDB_V2X_PT_LV_CHANGE                       = 1
+    eDB_V2X_PT_LV_CHANGE                       = 1,
+    eDB_V2X_PT_LV_CHANGE_MAX
 } DB_V2X_PT_LV_CHANGE_CODE_E;
 
 /**
@@ -159,8 +166,9 @@ typedef enum {
 * @param DB_V2X_PT_LV_PLAN_LANE_E
 */
 typedef enum {
-    eDB_V2X_PT_LV_LANE_STAY                    = 0,
-    eDB_V2X_PT_LV_LANE_CHANGE                  = 1
+    eDB_V2X_PT_LV_LANE_PLAN_STAY               = 0,
+    eDB_V2X_PT_LV_LANE_PLAN_CHANGE             = 1,
+    eDB_V2X_PT_LV_LANE_PLAN_MAX
 } DB_V2X_PT_LV_LANE_PLAN_E;
 
 /**
@@ -169,9 +177,10 @@ typedef enum {
 */
 typedef enum {
     eDB_V2X_PT_LV_GEN_LANE                     = 0,
-    eDB_V2X_PT_LV_ENTER_CROSSWAY               = 1,
-    eDB_V2X_PT_LV_INSIDE_CROSSWAY              = 2,
-    eDB_V2X_PT_LV_OUT_CROSSWAY                 = 3
+    eDB_V2X_PT_LV_CROSSWAY_ENTER               = 1,
+    eDB_V2X_PT_LV_CROSSWAY_INSIDE              = 2,
+    eDB_V2X_PT_LV_CROSSWAY_OUT                 = 3,
+    eDB_V2X_PT_LV_CROSSWAY_MAX
 } DB_V2X_PT_LV_CROSSWAY_E;
 
 /**
@@ -179,12 +188,13 @@ typedef enum {
 * @param DB_V2X_PT_LV_LANE_MANEUVER_E
 */
 typedef enum {
-    eDB_V2X_PT_LV_STRAIGHT_LANE                = 0,
-    eDB_V2X_PT_LV_LEFT_LANE                    = 1,
-    eDB_V2X_PT_LV_RIGHT_LANE                   = 2,
-    eDB_V2X_PT_LV_UTURN_LANE                   = 3,
-    eDB_V2X_PT_LV_STRAIGHT_LEFT_LANE           = 4,
-    eDB_V2X_PT_LV_STRAIGHT_RIGHT_LANE          = 5
+    eDB_V2X_PT_LV_LANE_STRAIGHT                = 0,
+    eDB_V2X_PT_LV_LANE_LEFT                    = 1,
+    eDB_V2X_PT_LV_LANE_RIGHT                   = 2,
+    eDB_V2X_PT_LV_LANE_UTURN                   = 3,
+    eDB_V2X_PT_LV_LANE_STRAIGHT_LEFT           = 4,
+    eDB_V2X_PT_LV_LANE_STRAIGHT_RIGHT          = 5,
+    eDB_V2X_PT_LV_LANE_MANEUVER_MAX
 } DB_V2X_PT_LV_LANE_MANEUVER_E;
 
 /**
@@ -206,7 +216,8 @@ typedef enum {
     eDB_V2X_PT_FV_SVC_ID_PLATOONING            = 1,
     eDB_V2X_PT_FV_SVC_ID_SENSOR_SHARING        = 2,
     eDB_V2X_PT_FV_SVC_ID_REMOTE_DRIVING        = 3,
-    eDB_V2X_PT_FV_SVC_ID_ADVANCED_DRIVING      = 4
+    eDB_V2X_PT_FV_SVC_ID_ADVANCED_DRIVING      = 4,
+    eDB_V2X_PT_FV_SVC_ID_MAX
 } DB_V2X_PT_FV_SVC_ID_E;
 
 /**
@@ -227,7 +238,8 @@ typedef enum {
     eDB_V2X_PT_FV_METHOD_ID_P2N                = 10,
     eDB_V2X_PT_FV_METHOD_ID_N2V                = 11,
     eDB_V2X_PT_FV_METHOD_ID_N2I                = 12,
-    eDB_V2X_PT_FV_METHOD_ID_N2P                = 13
+    eDB_V2X_PT_FV_METHOD_ID_N2P                = 13,
+    eDB_V2X_PT_FV_METHOD_ID_MAX
 } DB_V2X_PT_FV_METHOD_ID_E;
 
 /**
@@ -239,7 +251,8 @@ typedef enum {
     eDB_V2X_PT_FV_MSG_TYPE_BROADCAST           = 1,
     eDB_V2X_PT_FV_MSG_TYPE_UNICAST             = 2,
     eDB_V2X_PT_FV_MSG_TYPE_MULTICASST          = 3,
-    eDB_V2X_PT_FV_MSG_TYPE_GRAOUPCAST          = 4
+    eDB_V2X_PT_FV_MSG_TYPE_GRAOUPCAST          = 4,
+    eDB_V2X_PT_FV_MSG_TYPE_MAX
 } DB_V2X_PT_FV_MSG_TYPE_E;
 
 /**
@@ -249,7 +262,8 @@ typedef enum {
 typedef enum {
     eDB_V2X_PT_FV_VEHICLE_TYPE_UNKNOWN         = 0,
     eDB_V2X_PT_FV_VEHICLE_TYPE_LEAD            = 1,
-    eDB_V2X_PT_FV_VEHICLE_TYPE_FOLLOW          = 2
+    eDB_V2X_PT_FV_VEHICLE_TYPE_FOLLOW          = 2,
+    eDB_V2X_PT_FV_VEHICLE_TYPE_MAX
 } DB_V2X_PT_FV_VEHICLE_TYPE_E;
 
 /**
@@ -257,11 +271,12 @@ typedef enum {
 * @param DB_V2X_PT_FV_MSG_ID_E
 */
 typedef enum {
-    eDB_V2X_PT_FV_MSG_ID_INVALID              = 0,
-    eDB_V2X_PT_FV_MSG_ID_REQ_L2F              = 1,
-    eDB_V2X_PT_FV_MSG_ID_REQ_F2F              = 2,
-    eDB_V2X_PT_FV_MSG_ID_RES_F2L              = 3,
-    eDB_V2X_PT_FV_MSG_ID_RES_F2F              = 4
+    eDB_V2X_PT_FV_MSG_ID_INVALID               = 0,
+    eDB_V2X_PT_FV_MSG_ID_REQ_L2F               = 1,
+    eDB_V2X_PT_FV_MSG_ID_REQ_F2F               = 2,
+    eDB_V2X_PT_FV_MSG_ID_RES_F2L               = 3,
+    eDB_V2X_PT_FV_MSG_ID_RES_F2F               = 4,
+    eDB_V2X_PT_FV_MSG_ID_MAX
 } DB_V2X_PT_FV_MSG_ID_E;
 
 /**
@@ -272,7 +287,8 @@ typedef enum {
     eDB_V2X_PT_FV_DRIVE_STATUS_STAY_LANE       = 0,
     eDB_V2X_PT_FV_DRIVE_STATUS_CHANGE_LANE     = 1,
     eDB_V2X_PT_FV_DRIVE_STATUS_STOP            = 2,
-    eDB_V2X_PT_FV_DRIVE_STATUS_SLOW            = 3
+    eDB_V2X_PT_FV_DRIVE_STATUS_SLOW            = 3,
+    eDB_V2X_PT_FV_DRIVE_STATUS_MAX
 } DB_V2X_PT_FV_DRIVE_STATUS_E;
 
 /**
@@ -281,7 +297,8 @@ typedef enum {
 */
 typedef enum {
     eDB_V2X_PT_FV_CHANGE_NO                    = 0,
-    eDB_V2X_PT_FV_CHANGE                       = 1
+    eDB_V2X_PT_FV_CHANGE                       = 1,
+    eDB_V2X_PT_FV_CHANGE_MAX
 } DB_V2X_PT_FV_CHANGE_CODE_E;
 
 /**
@@ -289,8 +306,9 @@ typedef enum {
 * @param DB_V2X_PLATOONING_TYPE_E
 */
 typedef enum {
-    eDB_V2X_PT_TYPE_LV                         = 0,
-    eDB_V2X_PT_TYPE_FV                         = 1,
+    eDB_V2X_PT_TYPE_NONE                       = 0,
+    eDB_V2X_PT_TYPE_LV                         = 1,
+    eDB_V2X_PT_TYPE_FV                         = 2,
     eDB_V2X_PT_TYPE_MAX
 } DB_V2X_PLATOONING_TYPE_E;
 

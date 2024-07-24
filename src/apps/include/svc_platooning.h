@@ -123,6 +123,7 @@ typedef enum {
 */
 typedef struct SVC_PLATOONING_t {
     bool                                  bLogLevel;
+    DB_V2X_PLATOONING_T                   stDbV2xPt;
     SVC_PLATOONING_STATUS_E               eSvcPlatooningStatus;
     DB_MANAGER_WRITE_T                    stDbManagerWrite;
     MSG_MANAGER_TX_T                      stMsgManagerTx;
