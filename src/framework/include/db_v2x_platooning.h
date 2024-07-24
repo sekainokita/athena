@@ -285,6 +285,16 @@ typedef enum {
 } DB_V2X_PT_FV_CHANGE_CODE_E;
 
 /**
+* @details Change the path
+* @param DB_V2X_PLATOONING_TYPE_E
+*/
+typedef enum {
+    eDB_V2X_PT_TYPE_LV                         = 0,
+    eDB_V2X_PT_TYPE_FV                         = 1,
+    eDB_V2X_PT_TYPE_MAX
+} DB_V2X_PLATOONING_TYPE_E;
+
+/**
 * @details Provides path of GPS at intervals of 30 centimeters
 * @param DB_V2X_PT_FV_PATH_PLAN_T
 */
@@ -364,8 +374,10 @@ typedef struct DB_V2X_PLATOONING_FV_t {
 * @param ulReserved        reserved
 */
 typedef struct DB_V2X_PLATOONING_t {
-    DB_V2X_PLATOONING_LV_T           stV2XPtLv;
-    DB_V2X_PLATOONING_FV_T           stV2XPtFv;
+    DB_V2X_PLATOONING_TYPE_E         eDbV2XPtType;
+    DB_V2X_PLATOONING_LV_T           stV2xPtLv;
+    DB_V2X_PLATOONING_FV_T           stV2xPtFv;
+    uint16_t                         usV2xGroupId;
     uint32_t                         ulReserved;
 } DB_V2X_PLATOONING_T;
 
