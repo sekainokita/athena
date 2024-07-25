@@ -17,6 +17,18 @@ body { margin: 0; padding: 0; }
     const cKetiPangyoLatitude = 37.4064;
     const cKetiPangyolongitude = 127.1021;
 
+    const cPangyoRsuLatitude18 = 37.405254;
+    const cPangyoRsuLongitude18 = 127.103609;
+
+    const cPangyoRsuLatitude31 = 37.411751;
+    const cPangyoRsuLongitude31 = 127.095019;
+
+    const cPangyoRsuLatitude16 = 37.409221;
+    const cPangyoRsuLongitude16 = 127.099505;
+
+    const cPangyoRsuLatitude17 = 37.406536;
+    const cPangyoRsuLongitude17 = 127.100765;
+
 	mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
     const map = new mapboxgl.Map({
         container: 'map',
@@ -27,24 +39,20 @@ body { margin: 0; padding: 0; }
     });
 
     map.addControl(new mapboxgl.NavigationControl());
-    //map.scrollZoom.disable();
 
     map.on('style.load', () => {
         map.setFog({}); // Set the default atmosphere style
     });
 
     map.on('load', () => {
-        // Load an image from an external URL.
         map.loadImage(
             'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/keti_ci.png',
             (error, image) => {
                 if (error) throw error;
 
-                // Add the image to the map style.
-                map.addImage('cat', image);
+                map.addImage('keti-log', image);
 
-                // Add a data source containing one point feature.
-                map.addSource('point', {
+                map.addSource('keti_log_src', {
                     'type': 'geojson',
                     'data': {
                         'type': 'FeatureCollection',
@@ -53,26 +61,64 @@ body { margin: 0; padding: 0; }
                                 'type': 'Feature',
                                 'geometry': {
                                     'type': 'Point',
-                                    'coordinates': [127.1021, 37.4064]
+                                    'coordinates': [cKetiPangyolongitude, cKetiPangyoLatitude]
                                 }
                             }
                         ]
                     }
                 });
 
-                // Add a layer to use the image to represent the data.
                 map.addLayer({
-                    'id': 'points',
+                    'id': 'keti',
                     'type': 'symbol',
-                    'source': 'point', // reference the data source
+                    'source': 'keti_log_src',
                     'layout': {
-                        'icon-image': 'cat', // reference the image
+                        'icon-image': 'keti-log',
                         'icon-size': 0.50
                     }
                 });
             }
         );
+        
+        map.loadImage(
+            'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/5g-nr-v2x-rsu.png',
+            (error, image) => {
+                if (error) throw error;
+
+                map.addImage('rsu', image);
+
+                map.addSource('rsu-src', {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'FeatureCollection',
+                        'features': [
+                            {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [cPangyoRsuLongitude18, cPangyoRsuLatitude18]
+                                }
+                            }
+                        ]
+                    }
+                });
+
+                map.addLayer({
+                    'id': 'RSU18-ARO-3-03',
+                    'type': 'symbol',
+                    'source': 'rsu-src',
+                    'layout': {
+                        'icon-image': 'rsu',
+                        'icon-size': 0.15
+                    }
+                });
+            }
+        );
+        
     });
+
+</script>
+    
 </script>
 
 </body>
