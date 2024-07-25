@@ -14,20 +14,35 @@ body { margin: 0; padding: 0; }
 <body>
 <div id="map"></div>
 <script>
+    // KETI Pangyo
     const cKetiPangyoLatitude = 37.4064;
     const cKetiPangyolongitude = 127.1021;
 
-    const cPangyoRsuLatitude18 = 37.405254;
-    const cPangyoRsuLongitude18 = 127.103609;
-
-    const cPangyoRsuLatitude31 = 37.411751;
-    const cPangyoRsuLongitude31 = 127.095019;
-
+    // RSU Location
     const cPangyoRsuLatitude16 = 37.409221;
     const cPangyoRsuLongitude16 = 127.099505;
 
     const cPangyoRsuLatitude17 = 37.406536;
     const cPangyoRsuLongitude17 = 127.100765;
+
+    const cPangyoRsuLatitude18 = 37.405254;
+    const cPangyoRsuLongitude18 = 127.103609;
+
+    const cPangyoRsuLatitude5 = 37.410922;
+    const cPangyoRsuLongitude5 = 127.094732;
+
+    const cPangyoRsuLatitude31 = 37.411751;
+    const cPangyoRsuLongitude31 = 127.095019;
+
+    // Vehicle Default Location
+    const cVehicleLatitude0 = 37.4062;
+    const cVehicleLongitude0 = 127.1032;    
+
+    const cVehicleLatitude1 = 37.4058;
+    const cVehicleLongitude1 = 127.1035;      
+
+    const cVehicleHeading0 = 320;
+    const cVehicleHeading1 = 320;
 
 	mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
     const map = new mapboxgl.Map({
@@ -87,7 +102,7 @@ body { margin: 0; padding: 0; }
 
                 map.addImage('rsu', image);
 
-                map.addSource('rsu-src', {
+                map.addSource('rsu-src-18', {
                     'type': 'geojson',
                     'data': {
                         'type': 'FeatureCollection',
@@ -104,18 +119,190 @@ body { margin: 0; padding: 0; }
                 });
 
                 map.addLayer({
-                    'id': 'RSU18-ARO-3-03',
+                    'id': 'rsu18',
                     'type': 'symbol',
-                    'source': 'rsu-src',
+                    'source': 'rsu-src-18',
                     'layout': {
                         'icon-image': 'rsu',
                         'icon-size': 0.15
                     }
                 });
+
+                map.addSource('rsu-src-16', {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'FeatureCollection',
+                        'features': [
+                            {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [cPangyoRsuLongitude16, cPangyoRsuLatitude16]
+                                }
+                            }
+                        ]
+                    }
+                });
+
+                map.addLayer({
+                    'id': 'rsu16',
+                    'type': 'symbol',
+                    'source': 'rsu-src-16',
+                    'layout': {
+                        'icon-image': 'rsu',
+                        'icon-size': 0.15
+                    }
+                });
+
+                map.addSource('rsu-src-17', {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'FeatureCollection',
+                        'features': [
+                            {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [cPangyoRsuLongitude17, cPangyoRsuLatitude17]
+                                }
+                            }
+                        ]
+                    }
+                });
+
+                map.addLayer({
+                    'id': 'rsu17',
+                    'type': 'symbol',
+                    'source': 'rsu-src-17',
+                    'layout': {
+                        'icon-image': 'rsu',
+                        'icon-size': 0.15
+                    }
+                });
+                
             }
         );
-        
+
+        map.addSource('rsu-src-31', {
+            'type': 'geojson',
+            'data': {
+                'type': 'FeatureCollection',
+                'features': [
+                    {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': [cPangyoRsuLongitude31, cPangyoRsuLatitude31]
+                        }
+                    }
+                ]
+            }
+        });
+
+        map.addLayer({
+            'id': 'rsu31',
+            'type': 'symbol',
+            'source': 'rsu-src-31',
+            'layout': {
+                'icon-image': 'rsu',
+                'icon-size': 0.15
+            }
+        });
+
+        map.addSource('rsu-src-5', {
+            'type': 'geojson',
+            'data': {
+                'type': 'FeatureCollection',
+                'features': [
+                    {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': [cPangyoRsuLongitude5, cPangyoRsuLatitude5]
+                        }
+                    }
+                ]
+            }
+        });
+
+        map.addLayer({
+            'id': 'rsu5',
+            'type': 'symbol',
+            'source': 'rsu-src-5',
+            'layout': {
+                'icon-image': 'rsu',
+                'icon-size': 0.15
+            }
+        });
     });
+
+    map.loadImage(
+        'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/vehicle.png',
+        (error, image) => {
+            if (error) throw error;
+
+            map.addImage('vehicle', image);
+
+            map.addSource('vehicle_src_0', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': [
+                        {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [cVehicleLongitude0, cVehicleLatitude0]
+                            }
+                        }
+                    ]
+                }
+            });
+
+            map.addLayer({
+                'id': 'vehicle0',
+                'type': 'symbol',
+                'source': 'vehicle_src_0',
+                'layout': {
+                    'icon-image': 'vehicle',
+                    'icon-size': 0.03,
+                    'icon-rotate': cVehicleHeading0
+                }
+            });
+
+            map.addSource('vehicle_src_1', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': [
+                        {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [cVehicleLongitude1, cVehicleLatitude1]
+                            }
+                        }
+                    ]
+                }
+            });
+
+            map.addLayer({
+                'id': 'vehicle1',
+                'type': 'symbol',
+                'source': 'vehicle_src_1',
+                'layout': {
+                    'icon-image': 'vehicle',
+                    'icon-size': 0.03,
+                    'icon-rotate': cVehicleHeading1
+                }
+            });
+
+            
+        }
+    );
+    
+
+    
 
 </script>
     
