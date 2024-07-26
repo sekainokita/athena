@@ -393,10 +393,7 @@ typedef struct DB_V2X_PLATOONING_FV_t {
 */
 typedef struct DB_V2X_PLATOONING_t {
     DB_V2X_PLATOONING_TYPE_E         eDbV2XPtType;
-    DB_V2X_PLATOONING_LV_T           stV2xPtLv;
-    DB_V2X_PLATOONING_FV_T           stV2xPtFv;
     uint16_t                         usV2xGroupId;
-    uint32_t                         ulReserved;
 } DB_V2X_PLATOONING_T;
 
 /***************************** Function Protype ******************************/

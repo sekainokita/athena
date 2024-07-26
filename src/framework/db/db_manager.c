@@ -148,6 +148,34 @@ static int32_t P_DB_MANAGER_PrintStatus(DB_V2X_STATUS_TX_T *pstDbV2xStatusTx, DB
     return nRet;
 }
 
+static int32_t P_DB_MANAGER_PrintStatusPt(DB_V2X_PLATOONING_T *pstDbV2xPt)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
+
+    if(pstDbV2xPt == NULL)
+    {
+        PrintError("pstDbV2xPt is NULL!");
+        return nRet;
+    }
+
+    nRet = P_DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+    }
+    else
+    {
+        nRet = FRAMEWORK_OK;
+        if(stDbV2xStatus.unCurrentContCnt == MSG_MGR_MAX_CONT_CNT)
+        {
+            PrintDebug("eDbV2XPtType[%d], usV2xGroupId[%d]", pstDbV2xPt->eDbV2XPtType, pstDbV2xPt->usV2xGroupId);
+        }
+    }
+    return nRet;
+}
+
+
 static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB_V2X_STATUS_TX_T *pstDbV2xStatusTx, DB_V2X_STATUS_RX_T *pstDbV2xStatusRx)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -998,6 +1026,32 @@ static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
             fprintf(sh_pDbMgrTxMsg, "unTxVehicleHeading,");
             fprintf(sh_pDbMgrTxMsg, "unTotalPacketCrc32");
         }
+        else if(pstDbManager->eSvcType == DB_MANAGER_SVC_TYPE_PLATOONING)
+        {
+            /* V2X Status */
+            fprintf(sh_pDbMgrTxMsg, "ulTxTimeStampL1,");
+            fprintf(sh_pDbMgrTxMsg, "ulTxTimeStampL2,");
+            fprintf(sh_pDbMgrTxMsg, "ulTxTimeStampL3,");
+            fprintf(sh_pDbMgrTxMsg, "unRxTargetDeviceId,");
+            fprintf(sh_pDbMgrTxMsg, "usTxFreq,");
+            fprintf(sh_pDbMgrTxMsg, "ucTxPwr,");
+            fprintf(sh_pDbMgrTxMsg, "ucTxBw,");
+            fprintf(sh_pDbMgrTxMsg, "ucScs,");
+            fprintf(sh_pDbMgrTxMsg, "ucMcs,");
+            fprintf(sh_pDbMgrTxMsg, "usTxRatio,");
+            fprintf(sh_pDbMgrTxMsg, "nTxLatitude,");
+            fprintf(sh_pDbMgrTxMsg, "nTxLongitude,");
+            fprintf(sh_pDbMgrTxMsg, "nTxAttitude,");
+            fprintf(sh_pDbMgrTxMsg, "unSeqNum,");
+            fprintf(sh_pDbMgrTxMsg, "unContCnt,");
+            fprintf(sh_pDbMgrTxMsg, "unTxVehicleSpeed,");
+            fprintf(sh_pDbMgrTxMsg, "unTxVehicleHeading,");
+            /* PLATOONING */
+            fprintf(sh_pDbMgrTxMsg, "eDbV2XPtType,");
+            fprintf(sh_pDbMgrTxMsg, "usV2xGroupId,");
+            /* CRC */
+            fprintf(sh_pDbMgrTxMsg, "unTotalPacketCrc32");
+        }
         else if(pstDbManager->eSvcType == DB_MANAGER_SVC_TYPE_BASE)
         {
             fprintf(sh_pDbMgrRxMsg, "cPayload,");
@@ -1096,6 +1150,71 @@ static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
             fprintf(sh_pDbMgrRxMsg, "ulTotalErrCnt,");
             fprintf(sh_pDbMgrRxMsg, "unPdr(percent),");
             fprintf(sh_pDbMgrRxMsg, "unPer(percent)");
+        }
+        else if(pstDbManager->eSvcType == DB_MANAGER_SVC_TYPE_PLATOONING)
+        {
+            /* PT Tx */
+            fprintf(sh_pDbMgrRxMsg, "ulTxTimeStampL1,");
+            fprintf(sh_pDbMgrRxMsg, "ulTxTimeStampL2,");
+            fprintf(sh_pDbMgrRxMsg, "ulTxTimeStampL3,");
+            fprintf(sh_pDbMgrRxMsg, "unTxDeviceIdL1,");
+            fprintf(sh_pDbMgrRxMsg, "unTxDeviceIdL2,");
+            fprintf(sh_pDbMgrRxMsg, "unTxDeviceIdL3,");
+            fprintf(sh_pDbMgrRxMsg, "usTxSwVerL1,");
+            fprintf(sh_pDbMgrRxMsg, "usTxSwVerL2,");
+            fprintf(sh_pDbMgrRxMsg, "usTxSwVerL3,");
+            fprintf(sh_pDbMgrRxMsg, "usTxHwVerL1,");
+            fprintf(sh_pDbMgrRxMsg, "usTxHwVerL2,");
+            fprintf(sh_pDbMgrRxMsg, "usTxHwVerL3,");
+            fprintf(sh_pDbMgrRxMsg, "unRxTargetDeviceId,");
+            fprintf(sh_pDbMgrRxMsg, "usTxFreq,");
+            fprintf(sh_pDbMgrRxMsg, "ucTxPwr,");
+            fprintf(sh_pDbMgrRxMsg, "ucTxBw,");
+            fprintf(sh_pDbMgrRxMsg, "ucScs,");
+            fprintf(sh_pDbMgrRxMsg, "ucMcs,");
+            fprintf(sh_pDbMgrRxMsg, "usTxRatio,");
+            fprintf(sh_pDbMgrRxMsg, "nTxLatitude,");
+            fprintf(sh_pDbMgrRxMsg, "nTxLongitude,");
+            fprintf(sh_pDbMgrRxMsg, "nTxAttitude,");
+            fprintf(sh_pDbMgrRxMsg, "unSeqNum,");
+            fprintf(sh_pDbMgrRxMsg, "unContCnt,");
+            fprintf(sh_pDbMgrRxMsg, "unTxVehicleSpeed,");
+            fprintf(sh_pDbMgrRxMsg, "unTxVehicleHeading,");
+            fprintf(sh_pDbMgrRxMsg, "unTotalPacketCrc32,");
+
+            /* PT Rx */
+            fprintf(sh_pDbMgrRxMsg, "ulRxTimeStampL1,");
+            fprintf(sh_pDbMgrRxMsg, "ulRxTimeStampL2,");
+            fprintf(sh_pDbMgrRxMsg, "ulRxTimeStampL3,");
+            fprintf(sh_pDbMgrRxMsg, "ulLatencyL1(us),");
+            fprintf(sh_pDbMgrRxMsg, "ulLatencyL2(us),");
+            fprintf(sh_pDbMgrRxMsg, "ulLatencyL3(us),");
+            fprintf(sh_pDbMgrRxMsg, "unRxDeviceIdL1,");
+            fprintf(sh_pDbMgrRxMsg, "unRxDeviceIdL2,");
+            fprintf(sh_pDbMgrRxMsg, "unRxDeviceIdL3,");
+            fprintf(sh_pDbMgrRxMsg, "usRxSwVerL1,");
+            fprintf(sh_pDbMgrRxMsg, "usRxSwVerL2,");
+            fprintf(sh_pDbMgrRxMsg, "usRxSwVerL3,");
+            fprintf(sh_pDbMgrRxMsg, "usRxHwVerL1,");
+            fprintf(sh_pDbMgrRxMsg, "usRxHwVerL2,");
+            fprintf(sh_pDbMgrRxMsg, "usRxHwVerL3,");
+            fprintf(sh_pDbMgrRxMsg, "unRxVehicleSpeed,");
+            fprintf(sh_pDbMgrRxMsg, "unRxVehicleHeading,");
+            fprintf(sh_pDbMgrRxMsg, "unTotalCommDevCnt,");
+            fprintf(sh_pDbMgrRxMsg, "nRssi,");
+            fprintf(sh_pDbMgrRxMsg, "ucRcpi,");
+            fprintf(sh_pDbMgrRxMsg, "eRsvLevel,");
+            fprintf(sh_pDbMgrRxMsg, "usCommDistance,");
+            fprintf(sh_pDbMgrRxMsg, "nRxLatitude,");
+            fprintf(sh_pDbMgrRxMsg, "nRxLongitude,");
+            fprintf(sh_pDbMgrRxMsg, "nRxAttitude,");
+            fprintf(sh_pDbMgrRxMsg, "ucErrIndicator,");
+            fprintf(sh_pDbMgrRxMsg, "ulTotalPacketCnt,");
+            fprintf(sh_pDbMgrRxMsg, "ulTotalErrCnt,");
+            fprintf(sh_pDbMgrRxMsg, "unPdr(percent),");
+            fprintf(sh_pDbMgrRxMsg, "unPer(percent),");
+            fprintf(sh_pDbMgrRxMsg, "eDbV2XPtType,");
+            fprintf(sh_pDbMgrRxMsg, "usV2xGroupId");
         }
         else if(pstDbManager->eSvcType == DB_MANAGER_SVC_TYPE_BASE)
         {
@@ -1267,6 +1386,295 @@ static int32_t P_DB_MANAGER_WriteCsvPlatooningThroughput(DB_MANAGER_EVENT_MSG_T 
     return nRet;
 }
 
+static int32_t P_DB_MANAGER_WriteCsvPlatooningTx(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    char *pchPayload = NULL;
+    DB_V2X_STATUS_TX_T stDbV2xStatusTx;
+    DB_V2X_PLATOONING_T stDbV2XPt;
+    double dTemp;
+
+    if(pstEventMsg == NULL)
+    {
+        PrintError("pstEventMsg is NULL!");
+        return nRet;
+    }
+
+    memset(&stDbV2xStatusTx, 0, sizeof(DB_V2X_STATUS_TX_T));
+    memset(&stDbV2XPt, 0, sizeof(DB_V2X_PLATOONING_T));
+
+    pchPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
+    if(pchPayload == NULL)
+    {
+        PrintError("malloc() is failed! [NULL]");
+        return nRet;
+    }
+
+    memcpy(pchPayload, (char *)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
+
+    fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eDeviceType);
+    fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eTeleCommType);
+    fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->unDeviceId);
+    fprintf(sh_pDbMgrTxMsg, "%ld,", pstEventMsg->pstDbV2x->ulTimeStamp);
+    fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eServiceId);
+    fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eActionType);
+    fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eRegionId);
+    fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->ePayloadType);
+    fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->eCommId);
+    fprintf(sh_pDbMgrTxMsg, "%d.%d,", pstEventMsg->pstDbV2x->usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, pstEventMsg->pstDbV2x->usDbVer & CLI_DB_V2X_MINOR_MASK);
+    fprintf(sh_pDbMgrTxMsg, "0x%x,", pstEventMsg->pstDbV2x->usHwVer);
+    fprintf(sh_pDbMgrTxMsg, "0x%x,", pstEventMsg->pstDbV2x->usSwVer);
+    fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->ulPayloadLength);
+
+    memcpy(&stDbV2xStatusTx, pchPayload - sizeof(DB_V2X_PLATOONING_T), sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength - sizeof(DB_V2X_PLATOONING_T));
+    memcpy(&stDbV2XPt, pchPayload - sizeof(DB_V2X_STATUS_TX_T), sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength - sizeof(DB_V2X_STATUS_TX_T));
+
+    fprintf(sh_pDbMgrTxMsg, "%ld,", stDbV2xStatusTx.stDbV2xDevL1.ulTimeStamp);
+    fprintf(sh_pDbMgrTxMsg, "%ld,", stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp);
+    fprintf(sh_pDbMgrTxMsg, "%ld,", stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.unRxTargetDeviceId);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.usTxFreq);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.ucTxPwr);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.ucTxBw);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.ucScs);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.ucMcs);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.usTxRatio);
+    dTemp = (double)stDbV2xStatusTx.stTxPosition.nTxLatitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrTxMsg, "%lf,", dTemp);
+    dTemp = (double)stDbV2xStatusTx.stTxPosition.nTxLongitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrTxMsg, "%lf,", dTemp);
+    dTemp = (double)stDbV2xStatusTx.stTxPosition.nTxAttitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrTxMsg, "%lf,", dTemp);
+
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.unSeqNum);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.unContCnt);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.unTxVehicleSpeed);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.unTxVehicleHeading);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPt.eDbV2XPtType);
+    fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPt.usV2xGroupId);
+    fprintf(sh_pDbMgrTxMsg, "0x%x", pstEventMsg->pstDbManagerWrite->unCrc32);
+    fprintf(sh_pDbMgrTxMsg, "\r\n");
+
+    nRet = fflush(sh_pDbMgrTxMsg);
+    if (nRet < 0)
+    {
+        PrintError("fflush() is failed! [unRet:%d]", nRet);
+    }
+
+    if(pchPayload != NULL)
+    {
+        free(pchPayload);
+    }
+
+    if(pstEventMsg->pPayload != NULL)
+    {
+        if(s_bDbMgrLog == ON)
+        {
+            PrintDebug("free [%p] allocated at P_MSG_MANAGER_SendRxMsgToDbMgr()", pstEventMsg->pPayload);
+        }
+        free(pstEventMsg->pPayload);
+    }
+
+    return nRet;
+
+}
+
+static int32_t P_DB_MANAGER_WriteCsvPlatooningRx(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    char *pchPayload = NULL;
+    DB_V2X_STATUS_TX_T stDbV2xStatusTx;
+    DB_V2X_STATUS_RX_T stDbV2xStatusRx;
+    DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
+    DB_V2X_PLATOONING_T stDbV2XPt;
+    DI_T *pstDi;
+    float fTemp;
+    double dTemp;
+
+    if(pstEventMsg == NULL)
+    {
+        PrintError("pstEventMsg is NULL!");
+        return nRet;
+    }
+
+    nRet = P_DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+    }
+
+    memset(&stDbV2xStatusTx, 0, sizeof(DB_V2X_STATUS_TX_T));
+    memset(&stDbV2xStatusRx, 0, sizeof(DB_V2X_STATUS_RX_T));
+    memset(&stDbV2XPt, 0, sizeof(DB_V2X_PLATOONING_T));
+
+    pchPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
+    if(pchPayload == NULL)
+    {
+        PrintError("malloc() is failed! [NULL]");
+        return nRet;
+    }
+
+    memcpy(pchPayload, (char *)pstEventMsg->pPayload, pstEventMsg->pstDbV2x->ulPayloadLength);
+
+    fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eDeviceType);
+    fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eTeleCommType);
+    fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->unDeviceId);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", pstEventMsg->pstDbV2x->ulTimeStamp);
+    fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eServiceId);
+    fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eActionType);
+    fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eRegionId);
+    fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->ePayloadType);
+    fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->eCommId);
+    fprintf(sh_pDbMgrRxMsg, "%d.%d,", pstEventMsg->pstDbV2x->usDbVer >> CLI_DB_V2X_MAJOR_SHIFT, pstEventMsg->pstDbV2x->usDbVer & CLI_DB_V2X_MINOR_MASK);
+    fprintf(sh_pDbMgrRxMsg, "0x%x,", pstEventMsg->pstDbV2x->usHwVer);
+    fprintf(sh_pDbMgrRxMsg, "0x%x,", pstEventMsg->pstDbV2x->usSwVer);
+    fprintf(sh_pDbMgrRxMsg, "%d,", pstEventMsg->pstDbV2x->ulPayloadLength);
+
+    memcpy(&stDbV2xStatusTx, pchPayload - sizeof(DB_V2X_PLATOONING_T), sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength - sizeof(DB_V2X_PLATOONING_T));
+    memcpy(&stDbV2XPt, pchPayload - sizeof(DB_V2X_STATUS_TX_T), sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength - sizeof(DB_V2X_STATUS_TX_T));
+
+    nRet = P_DB_MANAGER_UpdateStatus(pstEventMsg, &stDbV2xStatusTx, &stDbV2xStatusRx);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_UpdateStatus() is failed! [unRet:%d]", nRet);
+    }
+
+    nRet = P_DB_MANAGER_PrintStatus(&stDbV2xStatusTx, &stDbV2xStatusRx);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_PrintStatus() is failed! [unRet:%d]", nRet);
+    }
+
+    nRet = P_DB_MANAGER_PrintStatusPt(&stDbV2XPt);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_PrintStatusPt() is failed! [unRet:%d]", nRet);
+    }
+
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusTx.stDbV2xDevL1.ulTimeStamp);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.stDbV2xDevL1.unDevId);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.stDbV2xDevL2.unDevId);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.stDbV2xDevL3.unDevId);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.stDbV2xDevL1.usSwVer);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.stDbV2xDevL2.usSwVer);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.stDbV2xDevL3.usSwVer);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.stDbV2xDevL1.usHwVer);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.stDbV2xDevL2.usHwVer);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.stDbV2xDevL3.usHwVer);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.unRxTargetDeviceId);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.usTxFreq);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.ucTxPwr);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.ucTxBw);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.ucScs);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.ucMcs);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.usTxRatio);
+
+    dTemp = (double)stDbV2xStatusTx.stTxPosition.nTxLatitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
+    dTemp = (double)stDbV2xStatusTx.stTxPosition.nTxLongitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
+    dTemp = (double)stDbV2xStatusTx.stTxPosition.nTxAttitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.unSeqNum);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.unContCnt);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.unTxVehicleSpeed);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusTx.unTxVehicleHeading);
+
+    fprintf(sh_pDbMgrRxMsg, "0x%x,", pstEventMsg->pstDbManagerWrite->unCrc32);
+
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.stDbV2xDevL1.ulTimeStamp);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.stDbV2xDevL2.ulTimeStamp);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.stDbV2xDevL3.ulTimeStamp);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.stDbV2xDevL1.ulLatency);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.stDbV2xDevL2.ulLatency);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.stDbV2xDevL3.ulLatency);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stDbV2xDevL1.unDevId);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stDbV2xDevL2.unDevId);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stDbV2xDevL3.unDevId);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stDbV2xDevL1.usSwVer);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stDbV2xDevL2.usSwVer);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stDbV2xDevL3.usSwVer);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stDbV2xDevL1.usHwVer);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stDbV2xDevL2.usHwVer);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.stDbV2xDevL3.usHwVer);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unRxVehicleSpeed);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unRxVehicleHeading);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.unTotalCommDevCnt);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.nRssi);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.ucRcpi);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.eRsvLevel);
+
+    pstDi = APP_GetDiInstance();
+    if(pstDi == NULL)
+    {
+        PrintError("pstDi is NULL!");
+    }
+
+    /* Set the GPS values */
+    nRet = DI_GPS_Get(&pstDi->stDiGps);
+    if (nRet != DI_OK)
+    {
+        PrintError("DI_GPS_Get() is failed! [nRet:%d]", nRet);
+    }
+    dTemp = (double)stDbV2xStatusRx.stRxPosition.unCommDistance / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
+    dTemp = (double)stDbV2xStatusRx.stRxPosition.nRxLatitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
+    dTemp = (double)stDbV2xStatusRx.stRxPosition.nRxLongitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
+    dTemp = (double)stDbV2xStatusRx.stRxPosition.nRxAttitude / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+    fprintf(sh_pDbMgrRxMsg, "%lf,", dTemp);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2xStatusRx.ucErrIndicator);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulTotalPacketCnt);
+    fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2xStatusRx.ulTotalErrCnt);
+    fTemp = (float)stDbV2xStatusRx.unPdr / 1000.0f;
+    fprintf(sh_pDbMgrRxMsg, "%.3f,", fTemp);
+    fTemp = (float)stDbV2xStatusRx.unPer / 1000.0f;
+    fprintf(sh_pDbMgrRxMsg, "%.3f,", fTemp);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPt.eDbV2XPtType);
+    fprintf(sh_pDbMgrRxMsg, "%d", stDbV2XPt.usV2xGroupId);
+
+    fprintf(sh_pDbMgrRxMsg, "\r\n");
+
+    nRet = P_DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+    }
+
+    /* Reset the err indicator */
+    stDbV2xStatus.stV2xStatusRx.ucErrIndicator = FALSE;
+    nRet = P_DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+    }
+
+    nRet = fflush(sh_pDbMgrRxMsg);
+    if (nRet < 0)
+    {
+        PrintError("fflush() is failed! [unRet:%d]", nRet);
+    }
+
+    if(pchPayload != NULL)
+    {
+        free(pchPayload);
+    }
+
+    if(pstEventMsg->pPayload != NULL)
+    {
+        if(s_bDbMgrLog == ON)
+        {
+            PrintDebug("free [%p] allocated at P_MSG_MANAGER_SendRxMsgToDbMgr()", pstEventMsg->pPayload);
+        }
+        free(pstEventMsg->pPayload);
+    }
+
+    return nRet;
+}
+
 static int32_t P_DB_MANAGER_WriteCsvPlatooning(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -1277,8 +1685,44 @@ static int32_t P_DB_MANAGER_WriteCsvPlatooning(DB_MANAGER_EVENT_MSG_T *pstEventM
         return nRet;
     }
 
-    UNUSED(pstEventMsg);
-    PrintTrace("TODO : DB_V2X_PAYLOAD_TYPE_PLATOONING");
+    switch(pstEventMsg->pstDbManagerWrite->eCommMsgType)
+    {
+        case DB_MANAGER_COMM_MSG_TYPE_TX:
+        {
+            if (sh_pDbMgrTxMsg != NULL)
+            {
+                nRet = P_DB_MANAGER_WriteCsvPlatooningTx(pstEventMsg);
+                if(nRet != FRAMEWORK_OK)
+                {
+                    PrintError("P_DB_MANAGER_WriteCsvPlatooningTx() is failed! [unRet:%d]", nRet);
+                }
+            }
+            else
+            {
+                PrintError("sh_pDbMgrTxMsg is NULL!!, check whethter sh_pDbMgrTxMsg is opened before.");
+            }
+            break;
+        }
+        case DB_MANAGER_COMM_MSG_TYPE_RX:
+        {
+            if (sh_pDbMgrRxMsg != NULL)
+            {
+                nRet = P_DB_MANAGER_WriteCsvPlatooningRx(pstEventMsg);
+                if(nRet != FRAMEWORK_OK)
+                {
+                    PrintError("P_DB_MANAGER_WriteCsvPlatooningRx() is failed! [unRet:%d]", nRet);
+                }
+            }
+            else
+            {
+                PrintError("sh_pDbMgrRxMsg is NULL!!, check whethter sh_pDbMgrRxMsg is opened before.");
+            }
+            break;
+        }
+        default:
+            PrintError("unknown eCommMsgType [%d]", pstEventMsg->pstDbManagerWrite->eCommMsgType);
+            break;
+    }
     nRet = FRAMEWORK_OK;
 
     return nRet;

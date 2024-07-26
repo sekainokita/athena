@@ -163,7 +163,7 @@ int32_t P_SVC_PLATOONING_SetDefaultSettings(SVC_PLATOONING_T *pstSvcPlatooning)
     pstSvcPlatooning->stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
     pstSvcPlatooning->stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
     pstSvcPlatooning->stDbV2x.eRegionId = DB_V2X_REGION_ID_SEONGNAM;
-    pstSvcPlatooning->stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_V2X_STATUS;
+    pstSvcPlatooning->stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_PLATOONING;
     pstSvcPlatooning->stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
     pstSvcPlatooning->stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
     pstSvcPlatooning->stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
@@ -323,7 +323,7 @@ static void *P_SVC_PLATOONING_TaskTx(void *arg)
     {
         if(s_stSvcPlatooning.eSvcPlatooningStatus == SVC_PLATOONING_STATUS_START)
         {
-            s_stSvcPlatooning.stDbV2x.ulPayloadLength = sizeof(s_stSvcPlatooning.stDbV2xStatusTx);
+            s_stSvcPlatooning.stDbV2x.ulPayloadLength = sizeof(s_stSvcPlatooning.stDbV2xStatusTx) + sizeof(s_stSvcPlatooning.stDbV2xPt);
 
             pchPayload = (char*)malloc(sizeof(char)*s_stSvcPlatooning.stDbV2x.ulPayloadLength);
             if(pchPayload == NULL)
@@ -374,7 +374,8 @@ static void *P_SVC_PLATOONING_TaskTx(void *arg)
             s_stSvcPlatooning.stDbV2xStatusTx.stTxPosition.nTxLongitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLongitude * SVC_PLATOONING_GPS_VALUE_CONVERT);
             s_stSvcPlatooning.stDbV2xStatusTx.stTxPosition.nTxAttitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fAltitude * SVC_PLATOONING_GPS_VALUE_CONVERT);
 
-            memcpy(pchPayload, (char*)&s_stSvcPlatooning.stDbV2xStatusTx, sizeof(char)*s_stSvcPlatooning.stDbV2x.ulPayloadLength);
+            memcpy(pchPayload, (char*)&s_stSvcPlatooning.stDbV2xStatusTx, sizeof(s_stSvcPlatooning.stDbV2xStatusTx));
+            memcpy(pchPayload + sizeof(s_stSvcPlatooning.stDbV2xStatusTx), (char*)&s_stSvcPlatooning.stDbV2xPt, sizeof(s_stSvcPlatooning.stDbV2xPt));
 
             if(s_bFirstMsg == TRUE)
             {
@@ -688,7 +689,7 @@ void SVC_PLATOONING_ShowSettings(SVC_PLATOONING_T *pstSvcPlatooning)
     }
     else
     {
-        PrintDebug(" eDbV2XPtType [none]");
+        PrintDebug(" eDbV2XPtType [none]");
     }
     PrintDebug(" eDeviceType[%d]", pstSvcPlatooning->stDbV2x.eDeviceType);
     PrintDebug(" eTeleCommType[%d]", pstSvcPlatooning->stDbV2x.eTeleCommType);
@@ -830,7 +831,7 @@ int32_t SVC_PLATOONING_Open(SVC_PLATOONING_T *pstSvcPlatooning)
     }
 
     pstDbManager->eFileType = pstSvcPlatooning->stDbManagerWrite.eFileType;
-    pstDbManager->eSvcType = DB_MANAGER_SVC_TYPE_V2X_STATUS;
+    pstDbManager->eSvcType = DB_MANAGER_SVC_TYPE_PLATOONING;
 
     nFrameWorkRet = DB_MANAGER_Open(pstDbManager);
     if (nFrameWorkRet != FRAMEWORK_OK)
