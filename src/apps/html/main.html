@@ -268,7 +268,7 @@ body { margin: 0; padding: 0; }
                 'layout': {
                     'icon-image': 'vehicle',
                     'icon-size': 0.03,
-                    'icon-rotate': vehicleHeading0
+                    'icon-rotate': ['get', 'heading']
                 }
             });
     
@@ -296,7 +296,7 @@ body { margin: 0; padding: 0; }
                 'layout': {
                     'icon-image': 'vehicle',
                     'icon-size': 0.03,
-                    'icon-rotate': vehicleHeading1
+                    'icon-rotate': ['get', 'heading']
                 }
             });
     
@@ -342,12 +342,12 @@ body { margin: 0; padding: 0; }
                                     const heading1 = parseFloat(row['unTxVehicleHeading']);
                                     
                                     if (!isNaN(latitude0) && !isNaN(longitude0)) {
-                                        //console.log(`Vehicle 0 - Row ${currentRowIndex + 1}, Latitude: ${latitude0}, Longitude: ${longitude0}, Heading: ${heading0}`);
+                                        console.log(`Vehicle 0 - Row ${currentRowIndex + 1}, Latitude: ${latitude0}, Longitude: ${longitude0}, Heading: ${heading0}`);
                                         updateVehiclePosition(0, [longitude0, latitude0], heading0);
                                     }
     
                                     if (!isNaN(latitude1) && !isNaN(longitude1)) {
-                                        //console.log(`Vehicle 1 - Row ${currentRowIndex + 1}, Latitude: ${latitude1}, Longitude: ${longitude1}, Heading: ${heading1}`);
+                                        console.log(`Vehicle 1 - Row ${currentRowIndex + 1}, Latitude: ${latitude1}, Longitude: ${longitude1}, Heading: ${heading1}`);
                                         updateVehiclePosition(1, [longitude1, latitude1], heading1);
                                     }
     
