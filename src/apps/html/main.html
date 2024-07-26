@@ -6,6 +6,7 @@
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 <style>
 body { margin: 0; padding: 0; }
 #map { position: absolute; top: 0; bottom: 0; width: 100%; }
@@ -35,14 +36,14 @@ body { margin: 0; padding: 0; }
     const cPangyoRsuLongitude31 = 127.095019;
 
     // Vehicle Default Location
-    const cVehicleLatitude0 = 37.4062;
-    const cVehicleLongitude0 = 127.1032;    
+    var vehicleLatitude0 = 37.4062;
+    var vehicleLongitude0 = 127.1032;    
 
-    const cVehicleLatitude1 = 37.4058;
-    const cVehicleLongitude1 = 127.1035;      
+    var vehicleLatitude1 = 37.4058;
+    var vehicleLongitude1 = 127.1035;      
 
-    const cVehicleHeading0 = 320;
-    const cVehicleHeading1 = 320;
+    var vehicleHeading0 = 320;
+    var vehicleHeading1 = 320;
 
 	mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
     const map = new mapboxgl.Map({
@@ -240,9 +241,10 @@ body { margin: 0; padding: 0; }
         'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/vehicle.png',
         (error, image) => {
             if (error) throw error;
-
+    
             map.addImage('vehicle', image);
-
+    
+            // 첫 번째 차량 소스 및 레이어 추가
             map.addSource('vehicle_src_0', {
                 'type': 'geojson',
                 'data': {
@@ -252,13 +254,13 @@ body { margin: 0; padding: 0; }
                             'type': 'Feature',
                             'geometry': {
                                 'type': 'Point',
-                                'coordinates': [cVehicleLongitude0, cVehicleLatitude0]
+                                'coordinates': [vehicleLongitude0, vehicleLatitude0]
                             }
                         }
                     ]
                 }
             });
-
+    
             map.addLayer({
                 'id': 'vehicle0',
                 'type': 'symbol',
@@ -266,10 +268,11 @@ body { margin: 0; padding: 0; }
                 'layout': {
                     'icon-image': 'vehicle',
                     'icon-size': 0.03,
-                    'icon-rotate': cVehicleHeading0
+                    'icon-rotate': vehicleHeading0
                 }
             });
-
+    
+            // 두 번째 차량 소스 및 레이어 추가
             map.addSource('vehicle_src_1', {
                 'type': 'geojson',
                 'data': {
@@ -279,13 +282,13 @@ body { margin: 0; padding: 0; }
                             'type': 'Feature',
                             'geometry': {
                                 'type': 'Point',
-                                'coordinates': [cVehicleLongitude1, cVehicleLatitude1]
+                                'coordinates': [vehicleLongitude1, vehicleLatitude1]
                             }
                         }
                     ]
                 }
             });
-
+    
             map.addLayer({
                 'id': 'vehicle1',
                 'type': 'symbol',
@@ -293,11 +296,73 @@ body { margin: 0; padding: 0; }
                 'layout': {
                     'icon-image': 'vehicle',
                     'icon-size': 0.03,
-                    'icon-rotate': cVehicleHeading1
+                    'icon-rotate': vehicleHeading1
                 }
             });
+    
+            function updateVehiclePosition(vehicleId, coordinates, heading) {
+                map.getSource(`vehicle_src_${vehicleId}`).setData({
+                    'type': 'FeatureCollection',
+                    'features': [{
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': coordinates
+                        },
+                        'properties': {
+                            'heading': heading
+                        }
+                    }]
+                });
 
-            
+                if (vehicleId === 0) {
+                    map.setCenter(coordinates);
+                }
+            }
+    
+            // Function to fetch and parse CSV
+            let currentRowIndex = 1; // 시작 행 (2번째 행이므로 1)
+    
+            function fetchAndUpdate() {
+                fetch('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/qt/venus/db/rx_db_sample_1.csv')
+                    .then(response => response.text())
+                    .then(csvText => {
+                        Papa.parse(csvText, {
+                            header: true,
+                            skipEmptyLines: true,
+                            complete: function(results) {
+                                const rows = results.data;
+                                if (currentRowIndex < rows.length) {
+                                    const row = rows[currentRowIndex];
+                                    const latitude0 = parseFloat(row['nRxLatitude']);
+                                    const longitude0 = parseFloat(row['nRxLongitude']);
+                                    const heading0 = parseFloat(row['unRxVehicleHeading']);
+                                    const latitude1 = parseFloat(row['nTxLatitude']);
+                                    const longitude1 = parseFloat(row['nTxLongitude']);
+                                    const heading1 = parseFloat(row['unTxVehicleHeading']);
+                                    
+                                    if (!isNaN(latitude0) && !isNaN(longitude0)) {
+                                        //console.log(`Vehicle 0 - Row ${currentRowIndex + 1}, Latitude: ${latitude0}, Longitude: ${longitude0}, Heading: ${heading0}`);
+                                        updateVehiclePosition(0, [longitude0, latitude0], heading0);
+                                    }
+    
+                                    if (!isNaN(latitude1) && !isNaN(longitude1)) {
+                                        //console.log(`Vehicle 1 - Row ${currentRowIndex + 1}, Latitude: ${latitude1}, Longitude: ${longitude1}, Heading: ${heading1}`);
+                                        updateVehiclePosition(1, [longitude1, latitude1], heading1);
+                                    }
+    
+                                    currentRowIndex++;
+                                } else {
+                                    console.log('Waiting for new data...');
+                                }
+                            }
+                        });
+                    })
+                    .catch(error => console.error('Error fetching the CSV file:', error));
+            }
+    
+            fetchAndUpdate();
+            setInterval(fetchAndUpdate, 100);
         }
     );
     
