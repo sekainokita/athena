@@ -398,7 +398,9 @@
             let currentRowIndex = 1; // 시작 행 (2번째 행이므로 1)
     
             function fetchAndUpdate() {
-                fetch('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/qt/venus/db/rx_db_sample_1.csv')
+                //fetch('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/qt/venus/db/rx_db_sample_1.csv')
+                fetch('http://10.252.110.58/rx_db_sample_1.csv')
+                //fetch('http://localhost/rx_db_sample_1.csv')
                     .then(response => response.text())
                     .then(csvText => {
                         Papa.parse(csvText, {
@@ -430,7 +432,7 @@
 
                                     updateGraph1(ulTotalPacketCnt, unPdr); // x축을 ulTotalPacketCnt로 설정
                                     updateGraph2(ulTotalPacketCnt, ulLatencyL1 / 100); // x축을 ulTotalPacketCnt로 설정
-                                    console.log("ulTotalPacketCnt:", ulTotalPacketCnt);
+                                    //console.log("ulTotalPacketCnt:", ulTotalPacketCnt);
 
                                     currentRowIndex++;
                                 } else {
