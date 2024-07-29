@@ -7,13 +7,19 @@
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <style>
-body { margin: 0; padding: 0; }
-#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+#map { position: absolute; top: 0; bottom: 0; width: 75%; }
+#graphs { position: absolute; top: 0; bottom: 0; right: 0; width: 25%; display: flex; flex-direction: column; }
+.graph { flex: 1; }
 </style>
 </head>
 <body>
 <div id="map"></div>
+<div id="graphs">
+    <div id="graph1" class="graph"></div>
+    <div id="graph2" class="graph"></div>
+</div>
 <script>
     // KETI Pangyo
     const cKetiPangyoLatitude = 37.4064;
@@ -383,9 +389,9 @@ body { margin: 0; padding: 0; }
                     }
                 });
     
-                //if (vehicleId === 0) {
-//                    map.setCenter(coordinates);
-                //}
+                if (vehicleId === 0) {
+                    map.setCenter(coordinates);
+                }
             }
     
             // Function to fetch and parse CSV
@@ -408,17 +414,24 @@ body { margin: 0; padding: 0; }
                                     const latitude1 = parseFloat(row['nTxLatitude']);
                                     const longitude1 = parseFloat(row['nTxLongitude']);
                                     const heading1 = parseFloat(row['unTxVehicleHeading']);
-                                    
+                                    const unPdr = parseFloat(row['unPdr(percent)']);
+                                    const ulLatencyL1 = parseFloat(row['ulLatencyL1(us)']);
+                                    const ulTotalPacketCnt = parseFloat(row['ulTotalPacketCnt']); // 새로운 x축 데이터                                    
+
                                     if (!isNaN(latitude0) && !isNaN(longitude0)) {
-                                        console.log(`Vehicle 0 - Row ${currentRowIndex + 1}, Latitude: ${latitude0}, Longitude: ${longitude0}, Heading: ${heading0}`);
+                                        //console.log(`Vehicle 0 - Row ${currentRowIndex + 1}, Latitude: ${latitude0}, Longitude: ${longitude0}, Heading: ${heading0}`);
                                         updateVehiclePosition(0, [longitude0, latitude0], heading0);
                                     }
     
                                     if (!isNaN(latitude1) && !isNaN(longitude1)) {
-                                        console.log(`Vehicle 1 - Row ${currentRowIndex + 1}, Latitude: ${latitude1}, Longitude: ${longitude1}, Heading: ${heading1}`);
+                                        //console.log(`Vehicle 1 - Row ${currentRowIndex + 1}, Latitude: ${latitude1}, Longitude: ${longitude1}, Heading: ${heading1}`);
                                         updateVehiclePosition(1, [longitude1, latitude1], heading1);
                                     }
-    
+
+                                    updateGraph1(ulTotalPacketCnt, unPdr); // x축을 ulTotalPacketCnt로 설정
+                                    updateGraph2(ulTotalPacketCnt, ulLatencyL1 / 100); // x축을 ulTotalPacketCnt로 설정
+                                    console.log("ulTotalPacketCnt:", ulTotalPacketCnt);
+
                                     currentRowIndex++;
                                 } else {
                                     console.log('Waiting for new data...');
@@ -428,14 +441,67 @@ body { margin: 0; padding: 0; }
                     })
                     .catch(error => console.error('Error fetching the CSV file:', error));
             }
-    
+
             fetchAndUpdate();
             setInterval(fetchAndUpdate, 100);
+
+            function updateGraph1(xValue, unPdrValue) {
+                Plotly.extendTraces('graph1', {
+                    x: [[xValue]],
+                    y: [[unPdrValue]]
+                }, [0]);
+            
+                Plotly.relayout('graph1', {
+                    yaxis: { range: [0, 100], title: 'unPdr (%)' },
+                    xaxis: { title: 'ulTotalPacketCnt' } // x축 레이블 변경
+                });
+            }
+            
+            Plotly.newPlot('graph1', [{
+                x: [],
+                y: [],
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: 'green', width: 2 },
+                marker: { color: 'green', size: 6 }
+            }], {
+                margin: { t: 50, b: 40, l: 50, r: 30 },
+                yaxis: { range: [0, 100], title: 'PDR (%)', showgrid: true, zeroline: true },
+                xaxis: { title: 'ulTotalPacketCnt', showgrid: true }, // x축 레이블 변경
+                title: 'Real-time PDR Monitoring',
+                plot_bgcolor: '#f0f0f0',
+                paper_bgcolor: '#ffffff'
+            });
+            
+            function updateGraph2(xValue, ulLatencyValue) {
+                Plotly.extendTraces('graph2', {
+                    x: [[xValue]],
+                    y: [[ulLatencyValue]]
+                }, [0]);
+            
+                Plotly.relayout('graph2', {
+                    yaxis: { range: [0, 15], title: 'Latency (ms)' },
+                    xaxis: { title: 'ulTotalPacketCnt' } // x축 레이블 변경
+                });
+            }
+            
+            Plotly.newPlot('graph2', [{
+                x: [],
+                y: [],
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: 'blue', width: 2 },
+                marker: { color: 'blue', size: 6 }
+            }], {
+                margin: { t: 50, b: 40, l: 50, r: 30 },
+                yaxis: { range: [0, 15], title: 'Modem Latency (Air to Air)', showgrid: true, zeroline: true },
+                xaxis: { title: 'ulTotalPacketCnt', showgrid: true }, // x축 레이블 변경
+                title: 'Real-time Latency Monitoring',
+                plot_bgcolor: '#f0f0f0',
+                paper_bgcolor: '#ffffff'
+            });
         }
     );
-    
-
-    
 
 </script>
     
