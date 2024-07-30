@@ -285,6 +285,8 @@
         });
     });
 
+
+
     map.loadImage(
         'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/vehicle.png',
         (error, image) => {
@@ -446,6 +448,29 @@
                 }
             }
 
+            function animateVehiclePosition(vehicleId, startCoords, endCoords, heading) {
+                let startTime = null;
+                const duration = 300; // 100ms duration for the animation
+
+                function animate(timestamp) {
+                    if (!startTime) startTime = timestamp;
+                    const elapsed = timestamp - startTime;
+                    const t = Math.min(elapsed / duration, 1); // Normalize time
+
+                    const interpolatedCoords = [
+                        startCoords[0] + (endCoords[0] - startCoords[0]) * t,
+                        startCoords[1] + (endCoords[1] - startCoords[1]) * t
+                    ];
+
+                    updateVehiclePosition(vehicleId, interpolatedCoords, heading);
+
+                    if (t < 1) {
+                        requestAnimationFrame(animate);
+                    }
+                }
+                requestAnimationFrame(animate);
+            }
+
             function fetchAndUpdate() {
                 const latitude0 = parseFloat(s_nRxLatitude);
                 const longitude0 = parseFloat(s_nRxLongitude);
@@ -453,27 +478,21 @@
                 const latitude1 = parseFloat(s_nTxLatitude);
                 const longitude1 = parseFloat(s_nTxLongitude);
                 const heading1 = parseFloat(s_unTxVehicleHeading);
-                const unPdr = parseFloat(s_unPdr);
-                const ulLatencyL1 = parseFloat(s_ulLatencyL1);
-                const ulTotalPacketCnt = parseFloat(s_ulTotalPacketCnt);
-
-                console.log(`s_unPdr: ${s_unPdr}`);
-                console.log(`s_ulLatencyL1: ${s_ulLatencyL1}`);
-                console.log(`s_ulTotalPacketCnt: ${s_ulTotalPacketCnt}`);
 
                 if (!isNaN(latitude0) && !isNaN(longitude0)) {
-                    updateVehiclePosition(0, [longitude0, latitude0], heading0);
+                    animateVehiclePosition(0, [vehicleLongitude0, vehicleLatitude0], [longitude0, latitude0], heading0);
                 }
 
                 if (!isNaN(latitude1) && !isNaN(longitude1)) {
-                    updateVehiclePosition(1, [longitude1, latitude1], heading1);
+                    animateVehiclePosition(1, [vehicleLongitude1, vehicleLatitude1], [longitude1, latitude1], heading1);
                 }
             }
 
             fetchAndUpdate();
-            setInterval(fetchAndUpdate, 100);
+            setInterval(fetchAndUpdate, 100); // 100ms 주기로 호출
         }
     );
+
 
     function fetchAndUpdateGraph() {
         const latitude0 = parseFloat(s_nRxLatitude);
@@ -486,9 +505,7 @@
         const ulLatencyL1 = parseFloat(s_ulLatencyL1);
         const ulTotalPacketCnt = parseFloat(s_ulTotalPacketCnt);
 
-        console.log(`s_unPdr: ${s_unPdr}`);
-        console.log(`s_ulLatencyL1: ${s_ulLatencyL1}`);
-        console.log(`s_ulTotalPacketCnt: ${s_ulTotalPacketCnt}`);
+        //console.log(`s_unPdr: ${s_unPdr}`);
 
         if (!isNaN(unPdr) && !isNaN(ulTotalPacketCnt)) {
             updateGraph1(ulTotalPacketCnt, unPdr);

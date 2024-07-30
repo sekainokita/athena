@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,9 +7,11 @@
 struct per_session_data {
 };
 
-static FILE *s_file = NULL; // 파일 포인터 선언
-static long last_pos = 0; // 파일에서 마지막으로 읽은 위치
-static char last_line[1024] = ""; // 마지막으로 읽은 라인 저장
+//#define USE_TAIL_READING
+
+static FILE *s_file = NULL; // File pointer declaration
+static long last_pos = 0;   // Last read position in the file
+static char last_line[1024] = ""; // Last read line storage
 
 // Callback function for WebSocket server messages
 int callback(struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len) {
@@ -24,18 +25,28 @@ int callback(struct lws *wsi, enum lws_callback_reasons reason, void *user, void
                 perror("Failed to open file");
                 return -1;
             }
-            fseek(s_file, 0, SEEK_END); // 파일 끝으로 이동
-            last_pos = ftell(s_file); // 마지막 위치 저장
-            printf("Initial file position: %ld\n", last_pos); // 초기 파일 위치 출력
+
+#if defined(USE_TAIL_READING)
+            // If USE_TAIL_READING is defined, read from the end of the file
+            fseek(s_file, 0, SEEK_END); // Move to end of the file
+            last_pos = ftell(s_file);   // Store last position
+            printf("Initial file position: %ld\n", last_pos); // Print initial position
+
+#else
+            // Otherwise, start from the beginning of the file
+            fseek(s_file, 0, SEEK_SET); // Move to the beginning of the file
+#endif
 
             lws_callback_on_writable(wsi);
             break;
+
         case LWS_CALLBACK_SERVER_WRITEABLE: // Handle send data event
-            // 파일의 끝에서부터 역방향으로 탐색하여 마지막 줄의 시작을 찾음
+#if defined(USE_TAIL_READING)
+            // If USE_TAIL_READING is defined, read from the end of the file
             fseek(s_file, 0, SEEK_END);
             long file_size = ftell(s_file);
 
-            // 마지막 줄의 시작 부분 찾기
+            // Find the start of the last line
             for (long i = file_size - 2; i >= 0; i--) {
                 fseek(s_file, i, SEEK_SET);
                 if (fgetc(s_file) == '\n') {
@@ -44,20 +55,28 @@ int callback(struct lws *wsi, enum lws_callback_reasons reason, void *user, void
                 }
             }
 
-            // 마지막 줄의 데이터를 읽음
             fseek(s_file, last_pos, SEEK_SET);
             if (fgets(line, sizeof(line), s_file)) {
                 printf("Read last line: %s", line);
                 strcpy(last_line, line);
                 lws_write(wsi, (unsigned char *)line, strlen(line), LWS_WRITE_TEXT);
             } else if (strlen(last_line) > 0) {
-                // 새로운 데이터가 없을 경우, 마지막으로 읽은 데이터 전송
                 printf("Sending last line again: %s", last_line);
                 lws_write(wsi, (unsigned char *)last_line, strlen(last_line), LWS_WRITE_TEXT);
             }
 
-            // 100ms 후 다시 쓰기 가능 상태로 설정
-            usleep(1000000);
+#else
+            if (fgets(line, sizeof(line), s_file)) {
+                printf("Read line: %s", line);
+                lws_write(wsi, (unsigned char *)line, strlen(line), LWS_WRITE_TEXT);
+            } else {
+                // If end of file is reached, go back to the beginning
+                fseek(s_file, 0, SEEK_SET);
+            }
+#endif
+
+            //usleep(1000*1000); // Wait for 1 second
+            usleep(100*1000); // Wait for 100ms
             lws_callback_on_writable(wsi);
             break;
 
@@ -77,38 +96,33 @@ int callback(struct lws *wsi, enum lws_callback_reasons reason, void *user, void
 
 int main(int argc, char **argv)
 {
-    // Create the WebSocket protocol
     static struct lws_protocols protocols[] =
     {
         {
-            "demo-protocol", // Protocol name, should match the WebSocket protocol in the frontend code
-            callback, // Callback function pointer
-            sizeof(struct per_session_data), // Size of data for each session (connection)
-            0, // No additional protocol parameters
+            "demo-protocol",
+            callback,
+            sizeof(struct per_session_data),
+            0,
             NULL, NULL, NULL
         },
-        { NULL, NULL, 0, 0 } // Protocol list ends with NULL
+        { NULL, NULL, 0, 0 }
     };
 
-    // Create the WebSocket context
     struct lws_context_creation_info info = {
-        .port = 3001, // Listening port number
-        .protocols = protocols // Protocol list
+        .port = 3001,
+        .protocols = protocols
     };
     struct lws_context *context = lws_create_context(&info);
 
-    // Check if WebSocket context creation was successful
     if (!context) {
         printf("Failed to create WebSocket context.\n");
         return -1;
     }
 
-    // Enter the loop and wait for WebSocket connections
     while (1) {
         lws_service(context, 50);
     }
 
-    // Clean up and close the WebSocket context
     lws_context_destroy(context);
 
     return 0;
