@@ -15,3 +15,4 @@ build/
 objs/
 build/Desktop_Qt_6_7_0-Debug/
 venus.pro.user*
+websocket_server
