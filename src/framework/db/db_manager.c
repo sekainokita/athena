@@ -1426,8 +1426,8 @@ static int32_t P_DB_MANAGER_WriteCsvPlatooningTx(DB_MANAGER_EVENT_MSG_T *pstEven
     fprintf(sh_pDbMgrTxMsg, "0x%x,", pstEventMsg->pstDbV2x->usSwVer);
     fprintf(sh_pDbMgrTxMsg, "%d,", pstEventMsg->pstDbV2x->ulPayloadLength);
 
-    memcpy(&stDbV2xStatusTx, pchPayload - sizeof(DB_V2X_PLATOONING_T), sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength - sizeof(DB_V2X_PLATOONING_T));
-    memcpy(&stDbV2XPt, pchPayload - sizeof(DB_V2X_STATUS_TX_T), sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength - sizeof(DB_V2X_STATUS_TX_T));
+    memcpy(&stDbV2xStatusTx, pchPayload, sizeof(DB_V2X_STATUS_TX_T));
+    memcpy(&stDbV2XPt, pchPayload + sizeof(DB_V2X_STATUS_TX_T), sizeof(DB_V2X_PLATOONING_T));
 
     fprintf(sh_pDbMgrTxMsg, "%ld,", stDbV2xStatusTx.stDbV2xDevL1.ulTimeStamp);
     fprintf(sh_pDbMgrTxMsg, "%ld,", stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp);
