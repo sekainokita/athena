@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <libwebsockets.h>
 
 // Structure to store data for each WebSocket session
@@ -15,8 +14,6 @@ static char last_line[1024] = ""; // 마지막으로 읽은 라인 저장
 
 // Callback function for WebSocket server messages
 int callback(struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len) {
-    time_t t = time(NULL);
-    char timestamp[20];
     char line[1024];
 
     switch (reason) {
@@ -59,11 +56,8 @@ int callback(struct lws *wsi, enum lws_callback_reasons reason, void *user, void
                 lws_write(wsi, (unsigned char *)last_line, strlen(last_line), LWS_WRITE_TEXT);
             }
 
-            sprintf(timestamp, "%ld", t);
-
-            lws_write(wsi, timestamp, strlen(timestamp), LWS_WRITE_TEXT);
-
             // 100ms 후 다시 쓰기 가능 상태로 설정
+            usleep(100000);
             lws_callback_on_writable(wsi);
             break;
 
@@ -74,11 +68,8 @@ int callback(struct lws *wsi, enum lws_callback_reasons reason, void *user, void
             }
             break;
 
-        // Other events omitted
-
         default:
             break;
-        // Other events omitted
     }
 
     return 0;
@@ -86,7 +77,6 @@ int callback(struct lws *wsi, enum lws_callback_reasons reason, void *user, void
 
 int main(int argc, char **argv)
 {
-    printf("main======================\r\n");
     // Create the WebSocket protocol
     static struct lws_protocols protocols[] =
     {
