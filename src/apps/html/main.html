@@ -568,8 +568,8 @@
             let middleYValue = (80 + 100) / 2; // 중간 y값 (y축 범위에 따라 조정 가능)
 
             Plotly.relayout('graph1', {
-                yaxis: { range: [80, 100], title: 'unPdr (%)', dtick: 1 },
-                xaxis: { title: 'ulTotalPacketCnt' },
+                yaxis: { range: [80, 100], title: 'PDR (Packet Delivery Rate) (%)', dtick: 1 },
+                xaxis: { title: 'The Total Received Rx Packets' },
                 annotations: [
                     {
                         x: totalPacketCount,
@@ -627,7 +627,7 @@
             // 평균값 선과 텍스트 추가
             Plotly.relayout('graph2', {
                 yaxis: { range: [0, 15], title: 'Latency (ms)', dtick: 1 },
-                xaxis: { title: 'ulTotalPacketCnt' },
+                xaxis: { title: 'The Total Received Rx Packets' },
                 shapes: [
                     {
                         type: 'line',
