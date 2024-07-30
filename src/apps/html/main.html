@@ -11,7 +11,7 @@
 <style>
 #map { position: absolute; top: 0; bottom: 0; width: 75%; }
 #graphs { position: absolute; top: 0; bottom: 0; right: 0; width: 25%; display: flex; flex-direction: column; }
-.graph { flex: 1; position: relative; margin-top: 30px; } /* 그래프가 글자에 가리지 않도록 여백 추가 */
+.graph { flex: 1; position: relative; margin-top: 50px; } /* 그래프가 글자에 가리지 않도록 여백 추가 */
 #current-values {
     position: absolute;
     top: 0;
@@ -75,7 +75,7 @@
     // 전역 변수 선언
     let s_nRxLatitude, s_nRxLongitude, s_unRxVehicleHeading;
     let s_nTxLatitude, s_nTxLongitude, s_unTxVehicleHeading;
-    let s_unPdr, s_ulLatencyL1, s_ulTotalPacketCnt;
+    let s_unPdr, s_ulLatencyL1, s_ulTotalPacketCnt, s_unSeqNum;
 
 	mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
     const map = new mapboxgl.Map({
@@ -120,6 +120,7 @@
                 s_unPdr = data[68];
                 s_ulLatencyL1 = data[43];
                 s_ulTotalPacketCnt = data[66];
+                s_unSeqNum = data[35];
             }
 
             ws.onerror = (error) => {
@@ -517,7 +518,6 @@
         }
     );
 
-
     function fetchAndUpdateGraph() {
         const latitude0 = parseFloat(s_nRxLatitude);
         const longitude0 = parseFloat(s_nRxLongitude);
@@ -528,6 +528,7 @@
         const unPdr = parseFloat(s_unPdr);
         const ulLatencyL1 = parseFloat(s_ulLatencyL1);
         const ulTotalPacketCnt = parseFloat(s_ulTotalPacketCnt);
+        const unSeqNum = parseFloat(s_unSeqNum);
 
         //console.log(`s_unPdr: ${s_unPdr}`);
 
@@ -556,17 +557,44 @@
         }
 
         if (!isNaN(xValue[0]) && !isNaN(unPdrValue[0])) {
+            // 데이터 추가
             Plotly.extendTraces('graph1', {
                 x: [xValue],
                 y: [unPdrValue]
             }, [0]);
 
+            // TotalPacketCount 텍스트 추가
+            let totalPacketCount = xValue[0];
+            let middleYValue = (80 + 100) / 2; // 중간 y값 (y축 범위에 따라 조정 가능)
+
             Plotly.relayout('graph1', {
                 yaxis: { range: [80, 100], title: 'unPdr (%)', dtick: 1 },
-                xaxis: { title: 'ulTotalPacketCnt' }
+                xaxis: { title: 'ulTotalPacketCnt' },
+                annotations: [
+                    {
+                        x: totalPacketCount,
+                        y: middleYValue,
+                        xref: 'x',
+                        yref: 'y',
+                        text: `Received Total Tx Packets: ${s_unSeqNum}<br>Received Total Rx Packets: ${totalPacketCount}`,
+                        showarrow: false,
+                        font: {
+                            family: 'Arial, sans-serif',
+                            size: 16,
+                            color: 'black',
+                            weight: 'bold'
+                        },
+                        align: 'center',
+                        bordercolor: 'black',
+                        borderwidth: 1,
+                        borderpad: 4,
+                        bgcolor: '#ffffff',
+                        opacity: 0.8
+                    }
+                ]
             });
 
-            // Update the current value display
+            // 현재 PDR 값 업데이트
             document.getElementById('current-value-graph1').innerText = `PDR (Packet Delivery Rate): ${unPdrValue[0]}%`;
         } else {
             console.error('Invalid data points for Graph1.');
@@ -623,7 +651,7 @@
                         font: {
                             family: 'Arial, sans-serif',
                             size: 16,
-                            color: 'red'
+                            color: 'red',
                         },
                         align: 'right',
                         xanchor: 'left',
@@ -652,7 +680,7 @@
         line: { color: 'green', width: 2 },
         marker: { color: 'green', size: 6 }
     }], {
-        margin: { t: 50, b: 40, l: 50, r: 30 },
+        margin: { t: 30, b: 40, l: 50, r: 30 },
         yaxis: { range: [80, 100], title: 'PDR (%)', showgrid: true, zeroline: true, dtick: 1 },
         xaxis: { title: 'ulTotalPacketCnt', showgrid: true },
         title: 'Real-time PDR Monitoring',
@@ -668,7 +696,7 @@
         line: { color: 'blue', width: 2 },
         marker: { color: 'blue', size: 6 }
     }], {
-        margin: { t: 50, b: 40, l: 50, r: 30 },
+        margin: { t: 30, b: 40, l: 50, r: 30 },
         yaxis: { range: [0, 15], title: 'Modem Latency (Air to Air)', showgrid: true, zeroline: true, dtick: 1 },
         xaxis: { title: 'ulTotalPacketCnt', showgrid: true },
         title: 'Real-time Latency Monitoring',
