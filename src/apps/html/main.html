@@ -573,6 +573,8 @@
         }
     }
 
+    let latencyData = [];
+
     function updateGraph2(xValue, ulLatencyValue) {
         if (!Array.isArray(xValue)) {
             xValue = [xValue];
@@ -582,18 +584,61 @@
         }
 
         if (!isNaN(xValue[0]) && !isNaN(ulLatencyValue[0])) {
-            Plotly.extendTraces('graph2', {
-                x: [xValue],
-                y: [ulLatencyValue]
+            // 데이터 추가
+            latencyData.push({x: xValue[0], y: ulLatencyValue[0]});
+
+            // 그래프 업데이트
+            Plotly.update('graph2', {
+                x: [latencyData.map(point => point.x)],
+                y: [latencyData.map(point => point.y)]
             }, [0]);
 
+            // 평균값 계산
+            let avgLatency = latencyData.reduce((sum, point) => sum + point.y, 0) / latencyData.length;
+
+            // 평균값 선과 텍스트 추가
             Plotly.relayout('graph2', {
                 yaxis: { range: [0, 15], title: 'Latency (ms)', dtick: 1 },
-                xaxis: { title: 'ulTotalPacketCnt' }
+                xaxis: { title: 'ulTotalPacketCnt' },
+                shapes: [
+                    {
+                        type: 'line',
+                        x0: latencyData[0].x, x1: latencyData[latencyData.length - 1].x,
+                        y0: avgLatency, y1: avgLatency,
+                        line: {
+                            color: 'red',
+                            width: 2,
+                            dash: 'dash'
+                        }
+                    }
+                ],
+                annotations: [
+                    {
+                        x: latencyData[latencyData.length - 1].x,
+                        y: avgLatency,
+                        xref: 'x',
+                        yref: 'y',
+                        text: `Avg: ${avgLatency.toFixed(2)} ms`,
+                        showarrow: false,
+                        font: {
+                            family: 'Arial, sans-serif',
+                            size: 16,
+                            color: 'red'
+                        },
+                        align: 'right',
+                        xanchor: 'left',
+                        yanchor: 'bottom',
+                        bordercolor: 'red',
+                        borderwidth: 2,
+                        borderpad: 4,
+                        bgcolor: '#ffffff',
+                        opacity: 0.8
+                    }
+                ]
             });
 
-            // Update the current value display
-            document.getElementById('current-value-graph2').innerText = `Latency (Air to Air): ${ulLatencyValue[0]}ms`;
+            // 현재 값 및 평균값 표시
+            document.getElementById('current-value-graph2').innerText = `Latency (Air to Air): ${ulLatencyValue[0]}ms, Avg: ${avgLatency.toFixed(2)}ms`;
         } else {
             console.error('Invalid data points for Graph2.');
         }
