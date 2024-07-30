@@ -20,6 +20,7 @@
     <div id="graph1" class="graph"></div>
     <div id="graph2" class="graph"></div>
 </div>
+<button id="center-button" style="position: absolute; top: 10px; left: 10px; z-index: 1;">Center on Coordinates</button>
 <script>
     // KETI Pangyo
     const cKetiPangyoLatitude = 37.4064;
@@ -69,6 +70,11 @@
 
     map.on('style.load', () => {
         map.setFog({});
+
+        // 버튼 클릭 이벤트 핸들러 추가
+        document.getElementById('center-button').addEventListener('click', function() {
+            map.setCenter([s_nRxLongitude, s_nRxLatitude]);
+        });
     });
 
     window.onload = () => {
@@ -285,8 +291,6 @@
         });
     });
 
-
-
     map.loadImage(
         'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/vehicle.png',
         (error, image) => {
@@ -444,7 +448,7 @@
                 });
 
                 if (vehicleId === 0) {
-                    map.setCenter(coordinates);
+//                    map.setCenter(coordinates);
                 }
             }
 
