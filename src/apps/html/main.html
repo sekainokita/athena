@@ -11,7 +11,22 @@
 <style>
 #map { position: absolute; top: 0; bottom: 0; width: 75%; }
 #graphs { position: absolute; top: 0; bottom: 0; right: 0; width: 25%; display: flex; flex-direction: column; }
-.graph { flex: 1; }
+.graph { flex: 1; position: relative; margin-top: 30px; } /* 그래프가 글자에 가리지 않도록 여백 추가 */
+#current-values {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 5px;
+    border-radius: 5px;
+    z-index: 1;
+}
+#current-value-graph1 {
+    color: green; /* PDR 값은 초록색 */
+}
+#current-value-graph2 {
+    color: blue; /* Latency 값은 파란색 */
+}
 </style>
 </head>
 <body>
@@ -19,9 +34,14 @@
 <div id="graphs">
     <div id="graph1" class="graph"></div>
     <div id="graph2" class="graph"></div>
+    <div id="current-values">
+        <span id="current-value-graph1">PDR (Packet Delivery Rate): --</span>,
+        <span id="current-value-graph2">Latency (Air to Air): --</span>
+    </div>
 </div>
 <button id="center-button" style="position: absolute; top: 10px; left: 10px; z-index: 1;">Center on Coordinates</button>
 <script>
+
     // KETI Pangyo
     const cKetiPangyoLatitude = 37.4064;
     const cKetiPangyolongitude = 127.1021;
@@ -528,7 +548,6 @@
     setInterval(fetchAndUpdateGraph, 100);
 
     function updateGraph1(xValue, unPdrValue) {
-        // Ensure that the values are in array format and contain valid data
         if (!Array.isArray(xValue)) {
             xValue = [xValue];
         }
@@ -536,7 +555,6 @@
             unPdrValue = [unPdrValue];
         }
 
-        // Check if data points are valid numbers
         if (!isNaN(xValue[0]) && !isNaN(unPdrValue[0])) {
             Plotly.extendTraces('graph1', {
                 x: [xValue],
@@ -547,6 +565,9 @@
                 yaxis: { range: [80, 100], title: 'unPdr (%)', dtick: 1 },
                 xaxis: { title: 'ulTotalPacketCnt' }
             });
+
+            // Update the current value display
+            document.getElementById('current-value-graph1').innerText = `PDR (Packet Delivery Rate): ${unPdrValue[0]}%`;
         } else {
             console.error('Invalid data points for Graph1.');
         }
@@ -570,6 +591,9 @@
                 yaxis: { range: [0, 15], title: 'Latency (ms)', dtick: 1 },
                 xaxis: { title: 'ulTotalPacketCnt' }
             });
+
+            // Update the current value display
+            document.getElementById('current-value-graph2').innerText = `Latency (Air to Air): ${ulLatencyValue[0]}ms`;
         } else {
             console.error('Invalid data points for Graph2.');
         }
