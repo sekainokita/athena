@@ -10,6 +10,28 @@
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <style>
 #map { position: absolute; top: 0; bottom: 0; width: 75%; }
+#weather-info {
+    position: absolute;
+    top: 50px;
+    left: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    z-index: 1;
+}
+#weather-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+#temperature {
+    font-size: 18px;
+    font-weight: bold;
+}
+
 #graphs { position: absolute; top: 0; bottom: 0; right: 0; width: 25%; display: flex; flex-direction: column; }
 .graph { flex: 1; position: relative; margin-top: 50px; } /* 그래프가 글자에 가리지 않도록 여백 추가 */
 #current-values {
@@ -31,6 +53,11 @@
 </head>
 <body>
 <div id="map"></div>
+<div id="weather-info">
+    <img id="weather-icon" src="" alt="Weather Icon"/>
+    <span id="temperature">--°C</span>
+</div>
+
 <div id="graphs">
     <div id="graph1" class="graph"></div>
     <div id="graph2" class="graph"></div>
@@ -40,8 +67,8 @@
     </div>
 </div>
 <button id="center-button" style="position: absolute; top: 10px; left: 10px; z-index: 1;">Center on Coordinates</button>
-<script>
 
+<script>
     // KETI Pangyo
     const cKetiPangyoLatitude = 37.4064;
     const cKetiPangyolongitude = 127.1021;
@@ -703,6 +730,38 @@
         plot_bgcolor: '#f0f0f0',
         paper_bgcolor: '#ffffff'
     });
+
+    const weatherApiKey = '0384422edd4701383345e4e16d05b903'; // 여기에 OpenWeatherMap API 키를 입력하세요
+
+    function updateWeather() {
+        const center = map.getCenter();
+        const lat = center.lat;
+        const lon = center.lng;
+
+        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${weatherApiKey}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.cod === 200) { // 성공적인 응답 확인
+                    const icon = data.weather[0].icon;
+                    const temp = data.main.temp;
+                    document.getElementById('weather-icon').src = `http://openweathermap.org/img/wn/${icon}.png`;
+                    document.getElementById('temperature').textContent = `${temp.toFixed(1)}°C`;
+                } else {
+                    console.error(`Error: ${data.message}`); // 오류 메시지 출력
+                    document.getElementById('weather-icon').src = ''; // 아이콘 초기화
+                    document.getElementById('temperature').textContent = 'Data not available';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching weather data:', error);
+                document.getElementById('weather-icon').src = ''; // 아이콘 초기화
+                document.getElementById('temperature').textContent = 'Error fetching data';
+            });
+    }
+
+    // 초기 날씨 업데이트 및 이후 주기적으로 업데이트
+    updateWeather();
+    setInterval(updateWeather, 600000); // 10분마다 업데이트
 </script>
 </body>
 </html>
