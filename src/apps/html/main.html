@@ -51,6 +51,11 @@
     var vehicleHeading0 = 320;
     var vehicleHeading1 = 320;
 
+    // 전역 변수 선언
+    let s_nRxLatitude, s_nRxLongitude, s_unRxVehicleHeading;
+    let s_nTxLatitude, s_nTxLongitude, s_unTxVehicleHeading;
+    let s_unPdr, s_ulLatencyL1, s_ulTotalPacketCnt;
+
 	mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
     const map = new mapboxgl.Map({
         container: 'map',
@@ -65,6 +70,43 @@
     map.on('style.load', () => {
         map.setFog({});
     });
+
+    window.onload = () => {
+        if ('WebSocket' in window) {
+            // WebSocket 연결 생성
+            let ws = new WebSocket('ws://10.252.110.58:3001/websocket');
+
+            // 연결 성공 시
+            ws.onopen = () => {
+                console.log('WebSocket connection established');
+                ws.send('Client connected'); // 서버로 메시지 전송 (선택 사항)
+            }
+
+            // 메시지 수신 시
+            ws.onmessage = (message) => {
+                let data = message.data.split(','); // CSV 형식으로 가정하고, 콤마로 분리
+                s_nRxLatitude = data[62];
+                s_nRxLongitude = data[63];
+                s_unRxVehicleHeading = data[56];
+                s_nTxLatitude = data[32];
+                s_nTxLongitude = data[33];
+                s_unTxVehicleHeading = data[38];
+                s_unPdr = data[68];
+                s_ulLatencyL1 = data[43];
+                s_ulTotalPacketCnt = data[66];
+            }
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error', error);
+            }
+
+            ws.onclose = () => {
+                console.log('WebSocket connection closed');
+            }
+        } else {
+            console.error('WebSocket is not supported by this browser');
+        }
+    };
 
     map.on('load', () => {
         map.loadImage(
@@ -404,115 +446,145 @@
                 }
             }
 
-            let currentRowIndex = 1; /* 2nd lines */
             function fetchAndUpdate() {
-                //fetch('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/qt/venus/db/rx_db_sample_1.csv')
-                fetch('http://10.252.110.58/rx_db_sample_1.csv')
-                //fetch('z:/rx_db_sample_1.csv')
-                //fetch('http://localhost/rx_db_sample_1.csv')
-                    .then(response => response.text())
-                    .then(csvText => {
-                        Papa.parse(csvText, {
-                            header: true,
-                            skipEmptyLines: true,
-                            complete: function(results) {
-                                const rows = results.data;
-                                if (currentRowIndex < rows.length) {
-                                    const row = rows[currentRowIndex];
-                                    const latitude0 = parseFloat(row['nRxLatitude']);
-                                    const longitude0 = parseFloat(row['nRxLongitude']);
-                                    const heading0 = parseFloat(row['unRxVehicleHeading']);
-                                    const latitude1 = parseFloat(row['nTxLatitude']);
-                                    const longitude1 = parseFloat(row['nTxLongitude']);
-                                    const heading1 = parseFloat(row['unTxVehicleHeading']);
-                                    const unPdr = parseFloat(row['unPdr(percent)']);
-                                    const ulLatencyL1 = parseFloat(row['ulLatencyL1(us)']);
-                                    const ulTotalPacketCnt = parseFloat(row['ulTotalPacketCnt']);
+                const latitude0 = parseFloat(s_nRxLatitude);
+                const longitude0 = parseFloat(s_nRxLongitude);
+                const heading0 = parseFloat(s_unRxVehicleHeading);
+                const latitude1 = parseFloat(s_nTxLatitude);
+                const longitude1 = parseFloat(s_nTxLongitude);
+                const heading1 = parseFloat(s_unTxVehicleHeading);
+                const unPdr = parseFloat(s_unPdr);
+                const ulLatencyL1 = parseFloat(s_ulLatencyL1);
+                const ulTotalPacketCnt = parseFloat(s_ulTotalPacketCnt);
 
-                                    if (!isNaN(latitude0) && !isNaN(longitude0)) {
-                                        //console.log(`Vehicle 0 - Row ${currentRowIndex + 1}, Latitude: ${latitude0}, Longitude: ${longitude0}, Heading: ${heading0}`);
-                                        updateVehiclePosition(0, [longitude0, latitude0], heading0);
-                                    }
+                console.log(`s_unPdr: ${s_unPdr}`);
+                console.log(`s_ulLatencyL1: ${s_ulLatencyL1}`);
+                console.log(`s_ulTotalPacketCnt: ${s_ulTotalPacketCnt}`);
 
-                                    if (!isNaN(latitude1) && !isNaN(longitude1)) {
-                                        //console.log(`Vehicle 1 - Row ${currentRowIndex + 1}, Latitude: ${latitude1}, Longitude: ${longitude1}, Heading: ${heading1}`);
-                                        updateVehiclePosition(1, [longitude1, latitude1], heading1);
-                                    }
+                if (!isNaN(latitude0) && !isNaN(longitude0)) {
+                    updateVehiclePosition(0, [longitude0, latitude0], heading0);
+                }
 
-                                    updateGraph1(ulTotalPacketCnt, unPdr);
-                                    updateGraph2(ulTotalPacketCnt, ulLatencyL1 / 100);
-                                    //console.log("ulTotalPacketCnt:", ulTotalPacketCnt);
-
-                                    currentRowIndex++;
-                                } else {
-                                    console.log('Waiting for new data...');
-                                }
-                            }
-                        });
-                    })
-                    .catch(error => console.error('Error fetching the CSV file:', error));
+                if (!isNaN(latitude1) && !isNaN(longitude1)) {
+                    updateVehiclePosition(1, [longitude1, latitude1], heading1);
+                }
             }
 
             fetchAndUpdate();
             setInterval(fetchAndUpdate, 100);
-
-            function updateGraph1(xValue, unPdrValue) {
-                Plotly.extendTraces('graph1', {
-                    x: [[xValue]],
-                    y: [[unPdrValue]]
-                }, [0]);
-
-                Plotly.relayout('graph1', {
-                    yaxis: { range: [80, 100], title: 'unPdr (%)', dtick: 1 },
-                    xaxis: { title: 'ulTotalPacketCnt' }
-                });
-            }
-
-            Plotly.newPlot('graph1', [{
-                x: [],
-                y: [],
-                type: 'scatter',
-                mode: 'lines+markers',
-                line: { color: 'green', width: 2 },
-                marker: { color: 'green', size: 6 }
-            }], {
-                margin: { t: 50, b: 40, l: 50, r: 30 },
-                yaxis: { range: [80, 100], title: 'PDR (%)', showgrid: true, zeroline: true, dtick: 1 },
-                xaxis: { title: 'ulTotalPacketCnt', showgrid: true },
-                title: 'Real-time PDR Monitoring',
-                plot_bgcolor: '#f0f0f0',
-                paper_bgcolor: '#ffffff'
-            });
-
-            function updateGraph2(xValue, ulLatencyValue) {
-                Plotly.extendTraces('graph2', {
-                    x: [[xValue]],
-                    y: [[ulLatencyValue]]
-                }, [0]);
-
-                Plotly.relayout('graph2', {
-                    yaxis: { range: [0, 15], title: 'Latency (ms)', dtick: 1 },
-                    xaxis: { title: 'ulTotalPacketCnt' }
-                });
-            }
-
-            Plotly.newPlot('graph2', [{
-                x: [],
-                y: [],
-                type: 'scatter',
-                mode: 'lines+markers',
-                line: { color: 'blue', width: 2 },
-                marker: { color: 'blue', size: 6 }
-            }], {
-                margin: { t: 50, b: 40, l: 50, r: 30 },
-                yaxis: { range: [0, 15], title: 'Modem Latency (Air to Air)', showgrid: true, zeroline: true, dtick: 1 },
-                xaxis: { title: 'ulTotalPacketCnt', showgrid: true },
-                title: 'Real-time Latency Monitoring',
-                plot_bgcolor: '#f0f0f0',
-                paper_bgcolor: '#ffffff'
-            });
         }
     );
+
+    function fetchAndUpdateGraph() {
+        const latitude0 = parseFloat(s_nRxLatitude);
+        const longitude0 = parseFloat(s_nRxLongitude);
+        const heading0 = parseFloat(s_unRxVehicleHeading);
+        const latitude1 = parseFloat(s_nTxLatitude);
+        const longitude1 = parseFloat(s_nTxLongitude);
+        const heading1 = parseFloat(s_unTxVehicleHeading);
+        const unPdr = parseFloat(s_unPdr);
+        const ulLatencyL1 = parseFloat(s_ulLatencyL1);
+        const ulTotalPacketCnt = parseFloat(s_ulTotalPacketCnt);
+
+        console.log(`s_unPdr: ${s_unPdr}`);
+        console.log(`s_ulLatencyL1: ${s_ulLatencyL1}`);
+        console.log(`s_ulTotalPacketCnt: ${s_ulTotalPacketCnt}`);
+
+        if (!isNaN(unPdr) && !isNaN(ulTotalPacketCnt)) {
+            updateGraph1(ulTotalPacketCnt, unPdr);
+        } else {
+            console.error('Invalid data points for Graph1.');
+        }
+
+        if (!isNaN(ulLatencyL1) && !isNaN(ulTotalPacketCnt)) {
+            updateGraph2(ulTotalPacketCnt, ulLatencyL1 / 100);
+        } else {
+            console.error('Invalid data points for Graph2.');
+        }
+    }
+
+    fetchAndUpdateGraph();
+    setInterval(fetchAndUpdateGraph, 100);
+
+    function updateGraph1(xValue, unPdrValue) {
+        // Ensure that the values are in array format and contain valid data
+        if (!Array.isArray(xValue)) {
+            xValue = [xValue];
+        }
+        if (!Array.isArray(unPdrValue)) {
+            unPdrValue = [unPdrValue];
+        }
+
+        // Check if data points are valid numbers
+        if (!isNaN(xValue[0]) && !isNaN(unPdrValue[0])) {
+            Plotly.extendTraces('graph1', {
+                x: [xValue],
+                y: [unPdrValue]
+            }, [0]);
+
+            Plotly.relayout('graph1', {
+                yaxis: { range: [80, 100], title: 'unPdr (%)', dtick: 1 },
+                xaxis: { title: 'ulTotalPacketCnt' }
+            });
+        } else {
+            console.error('Invalid data points for Graph1.');
+        }
+    }
+
+    function updateGraph2(xValue, ulLatencyValue) {
+        if (!Array.isArray(xValue)) {
+            xValue = [xValue];
+        }
+        if (!Array.isArray(ulLatencyValue)) {
+            ulLatencyValue = [ulLatencyValue];
+        }
+
+        if (!isNaN(xValue[0]) && !isNaN(ulLatencyValue[0])) {
+            Plotly.extendTraces('graph2', {
+                x: [xValue],
+                y: [ulLatencyValue]
+            }, [0]);
+
+            Plotly.relayout('graph2', {
+                yaxis: { range: [0, 15], title: 'Latency (ms)', dtick: 1 },
+                xaxis: { title: 'ulTotalPacketCnt' }
+            });
+        } else {
+            console.error('Invalid data points for Graph2.');
+        }
+    }
+
+    Plotly.newPlot('graph1', [{
+        x: [],
+        y: [],
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: { color: 'green', width: 2 },
+        marker: { color: 'green', size: 6 }
+    }], {
+        margin: { t: 50, b: 40, l: 50, r: 30 },
+        yaxis: { range: [80, 100], title: 'PDR (%)', showgrid: true, zeroline: true, dtick: 1 },
+        xaxis: { title: 'ulTotalPacketCnt', showgrid: true },
+        title: 'Real-time PDR Monitoring',
+        plot_bgcolor: '#f0f0f0',
+        paper_bgcolor: '#ffffff'
+    });
+
+    Plotly.newPlot('graph2', [{
+        x: [],
+        y: [],
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: { color: 'blue', width: 2 },
+        marker: { color: 'blue', size: 6 }
+    }], {
+        margin: { t: 50, b: 40, l: 50, r: 30 },
+        yaxis: { range: [0, 15], title: 'Modem Latency (Air to Air)', showgrid: true, zeroline: true, dtick: 1 },
+        xaxis: { title: 'ulTotalPacketCnt', showgrid: true },
+        title: 'Real-time Latency Monitoring',
+        plot_bgcolor: '#f0f0f0',
+        paper_bgcolor: '#ffffff'
+    });
 </script>
 </body>
 </html>

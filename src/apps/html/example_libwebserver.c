@@ -57,7 +57,7 @@ int callback(struct lws *wsi, enum lws_callback_reasons reason, void *user, void
             }
 
             // 100ms 후 다시 쓰기 가능 상태로 설정
-            usleep(100000);
+            usleep(1000000);
             lws_callback_on_writable(wsi);
             break;
 
