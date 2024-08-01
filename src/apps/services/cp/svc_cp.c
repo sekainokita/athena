@@ -143,8 +143,8 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
     pstSvcCp->stMsgManagerTx.eV2xTimeSlot = eMSG_MANAGER_V2X_TIME_SLOT_CONTINUOUS;
     pstSvcCp->stMsgManagerTx.unPsid = DB_V2X_PSID;
     pstSvcCp->stMsgManagerTx.nTxPower = MSG_MANAGER_V2X_TX_POWER;
-    pstSvcCp->stMsgManagerTx.unTxCount = 10;
-    pstSvcCp->stMsgManagerTx.unTxDelay = 100;
+    pstSvcCp->stMsgManagerTx.unTxCount = MSG_MANAGER_V2X_TX_COUNT;
+    pstSvcCp->stMsgManagerTx.unTxDelay = MSG_MANAGER_V2X_TX_DELAY;
 
     for(int i = 0; i < MSG_MANAGER_MAC_LENGTH; i++)
     {

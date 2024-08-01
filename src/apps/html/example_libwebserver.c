@@ -65,7 +65,7 @@ int callback(struct lws *wsi, enum lws_callback_reasons reason, void *user, void
     switch (reason)
     {
         case LWS_CALLBACK_ESTABLISHED:
-            s_file = fopen("/tmp/rx_db_sample_1.csv", "r");
+            s_file = fopen(EG_WEB_SEFVER_FILE_DB_TX, "r");
             if (s_file == NULL)
             {
                 perror("Failed to open file");

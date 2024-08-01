@@ -61,6 +61,9 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#if defined(CONFIG_WEBSOCKET)
+#include <libwebsockets.h>
+#endif
 
 /***************************** Definition ************************************/
 //#define CONFIG_CLI_MSG_DEBUG        (1)
@@ -75,7 +78,186 @@ static MSG_MANAGER_TX_T s_stMsgManagerTx;
 static MSG_MANAGER_RX_T s_stMsgManagerRx;
 static DB_V2X_T s_stDbV2x;
 
+#if defined(CONFIG_WEBSOCKET)
+struct per_session_data {
+
+};
+#define MSG_MANAGER_READ_TAIL               (1)
+#define MSG_MANAGER_WEBSOCKET_PORT          (3001)
+#define MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN   (1024)
+
+#define MSG_MANAGER_WEBSERVER_FILE_SAMPLE   "/tmp/rx_db_sample_1.csv"
+#define MSG_MANAGER_WEBSERVER_FILE_TX       "/tmp/db_v2x_tx_temp_writing.csv"
+#define MSG_MANAGER_WEBSERVER_FILE_RX       "/tmp/db_v2x_rx_temp_writing.csv"
+
+static FILE *s_hWebSocket = NULL;
+static struct lws_context *s_pLwsContext = NULL;
+static long s_lLastPos = 0;
+static char s_chLastLine[MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN] = "";
+#endif
 /***************************** Function Protype ******************************/
+#if defined(CONFIG_WEBSOCKET)
+static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_callback_reasons eCbReason, void *pvUser, void *pvIn, size_t szLen)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    char chLine[MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN];
+    long lFileSize = 0;
+
+    UNUSED(pvUser);
+    UNUSED(pvIn);
+    UNUSED(szLen);
+
+    if (pstWsi == NULL)
+    {
+        PrintError("pstWsi is NULL!");
+        return nRet;
+    }
+
+    switch (eCbReason)
+    {
+        case LWS_CALLBACK_ESTABLISHED:
+            PrintWarn("LWS_CALLBACK_ESTABLISHED");
+#if defined(MSG_MANAGER_WEBSERVER_FILE_TX)
+            s_hWebSocket = fopen(MSG_MANAGER_WEBSERVER_FILE_TX, "r");
+#elif defined(MSG_MANAGER_WEBSERVER_FILE_RX)
+            s_hWebSocket = fopen(MSG_MANAGER_WEBSERVER_FILE_RX, "r");
+
+#elif defined(MSG_MANAGER_WEBSERVER_FILE_SAMPLE)
+            s_hWebSocket = fopen(MSG_MANAGER_WEBSERVER_FILE_SAMPLE, "r");
+#else
+        #error "FILE TYPE is not defined"
+#endif
+
+#if defined(MSG_MANAGER_READ_TAIL)
+            fseek(s_hWebSocket, 0, SEEK_END);
+            s_lLastPos = ftell(s_hWebSocket);
+            PrintDebug("Initial file position: %ld\n", s_lLastPos);
+
+#else
+            fseek(s_hWebSocket, 0, SEEK_SET);
+#endif
+
+            lws_callback_on_writable(pstWsi);
+            break;
+
+        case LWS_CALLBACK_SERVER_WRITEABLE:
+            PrintWarn("LWS_CALLBACK_SERVER_WRITEABLE");
+#if defined(MSG_MANAGER_READ_TAIL)
+            fseek(s_hWebSocket, 0, SEEK_END);
+            lFileSize = ftell(s_hWebSocket);
+
+            for (long i = lFileSize - 2; i >= 0; i--)
+            {
+                fseek(s_hWebSocket, i, SEEK_SET);
+                if (fgetc(s_hWebSocket) == '\n')
+                {
+                    s_lLastPos = ftell(s_hWebSocket);
+                    break;
+                }
+            }
+
+            fseek(s_hWebSocket, s_lLastPos, SEEK_SET);
+            if (fgets(chLine, sizeof(chLine), s_hWebSocket))
+            {
+                PrintDebug("Read last line: %s", chLine);
+                strcpy(s_chLastLine, chLine);
+                lws_write(pstWsi, (unsigned char *)chLine, strlen(chLine), LWS_WRITE_TEXT);
+            }
+            else if (strlen(s_chLastLine) > 0)
+            {
+                PrintDebug("Sending last line again: %s", s_chLastLine);
+                lws_write(pstWsi, (unsigned char *)s_chLastLine, strlen(s_chLastLine), LWS_WRITE_TEXT);
+            }
+
+#else
+            if (fgets(chLine, sizeof(chLine), s_hWebSocket))
+            {
+                PrintDebug("Read line: %s", chLine);
+                lws_write(pstWsi, (unsigned char *)chLine, strlen(chLine), LWS_WRITE_TEXT);
+            }
+            else
+            {
+                fseek(s_hWebSocket, 0, SEEK_SET);
+            }
+#endif
+            usleep(MSG_MANAGER_V2X_TX_DELAY*1000); // Wait for 100ms
+            lws_callback_on_writable(pstWsi);
+            break;
+
+        case LWS_CALLBACK_CLOSED:
+            PrintWarn("LWS_CALLBACK_CLOSED");
+            if (s_hWebSocket != NULL)
+            {
+                fclose(s_hWebSocket);
+                s_hWebSocket = NULL;
+            }
+            break;
+
+        default:
+            PrintError("unknown reason[%d]", eCbReason);
+            break;
+    }
+
+    nRet = FRAMEWORK_OK;
+
+    return nRet;
+}
+
+void P_MSG_MANAGER_WebSocketProcess(void)
+{
+    lws_service(s_pLwsContext, 50);
+}
+
+static int32_t P_MSG_MANAGER_WebSocketInit(void)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    static struct lws_protocols protocols[] =
+    {
+        {
+            "v2x-web-protocol",
+            P_MSG_MANAGER_WebSocketCallback,
+            sizeof(struct per_session_data),
+            0,
+            NULL, NULL, NULL
+        },
+        { NULL, NULL, 0, 0 }
+    };
+
+    struct lws_context_creation_info info = {
+        .port = MSG_MANAGER_WEBSOCKET_PORT,
+        .protocols = protocols
+    };
+
+    s_pLwsContext = lws_create_context(&info);
+    if (!s_pLwsContext)
+    {
+        PrintError("Failed to create WebSocket context.\n");
+        return nRet;
+    }
+
+    nRet = FRAMEWORK_OK;
+
+    return nRet;
+}
+static int32_t P_MSG_MANAGER_WebSocketDeInit(void)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    if(s_pLwsContext != NULL)
+    {
+        lws_context_destroy(s_pLwsContext);
+        PrintDebug("P_MSG_MANAGER_WebSocketDeInit() is deinit.");
+        nRet = FRAMEWORK_OK;
+    }
+    else
+    {
+        PrintError("s_pLwsContext is NULL!");
+    }
+
+    return nRet;
+}
+#endif
 
 void *P_CLI_MSG_TcpServerTask(void *fd)
 {
@@ -445,6 +627,29 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
             }
         }
+#if defined(CONFIG_WEBSOCKET)
+        else if(IS_CMD(pcCmd, "web"))
+        {
+            nRet = P_MSG_MANAGER_WebSocketInit();
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("P_MSG_MANAGER_WebSocketInit() is failed!!, nRet[%d]", nRet);
+                return nRet;
+            }
+
+            while(1)
+            {
+                (void)P_MSG_MANAGER_WebSocketProcess();
+            }
+
+            nRet = P_MSG_MANAGER_WebSocketDeInit();
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("P_MSG_MANAGER_WebSocketDeInit() is failed!!, nRet[%d]", nRet);
+                return nRet;
+            }
+        }
+#endif
         else if(IS_CMD(pcCmd, "tx"))
         {
             pstTimeManager = FRAMEWORK_GetTimeManagerInstance();

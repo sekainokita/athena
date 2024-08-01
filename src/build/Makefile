@@ -68,7 +68,11 @@ endif
 # To add Library : -l$(LIB_DB) -l$(LIB_MSG) -l$(LIB_TIME)
 
 ifeq ($(CONFIG_NVIDIA_JETSON_UTILS),y)
-TARGET_LDFLAGS += -L/usr/local/lib -ljetson-utils 
+TARGET_LDFLAGS += -L/usr/local/lib -ljetson-utils
+endif
+
+ifeq ($(CONFIG_WEBSOCKET),y)
+TARGET_LDFLAGS += -lwebsockets -lssl -lcrypto -luv
 endif
 
 TARGET_CXXFLAGS = -I$(INC_PATH)
@@ -90,6 +94,11 @@ endif
 ifeq ($(CONFIG_ROS),y)
 TARGET_CFLAGS += -DCONFIG_ROS
 TARGET_CXXFLAGS += -DCONFIG_ROS
+endif
+
+ifeq ($(CONFIG_WEBSOCKET),y)
+TARGET_CFLAGS += -DCONFIG_WEBSOCKET
+TARGET_CXXFLAGS += -DCONFIG_WEBSOCKET
 endif
 
 ifeq ($(CONFIG_GPS_XSENS),y)
