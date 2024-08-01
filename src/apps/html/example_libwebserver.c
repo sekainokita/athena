@@ -1,87 +1,135 @@
+
+/******************************************************************************
+*
+* Copyright (C) 2023 - 2028 KETI, All rights reserved.
+*                           (Korea Electronics Technology Institute)
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* Use of the Software is limited solely to applications:
+* (a) running for Korean Government Project, or
+* (b) that interact with KETI project/platform.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+* KETI BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
+* OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*
+* Except as contained in this notice, the name of the KETI shall not be used
+* in advertising or otherwise to promote the sale, use or other dealings in
+* this Software without prior written authorization from KETI.
+*
+******************************************************************************/
+/******************************************************************************/
+/**
+*
+* @file example_libwebserver.c
+*
+* @note
+*
+* Library Web Server Example
+*
+******************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <libwebsockets.h>
 
-// Structure to store data for each WebSocket session
 struct per_session_data {
+
 };
 
-//#define USE_TAIL_READING
+#define USE_TAIL_READING
+#define EG_WEB_SERVER_FILE_DB_SAMPLE "/tmp/rx_db_sample_1.csv"
+#define EG_WEB_SEFVER_FILE_DB_TX     "/tmp/db_v2x_tx_temp_writing.csv"
 
-static FILE *s_file = NULL; // File pointer declaration
-static long last_pos = 0;   // Last read position in the file
-static char last_line[1024] = ""; // Last read line storage
+static FILE *s_file = NULL;
+static long last_pos = 0;
+static char last_line[1024] = "";
 
-// Callback function for WebSocket server messages
-int callback(struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len) {
+int callback(struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len)
+{
     char line[1024];
 
-    switch (reason) {
-        case LWS_CALLBACK_ESTABLISHED: // Handle new connection event
-            // Add a timer to send a timestamp every second
-            s_file = fopen("/tmp/rx_db_sample_1.csv", "r");
-            if (s_file == NULL) {
+    switch (reason)
+    {
+        case LWS_CALLBACK_ESTABLISHED:
+            s_file = fopen(EG_WEB_SEFVER_FILE_DB_TX, "r");
+            if (s_file == NULL)
+            {
                 perror("Failed to open file");
                 return -1;
             }
 
 #if defined(USE_TAIL_READING)
-            // If USE_TAIL_READING is defined, read from the end of the file
-            fseek(s_file, 0, SEEK_END); // Move to end of the file
-            last_pos = ftell(s_file);   // Store last position
-            printf("Initial file position: %ld\n", last_pos); // Print initial position
+            fseek(s_file, 0, SEEK_END);
+            last_pos = ftell(s_file);
+            printf("Initial file position: %ld\n", last_pos);
 
 #else
-            // Otherwise, start from the beginning of the file
-            fseek(s_file, 0, SEEK_SET); // Move to the beginning of the file
+            fseek(s_file, 0, SEEK_SET);
 #endif
 
             lws_callback_on_writable(wsi);
             break;
 
-        case LWS_CALLBACK_SERVER_WRITEABLE: // Handle send data event
+        case LWS_CALLBACK_SERVER_WRITEABLE:
 #if defined(USE_TAIL_READING)
-            // If USE_TAIL_READING is defined, read from the end of the file
             fseek(s_file, 0, SEEK_END);
             long file_size = ftell(s_file);
 
-            // Find the start of the last line
-            for (long i = file_size - 2; i >= 0; i--) {
+            for (long i = file_size - 2; i >= 0; i--)
+            {
                 fseek(s_file, i, SEEK_SET);
-                if (fgetc(s_file) == '\n') {
+                if (fgetc(s_file) == '\n')
+                {
                     last_pos = ftell(s_file);
                     break;
                 }
             }
 
             fseek(s_file, last_pos, SEEK_SET);
-            if (fgets(line, sizeof(line), s_file)) {
+            if (fgets(line, sizeof(line), s_file))
+            {
                 printf("Read last line: %s", line);
                 strcpy(last_line, line);
                 lws_write(wsi, (unsigned char *)line, strlen(line), LWS_WRITE_TEXT);
-            } else if (strlen(last_line) > 0) {
+            }
+            else if (strlen(last_line) > 0)
+            {
                 printf("Sending last line again: %s", last_line);
                 lws_write(wsi, (unsigned char *)last_line, strlen(last_line), LWS_WRITE_TEXT);
             }
 
 #else
-            if (fgets(line, sizeof(line), s_file)) {
+            if (fgets(line, sizeof(line), s_file))
+            {
                 printf("Read line: %s", line);
                 lws_write(wsi, (unsigned char *)line, strlen(line), LWS_WRITE_TEXT);
-            } else {
-                // If end of file is reached, go back to the beginning
+            }
+            else
+            {
                 fseek(s_file, 0, SEEK_SET);
             }
 #endif
-
-            //usleep(1000*1000); // Wait for 1 second
             usleep(100*1000); // Wait for 100ms
             lws_callback_on_writable(wsi);
             break;
 
         case LWS_CALLBACK_CLOSED:
-            if (s_file != NULL) {
+            if (s_file != NULL)
+            {
                 fclose(s_file);
                 s_file = NULL;
             }
@@ -112,6 +160,7 @@ int main(int argc, char **argv)
         .port = 3001,
         .protocols = protocols
     };
+
     struct lws_context *context = lws_create_context(&info);
 
     if (!context) {
@@ -119,7 +168,8 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    while (1) {
+    while (1)
+    {
         lws_service(context, 50);
     }
 

@@ -70,6 +70,9 @@
 #define MSG_MANAGER_CRC16_LEN                       (2)
 #define MSG_MANAGER_CRC32_LEN                       (4)
 
+#define MSG_MANAGER_V2X_TX_COUNT                    (10)
+#define MSG_MANAGER_V2X_TX_DELAY                    (100)
+
  /**
 * @details V2X Extensible Message Format
 */
