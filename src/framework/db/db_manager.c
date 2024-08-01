@@ -1533,8 +1533,6 @@ static int32_t P_DB_MANAGER_WriteCsvPlatooningRx(DB_MANAGER_EVENT_MSG_T *pstEven
     memcpy(&stDbV2xStatusTx, pchPayload, sizeof(DB_V2X_STATUS_TX_T));
     memcpy(&stDbV2XPt, pchPayload + sizeof(DB_V2X_STATUS_TX_T), sizeof(DB_V2X_PLATOONING_T));
 
-    PrintDebug("%d", stDbV2XPt.eDbV2XPtType);
-
     nRet = P_DB_MANAGER_UpdateStatus(pstEventMsg, &stDbV2xStatusTx, &stDbV2xStatusRx);
     if (nRet != FRAMEWORK_OK)
     {
