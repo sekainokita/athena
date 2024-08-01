@@ -63,7 +63,7 @@ int callback(struct lws *wsi, enum lws_callback_reasons reason, void *user, void
     char line[1024];
 
     switch (reason)
-    s{
+    {
         case LWS_CALLBACK_ESTABLISHED:
             s_file = fopen("/tmp/rx_db_sample_1.csv", "r");
             if (s_file == NULL)
@@ -160,6 +160,7 @@ int main(int argc, char **argv)
         .port = 3001,
         .protocols = protocols
     };
+
     struct lws_context *context = lws_create_context(&info);
 
     if (!context) {
