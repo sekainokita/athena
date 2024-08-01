@@ -80,15 +80,17 @@ static DB_V2X_T s_stDbV2x;
 
 #if defined(CONFIG_WEBSOCKET)
 struct per_session_data {
-
 };
+
+#define CLI_MSG_DEBUG                       (1)
+
 #define MSG_MANAGER_READ_TAIL               (1)
 #define MSG_MANAGER_WEBSOCKET_PORT          (3001)
 #define MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN   (1024)
 
-#define MSG_MANAGER_WEBSERVER_FILE_SAMPLE   "/tmp/rx_db_sample_1.csv"
+//#define MSG_MANAGER_WEBSERVER_FILE_SAMPLE   "/tmp/rx_db_sample_1.csv"
 #define MSG_MANAGER_WEBSERVER_FILE_TX       "/tmp/db_v2x_tx_temp_writing.csv"
-#define MSG_MANAGER_WEBSERVER_FILE_RX       "/tmp/db_v2x_rx_temp_writing.csv"
+//#define MSG_MANAGER_WEBSERVER_FILE_RX       "/tmp/db_v2x_rx_temp_writing.csv"
 
 static FILE *s_hWebSocket = NULL;
 static struct lws_context *s_pLwsContext = NULL;
@@ -127,6 +129,11 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
 #else
         #error "FILE TYPE is not defined"
 #endif
+            if(s_hWebSocket == NULL)
+            {
+                PrintError("s_hWebSocket is NULL!!");
+                return nRet;
+            }
 
 #if defined(MSG_MANAGER_READ_TAIL)
             fseek(s_hWebSocket, 0, SEEK_END);
@@ -159,20 +166,24 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
             fseek(s_hWebSocket, s_lLastPos, SEEK_SET);
             if (fgets(chLine, sizeof(chLine), s_hWebSocket))
             {
+#if defined(CLI_MSG_DEBUG)
                 PrintDebug("Read last line: %s", chLine);
+#endif
                 strcpy(s_chLastLine, chLine);
                 lws_write(pstWsi, (unsigned char *)chLine, strlen(chLine), LWS_WRITE_TEXT);
             }
             else if (strlen(s_chLastLine) > 0)
             {
-                PrintDebug("Sending last line again: %s", s_chLastLine);
+                PrintWarn("Sending last line again: %s", s_chLastLine);
                 lws_write(pstWsi, (unsigned char *)s_chLastLine, strlen(s_chLastLine), LWS_WRITE_TEXT);
             }
 
 #else
             if (fgets(chLine, sizeof(chLine), s_hWebSocket))
             {
+#if defined(CLI_MSG_DEBUG)
                 PrintDebug("Read line: %s", chLine);
+#endif
                 lws_write(pstWsi, (unsigned char *)chLine, strlen(chLine), LWS_WRITE_TEXT);
             }
             else
@@ -257,6 +268,42 @@ static int32_t P_MSG_MANAGER_WebSocketDeInit(void)
 
     return nRet;
 }
+
+void *P_CLI_MSG_SebSocketTask(void *fd)
+{
+    UNUSED(fd);
+
+    while (1)
+    {
+        (void)P_MSG_MANAGER_WebSocketProcess();
+    }
+
+    return NULL;
+
+}
+
+int32_t P_CLI_MSG_SebSocketStart(void)
+{
+    int32_t nRet = APP_ERROR;
+    pthread_t h_stRecvTid;
+
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
+    nRet = pthread_create(&h_stRecvTid, &attr, P_CLI_MSG_SebSocketTask, NULL);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("pthread_create() is failed!! (P_CLI_MSG_SebSocketTask) [nRet:%d]", nRet);
+    }
+    else
+    {
+        PrintTrace("P_CLI_MSG_SebSocketTask() is successfully created.");
+        nRet = FRAMEWORK_OK;
+    }
+
+    return nRet;
+}
 #endif
 
 void *P_CLI_MSG_TcpServerTask(void *fd)
@@ -300,8 +347,8 @@ int32_t P_CLI_MSG_TcpServerStart(void)
 {
     int32_t nRet = APP_ERROR;
     int h_nListen , h_nConn;
-    pthread_t h_stRecvTid ;
-    struct sockaddr_in stServerAddr , stClientAddr;
+    pthread_t h_stRecvTid;
+    struct sockaddr_in stServerAddr, stClientAddr;
     socklen_t stClientLen = sizeof(stClientAddr);
     char cMsgBuf[MAX_LINE];
     memset(cMsgBuf, 0, MAX_LINE);
@@ -313,7 +360,7 @@ int32_t P_CLI_MSG_TcpServerStart(void)
         return nRet;
     }
 
-    bzero(&stServerAddr , sizeof(stServerAddr));
+    bzero(&stServerAddr, sizeof(stServerAddr));
 
     stServerAddr.sin_family = AF_INET;
     stServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -325,19 +372,19 @@ int32_t P_CLI_MSG_TcpServerStart(void)
         return -1;
     }
 
-    if(bind(h_nListen , (struct sockaddr *)&stServerAddr , sizeof(stServerAddr)) < 0)
+    if(bind(h_nListen, (struct sockaddr *)&stServerAddr, sizeof(stServerAddr)) < 0)
     {
         PrintError("bind error.");
         return nRet;
     }
 
-    if(listen(h_nListen , LISTENQ) < 0)
+    if(listen(h_nListen, LISTENQ) < 0)
     {
         PrintError("listen error.");
         return nRet;
     }
 
-    if((h_nConn = accept(h_nListen , (struct sockaddr *)&stClientAddr , &stClientLen)) < 0)
+    if((h_nConn = accept(h_nListen, (struct sockaddr *)&stClientAddr, &stClientLen)) < 0)
     {
         PrintError("accept error.");
         return nRet;
@@ -345,14 +392,14 @@ int32_t P_CLI_MSG_TcpServerStart(void)
 
     PrintDebug("server: got connection from %s", inet_ntoa(stClientAddr.sin_addr));
 
-    if(pthread_create(&h_stRecvTid , NULL , P_CLI_MSG_TcpServerTask, &h_nConn) == -1)
+    if(pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpServerTask, &h_nConn) == -1)
     {
         PrintError("pthread create error.");
         return nRet;
     }
 
 
-    while(fgets(cMsgBuf, MAX_LINE , stdin) != NULL)
+    while(fgets(cMsgBuf, MAX_LINE, stdin) != NULL)
     {
         if(strcmp(cMsgBuf, "exit\n") == 0)
         {
@@ -360,7 +407,7 @@ int32_t P_CLI_MSG_TcpServerStart(void)
             exit(0);
         }
 
-        if(send(h_nConn, cMsgBuf, strlen(cMsgBuf) , 0) == -1)
+        if(send(h_nConn, cMsgBuf, strlen(cMsgBuf), 0) == -1)
         {
             PrintError("send error.");
             return nRet;
@@ -637,17 +684,21 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 return nRet;
             }
 
-            while(1)
+            nRet = P_CLI_MSG_SebSocketStart();
+            if (nRet != FRAMEWORK_OK)
             {
-                (void)P_MSG_MANAGER_WebSocketProcess();
+                PrintError("P_CLI_MSG_SebSocketStart() is failed!!, nRet[%d]", nRet);
+                return nRet;
             }
 
+#if 0
             nRet = P_MSG_MANAGER_WebSocketDeInit();
             if (nRet != FRAMEWORK_OK)
             {
                 PrintError("P_MSG_MANAGER_WebSocketDeInit() is failed!!, nRet[%d]", nRet);
                 return nRet;
             }
+#endif
         }
 #endif
         else if(IS_CMD(pcCmd, "tx"))

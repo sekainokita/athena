@@ -135,7 +135,8 @@
                 ws.send('Client connected'); // 서버로 메시지 전송 (선택 사항)
             }
 
-            // 메시지 수신 시
+            /* Rx */
+            /*
             ws.onmessage = (message) => {
                 let data = message.data.split(','); // CSV 형식으로 가정하고, 콤마로 분리
                 s_nRxLatitude = data[62];
@@ -149,7 +150,21 @@
                 s_ulTotalPacketCnt = data[66];
                 s_unSeqNum = data[35];
             }
-
+            */
+            /* Tx */
+            ws.onmessage = (message) => {
+                let data = message.data.split(','); // CSV 형식으로 가정하고, 콤마로 분리
+                s_nRxLatitude = data[24]; // Mine
+                s_nRxLongitude = data[25]; // Mine
+                s_unRxVehicleHeading = data[30]; // Mine
+                s_nTxLatitude = vehicleLatitude1;
+                s_nTxLongitude = vehicleLongitude1;
+                s_unTxVehicleHeading = vehicleHeading1;
+                s_unPdr = 100;
+                s_ulLatencyL1 = 5;
+                s_ulTotalPacketCnt = 1;
+                s_unSeqNum = 1;
+            }
             ws.onerror = (error) => {
                 console.error('WebSocket error', error);
             }
