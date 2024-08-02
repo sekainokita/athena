@@ -250,7 +250,7 @@ typedef enum {
     eDB_V2X_PT_FV_MSG_TYPE_UNKNOWN             = 0,
     eDB_V2X_PT_FV_MSG_TYPE_BROADCAST           = 1,
     eDB_V2X_PT_FV_MSG_TYPE_UNICAST             = 2,
-    eDB_V2X_PT_FV_MSG_TYPE_MULTICASST          = 3,
+    eDB_V2X_PT_FV_MSG_TYPE_MULTICAST           = 3,
     eDB_V2X_PT_FV_MSG_TYPE_GRAOUPCAST          = 4,
     eDB_V2X_PT_FV_MSG_TYPE_MAX
 } DB_V2X_PT_FV_MSG_TYPE_E;
