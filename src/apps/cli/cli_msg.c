@@ -77,6 +77,7 @@ const int MAX_CONNECT = 20;
 static MSG_MANAGER_TX_T s_stMsgManagerTx;
 static MSG_MANAGER_RX_T s_stMsgManagerRx;
 static DB_V2X_T s_stDbV2x;
+static bool s_bCliMsgLog = FALSE;
 
 #if defined(CONFIG_WEBSOCKET)
 struct per_session_data {
@@ -84,18 +85,11 @@ struct per_session_data {
 
 #define CLI_MSG_DEBUG                       (1)
 
-#define MSG_MANAGER_READ_TAIL               (1)
-#define MSG_MANAGER_WEBSOCKET_PORT          (3001)
-#define MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN   (1024)
-
-//#define MSG_MANAGER_WEBSERVER_FILE_SAMPLE   "/tmp/rx_db_sample_1.csv"
-#define MSG_MANAGER_WEBSERVER_FILE_TX       "/tmp/db_v2x_tx_temp_writing.csv"
-//#define MSG_MANAGER_WEBSERVER_FILE_RX       "/tmp/db_v2x_rx_temp_writing.csv"
-
 static FILE *s_hWebSocket = NULL;
 static struct lws_context *s_pLwsContext = NULL;
 static long s_lLastPos = 0;
 static char s_chLastLine[MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN] = "";
+static MSG_MANAGER_FILE_TYPE_E s_eFileType = eMSG_MANAGER_FILE_TYPE_RX;
 #endif
 /***************************** Function Protype ******************************/
 #if defined(CONFIG_WEBSOCKET)
@@ -115,82 +109,113 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
         return nRet;
     }
 
+
+    typedef enum
+    {
+        eMSG_MANAGER_FILE_TYPE_UNKNOWN = 0,
+        eMSG_MANAGER_FILE_TYPE_TX,
+        eMSG_MANAGER_FILE_TYPE_RX,
+        eMSG_MANAGER_FILE_TYPE_SAMPLE,
+        eMSG_MANAGER_COMM_TYPE_MAX = 0xFF
+    } MSG_MANAGER_FILE_TYPE_E;
+
     switch (eCbReason)
     {
         case LWS_CALLBACK_ESTABLISHED:
             PrintWarn("LWS_CALLBACK_ESTABLISHED");
-#if defined(MSG_MANAGER_WEBSERVER_FILE_TX)
-            s_hWebSocket = fopen(MSG_MANAGER_WEBSERVER_FILE_TX, "r");
-#elif defined(MSG_MANAGER_WEBSERVER_FILE_RX)
-            s_hWebSocket = fopen(MSG_MANAGER_WEBSERVER_FILE_RX, "r");
 
-#elif defined(MSG_MANAGER_WEBSERVER_FILE_SAMPLE)
-            s_hWebSocket = fopen(MSG_MANAGER_WEBSERVER_FILE_SAMPLE, "r");
-#else
-        #error "FILE TYPE is not defined"
-#endif
+            if(s_eFileType == eMSG_MANAGER_FILE_TYPE_TX)
+            {
+                s_hWebSocket = fopen(MSG_MANAGER_WEBSERVER_FILE_TX, "r");
+            }
+            else if(s_eFileType == eMSG_MANAGER_FILE_TYPE_RX)
+            {
+                s_hWebSocket = fopen(MSG_MANAGER_WEBSERVER_FILE_RX, "r");
+            }
+            else if(s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE)
+            {
+                s_hWebSocket = fopen(MSG_MANAGER_WEBSERVER_FILE_SAMPLE, "r");
+            }
+            else
+            {
+                PrintError("unknown file format[%d]", s_eFileType);
+            }
+
             if(s_hWebSocket == NULL)
             {
                 PrintError("s_hWebSocket is NULL!!");
                 return nRet;
             }
+            else
+            {
+                PrintTrace("file type[%d] is opened", s_hWebSocket);
+            }
 
-#if defined(MSG_MANAGER_READ_TAIL)
-            fseek(s_hWebSocket, 0, SEEK_END);
-            s_lLastPos = ftell(s_hWebSocket);
-            PrintDebug("Initial file position: %ld\n", s_lLastPos);
-
-#else
-            fseek(s_hWebSocket, 0, SEEK_SET);
-#endif
+            if(s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE)
+            {
+                /* read from the first */
+                fseek(s_hWebSocket, 0, SEEK_SET);
+            }
+            else
+            {
+                fseek(s_hWebSocket, 0, SEEK_END);
+                s_lLastPos = ftell(s_hWebSocket);
+                PrintDebug("Initial file position: %ld\n", s_lLastPos);
+            }
 
             lws_callback_on_writable(pstWsi);
             break;
 
         case LWS_CALLBACK_SERVER_WRITEABLE:
-            PrintWarn("LWS_CALLBACK_SERVER_WRITEABLE");
-#if defined(MSG_MANAGER_READ_TAIL)
-            fseek(s_hWebSocket, 0, SEEK_END);
-            lFileSize = ftell(s_hWebSocket);
-
-            for (long i = lFileSize - 2; i >= 0; i--)
+            if(s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE)
             {
-                fseek(s_hWebSocket, i, SEEK_SET);
-                if (fgetc(s_hWebSocket) == '\n')
+                if (fgets(chLine, sizeof(chLine), s_hWebSocket))
                 {
-                    s_lLastPos = ftell(s_hWebSocket);
-                    break;
+                    if(s_bCliMsgLog == TRUE)
+                    {
+                        PrintDebug("Read line: %s", chLine);
+                    }
+
+                    lws_write(pstWsi, (unsigned char *)chLine, strlen(chLine), LWS_WRITE_TEXT);
                 }
-            }
-
-            fseek(s_hWebSocket, s_lLastPos, SEEK_SET);
-            if (fgets(chLine, sizeof(chLine), s_hWebSocket))
-            {
-#if defined(CLI_MSG_DEBUG)
-                PrintDebug("Read last line: %s", chLine);
-#endif
-                strcpy(s_chLastLine, chLine);
-                lws_write(pstWsi, (unsigned char *)chLine, strlen(chLine), LWS_WRITE_TEXT);
-            }
-            else if (strlen(s_chLastLine) > 0)
-            {
-                PrintWarn("Sending last line again: %s", s_chLastLine);
-                lws_write(pstWsi, (unsigned char *)s_chLastLine, strlen(s_chLastLine), LWS_WRITE_TEXT);
-            }
-
-#else
-            if (fgets(chLine, sizeof(chLine), s_hWebSocket))
-            {
-#if defined(CLI_MSG_DEBUG)
-                PrintDebug("Read line: %s", chLine);
-#endif
-                lws_write(pstWsi, (unsigned char *)chLine, strlen(chLine), LWS_WRITE_TEXT);
+                else
+                {
+                    fseek(s_hWebSocket, 0, SEEK_SET);
+                }
             }
             else
             {
-                fseek(s_hWebSocket, 0, SEEK_SET);
+                fseek(s_hWebSocket, 0, SEEK_END);
+                lFileSize = ftell(s_hWebSocket);
+
+                for (long i = lFileSize - 2; i >= 0; i--)
+                {
+                    fseek(s_hWebSocket, i, SEEK_SET);
+                    if (fgetc(s_hWebSocket) == '\n')
+                    {
+                        s_lLastPos = ftell(s_hWebSocket);
+                        break;
+                    }
+                }
+
+                fseek(s_hWebSocket, s_lLastPos, SEEK_SET);
+                if (fgets(chLine, sizeof(chLine), s_hWebSocket))
+                {
+                    if(s_bCliMsgLog == TRUE)
+                    {
+                        PrintDebug("Read last line: %s", chLine);
+                    }
+
+                    strcpy(s_chLastLine, chLine);
+                    lws_write(pstWsi, (unsigned char *)chLine, strlen(chLine), LWS_WRITE_TEXT);
+                }
+                else if (strlen(s_chLastLine) > 0)
+                {
+                    PrintWarn("Sending last line again: %s", s_chLastLine);
+                    lws_write(pstWsi, (unsigned char *)s_chLastLine, strlen(s_chLastLine), LWS_WRITE_TEXT);
+                }
             }
-#endif
+
             usleep(MSG_MANAGER_V2X_TX_DELAY*1000); // Wait for 100ms
             lws_callback_on_writable(pstWsi);
             break;
@@ -674,31 +699,70 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
             }
         }
+        if(IS_CMD(pcCmd, "log"))
+        {
+            if(s_bCliMsgLog == TRUE)
+            {
+                s_bCliMsgLog = FALSE;
+            }
+            else
+            {
+                s_bCliMsgLog = TRUE;
+            }
+
+            PrintWarn("set s_bCliMsgLog[%d]", s_bCliMsgLog);
+        }
 #if defined(CONFIG_WEBSOCKET)
         else if(IS_CMD(pcCmd, "web"))
         {
-            nRet = P_MSG_MANAGER_WebSocketInit();
-            if (nRet != FRAMEWORK_OK)
+            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+            if(pcCmd != NULL)
             {
-                PrintError("P_MSG_MANAGER_WebSocketInit() is failed!!, nRet[%d]", nRet);
-                return nRet;
-            }
+                if(IS_CMD(pcCmd, "start"))
+                {
+                    nRet = P_MSG_MANAGER_WebSocketInit();
+                    if (nRet != FRAMEWORK_OK)
+                    {
+                        PrintError("P_MSG_MANAGER_WebSocketInit() is failed!!, nRet[%d]", nRet);
+                        return nRet;
+                    }
 
-            nRet = P_CLI_MSG_SebSocketStart();
-            if (nRet != FRAMEWORK_OK)
-            {
-                PrintError("P_CLI_MSG_SebSocketStart() is failed!!, nRet[%d]", nRet);
-                return nRet;
-            }
+                    nRet = P_CLI_MSG_SebSocketStart();
+                    if (nRet != FRAMEWORK_OK)
+                    {
+                        PrintError("P_CLI_MSG_SebSocketStart() is failed!!, nRet[%d]", nRet);
+                        return nRet;
+                    }
+                }
+                else if(IS_CMD(pcCmd, "stop"))
+                {
+                    nRet = P_MSG_MANAGER_WebSocketDeInit();
+                    if (nRet != FRAMEWORK_OK)
+                    {
+                        PrintError("P_MSG_MANAGER_WebSocketDeInit() is failed!!, nRet[%d]", nRet);
+                        return nRet;
+                    }
+                }
+                else if(IS_CMD(pcCmd, "file"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        s_eFileType = (MSG_MANAGER_FILE_TYPE_E)atoi(pcCmd);
 
-#if 0
-            nRet = P_MSG_MANAGER_WebSocketDeInit();
-            if (nRet != FRAMEWORK_OK)
-            {
-                PrintError("P_MSG_MANAGER_WebSocketDeInit() is failed!!, nRet[%d]", nRet);
-                return nRet;
+                        PrintTrace("s_eFileTypet[%d]", s_eFileType);
+                    }
+                    else
+                    {
+                        PrintError("set file [id], 0:unknown, 1:tx, 2:rx, 3:sample");
+                    }
+
+                }
+                else
+                {
+                    PrintError("set file type and web start/stop");
+                }
             }
-#endif
         }
 #endif
         else if(IS_CMD(pcCmd, "tx"))
@@ -1328,6 +1392,7 @@ int32_t CLI_MSG_InitCmds(void)
                "and the command name."
                "and the command name.\n\n"
                "msg info          show msg settings\n"
+               "msg log           on/off\n"
                "msg log [opt]     show msg debug logs (on/off)\n"
                "msg open [eth#]   open message protocol, connect TCP server, e.g. msg open eth1\n"
                "msg close         close message protocol\n"
@@ -1351,6 +1416,9 @@ int32_t CLI_MSG_InitCmds(void)
                "  pl_type         [0]UNKONWN, [1]SAE J2735 BSM, [2]SAE J2736 PVD, [201]Platooning(default), [301]Sensor sharing, [401]Remote driving, [501] Advanced driving\n"
                "  comm_id         [0]UNKONWN, [1]V2V(default), [2]V2I,...\n"
                "msg get           get setting values of v2x structures\n"
+               "msg web file [id] set file type, 0:unknown, 1:tx, 2:rx(default), 3:sample\n"
+               "msg web start     start web server, set file type first\n"
+               "msg web stop      stop web server\n"
                "msg tcp [OPTIONS]\n"
                "  server           start TCP server (127.0.0.1)\n"
                "  client [IP Addr] start TCP client with IP server IP address\n",
