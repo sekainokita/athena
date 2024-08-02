@@ -33,7 +33,7 @@
 }
 
 #graphs { position: absolute; top: 0; bottom: 0; right: 0; width: 25%; display: flex; flex-direction: column; }
-.graph { flex: 1; position: relative; margin-top: 50px; } /* 그래프가 글자에 가리지 않도록 여백 추가 */
+.graph { flex: 1; position: relative; margin-top: 50px; }
 #current-values {
     position: absolute;
     top: 0;
@@ -44,10 +44,10 @@
     z-index: 1;
 }
 #current-value-graph1 {
-    color: green; /* PDR 값은 초록색 */
+    color: green;
 }
 #current-value-graph2 {
-    color: blue; /* Latency 값은 파란색 */
+    color: blue;
 }
 </style>
 </head>
@@ -89,7 +89,6 @@
     const cPangyoRsuLatitude31 = 37.411751;
     const cPangyoRsuLongitude31 = 127.095019;
 
-    // Vehicle Default Location
     var vehicleLatitude0 = 37.4062;
     var vehicleLongitude0 = 127.1032;
 
@@ -99,10 +98,12 @@
     var vehicleHeading0 = 320;
     var vehicleHeading1 = 320;
 
-    // 전역 변수 선언
     let s_nRxLatitude, s_nRxLongitude, s_unRxVehicleHeading;
     let s_nTxLatitude, s_nTxLongitude, s_unTxVehicleHeading;
     let s_unPdr, s_ulLatencyL1, s_ulTotalPacketCnt, s_unSeqNum;
+
+    let s_unTempTxCnt = 0;
+    let isTempTxTest = true;
 
 	mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
     const map = new mapboxgl.Map({
@@ -118,7 +119,6 @@
     map.on('style.load', () => {
         map.setFog({});
 
-        // 버튼 클릭 이벤트 핸들러 추가
         document.getElementById('center-button').addEventListener('click', function() {
             map.setCenter([s_nRxLongitude, s_nRxLatitude]);
         });
@@ -126,45 +126,48 @@
 
     window.onload = () => {
         if ('WebSocket' in window) {
-            // WebSocket 연결 생성
             let ws = new WebSocket('ws://10.252.110.58:3001/websocket');
+            //let ws = new WebSocket('ws://192.168.2.249:3001/websocket');
 
-            // 연결 성공 시
             ws.onopen = () => {
                 console.log('WebSocket connection established');
-                ws.send('Client connected'); // 서버로 메시지 전송 (선택 사항)
+                ws.send('Client connected');
             }
 
-            /* Rx */
-            /*
-            ws.onmessage = (message) => {
-                let data = message.data.split(','); // CSV 형식으로 가정하고, 콤마로 분리
-                s_nRxLatitude = data[62];
-                s_nRxLongitude = data[63];
-                s_unRxVehicleHeading = data[56];
-                s_nTxLatitude = data[32];
-                s_nTxLongitude = data[33];
-                s_unTxVehicleHeading = data[38];
-                s_unPdr = data[68];
-                s_ulLatencyL1 = data[43];
-                s_ulTotalPacketCnt = data[66];
-                s_unSeqNum = data[35];
+            if(isTempTxTest) {
+                ws.onmessage = (message) => {
+                    let data = message.data.split(',');
+                    s_nRxLatitude = data[23]; // Mine
+                    s_nRxLongitude = data[24]; // Mine
+                    s_unRxVehicleHeading = data[29]; // Mine
+                    s_nTxLatitude = vehicleLatitude1;
+                    s_nTxLongitude = vehicleLongitude1;
+                    s_unTxVehicleHeading = vehicleHeading1;
+                    s_unPdr = 100;
+                    s_ulLatencyL1 = 500;
+                    s_ulTotalPacketCnt = 1 + s_unTempTxCnt;
+                    s_unSeqNum = 1 + s_unTempTxCnt;
+
+                    s_unTempTxCnt += 1;
+                }
             }
-            */
-            /* Tx */
-            ws.onmessage = (message) => {
-                let data = message.data.split(','); // CSV 형식으로 가정하고, 콤마로 분리
-                s_nRxLatitude = data[24]; // Mine
-                s_nRxLongitude = data[25]; // Mine
-                s_unRxVehicleHeading = data[30]; // Mine
-                s_nTxLatitude = vehicleLatitude1;
-                s_nTxLongitude = vehicleLongitude1;
-                s_unTxVehicleHeading = vehicleHeading1;
-                s_unPdr = 100;
-                s_ulLatencyL1 = 5;
-                s_ulTotalPacketCnt = 1;
-                s_unSeqNum = 1;
+            else
+            {
+                ws.onmessage = (message) => {
+                    let data = message.data.split(',');
+                    s_nRxLatitude = data[62];
+                    s_nRxLongitude = data[63];
+                    s_unRxVehicleHeading = data[56];
+                    s_nTxLatitude = data[32];
+                    s_nTxLongitude = data[33];
+                    s_unTxVehicleHeading = data[38];
+                    s_unPdr = data[68];
+                    s_ulLatencyL1 = data[43];
+                    s_ulTotalPacketCnt = data[66];
+                    s_unSeqNum = data[35];
+                }
             }
+
             ws.onerror = (error) => {
                 console.error('WebSocket error', error);
             }
@@ -556,7 +559,7 @@
             }
 
             fetchAndUpdate();
-            setInterval(fetchAndUpdate, 100); // 100ms 주기로 호출
+            setInterval(fetchAndUpdate, 100);
         }
     );
 
@@ -572,7 +575,16 @@
         const ulTotalPacketCnt = parseFloat(s_ulTotalPacketCnt);
         const unSeqNum = parseFloat(s_unSeqNum);
 
-        //console.log(`s_unPdr: ${s_unPdr}`);
+        console.log(`latitude0: ${latitude0}`);
+        console.log(`longitude0: ${longitude0}`);
+        console.log(`heading0: ${heading0}`);
+        console.log(`latitude1: ${latitude1}`);
+        console.log(`longitude1: ${longitude1}`);
+        console.log(`heading1: ${heading1}`);
+        console.log(`unPdr: ${unPdr}`);
+        console.log(`ulLatencyL1: ${ulLatencyL1}`);
+        console.log(`ulTotalPacketCnt: ${ulTotalPacketCnt}`);
+        console.log(`unSeqNum: ${unSeqNum}`);
 
         if (!isNaN(unPdr) && !isNaN(ulTotalPacketCnt)) {
             updateGraph1(ulTotalPacketCnt, unPdr);
@@ -599,7 +611,6 @@
         }
 
         if (!isNaN(xValue[0]) && !isNaN(unPdrValue[0])) {
-            // 데이터 추가
             Plotly.extendTraces('graph1', {
                 x: [xValue],
                 y: [unPdrValue]
@@ -607,7 +618,7 @@
 
             // TotalPacketCount 텍스트 추가
             let totalPacketCount = xValue[0];
-            let middleYValue = (80 + 100) / 2; // 중간 y값 (y축 범위에 따라 조정 가능)
+            let middleYValue = (80 + 100) / 2;
 
             Plotly.relayout('graph1', {
                 yaxis: { range: [80, 100], title: 'PDR (Packet Delivery Rate) (%)', dtick: 1 },
@@ -636,7 +647,6 @@
                 ]
             });
 
-            // 현재 PDR 값 업데이트
             document.getElementById('current-value-graph1').innerText = `PDR (Packet Delivery Rate): ${unPdrValue[0]}%`;
         } else {
             console.error('Invalid data points for Graph1.');
@@ -654,19 +664,15 @@
         }
 
         if (!isNaN(xValue[0]) && !isNaN(ulLatencyValue[0])) {
-            // 데이터 추가
             latencyData.push({x: xValue[0], y: ulLatencyValue[0]});
 
-            // 그래프 업데이트
             Plotly.update('graph2', {
                 x: [latencyData.map(point => point.x)],
                 y: [latencyData.map(point => point.y)]
             }, [0]);
 
-            // 평균값 계산
             let avgLatency = latencyData.reduce((sum, point) => sum + point.y, 0) / latencyData.length;
 
-            // 평균값 선과 텍스트 추가
             Plotly.relayout('graph2', {
                 yaxis: { range: [0, 15], title: 'Latency (ms)', dtick: 1 },
                 xaxis: { title: 'The Total Received Rx Packets' },
@@ -707,7 +713,6 @@
                 ]
             });
 
-            // 현재 값 및 평균값 표시
             document.getElementById('current-value-graph2').innerText = `Latency (Air to Air): ${ulLatencyValue[0]}ms, Avg: ${avgLatency.toFixed(2)}ms`;
         } else {
             console.error('Invalid data points for Graph2.');
@@ -746,7 +751,7 @@
         paper_bgcolor: '#ffffff'
     });
 
-    const weatherApiKey = '0384422edd4701383345e4e16d05b903'; // 여기에 OpenWeatherMap API 키를 입력하세요
+    const weatherApiKey = '0384422edd4701383345e4e16d05b903';
 
     function updateWeather() {
         const center = map.getCenter();
@@ -756,27 +761,27 @@
         fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${weatherApiKey}`)
             .then(response => response.json())
             .then(data => {
-                if (data.cod === 200) { // 성공적인 응답 확인
+                if (data.cod === 200) {
                     const icon = data.weather[0].icon;
                     const temp = data.main.temp;
                     document.getElementById('weather-icon').src = `http://openweathermap.org/img/wn/${icon}.png`;
                     document.getElementById('temperature').textContent = `${temp.toFixed(1)}°C`;
                 } else {
-                    console.error(`Error: ${data.message}`); // 오류 메시지 출력
-                    document.getElementById('weather-icon').src = ''; // 아이콘 초기화
+                    console.error(`Error: ${data.message}`);
+                    document.getElementById('weather-icon').src = '';
                     document.getElementById('temperature').textContent = 'Data not available';
                 }
             })
             .catch(error => {
                 console.error('Error fetching weather data:', error);
-                document.getElementById('weather-icon').src = ''; // 아이콘 초기화
+                document.getElementById('weather-icon').src = '';
                 document.getElementById('temperature').textContent = 'Error fetching data';
             });
     }
 
-    // 초기 날씨 업데이트 및 이후 주기적으로 업데이트
     updateWeather();
-    setInterval(updateWeather, 600000); // 10분마다 업데이트
+    setInterval(updateWeather, 600000);
+
 </script>
 </body>
 </html>
