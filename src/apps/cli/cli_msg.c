@@ -148,7 +148,7 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
             }
             else
             {
-                PrintTrace("file type[%d] is opened", s_hWebSocket);
+                PrintTrace("file type[%d] is opened", s_eFileType);
             }
 
             if(s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE)

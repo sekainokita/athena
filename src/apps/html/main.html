@@ -19,19 +19,20 @@
     border-radius: 5px;
     font-family: Arial, sans-serif;
     display: flex;
-    align-items: center;
+    flex-direction: column; /* 요소들을 세로로 정렬 */
+    align-items: center; /* 요소들을 왼쪽에 정렬 */
     z-index: 1;
 }
 #weather-icon {
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
+    width: 70px;
+    height: 70px;
+    margin-bottom: 5px; /* 이미지와 텍스트 사이의 간격 추가 */
 }
-#temperature {
+#location, #temperature, #humidity {
     font-size: 18px;
     font-weight: bold;
+    margin-bottom: 5px; /* 각 텍스트 요소 사이의 간격 추가 */
 }
-
 #graphs { position: absolute; top: 0; bottom: 0; right: 0; width: 25%; display: flex; flex-direction: column; }
 .graph { flex: 1; position: relative; margin-top: 50px; }
 #current-values {
@@ -55,7 +56,9 @@
 <div id="map"></div>
 <div id="weather-info">
     <img id="weather-icon" src="" alt="Weather Icon"/>
-    <span id="temperature">--°C</span>
+    <div id="location">Location: --</div>
+    <div id="temperature">Temperature: --°C</div>
+    <div id="humidity">Humidity: --%</div>
 </div>
 
 <div id="graphs">
@@ -103,7 +106,7 @@
     let s_unPdr, s_ulLatencyL1, s_ulTotalPacketCnt, s_unSeqNum;
 
     let s_unTempTxCnt = 0;
-    let isTempTxTest = true;
+    let isTempTxTest = false;
 
 	mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
     const map = new mapboxgl.Map({
@@ -761,23 +764,38 @@
         fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${weatherApiKey}`)
             .then(response => response.json())
             .then(data => {
+                console.log(data); // API 응답 데이터를 콘솔에 출력하여 확인
+
                 if (data.cod === 200) {
                     const icon = data.weather[0].icon;
                     const temp = data.main.temp;
-                    document.getElementById('weather-icon').src = `http://openweathermap.org/img/wn/${icon}.png`;
-                    document.getElementById('temperature').textContent = `${temp.toFixed(1)}°C`;
+                    const humidity = data.main.humidity;
+                    const location = data.name;
+
+                    document.getElementById('weather-icon').src = `https://openweathermap.org/img/wn/${icon}.png`;
+                    document.getElementById('location').textContent = `Location: ${location}`;
+                    document.getElementById('temperature').textContent = `Temperature: ${temp.toFixed(1)}°C`;
+                    document.getElementById('humidity').textContent = `Humidity: ${humidity}%`;
                 } else {
                     console.error(`Error: ${data.message}`);
                     document.getElementById('weather-icon').src = '';
-                    document.getElementById('temperature').textContent = 'Data not available';
+                    document.getElementById('location').textContent = 'Location: Data not available';
+                    document.getElementById('temperature').textContent = 'Temperature: Data not available';
+                    document.getElementById('humidity').textContent = 'Humidity: Data not available';
                 }
             })
             .catch(error => {
                 console.error('Error fetching weather data:', error);
                 document.getElementById('weather-icon').src = '';
-                document.getElementById('temperature').textContent = 'Error fetching data';
+                document.getElementById('location').textContent = 'Location: Error fetching data';
+                document.getElementById('temperature').textContent = 'Temperature: Error fetching data';
+                document.getElementById('humidity').textContent = 'Humidity: Error fetching data';
             });
     }
+
+    updateWeather();
+    setInterval(updateWeather, 600000);
+
 
     updateWeather();
     setInterval(updateWeather, 600000);
