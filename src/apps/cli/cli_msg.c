@@ -109,16 +109,6 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
         return nRet;
     }
 
-
-    typedef enum
-    {
-        eMSG_MANAGER_FILE_TYPE_UNKNOWN = 0,
-        eMSG_MANAGER_FILE_TYPE_TX,
-        eMSG_MANAGER_FILE_TYPE_RX,
-        eMSG_MANAGER_FILE_TYPE_SAMPLE,
-        eMSG_MANAGER_COMM_TYPE_MAX = 0xFF
-    } MSG_MANAGER_FILE_TYPE_E;
-
     switch (eCbReason)
     {
         case LWS_CALLBACK_ESTABLISHED:
@@ -255,9 +245,11 @@ static int32_t P_MSG_MANAGER_WebSocketInit(void)
             P_MSG_MANAGER_WebSocketCallback,
             sizeof(struct per_session_data),
             0,
-            NULL, NULL, NULL
+            0,
+            NULL,
+            0
         },
-        { NULL, NULL, 0, 0 }
+        { NULL, NULL, 0, 0, 0, NULL, 0 }
     };
 
     struct lws_context_creation_info info = {
