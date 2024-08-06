@@ -106,14 +106,14 @@
     let s_unPdr, s_ulLatencyL1, s_ulTotalPacketCnt, s_unSeqNum;
 
     let s_unTempTxCnt = 0;
-    let isTempTxTest = false;
+    let isTempTxTest = true;
 
 	mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
     const map = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/yesbman/clyzkeh8900dr01pxdqow8awk',
         projection: 'globe',
-        zoom: 18,
+        zoom: 19,
         center: [cKetiPangyolongitude, cKetiPangyoLatitude]
     });
 
@@ -137,12 +137,18 @@
                 ws.send('Client connected');
             }
 
+            function reverseHeading(heading) {
+                // heading 값을 180도 회전시키고 좌우를 반대로 변환
+                let reversedHeading = (360 - ((parseInt(heading) + 180) % 360)) % 360;
+                return reversedHeading;
+            }
+
             if(isTempTxTest) {
                 ws.onmessage = (message) => {
                     let data = message.data.split(',');
                     s_nRxLatitude = data[23]; // Mine
                     s_nRxLongitude = data[24]; // Mine
-                    s_unRxVehicleHeading = data[29]; // Mine
+                    s_unRxVehicleHeading = reverseHeading(data[29]); // 변환된 heading 값
                     s_nTxLatitude = vehicleLatitude1;
                     s_nTxLongitude = vehicleLongitude1;
                     s_unTxVehicleHeading = vehicleHeading1;
@@ -451,7 +457,7 @@
                 'source': 'vehicle_src_0',
                 'layout': {
                     'icon-image': 'vehicle',
-                    'icon-size': 0.03,
+                    'icon-size': 0.5,
                     'icon-rotate': ['get', 'heading'],
                     'text-field': ['concat', 'Heading ', ['get', 'heading']],
                     'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
@@ -517,22 +523,28 @@
                 });
 
                 if (vehicleId === 0) {
-//                    map.setCenter(coordinates);
+                    map.setCenter(coordinates);
                 }
             }
 
             function animateVehiclePosition(vehicleId, startCoords, endCoords, heading) {
                 let startTime = null;
-                const duration = 300; // 100ms duration for the animation
+                const duration = 100;
+
+                function easeInOutQuad(t) {
+                    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+                }
 
                 function animate(timestamp) {
                     if (!startTime) startTime = timestamp;
                     const elapsed = timestamp - startTime;
                     const t = Math.min(elapsed / duration, 1); // Normalize time
 
+                    const easedT = easeInOutQuad(t);
+
                     const interpolatedCoords = [
-                        startCoords[0] + (endCoords[0] - startCoords[0]) * t,
-                        startCoords[1] + (endCoords[1] - startCoords[1]) * t
+                        startCoords[0] + (endCoords[0] - startCoords[0]) * easedT,
+                        startCoords[1] + (endCoords[1] - startCoords[1]) * easedT
                     ];
 
                     updateVehiclePosition(vehicleId, interpolatedCoords, heading);
@@ -578,6 +590,7 @@
         const ulTotalPacketCnt = parseFloat(s_ulTotalPacketCnt);
         const unSeqNum = parseFloat(s_unSeqNum);
 
+        /*
         console.log(`latitude0: ${latitude0}`);
         console.log(`longitude0: ${longitude0}`);
         console.log(`heading0: ${heading0}`);
@@ -588,6 +601,7 @@
         console.log(`ulLatencyL1: ${ulLatencyL1}`);
         console.log(`ulTotalPacketCnt: ${ulTotalPacketCnt}`);
         console.log(`unSeqNum: ${unSeqNum}`);
+        */
 
         if (!isNaN(unPdr) && !isNaN(ulTotalPacketCnt)) {
             updateGraph1(ulTotalPacketCnt, unPdr);

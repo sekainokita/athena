@@ -653,6 +653,19 @@ int32_t DI_GPS_SetLog(DI_GPS_T *pstDiGps)
     return nRet;
 }
 
+double P_DI_GPS_AdjustHeading(double dHeadingDegree)
+{
+    while (dHeadingDegree < 0)
+    {
+        dHeadingDegree += 360.0; /* convert negative to positive angles */
+    }
+    while (dHeadingDegree >= 360.0)
+    {
+        dHeadingDegree -= 360.0; /* ensure the angle is within 0-360 degrees */
+    }
+    return dHeadingDegree;
+}
+
 double DI_GPS_GetHeading(DI_GPS_T *pstDiGps)
 {
     int32_t nRet = DI_ERROR;
@@ -690,10 +703,9 @@ double DI_GPS_GetHeading(DI_GPS_T *pstDiGps)
         dHeadingDegree = s_stDiGpsDev.fEulerYaw;
 #endif
 #endif
-        if(dHeadingDegree < 0)
-        {
-            dHeadingDegree += 360.0; /* convert negative to positive angles */
-        }
+
+    dHeadingDegree = P_DI_GPS_AdjustHeading(dHeadingDegree);
+
     }
     else
     {
