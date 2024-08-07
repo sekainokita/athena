@@ -565,16 +565,18 @@
                 const heading1 = parseFloat(s_unTxVehicleHeading);
 
                 if (!isNaN(latitude0) && !isNaN(longitude0)) {
-                    animateVehiclePosition(0, [vehicleLongitude0, vehicleLatitude0], [longitude0, latitude0], heading0);
+                    //animateVehiclePosition(0, [vehicleLongitude0, vehicleLatitude0], [longitude0, latitude0], heading0);
+                    updateVehiclePosition(0, [longitude0, latitude0], heading0);
                 }
 
                 if (!isNaN(latitude1) && !isNaN(longitude1)) {
-                    animateVehiclePosition(1, [vehicleLongitude1, vehicleLatitude1], [longitude1, latitude1], heading1);
+                    //animateVehiclePosition(1, [vehicleLongitude1, vehicleLatitude1], [longitude1, latitude1], heading1);
+                    updateVehiclePosition(1, [longitude1, latitude1], heading1);
                 }
             }
 
             fetchAndUpdate();
-            setInterval(fetchAndUpdate, 100);
+            setInterval(fetchAndUpdate, 10);
         }
     );
 
