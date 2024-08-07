@@ -9,47 +9,80 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <style>
-#map { position: absolute; top: 0; bottom: 0; width: 75%; }
-#weather-info {
-    position: absolute;
-    top: 50px;
-    left: 10px;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 10px;
-    border-radius: 5px;
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column; /* 요소들을 세로로 정렬 */
-    align-items: center; /* 요소들을 왼쪽에 정렬 */
-    z-index: 1;
-}
-#weather-icon {
-    width: 70px;
-    height: 70px;
-    margin-bottom: 5px; /* 이미지와 텍스트 사이의 간격 추가 */
-}
-#location, #temperature, #humidity {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 5px; /* 각 텍스트 요소 사이의 간격 추가 */
-}
-#graphs { position: absolute; top: 0; bottom: 0; right: 0; width: 25%; display: flex; flex-direction: column; }
-.graph { flex: 1; position: relative; margin-top: 50px; }
-#current-values {
-    position: absolute;
-    top: 0;
-    right: 10px;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 5px;
-    border-radius: 5px;
-    z-index: 1;
-}
-#current-value-graph1 {
-    color: green;
-}
-#current-value-graph2 {
-    color: blue;
-}
+    #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 75%;
+    }
+    #weather-info {
+        position: absolute;
+        top: 50px;
+        left: 10px;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        border-radius: 5px;
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 1;
+    }
+    #weather-icon {
+        width: 70px;
+        height: 70px;
+        margin-bottom: 5px;
+    }
+    #location, #temperature, #humidity {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    #graphs {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        width: 25%;
+        display: flex;
+        flex-direction: column;
+    }
+    .graph {
+        flex: 1;
+        position: relative;
+        margin-top: 50px;
+    }
+    #current-values {
+        position: absolute;
+        top: 0;
+        right: 10px;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 5px;
+        border-radius: 5px;
+        z-index: 1;
+    }
+    #current-value-graph1 {
+        color: green;
+    }
+    #current-value-graph2 {
+        color: blue;
+    }
+    #center-button, #centerToggleButton {
+        position: absolute;
+        z-index: 1;
+        padding: 10px;
+        background-color: white;
+        border: 1px solid #ccc;
+        cursor: pointer;
+    }
+    #center-button {
+        top: 10px;
+        left: 10px;
+    }
+    #centerToggleButton {
+        top: 10px;
+        left: 160px;
+    }
 </style>
 </head>
 <body>
@@ -70,6 +103,7 @@
     </div>
 </div>
 <button id="center-button" style="position: absolute; top: 10px; left: 10px; z-index: 1;">Center on Coordinates</button>
+<button id="centerToggleButton">Enable Centering</button>
 
 <script>
     // KETI Pangyo
@@ -108,6 +142,8 @@
     let s_unTempTxCnt = 0;
     let isTempTxTest = true;
 
+    let isCenteringEnabled = false;
+
 	mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
     const map = new mapboxgl.Map({
         container: 'map',
@@ -125,6 +161,11 @@
         document.getElementById('center-button').addEventListener('click', function() {
             map.setCenter([s_nRxLongitude, s_nRxLatitude]);
         });
+    });
+
+    document.getElementById('centerToggleButton').addEventListener('click', function() {
+        isCenteringEnabled = !isCenteringEnabled;
+        this.textContent = isCenteringEnabled ? 'Disable Centering' : 'Enable Centering';
     });
 
     window.onload = () => {
@@ -522,7 +563,7 @@
                     }
                 });
 
-                if (vehicleId === 0) {
+                if (isCenteringEnabled && vehicleId === 0) {
                     map.setCenter(coordinates);
                 }
             }
