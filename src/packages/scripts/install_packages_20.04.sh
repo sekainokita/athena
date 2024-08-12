@@ -97,6 +97,10 @@ pip3 install opencv-contrib-python
 pip3 install pygccxml
 pip3 install pybind11 pybind11-global thrift thrift-tools
 
+# Server
+apt-get install -y lighttpd
+apt-get install -y cmake libssl-dev libuv1-dev
+
 # ROS
 sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-noetic.list'
 apt install -y curl
@@ -160,3 +164,13 @@ echo "        server_args = /tftpboot" >> /etc/xinetd.d/tftp
 echo "        disable = no" >> /etc/xinetd.d/tftp
 echo "}" >> /etc/xinetd.d/tftp
 service xinetd restart
+
+#libwehsocket
+#git clone https://github.com/warmcat/libwebsockets.git
+#cd libwebsockets
+#mkdir build
+#cd build
+#cmake ..
+#make
+#sudo make install
+
