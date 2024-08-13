@@ -145,8 +145,8 @@ int32_t P_SVC_PLATOONING_SetDefaultSettings(SVC_PLATOONING_T *pstSvcPlatooning)
     pstSvcPlatooning->stMsgManagerTx.eV2xTimeSlot = eMSG_MANAGER_V2X_TIME_SLOT_CONTINUOUS;
     pstSvcPlatooning->stMsgManagerTx.unPsid = DB_V2X_PSID;
     pstSvcPlatooning->stMsgManagerTx.nTxPower = MSG_MANAGER_V2X_TX_POWER;
-    pstSvcPlatooning->stMsgManagerTx.unTxCount = 10;
-    pstSvcPlatooning->stMsgManagerTx.unTxDelay = 100;
+    pstSvcPlatooning->stMsgManagerTx.unTxCount = SVC_PLATOONING_TX_COUNT;
+    pstSvcPlatooning->stMsgManagerTx.unTxDelay = SVC_PLATOONING_TX_DELAY;
 
     for(int i = 0; i < MSG_MANAGER_MAC_LENGTH; i++)
     {

@@ -78,6 +78,9 @@
 #define SVC_PLATOONING_DEFAULT_PORT               (47347)
 #endif
 
+#define SVC_PLATOONING_TX_COUNT                   (10)
+#define SVC_PLATOONING_TX_DELAY                   (10)
+
 /***************************** Enum and Structure ****************************/
 
 /**
