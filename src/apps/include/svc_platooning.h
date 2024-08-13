@@ -79,7 +79,7 @@
 #endif
 
 #define SVC_PLATOONING_TX_COUNT                   (10)
-#define SVC_PLATOONING_TX_DELAY                   (10)
+#define SVC_PLATOONING_TX_DELAY                   (50)
 
 /***************************** Enum and Structure ****************************/
 
