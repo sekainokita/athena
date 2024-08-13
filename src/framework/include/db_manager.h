@@ -67,7 +67,7 @@
 
 #define DB_MGR_DEFAULT_COMM_TYPE                  "Tx"
 #define DB_MGR_DEFAULT_DEV_TYPE                   "OBU"
-#define DB_MGR_DEFAULT_COMM_DEV_ID                "KETIV2X01"
+#define DB_MGR_DEFAULT_COMM_DEV_ID                "VEH-ID"
 #define DB_MGR_DEFAULT_START_TIME                 "2309010911"
 #define DB_MGR_DEFAULT_END_TIME                   "2309011011"
 #define DB_MGR_DEFAULT_TOTAL_TIME                 "1h"
@@ -80,11 +80,7 @@
 #define DB_V2X_MONTH                              "M_08"
 #define DB_V2X_STORAGE                            "/exStorage/hdd_v2x_db_1/5g-nr-v2x/5g-nr-v2x-db/keti/results"
 
-#if defined(CONFIG_PLATFORM_OBU_CHEMTRONICS)
 #define DB_V2X_DEVICE_ID_PREFIX                   "VEH-ID"
-#else
-#define DB_V2X_DEVICE_ID_PREFIX                   "UNKNOWN"
-#endif
 
 /***************************** Enum and Structure ****************************/
 
