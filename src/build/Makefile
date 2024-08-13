@@ -40,6 +40,32 @@ LIB_FRAMEWORK = framework
 LIB_PLATFORM = platform
 LIB_DI = di
 
+APP_BIN_NAME = athena
+
+ifeq ($(CONFIG_MODEL_NNCO1XG),y)
+APP_MODEL_NAME = nnco1xg
+else ifeq ($(CONFIG_MODEL_NNCO2OG),y)
+APP_MODEL_NAME = nnco2og
+else ifeq ($(CONFIG_MODEL_NNCO2XG),y)
+APP_MODEL_NAME = nnco2xg
+else ifeq ($(CONFIG_MODEL_NOCO1XG),y)
+APP_MODEL_NAME = noco1xg
+else ifeq ($(CONFIG_MODEL_NOCO2OG),y)
+APP_MODEL_NAME = noco2og
+else ifeq ($(CONFIG_MODEL_NOCO2XG),y)
+APP_MODEL_NAME = noco2xg
+else ifeq ($(CONFIG_MODEL_NOCO2XGR),y)
+APP_MODEL_NAME = noco2xgr
+else ifeq ($(CONFIG_MODEL_UCO1XG),y)
+APP_MODEL_NAME = uco1xg
+else ifeq ($(CONFIG_MODEL_XZCO1XGC),y)
+APP_MODEL_NAME = xzco1xgc
+else
+APP_MODEL_NAME = keti
+endif
+
+APP_MODEL_BIN_NAME = $(APP_MODEL_NAME)-$(APP_BIN_NAME)
+
 # CFLAGS / LDFLAGS
 TARGET_CFLAGS = -I$(INC_PATH)
 TARGET_CFLAGS += -I$(APP_INC_PATH)
@@ -268,7 +294,8 @@ release:
 	@echo release $(RELEASE_DIR)/$(CONFIG_SW_VERSION)
 	rm -rf $(RELEASE_DIR)/$(CONFIG_SW_VERSION)
 	mkdir -p $(RELEASE_DIR)/$(CONFIG_SW_VERSION)
-	cp -a $(OUT_BIN_DIR) $(RELEASE_DIR)/$(CONFIG_SW_VERSION)/bin
+	mkdir -p $(RELEASE_DIR)/$(CONFIG_SW_VERSION)/bin
+	cp -af $(OUT_BIN_DIR)/$(APP_BIN_NAME) $(RELEASE_DIR)/$(CONFIG_SW_VERSION)/bin/$(APP_MODEL_BIN_NAME)
 	cp -a $(OUT_LIB_DIR) $(RELEASE_DIR)/$(CONFIG_SW_VERSION)/lib
 
 #
