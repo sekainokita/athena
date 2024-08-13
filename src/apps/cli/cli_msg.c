@@ -206,7 +206,7 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
                 }
             }
 
-            usleep(MSG_MANAGER_V2X_TX_DELAY*1000); // Wait for 100ms
+            usleep(SVC_PLATOONING_TX_DELAY*1000);
             lws_callback_on_writable(pstWsi);
             break;
 

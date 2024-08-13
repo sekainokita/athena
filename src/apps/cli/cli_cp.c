@@ -355,6 +355,8 @@ static int P_CLI_CP_StopV2xStatusScenario(void)
         PrintError("SVC_CP_Start() is failed! [nRet:%d]", nRet);
     }
 
+    usleep(SVC_CP_STOP_DELAY);
+
     nRet = SVC_CP_Close(pstSvcCp);
     if(nRet != APP_OK)
     {

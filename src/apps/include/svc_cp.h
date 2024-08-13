@@ -72,6 +72,7 @@
 #define SVC_CP_DEV_OBU                      "OBU"
 #define SVC_CP_DEV_RSU                      "RSU"
 #define SVC_CP_DEV_UNKNOWN                  "UNKNOWN"
+#define SVC_CP_STOP_DELAY                   (1000*1000)
 
 #if defined(CONFIG_EXT_DATA_FORMAT)
 #define SVC_CP_DEFAULT_IP                   "192.168.1.11"

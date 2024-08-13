@@ -72,6 +72,7 @@
 #define SVC_PLATOONING_DEV_OBU                    "OBU"
 #define SVC_PLATOONING_DEV_RSU                    "RSU"
 #define SVC_PLATOONING_DEV_UNKNOWN                "UNKNOWN"
+#define SVC_PLATOONING_STOP_DELAY                 (1000*1000)
 
 #if defined(CONFIG_EXT_DATA_FORMAT)
 #define SVC_PLATOONING_DEFAULT_IP                 "192.168.1.11"

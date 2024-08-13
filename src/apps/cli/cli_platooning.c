@@ -254,6 +254,8 @@ static int P_CLI_PLATOONING_StopPtSvc(void)
         PrintError("SVC_PLATOONING_Stop() is failed! [nRet:%d]", nRet);
     }
 
+    usleep(SVC_PLATOONING_STOP_DELAY);
+
     nRet = SVC_PLATOONING_Close(pstSvcPlatooning);
     if(nRet != APP_OK)
     {
