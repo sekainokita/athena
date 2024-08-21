@@ -91,12 +91,18 @@
         position: absolute;
         top: 0px;  /* 위치를 지정하세요 */
         left: 1600px; /* 위치를 지정하세요 */
-        z-index: 10; /* 지도가 겹치지 않도록 z-index 설정 */
+        z-index: 10; /* z-index 값을 높게 설정해서 다른 요소 위에 위치하도록 설정 */
+        text-align: center; /* 이미지와 텍스트를 가운데 정렬 */
+        padding: 5px; /* 여백 추가 */
+        border-radius: 5px; /* 모서리를 둥글게 */
     }
-
     #traffic-light img {
         width: 110px; /* 신호등 크기 조정 */
         height: auto;
+    }
+    #traffic-light-status {
+        font-size: 30px;
+        margin-top: 5px; /* 이미지와 텍스트 사이의 여백 */
     }
 </style>
 </head>
@@ -120,6 +126,7 @@
 
 <div id="traffic-light">
     <img id="traffic-light-image" src="https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/red-light.png" alt="Traffic Light" width="50">
+    <p id="traffic-light-status" style="color: red;">RED Light<br>(STOP)</p>
 </div>
 
 <button id="center-button" style="position: absolute; top: 10px; left: 10px; z-index: 1;">Center on Coordinates</button>
@@ -622,13 +629,20 @@
 
     function updateTrafficLightBasedOnHeading(heading) {
         const trafficLightImage = document.getElementById('traffic-light-image');
+        const trafficLightStatus = document.getElementById('traffic-light-status');
 
         if (heading >= 0 && heading <= 90) {
             trafficLightImage.src = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/green-light.png';  // 초록 불로 변경
+            trafficLightStatus.innerHTML = 'Green Light<br>(GO)';       // 텍스트 업데이트
+            trafficLightStatus.style.color = 'green';
         } else if (heading >= 91 && heading <= 180) {
             trafficLightImage.src = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/yellow-light.png';  // 주황 불로 변경
+            trafficLightStatus.innerHTML = 'Yellow Light<br>(STOP)';      // 텍스트 업데이트
+            trafficLightStatus.style.color = 'orange';
         } else if (heading >= 181 && heading <= 359) {
             trafficLightImage.src = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/red-light.png';  // 빨간 불로 변경
+            trafficLightStatus.innerHTML = 'RED Light<br>(STOP)';         // 텍스트 업데이트
+            trafficLightStatus.style.color = 'red';
         }
     }
 
