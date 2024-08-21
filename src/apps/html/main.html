@@ -244,6 +244,15 @@
     };
 
     map.on('load', () => {
+
+        map.on('zoom', () => {
+            map.resize();  // 확대/축소 시 강제로 지도를 리렌더링
+        });
+
+        map.on('move', () => {
+            map.resize();  // 지도가 이동될 때 리렌더링
+        });
+
         map.loadImage(
             'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/keti_ci.png',
             (error, image) => {
