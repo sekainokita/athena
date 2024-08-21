@@ -67,7 +67,7 @@
     #current-value-graph2 {
         color: blue;
     }
-    #center-button, #centerToggleButton {
+    #center-button, #centerToggleButton, #lineToggleButton{
         position: absolute;
         z-index: 1;
         padding: 10px;
@@ -81,7 +81,11 @@
     }
     #centerToggleButton {
         top: 10px;
-        left: 160px;
+        left: 170px;
+    }
+    #lineToggleButton {
+        top: 10px;
+        left: 300px;
     }
 </style>
 </head>
@@ -104,6 +108,7 @@
 </div>
 <button id="center-button" style="position: absolute; top: 10px; left: 10px; z-index: 1;">Center on Coordinates</button>
 <button id="centerToggleButton">Enable Centering</button>
+<button id="lineToggleButton">Enable Connected Vehicle</button>
 
 <script>
     // KETI Pangyo
@@ -140,9 +145,11 @@
     let s_unPdr, s_ulLatencyL1, s_ulTotalPacketCnt, s_unSeqNum;
 
     let s_unTempTxCnt = 0;
-    let isTempTxTest = true;
+    let isTempTxTest = false;
 
     let isCenteringEnabled = false;
+
+    let isCvLineEnabled = false;
 
 	mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
     const map = new mapboxgl.Map({
@@ -168,11 +175,16 @@
         this.textContent = isCenteringEnabled ? 'Disable Centering' : 'Enable Centering';
     });
 
+    document.getElementById('lineToggleButton').addEventListener('click', function() {
+        isCvLineEnabled = !isCvLineEnabled;
+        this.textContent = isCvLineEnabled ? 'Disable Connected Vehicle' : 'Enable Connected Vehicle';
+    });
+
     window.onload = () => {
         if ('WebSocket' in window) {
             let ws = new WebSocket('ws://10.252.110.58:3001/websocket');
-            //let ws = new WebSocket('ws://10.252.110.34:3001/websocket');
             //let ws = new WebSocket('ws://192.168.2.249:3001/websocket');
+            //let ws = new WebSocket('ws://10.252.110.34:3001/websocket');
 
             ws.onopen = () => {
                 console.log('WebSocket connection established');
@@ -208,10 +220,10 @@
                     let data = message.data.split(',');
                     s_nRxLatitude = data[62];
                     s_nRxLongitude = data[63];
-                    s_unRxVehicleHeading = data[56];
+                    s_unRxVehicleHeading = reverseHeading(data[56]);
                     s_nTxLatitude = data[32];
                     s_nTxLongitude = data[33];
-                    s_unTxVehicleHeading = data[38];
+                    s_unTxVehicleHeading = reverseHeading(data[38]);
                     s_unPdr = data[68];
                     s_ulLatencyL1 = data[43];
                     s_ulTotalPacketCnt = data[66];
@@ -499,7 +511,7 @@
                 'source': 'vehicle_src_0',
                 'layout': {
                     'icon-image': 'vehicle',
-                    'icon-size': 0.5,
+                    'icon-size': 0.4,
                     'icon-rotate': ['get', 'heading'],
                     'text-field': ['concat', 'Heading ', ['get', 'heading']],
                     'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
@@ -519,7 +531,7 @@
                 'source': 'vehicle_src_1',
                 'layout': {
                     'icon-image': 'vehicle',
-                    'icon-size': 0.03,
+                    'icon-size': 0.4,
                     'icon-rotate': ['get', 'heading'],
                     'text-field': ['concat', 'Heading ', ['get', 'heading']],
                     'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
@@ -556,6 +568,8 @@
                     vehicleLatitude1 = coordinates[1];
                 }
 
+                if (isCvLineEnabled)
+                {
                 map.getSource('line').setData({
                     'type': 'Feature',
                     'geometry': {
@@ -563,39 +577,11 @@
                         'coordinates': [[vehicleLongitude0, vehicleLatitude0], [vehicleLongitude1, vehicleLatitude1]]
                     }
                 });
+                }
 
                 if (isCenteringEnabled && vehicleId === 0) {
                     map.setCenter(coordinates);
                 }
-            }
-
-            function animateVehiclePosition(vehicleId, startCoords, endCoords, heading) {
-                let startTime = null;
-                const duration = 100;
-
-                function easeInOutQuad(t) {
-                    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-                }
-
-                function animate(timestamp) {
-                    if (!startTime) startTime = timestamp;
-                    const elapsed = timestamp - startTime;
-                    const t = Math.min(elapsed / duration, 1); // Normalize time
-
-                    const easedT = easeInOutQuad(t);
-
-                    const interpolatedCoords = [
-                        startCoords[0] + (endCoords[0] - startCoords[0]) * easedT,
-                        startCoords[1] + (endCoords[1] - startCoords[1]) * easedT
-                    ];
-
-                    updateVehiclePosition(vehicleId, interpolatedCoords, heading);
-
-                    if (t < 1) {
-                        requestAnimationFrame(animate);
-                    }
-                }
-                requestAnimationFrame(animate);
             }
 
             function fetchAndUpdate() {
@@ -607,12 +593,10 @@
                 const heading1 = parseFloat(s_unTxVehicleHeading);
 
                 if (!isNaN(latitude0) && !isNaN(longitude0)) {
-                    //animateVehiclePosition(0, [vehicleLongitude0, vehicleLatitude0], [longitude0, latitude0], heading0);
                     updateVehiclePosition(0, [longitude0, latitude0], heading0);
                 }
 
                 if (!isNaN(latitude1) && !isNaN(longitude1)) {
-                    //animateVehiclePosition(1, [vehicleLongitude1, vehicleLatitude1], [longitude1, latitude1], heading1);
                     updateVehiclePosition(1, [longitude1, latitude1], heading1);
                 }
             }

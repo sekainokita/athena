@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script>
+    window.onload = () => {
+        if ('WebSocket' in window) {
+            // Create a WebSocket connection
+            let ws = new WebSocket('ws://10.252.110.58:3001/websocket');
+            // Push a message when the connection is successfully established, and the server can start pushing data
+            ws.onopen = () => {
+                console.log('websocket success---');
+                ws.send('success');
+            }
+
+            // 메시지 수신 시
+            ws.onmessage = (message) => {
+                let data = message.data.split(','); // CSV 형식으로 가정하고, 콤마로 분리
+                let nRxLatitude = data[62];
+                let nRxLongitude = data[63];
+                let unRxVehicleHeading = data[56];
+                let nTxLatitude = data[32];
+                let nTxLongitude = data[33];
+                let unTxVehicleHeading = data[38];
+                let unPdr = data[68];
+                let ulLatencyL1 = data[43];
+                let ulTotalPacketCnt = data[66];
+
+                // 콘솔에 데이터 출력
+                console.log(`nRxLatitude: ${nRxLatitude}`);
+                console.log(`nRxLongitude: ${nRxLongitude}`);
+                console.log(`unRxVehicleHeading: ${unRxVehicleHeading}`);
+                console.log(`nTxLatitude: ${nTxLatitude}`);
+                console.log(`nTxLongitude: ${nTxLongitude}`);
+                console.log(`unTxVehicleHeading: ${unTxVehicleHeading}`);
+                console.log(`unPdr: ${unPdr}`);
+                console.log(`ulLatencyL1: ${ulLatencyL1}`);
+                console.log(`ulTotalPacketCnt: ${ulTotalPacketCnt}`);
+            }
+
+            ws.onerror = () => {
+                console.error('websocket fail');
+            }
+        } else {
+            console.error('dont support websocket');
+        };
+    };
+</script>
+
+</head>
+<body>
+
+</body>
+</html>
