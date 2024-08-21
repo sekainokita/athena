@@ -100,7 +100,7 @@
 #define MSG_MANAGER_WEBSOCKET_PORT                  (3001)
 #define MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN           (1024)
 
-#define MSG_MANAGER_WEBSERVER_FILE_SAMPLE           "/tmp/rx_pangyo_240819.csv"
+#define MSG_MANAGER_WEBSERVER_FILE_SAMPLE           "/tmp/rx_ctrack_240820.csv"
 #define MSG_MANAGER_WEBSERVER_FILE_TX               "/tmp/db_v2x_tx_temp_writing.csv"
 #define MSG_MANAGER_WEBSERVER_FILE_RX               "/tmp/db_v2x_rx_temp_writing.csv"
 
