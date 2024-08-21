@@ -87,6 +87,17 @@
         top: 10px;
         left: 300px;
     }
+    #traffic-light {
+        position: absolute;
+        top: 100px;  /* 위치를 지정하세요 */
+        left: 1600px; /* 위치를 지정하세요 */
+        z-index: 10; /* 지도가 겹치지 않도록 z-index 설정 */
+    }
+
+    #traffic-light img {
+        width: 80px; /* 신호등 크기 조정 */
+        height: auto;
+    }
 </style>
 </head>
 <body>
@@ -106,6 +117,11 @@
         <span id="current-value-graph2">Latency (Air to Air): --</span>
     </div>
 </div>
+
+<div id="traffic-light">
+    <img id="traffic-light-image" src="https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/red-light.png" alt="Traffic Light" width="50">
+</div>
+
 <button id="center-button" style="position: absolute; top: 10px; left: 10px; z-index: 1;">Center on Coordinates</button>
 <button id="centerToggleButton">Enable Centering</button>
 <button id="lineToggleButton">Enable Connected Vehicle</button>
@@ -604,6 +620,18 @@
         }
     }
 
+    function updateTrafficLightBasedOnHeading(heading) {
+        const trafficLightImage = document.getElementById('traffic-light-image');
+
+        if (heading >= 0 && heading <= 90) {
+            trafficLightImage.src = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/green-light.png';  // 초록 불로 변경
+        } else if (heading >= 91 && heading <= 180) {
+            trafficLightImage.src = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/yellow-light.png';  // 주황 불로 변경
+        } else if (heading >= 181 && heading <= 359) {
+            trafficLightImage.src = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/red-light.png';  // 빨간 불로 변경
+        }
+    }
+
     function fetchAndUpdate() {
         const latitude0 = parseFloat(s_nRxLatitude);
         const longitude0 = parseFloat(s_nRxLongitude);
@@ -614,6 +642,7 @@
 
         if (!isNaN(latitude0) && !isNaN(longitude0)) {
             updateVehiclePosition(0, [longitude0, latitude0], heading0);
+            updateTrafficLightBasedOnHeading(heading0);  // 신호등 업데이트
         }
 
         if (!isNaN(latitude1) && !isNaN(longitude1)) {
