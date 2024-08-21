@@ -443,6 +443,35 @@
                 }
             });
 
+            map.addLayer({
+                'id': 'vehicle0',
+                'type': 'symbol',
+                'source': 'vehicle_src_0',
+                'layout': {
+                    'icon-image': 'vehicle',
+                    'icon-size': 0.4,
+                    'icon-rotate': ['get', 'heading'],
+                    'text-field': ['concat', 'Heading ', ['get', 'heading']],
+                    'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+                    'text-offset': [0, 1.25], // Adjust this value to position the text
+                    'text-anchor': 'top'
+                },
+                'paint': {
+                    'text-color': '#000000',
+                    'text-halo-color': '#FFFFFF',
+                    'text-halo-width': 2
+                }
+            });
+        }
+    );
+
+    map.loadImage(
+        'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq-electric.png',
+        (error, image) => {
+            if (error) throw error;
+
+            map.addImage('vehicle1', image);
+
             map.addSource('vehicle_src_1', {
                 'type': 'geojson',
                 'data': {
@@ -506,31 +535,11 @@
             });
 
             map.addLayer({
-                'id': 'vehicle0',
-                'type': 'symbol',
-                'source': 'vehicle_src_0',
-                'layout': {
-                    'icon-image': 'vehicle',
-                    'icon-size': 0.4,
-                    'icon-rotate': ['get', 'heading'],
-                    'text-field': ['concat', 'Heading ', ['get', 'heading']],
-                    'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-                    'text-offset': [0, 1.25], // Adjust this value to position the text
-                    'text-anchor': 'top'
-                },
-                'paint': {
-                    'text-color': '#000000',
-                    'text-halo-color': '#FFFFFF',
-                    'text-halo-width': 2
-                }
-            });
-
-            map.addLayer({
                 'id': 'vehicle1',
                 'type': 'symbol',
                 'source': 'vehicle_src_1',
                 'layout': {
-                    'icon-image': 'vehicle',
+                    'icon-image': 'vehicle1',
                     'icon-size': 0.4,
                     'icon-rotate': ['get', 'heading'],
                     'text-field': ['concat', 'Heading ', ['get', 'heading']],
@@ -544,67 +553,67 @@
                     'text-halo-width': 2
                 }
             });
-
-            function updateVehiclePosition(vehicleId, coordinates, heading) {
-                map.getSource(`vehicle_src_${vehicleId}`).setData({
-                    'type': 'FeatureCollection',
-                    'features': [{
-                        'type': 'Feature',
-                        'geometry': {
-                            'type': 'Point',
-                            'coordinates': coordinates
-                        },
-                        'properties': {
-                            'heading': heading
-                        }
-                    }]
-                });
-
-                if (vehicleId === 0) {
-                    vehicleLongitude0 = coordinates[0];
-                    vehicleLatitude0 = coordinates[1];
-                } else if (vehicleId === 1) {
-                    vehicleLongitude1 = coordinates[0];
-                    vehicleLatitude1 = coordinates[1];
-                }
-
-                if (isCvLineEnabled)
-                {
-                map.getSource('line').setData({
-                    'type': 'Feature',
-                    'geometry': {
-                        'type': 'LineString',
-                        'coordinates': [[vehicleLongitude0, vehicleLatitude0], [vehicleLongitude1, vehicleLatitude1]]
-                    }
-                });
-                }
-
-                if (isCenteringEnabled && vehicleId === 0) {
-                    map.setCenter(coordinates);
-                }
-            }
-
-            function fetchAndUpdate() {
-                const latitude0 = parseFloat(s_nRxLatitude);
-                const longitude0 = parseFloat(s_nRxLongitude);
-                const heading0 = parseFloat(s_unRxVehicleHeading);
-                const latitude1 = parseFloat(s_nTxLatitude);
-                const longitude1 = parseFloat(s_nTxLongitude);
-                const heading1 = parseFloat(s_unTxVehicleHeading);
-
-                if (!isNaN(latitude0) && !isNaN(longitude0)) {
-                    updateVehiclePosition(0, [longitude0, latitude0], heading0);
-                }
-
-                if (!isNaN(latitude1) && !isNaN(longitude1)) {
-                    updateVehiclePosition(1, [longitude1, latitude1], heading1);
-                }
-            }
-
-            fetchAndUpdate();
-            setInterval(fetchAndUpdate, 10);
         }
     );
+
+    function updateVehiclePosition(vehicleId, coordinates, heading) {
+        map.getSource(`vehicle_src_${vehicleId}`).setData({
+            'type': 'FeatureCollection',
+            'features': [{
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': coordinates
+                },
+                'properties': {
+                    'heading': heading
+                }
+            }]
+        });
+
+        if (vehicleId === 0) {
+            vehicleLongitude0 = coordinates[0];
+            vehicleLatitude0 = coordinates[1];
+        } else if (vehicleId === 1) {
+            vehicleLongitude1 = coordinates[0];
+            vehicleLatitude1 = coordinates[1];
+        }
+
+        if (isCvLineEnabled)
+        {
+        map.getSource('line').setData({
+            'type': 'Feature',
+            'geometry': {
+                'type': 'LineString',
+                'coordinates': [[vehicleLongitude0, vehicleLatitude0], [vehicleLongitude1, vehicleLatitude1]]
+            }
+        });
+        }
+
+        if (isCenteringEnabled && vehicleId === 0) {
+            map.setCenter(coordinates);
+        }
+    }
+
+    function fetchAndUpdate() {
+        const latitude0 = parseFloat(s_nRxLatitude);
+        const longitude0 = parseFloat(s_nRxLongitude);
+        const heading0 = parseFloat(s_unRxVehicleHeading);
+        const latitude1 = parseFloat(s_nTxLatitude);
+        const longitude1 = parseFloat(s_nTxLongitude);
+        const heading1 = parseFloat(s_unTxVehicleHeading);
+
+        if (!isNaN(latitude0) && !isNaN(longitude0)) {
+            updateVehiclePosition(0, [longitude0, latitude0], heading0);
+        }
+
+        if (!isNaN(latitude1) && !isNaN(longitude1)) {
+            updateVehiclePosition(1, [longitude1, latitude1], heading1);
+        }
+    }
+
+    fetchAndUpdate();
+    setInterval(fetchAndUpdate, 10);
 
     function fetchAndUpdateGraph() {
         const latitude0 = parseFloat(s_nRxLatitude);
