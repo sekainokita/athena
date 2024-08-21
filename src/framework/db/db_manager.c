@@ -175,6 +175,88 @@ static int32_t P_DB_MANAGER_PrintStatusPt(DB_V2X_PLATOONING_T *pstDbV2xPt)
     return nRet;
 }
 
+static int32_t P_DB_MANAGER_PrintStatusPtLv(DB_V2X_PLATOONING_LV_T *pstDbV2XPtLv)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
+
+    if(pstDbV2XPtLv == NULL)
+    {
+        PrintError("pstDbV2XPtLv is NULL!");
+        return nRet;
+    }
+
+    nRet = P_DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+    }
+    else
+    {
+        nRet = FRAMEWORK_OK;
+        if(stDbV2xStatus.unCurrentContCnt == MSG_MGR_MAX_CONT_CNT)
+        {
+            PrintDebug("eLvServiceId[%d], eLvMethodId[%d], unLvLength[%d], usLvClientId[%d], usLvSessionId[%d], ucLvProtocolVer[%d]", pstDbV2XPtLv->eLvServiceId, pstDbV2XPtLv->eLvMethodId, pstDbV2XPtLv->unLvLength, pstDbV2XPtLv->usLvClientId, pstDbV2XPtLv->usLvSessionId, pstDbV2XPtLv->ucLvProtocolVer);
+            PrintDebug("ucLvInterfaceVer[%d], eLvMsgType[%d], ucLvReturnCode[%d], eLvVehicleType[%d]", pstDbV2XPtLv->ucLvInterfaceVer, pstDbV2XPtLv->eLvMsgType, pstDbV2XPtLv->ucLvReturnCode, pstDbV2XPtLv->eLvVehicleType);
+            PrintDebug("szLvVehicleId[%s], szLvVehicleNum[%s], usLvMsgCount[%d], eLvMsgId[%d]", pstDbV2XPtLv->szLvVehicleId, pstDbV2XPtLv->szLvVehicleNum, pstDbV2XPtLv->usLvMsgCount, pstDbV2XPtLv->eLvMsgId);
+            PrintDebug("nLvLatitude[%d], nLvLongitude[%d], usLvHeading[%d], usLvSpeed[%d]", pstDbV2XPtLv->nLvLatitude, pstDbV2XPtLv->nLvLongitude, pstDbV2XPtLv->usLvHeading, pstDbV2XPtLv->usLvSpeed);
+            PrintDebug("szLvDriveLaneId[%s], eLvDriveStatus[%d], eLvChangeCode[%d]", pstDbV2XPtLv->szLvDriveLaneId, pstDbV2XPtLv->eLvDriveStatus, pstDbV2XPtLv->eLvChangeCode);
+            PrintDebug("usLvPathId[%d], szLvLaneId[%s], eLvLanePlan[%d]", pstDbV2XPtLv->usLvPathId, pstDbV2XPtLv->szLvLaneId, pstDbV2XPtLv->eLvLanePlan);
+            PrintDebug("eLvCrossway[%d], eLvLaneManeuver[%d]", pstDbV2XPtLv->eLvCrossway, pstDbV2XPtLv->eLvLaneManeuver);
+            for (int i=0; i < DB_V2X_PT_LV_PATH_PLAN_MAX_LEN; i++)
+            {
+                PrintDebug("anLvLatitude[%d] = %d", i, pstDbV2XPtLv->stLvPathPlan.anLvLatitude[i]);
+            }
+            for (int i=0; i < DB_V2X_PT_LV_PATH_PLAN_MAX_LEN; i++)
+            {
+                PrintDebug("anLvLongitude[%d] = %d", i, pstDbV2XPtLv->stLvPathPlan.anLvLongitude[i]);
+            }
+            PrintDebug("unReserved1[%ld]", pstDbV2XPtLv->unReserved1);
+        }
+    }
+    return nRet;
+}
+
+static int32_t P_DB_MANAGER_PrintStatusPtFv(DB_V2X_PLATOONING_FV_T *pstDbV2XPtFv)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
+
+    if(pstDbV2XPtFv == NULL)
+    {
+        PrintError("pstDbV2XPtFv is NULL!");
+        return nRet;
+    }
+
+    nRet = P_DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+    }
+    else
+    {
+        nRet = FRAMEWORK_OK;
+        if(stDbV2xStatus.unCurrentContCnt == MSG_MGR_MAX_CONT_CNT)
+        {
+            PrintDebug("eFvServiceId[%d], eFvMethodId[%d], unFvLength[%d], usFvClientId[%d], usFvSessionId[%d], ucFvProtocolVer[%d]", pstDbV2XPtFv->eFvServiceId, pstDbV2XPtFv->eFvMethodId, pstDbV2XPtFv->unFvLength, pstDbV2XPtFv->usFvClientId, pstDbV2XPtFv->usFvSessionId, pstDbV2XPtFv->ucFvProtocolVer);
+            PrintDebug("ucFvInterfaceVer[%d], eFvMsgType[%d], ucFvReturnCode[%d], eFvVehicleType[%d]", pstDbV2XPtFv->ucFvInterfaceVer, pstDbV2XPtFv->eFvMsgType, pstDbV2XPtFv->ucFvReturnCode, pstDbV2XPtFv->eFvVehicleType);
+            PrintDebug("szFvVehicleId[%s], szFvVehicleNum[%s], usFvMsgCount[%d], eFvMsgId[%d]", pstDbV2XPtFv->szFvVehicleId, pstDbV2XPtFv->szFvVehicleNum, pstDbV2XPtFv->usFvMsgCount, pstDbV2XPtFv->eFvMsgId);
+            PrintDebug("nFvLatitude[%d], nFvLongitude[%d], usFvHeading[%d], usFvSpeed[%d]", pstDbV2XPtFv->nFvLatitude, pstDbV2XPtFv->nFvLongitude, pstDbV2XPtFv->usFvHeading, pstDbV2XPtFv->usFvSpeed);
+            PrintDebug("szFvDriveLaneId[%s], eFvDriveStatus[%d], eFvChangeCode[%d]", pstDbV2XPtFv->szFvDriveLaneId, pstDbV2XPtFv->eFvDriveStatus, pstDbV2XPtFv->eFvChangeCode);
+            for (int i=0; i < DB_V2X_PT_FV_PATH_PLAN_MAX_LEN; i++)
+            {
+                PrintDebug("anFvLatitude[%d] = %d", i, pstDbV2XPtFv->stFvPathPlan.anFvLatitude[i]);
+            }
+            for (int i=0; i < DB_V2X_PT_FV_PATH_PLAN_MAX_LEN; i++)
+            {
+                PrintDebug("anFvLongitude[%d] = %d", i, pstDbV2XPtFv->stFvPathPlan.anFvLongitude[i]);
+            }
+            PrintDebug("usFvRecommDistance[%d], usFvRecommSpeed[%d]", pstDbV2XPtFv->usFvRecommDistance, pstDbV2XPtFv->usFvRecommSpeed);
+            PrintDebug("unReserved1[%ld], unReserved2[%ld], unReserved3[%ld], unReserved4[%ld], unReserved5[%d], unReserved6[%d]", pstDbV2XPtFv->unReserved1, pstDbV2XPtFv->unReserved2, pstDbV2XPtFv->unReserved3, pstDbV2XPtFv->unReserved4, pstDbV2XPtFv->unReserved5, pstDbV2XPtFv->unReserved6);
+        }
+    }
+    return nRet;
+}
 
 static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB_V2X_STATUS_TX_T *pstDbV2xStatusTx, DB_V2X_STATUS_RX_T *pstDbV2xStatusRx)
 {
@@ -1049,12 +1131,82 @@ static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
             /* PLATOONING */
             fprintf(sh_pDbMgrTxMsg, "eDbV2XPtType,");
             fprintf(sh_pDbMgrTxMsg, "usV2xGroupId,");
+            if (pstDbManager->stDbV2xPt.eDbV2XPtType == eDB_V2X_PT_TYPE_LV)
+            {
+                fprintf(sh_pDbMgrTxMsg, "eLvServiceId,");
+                fprintf(sh_pDbMgrTxMsg, "eLvMethodId,");
+                fprintf(sh_pDbMgrTxMsg, "unLvLength,");
+                fprintf(sh_pDbMgrTxMsg, "usLvClientId,");
+                fprintf(sh_pDbMgrTxMsg, "usLvSessionId,");
+                fprintf(sh_pDbMgrTxMsg, "ucLvProtocolVer,");
+                fprintf(sh_pDbMgrTxMsg, "ucLvInterfaceVer,");
+                fprintf(sh_pDbMgrTxMsg, "eLvMsgType,");
+                fprintf(sh_pDbMgrTxMsg, "ucLvReturnCode,");
+                fprintf(sh_pDbMgrTxMsg, "eLvVehicleType,");
+                fprintf(sh_pDbMgrTxMsg, "szLvVehicleId,");
+                fprintf(sh_pDbMgrTxMsg, "szLvVehicleNum,");
+                fprintf(sh_pDbMgrTxMsg, "usLvMsgCount,");
+                fprintf(sh_pDbMgrTxMsg, "eLvMsgId,");
+                fprintf(sh_pDbMgrTxMsg, "nLvLatitude,");
+                fprintf(sh_pDbMgrTxMsg, "nLvLongitude,");
+                fprintf(sh_pDbMgrTxMsg, "usLvHeading,");
+                fprintf(sh_pDbMgrTxMsg, "usLvSpeed,");
+                fprintf(sh_pDbMgrTxMsg, "szLvDriveLaneId,");
+                fprintf(sh_pDbMgrTxMsg, "eLvDriveStatus,");
+                fprintf(sh_pDbMgrTxMsg, "eLvChangeCode,");
+                fprintf(sh_pDbMgrTxMsg, "usLvPathId,");
+                fprintf(sh_pDbMgrTxMsg, "szLvLaneId,");
+                fprintf(sh_pDbMgrTxMsg, "eLvLanePlan,");
+                fprintf(sh_pDbMgrTxMsg, "eLvCrossway,");
+                fprintf(sh_pDbMgrTxMsg, "eLvLaneManeuver,");
+                fprintf(sh_pDbMgrTxMsg, "anLvLatitude,");
+                fprintf(sh_pDbMgrTxMsg, "anLvLongitude,");
+                fprintf(sh_pDbMgrTxMsg, "unReserved1,");
+            }
+            else if (pstDbManager->stDbV2xPt.eDbV2XPtType == eDB_V2X_PT_TYPE_FV)
+            {
+                fprintf(sh_pDbMgrTxMsg, "eFvServiceId,");
+                fprintf(sh_pDbMgrTxMsg, "eFvMethodId,");
+                fprintf(sh_pDbMgrTxMsg, "unFvLength,");
+                fprintf(sh_pDbMgrTxMsg, "usFvClientId,");
+                fprintf(sh_pDbMgrTxMsg, "usFvSessionId,");
+                fprintf(sh_pDbMgrTxMsg, "ucFvProtocolVer,");
+                fprintf(sh_pDbMgrTxMsg, "ucFvInterfaceVer,");
+                fprintf(sh_pDbMgrTxMsg, "eFvMsgType,");
+                fprintf(sh_pDbMgrTxMsg, "ucFvReturnCode,");
+                fprintf(sh_pDbMgrTxMsg, "eFvVehicleType,");
+                fprintf(sh_pDbMgrTxMsg, "szFvVehicleId,");
+                fprintf(sh_pDbMgrTxMsg, "szFvVehicleNum,");
+                fprintf(sh_pDbMgrTxMsg, "usFvMsgCount,");
+                fprintf(sh_pDbMgrTxMsg, "eFvMsgId,");
+                fprintf(sh_pDbMgrTxMsg, "nFvLatitude,");
+                fprintf(sh_pDbMgrTxMsg, "nFvLongitude,");
+                fprintf(sh_pDbMgrTxMsg, "usFvHeading,");
+                fprintf(sh_pDbMgrTxMsg, "usFvSpeed,");
+                fprintf(sh_pDbMgrTxMsg, "szFvDriveLaneId,");
+                fprintf(sh_pDbMgrTxMsg, "eFvDriveStatus,");
+                fprintf(sh_pDbMgrTxMsg, "eFvChangeCode,");
+                fprintf(sh_pDbMgrTxMsg, "anFvLatitude,");
+                fprintf(sh_pDbMgrTxMsg, "anFvLongitude,");
+                fprintf(sh_pDbMgrTxMsg, "usFvRecommDistance,");
+                fprintf(sh_pDbMgrTxMsg, "usFvRecommSpeed,");
+                fprintf(sh_pDbMgrTxMsg, "unReserved1,");
+                fprintf(sh_pDbMgrTxMsg, "unReserved2,");
+                fprintf(sh_pDbMgrTxMsg, "unReserved3,");
+                fprintf(sh_pDbMgrTxMsg, "unReserved4,");
+                fprintf(sh_pDbMgrTxMsg, "unReserved5,");
+                fprintf(sh_pDbMgrTxMsg, "unReserved6,");
+            }
+            else
+            {
+                PrintError("unknown eDbV2XPtType[%d]", pstDbManager->stDbV2xPt.eDbV2XPtType);
+            }
             /* CRC */
             fprintf(sh_pDbMgrTxMsg, "unTotalPacketCrc32");
         }
         else if(pstDbManager->eSvcType == DB_MANAGER_SVC_TYPE_BASE)
         {
-            fprintf(sh_pDbMgrRxMsg, "cPayload,");
+            fprintf(sh_pDbMgrTxMsg, "cPayload,");
             fprintf(sh_pDbMgrTxMsg, "unTotalPacketCrc32");
         }
         else
@@ -1214,7 +1366,78 @@ static int32_t P_DB_MANAGER_OpenCsv(DB_MANAGER_T *pstDbManager)
             fprintf(sh_pDbMgrRxMsg, "unPdr(percent),");
             fprintf(sh_pDbMgrRxMsg, "unPer(percent),");
             fprintf(sh_pDbMgrRxMsg, "eDbV2XPtType,");
-            fprintf(sh_pDbMgrRxMsg, "usV2xGroupId");
+            fprintf(sh_pDbMgrRxMsg, "usV2xGroupId,");
+
+            if (pstDbManager->stDbV2xPt.eDbV2XPtType == eDB_V2X_PT_TYPE_LV)
+            {
+                fprintf(sh_pDbMgrRxMsg, "eFvServiceId,");
+                fprintf(sh_pDbMgrRxMsg, "eFvMethodId,");
+                fprintf(sh_pDbMgrRxMsg, "unFvLength,");
+                fprintf(sh_pDbMgrRxMsg, "usFvClientId,");
+                fprintf(sh_pDbMgrRxMsg, "usFvSessionId,");
+                fprintf(sh_pDbMgrRxMsg, "ucFvProtocolVer,");
+                fprintf(sh_pDbMgrRxMsg, "ucFvInterfaceVer,");
+                fprintf(sh_pDbMgrRxMsg, "eFvMsgType,");
+                fprintf(sh_pDbMgrRxMsg, "ucFvReturnCode,");
+                fprintf(sh_pDbMgrRxMsg, "eFvVehicleType,");
+                fprintf(sh_pDbMgrRxMsg, "szFvVehicleId,");
+                fprintf(sh_pDbMgrRxMsg, "szFvVehicleNum,");
+                fprintf(sh_pDbMgrRxMsg, "usFvMsgCount,");
+                fprintf(sh_pDbMgrRxMsg, "eFvMsgId,");
+                fprintf(sh_pDbMgrRxMsg, "nFvLatitude,");
+                fprintf(sh_pDbMgrRxMsg, "nFvLongitude,");
+                fprintf(sh_pDbMgrRxMsg, "usFvHeading,");
+                fprintf(sh_pDbMgrRxMsg, "usFvSpeed,");
+                fprintf(sh_pDbMgrRxMsg, "szFvDriveLaneId,");
+                fprintf(sh_pDbMgrRxMsg, "eFvDriveStatus,");
+                fprintf(sh_pDbMgrRxMsg, "eFvChangeCode,");
+                fprintf(sh_pDbMgrRxMsg, "anFvLatitude,");
+                fprintf(sh_pDbMgrRxMsg, "anFvLongitude,");
+                fprintf(sh_pDbMgrRxMsg, "usFvRecommDistance,");
+                fprintf(sh_pDbMgrRxMsg, "usFvRecommSpeed,");
+                fprintf(sh_pDbMgrRxMsg, "unReserved1,");
+                fprintf(sh_pDbMgrRxMsg, "unReserved2,");
+                fprintf(sh_pDbMgrRxMsg, "unReserved3,");
+                fprintf(sh_pDbMgrRxMsg, "unReserved4,");
+                fprintf(sh_pDbMgrRxMsg, "unReserved5,");
+                fprintf(sh_pDbMgrRxMsg, "unReserved6");
+            }
+            else if (pstDbManager->stDbV2xPt.eDbV2XPtType == eDB_V2X_PT_TYPE_FV)
+            {
+                fprintf(sh_pDbMgrRxMsg, "eLvServiceId,");
+                fprintf(sh_pDbMgrRxMsg, "eLvMethodId,");
+                fprintf(sh_pDbMgrRxMsg, "unLvLength,");
+                fprintf(sh_pDbMgrRxMsg, "usLvClientId,");
+                fprintf(sh_pDbMgrRxMsg, "usLvSessionId,");
+                fprintf(sh_pDbMgrRxMsg, "ucLvProtocolVer,");
+                fprintf(sh_pDbMgrRxMsg, "ucLvInterfaceVer,");
+                fprintf(sh_pDbMgrRxMsg, "eLvMsgType,");
+                fprintf(sh_pDbMgrRxMsg, "ucLvReturnCode,");
+                fprintf(sh_pDbMgrRxMsg, "eLvVehicleType,");
+                fprintf(sh_pDbMgrRxMsg, "szLvVehicleId,");
+                fprintf(sh_pDbMgrRxMsg, "szLvVehicleNum,");
+                fprintf(sh_pDbMgrRxMsg, "usLvMsgCount,");
+                fprintf(sh_pDbMgrRxMsg, "eLvMsgId,");
+                fprintf(sh_pDbMgrRxMsg, "nLvLatitude,");
+                fprintf(sh_pDbMgrRxMsg, "nLvLongitude,");
+                fprintf(sh_pDbMgrRxMsg, "usLvHeading,");
+                fprintf(sh_pDbMgrRxMsg, "usLvSpeed,");
+                fprintf(sh_pDbMgrRxMsg, "szLvDriveLaneId,");
+                fprintf(sh_pDbMgrRxMsg, "eLvDriveStatus,");
+                fprintf(sh_pDbMgrRxMsg, "eLvChangeCode,");
+                fprintf(sh_pDbMgrRxMsg, "usLvPathId,");
+                fprintf(sh_pDbMgrRxMsg, "szLvLaneId,");
+                fprintf(sh_pDbMgrRxMsg, "eLvLanePlan,");
+                fprintf(sh_pDbMgrRxMsg, "eLvCrossway,");
+                fprintf(sh_pDbMgrRxMsg, "eLvLaneManeuver,");
+                fprintf(sh_pDbMgrRxMsg, "anLvLatitude,");
+                fprintf(sh_pDbMgrRxMsg, "anLvLongitude,");
+                fprintf(sh_pDbMgrRxMsg, "unReserved1");
+            }
+            else
+            {
+                PrintError("unknown eDbV2XPtType[%d]", pstDbManager->stDbV2xPt.eDbV2XPtType);
+            }
         }
         else if(pstDbManager->eSvcType == DB_MANAGER_SVC_TYPE_BASE)
         {
@@ -1392,6 +1615,8 @@ static int32_t P_DB_MANAGER_WriteCsvPlatooningTx(DB_MANAGER_EVENT_MSG_T *pstEven
     char *pchPayload = NULL;
     DB_V2X_STATUS_TX_T stDbV2xStatusTx;
     DB_V2X_PLATOONING_T stDbV2XPt;
+    DB_V2X_PLATOONING_LV_T stDbV2XPtLv;
+    DB_V2X_PLATOONING_FV_T stDbV2XPtFv;
     double dTemp;
 
     if(pstEventMsg == NULL)
@@ -1402,6 +1627,8 @@ static int32_t P_DB_MANAGER_WriteCsvPlatooningTx(DB_MANAGER_EVENT_MSG_T *pstEven
 
     memset(&stDbV2xStatusTx, 0, sizeof(DB_V2X_STATUS_TX_T));
     memset(&stDbV2XPt, 0, sizeof(DB_V2X_PLATOONING_T));
+    memset(&stDbV2XPtLv, 0, sizeof(DB_V2X_PLATOONING_LV_T));
+    memset(&stDbV2XPtFv, 0, sizeof(DB_V2X_PLATOONING_FV_T));
 
     pchPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
     if(pchPayload == NULL)
@@ -1452,6 +1679,120 @@ static int32_t P_DB_MANAGER_WriteCsvPlatooningTx(DB_MANAGER_EVENT_MSG_T *pstEven
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2xStatusTx.unTxVehicleHeading);
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPt.eDbV2XPtType);
     fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPt.usV2xGroupId);
+    if (stDbV2XPt.eDbV2XPtType == eDB_V2X_PT_TYPE_LV)
+    {
+        memcpy(&stDbV2XPtLv, pchPayload + sizeof(DB_V2X_STATUS_TX_T) + sizeof(DB_V2X_PLATOONING_T), sizeof(DB_V2X_PLATOONING_LV_T));
+
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.eLvServiceId);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.eLvMethodId);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.unLvLength);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.usLvClientId);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.usLvSessionId);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.ucLvProtocolVer);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.ucLvInterfaceVer);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.eLvMsgType);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.ucLvReturnCode);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.eLvVehicleType);
+        fprintf(sh_pDbMgrTxMsg, "%s,", stDbV2XPtLv.szLvVehicleId);
+        fprintf(sh_pDbMgrTxMsg, "%s,", stDbV2XPtLv.szLvVehicleNum);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.usLvMsgCount);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.eLvMsgId);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.nLvLatitude);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.nLvLongitude);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.usLvHeading);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.usLvSpeed);
+        fprintf(sh_pDbMgrTxMsg, "%s,", stDbV2XPtLv.szLvDriveLaneId);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.eLvDriveStatus);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.eLvChangeCode);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.usLvPathId);
+        fprintf(sh_pDbMgrTxMsg, "%s,", stDbV2XPtLv.szLvLaneId);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.eLvLanePlan);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.eLvCrossway);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtLv.eLvLaneManeuver);
+        fprintf(sh_pDbMgrTxMsg, "\"");
+        for (int i = 0; i < DB_V2X_PT_LV_PATH_PLAN_MAX_LEN; i++)
+        {
+            dTemp = (double)stDbV2XPtLv.stLvPathPlan.anLvLatitude[i] / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+            fprintf(sh_pDbMgrTxMsg, "%lf", dTemp);
+            if (i < DB_V2X_PT_LV_PATH_PLAN_MAX_LEN - 1)
+            {
+                fprintf(sh_pDbMgrTxMsg, ",");
+            }
+        }
+        fprintf(sh_pDbMgrTxMsg, "\",");
+        fprintf(sh_pDbMgrTxMsg, "\"");
+        for (int i = 0; i < DB_V2X_PT_LV_PATH_PLAN_MAX_LEN; i++)
+        {
+            dTemp = (double)stDbV2XPtLv.stLvPathPlan.anLvLongitude[i] / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+            fprintf(sh_pDbMgrTxMsg, "%lf", dTemp);
+            if (i < DB_V2X_PT_LV_PATH_PLAN_MAX_LEN - 1)
+            {
+                fprintf(sh_pDbMgrTxMsg, ",");
+            }
+        }
+        fprintf(sh_pDbMgrTxMsg, "\",");
+        fprintf(sh_pDbMgrTxMsg, "%ld,", stDbV2XPtLv.unReserved1);
+    }
+    else if (stDbV2XPt.eDbV2XPtType == eDB_V2X_PT_TYPE_FV)
+    {
+        memcpy(&stDbV2XPtFv, pchPayload + sizeof(DB_V2X_STATUS_TX_T) + sizeof(DB_V2X_PLATOONING_T), sizeof(DB_V2X_PLATOONING_FV_T));
+
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.eFvServiceId);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.eFvMethodId);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.unFvLength);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.usFvClientId);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.usFvSessionId);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.ucFvProtocolVer);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.ucFvInterfaceVer);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.eFvMsgType);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.ucFvReturnCode);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.eFvVehicleType);
+        fprintf(sh_pDbMgrTxMsg, "%s,", stDbV2XPtFv.szFvVehicleId);
+        fprintf(sh_pDbMgrTxMsg, "%s,", stDbV2XPtFv.szFvVehicleNum);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.usFvMsgCount);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.eFvMsgId);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.nFvLatitude);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.nFvLongitude);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.usFvHeading);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.usFvSpeed);
+        fprintf(sh_pDbMgrTxMsg, "%s,", stDbV2XPtFv.szFvDriveLaneId);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.eFvDriveStatus);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.eFvChangeCode);
+        fprintf(sh_pDbMgrTxMsg, "\"");
+        for (int i = 0; i < DB_V2X_PT_FV_PATH_PLAN_MAX_LEN; i++)
+        {
+            dTemp = (double)stDbV2XPtFv.stFvPathPlan.anFvLatitude[i] / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+            fprintf(sh_pDbMgrTxMsg, "%lf", dTemp);
+            if (i < DB_V2X_PT_FV_PATH_PLAN_MAX_LEN - 1)
+            {
+                fprintf(sh_pDbMgrTxMsg, ",");
+            }
+        }
+        fprintf(sh_pDbMgrTxMsg, "\",");
+        fprintf(sh_pDbMgrTxMsg, "\"");
+        for (int i = 0; i < DB_V2X_PT_FV_PATH_PLAN_MAX_LEN; i++)
+        {
+            dTemp = (double)stDbV2XPtFv.stFvPathPlan.anFvLongitude[i] / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+            fprintf(sh_pDbMgrTxMsg, "%lf", dTemp);
+            if (i < DB_V2X_PT_FV_PATH_PLAN_MAX_LEN - 1)
+            {
+                fprintf(sh_pDbMgrTxMsg, ",");
+            }
+        }
+        fprintf(sh_pDbMgrTxMsg, "\",");
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.usFvRecommDistance);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.usFvRecommSpeed);
+        fprintf(sh_pDbMgrTxMsg, "%ld,", stDbV2XPtFv.unReserved1);
+        fprintf(sh_pDbMgrTxMsg, "%ld,", stDbV2XPtFv.unReserved2);
+        fprintf(sh_pDbMgrTxMsg, "%ld,", stDbV2XPtFv.unReserved3);
+        fprintf(sh_pDbMgrTxMsg, "%ld,", stDbV2XPtFv.unReserved4);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.unReserved5);
+        fprintf(sh_pDbMgrTxMsg, "%d,", stDbV2XPtFv.unReserved6);
+    }
+    else
+    {
+        PrintError("unknown eDbV2XPtType[%d]", stDbV2XPt.eDbV2XPtType);
+    }
     fprintf(sh_pDbMgrTxMsg, "0x%x", pstEventMsg->pstDbManagerWrite->unCrc32);
     fprintf(sh_pDbMgrTxMsg, "\r\n");
 
@@ -1487,6 +1828,8 @@ static int32_t P_DB_MANAGER_WriteCsvPlatooningRx(DB_MANAGER_EVENT_MSG_T *pstEven
     DB_V2X_STATUS_RX_T stDbV2xStatusRx;
     DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
     DB_V2X_PLATOONING_T stDbV2XPt;
+    DB_V2X_PLATOONING_LV_T stDbV2XPtLv;
+    DB_V2X_PLATOONING_FV_T stDbV2XPtFv;
     DI_T *pstDi;
     float fTemp;
     double dTemp;
@@ -1506,6 +1849,8 @@ static int32_t P_DB_MANAGER_WriteCsvPlatooningRx(DB_MANAGER_EVENT_MSG_T *pstEven
     memset(&stDbV2xStatusTx, 0, sizeof(DB_V2X_STATUS_TX_T));
     memset(&stDbV2xStatusRx, 0, sizeof(DB_V2X_STATUS_RX_T));
     memset(&stDbV2XPt, 0, sizeof(DB_V2X_PLATOONING_T));
+    memset(&stDbV2XPtLv, 0, sizeof(DB_V2X_PLATOONING_LV_T));
+    memset(&stDbV2XPtFv, 0, sizeof(DB_V2X_PLATOONING_FV_T));
 
     pchPayload = (char*)malloc(sizeof(char)*pstEventMsg->pstDbV2x->ulPayloadLength);
     if(pchPayload == NULL)
@@ -1634,7 +1979,135 @@ static int32_t P_DB_MANAGER_WriteCsvPlatooningRx(DB_MANAGER_EVENT_MSG_T *pstEven
     fTemp = (float)stDbV2xStatusRx.unPer / 1000.0f;
     fprintf(sh_pDbMgrRxMsg, "%.3f,", fTemp);
     fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPt.eDbV2XPtType);
-    fprintf(sh_pDbMgrRxMsg, "%d", stDbV2XPt.usV2xGroupId);
+    fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPt.usV2xGroupId);
+
+    if (stDbV2XPt.eDbV2XPtType == eDB_V2X_PT_TYPE_LV)
+    {
+        memcpy(&stDbV2XPtLv, pchPayload + sizeof(DB_V2X_STATUS_TX_T) + sizeof(DB_V2X_PLATOONING_T), sizeof(DB_V2X_PLATOONING_LV_T));
+
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.eLvServiceId);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.eLvMethodId);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.unLvLength);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.usLvClientId);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.usLvSessionId);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.ucLvProtocolVer);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.ucLvInterfaceVer);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.eLvMsgType);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.ucLvReturnCode);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.eLvVehicleType);
+        fprintf(sh_pDbMgrRxMsg, "%s,", stDbV2XPtLv.szLvVehicleId);
+        fprintf(sh_pDbMgrRxMsg, "%s,", stDbV2XPtLv.szLvVehicleNum);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.usLvMsgCount);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.eLvMsgId);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.nLvLatitude);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.nLvLongitude);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.usLvHeading);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.usLvSpeed);
+        fprintf(sh_pDbMgrRxMsg, "%s,", stDbV2XPtLv.szLvDriveLaneId);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.eLvDriveStatus);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.eLvChangeCode);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.usLvPathId);
+        fprintf(sh_pDbMgrRxMsg, "%s,", stDbV2XPtLv.szLvLaneId);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.eLvLanePlan);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.eLvCrossway);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtLv.eLvLaneManeuver);
+        fprintf(sh_pDbMgrRxMsg, "\"");
+        for (int i = 0; i < DB_V2X_PT_LV_PATH_PLAN_MAX_LEN; i++)
+        {
+            dTemp = (double)stDbV2XPtLv.stLvPathPlan.anLvLatitude[i] / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+            fprintf(sh_pDbMgrRxMsg, "%lf", dTemp);
+            if (i < DB_V2X_PT_LV_PATH_PLAN_MAX_LEN - 1)
+            {
+                fprintf(sh_pDbMgrRxMsg, ",");
+            }
+        }
+        fprintf(sh_pDbMgrRxMsg, "\",");
+        fprintf(sh_pDbMgrRxMsg, "\"");
+        for (int i = 0; i < DB_V2X_PT_LV_PATH_PLAN_MAX_LEN; i++)
+        {
+            dTemp = (double)stDbV2XPtLv.stLvPathPlan.anLvLongitude[i] / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+            fprintf(sh_pDbMgrRxMsg, "%lf", dTemp);
+            if (i < DB_V2X_PT_LV_PATH_PLAN_MAX_LEN - 1)
+            {
+                fprintf(sh_pDbMgrRxMsg, ",");
+            }
+        }
+        fprintf(sh_pDbMgrRxMsg, "\",");
+        fprintf(sh_pDbMgrRxMsg, "%ld", stDbV2XPtLv.unReserved1);
+
+        nRet = P_DB_MANAGER_PrintStatusPtLv(&stDbV2XPtLv);
+        if (nRet != FRAMEWORK_OK)
+        {
+            PrintError("P_DB_MANAGER_PrintStatusPtLv() is failed! [unRet:%d]", nRet);
+        }
+
+    }
+    else if (stDbV2XPt.eDbV2XPtType == eDB_V2X_PT_TYPE_FV)
+    {
+        memcpy(&stDbV2XPtFv, pchPayload + sizeof(DB_V2X_STATUS_TX_T) + sizeof(DB_V2X_PLATOONING_T), sizeof(DB_V2X_PLATOONING_FV_T));
+
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.eFvServiceId);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.eFvMethodId);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.unFvLength);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.usFvClientId);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.usFvSessionId);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.ucFvProtocolVer);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.ucFvInterfaceVer);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.eFvMsgType);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.ucFvReturnCode);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.eFvVehicleType);
+        fprintf(sh_pDbMgrRxMsg, "%s,", stDbV2XPtFv.szFvVehicleId);
+        fprintf(sh_pDbMgrRxMsg, "%s,", stDbV2XPtFv.szFvVehicleNum);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.usFvMsgCount);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.eFvMsgId);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.nFvLatitude);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.nFvLongitude);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.usFvHeading);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.usFvSpeed);
+        fprintf(sh_pDbMgrRxMsg, "%s,", stDbV2XPtFv.szFvDriveLaneId);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.eFvDriveStatus);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.eFvChangeCode);
+        fprintf(sh_pDbMgrRxMsg, "\"");
+        for (int i = 0; i < DB_V2X_PT_FV_PATH_PLAN_MAX_LEN; i++)
+        {
+            dTemp = (double)stDbV2XPtFv.stFvPathPlan.anFvLatitude[i] / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+            fprintf(sh_pDbMgrRxMsg, "%lf", dTemp);
+            if (i < DB_V2X_PT_FV_PATH_PLAN_MAX_LEN - 1)
+            {
+                fprintf(sh_pDbMgrRxMsg, ",");
+            }
+        }
+        fprintf(sh_pDbMgrRxMsg, "\",");
+        fprintf(sh_pDbMgrRxMsg, "\"");
+        for (int i = 0; i < DB_V2X_PT_FV_PATH_PLAN_MAX_LEN; i++)
+        {
+            dTemp = (double)stDbV2XPtFv.stFvPathPlan.anFvLongitude[i] / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;
+            fprintf(sh_pDbMgrRxMsg, "%lf", dTemp);
+            if (i < DB_V2X_PT_FV_PATH_PLAN_MAX_LEN - 1)
+            {
+                fprintf(sh_pDbMgrRxMsg, ",");
+            }
+        }
+        fprintf(sh_pDbMgrRxMsg, "\",");
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.usFvRecommDistance);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.usFvRecommSpeed);
+        fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2XPtFv.unReserved1);
+        fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2XPtFv.unReserved2);
+        fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2XPtFv.unReserved3);
+        fprintf(sh_pDbMgrRxMsg, "%ld,", stDbV2XPtFv.unReserved4);
+        fprintf(sh_pDbMgrRxMsg, "%d,", stDbV2XPtFv.unReserved5);
+        fprintf(sh_pDbMgrRxMsg, "%d", stDbV2XPtFv.unReserved6);
+
+        nRet = P_DB_MANAGER_PrintStatusPtFv(&stDbV2XPtFv);
+        if (nRet != FRAMEWORK_OK)
+        {
+            PrintError("P_DB_MANAGER_PrintStatusPtFv() is failed! [unRet:%d]", nRet);
+        }
+    }
+    else
+    {
+        PrintError("unknown eDbV2XPtType[%d]", stDbV2XPt.eDbV2XPtType);
+    }
 
     fprintf(sh_pDbMgrRxMsg, "\r\n");
 

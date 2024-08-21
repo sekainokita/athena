@@ -56,13 +56,20 @@
 
 /***************************** Definition ************************************/
 #define DB_V2X_PT_LV_VEHICLE_ID_LEN             10
+#define DB_V2X_PT_LV_VEHICLE_ID_C_VEH           "C-VEH"
+#define DB_V2X_PT_LV_VEHICLE_ID_A_VEH           "A-VEH"
+#define DB_V2X_PT_LV_VEHICLE_ID_E_VEH           "E-VEH"
 #define DB_V2X_PT_LV_VEHICLE_NUM_LEN            20
+#define DB_V2X_PT_LV_VEHICLE_NUM_IONIQ5         "21HO0139"
 #define DB_V2X_PT_LV_LANE_LEN                   20
-#define DB_V2X_PT_LV_PATH_PLAN_MAX_LEN          300
+#define DB_V2X_PT_LV_LANE_DEFAULT               "A2207G001101"
+#define DB_V2X_PT_LV_PATH_PLAN_MAX_LEN          10
+#define DB_V2X_PT_LV_DEFAULT_LATITUDE           37.406348
+#define DB_V2X_PT_LV_DEFAULT_LONGITUDE          127.102576
 #define DB_V2X_PT_FV_VEHICLE_ID_LEN             10
 #define DB_V2X_PT_FV_VEHICLE_NUM_LEN            20
 #define DB_V2X_PT_FV_LANE_LEN                   20
-#define DB_V2X_PT_FV_PATH_PLAN_MAX_LEN          300
+#define DB_V2X_PT_FV_PATH_PLAN_MAX_LEN          10
 
 /***************************** Enum and Structure ****************************/
 
@@ -163,7 +170,7 @@ typedef enum {
 
 /**
 * @details Plan lane change in the
-* @param DB_V2X_PT_LV_PLAN_LANE_E
+* @param DB_V2X_PT_LV_LANE_PLAN_E
 */
 typedef enum {
     eDB_V2X_PT_LV_LANE_PLAN_STAY               = 0,
@@ -204,7 +211,7 @@ typedef enum {
 typedef struct DB_V2X_PT_LV_PATH_PLAN_t {
     int32_t                          anLvLatitude[DB_V2X_PT_LV_PATH_PLAN_MAX_LEN];
     int32_t                          anLvLongitude[DB_V2X_PT_LV_PATH_PLAN_MAX_LEN];
-} DB_V2X_PT_LV_PATH_PLAN_T;
+} __attribute__((__packed__)) DB_V2X_PT_LV_PATH_PLAN_T;
 
 /* FV (Follow Vehicle) */
 /**
@@ -281,7 +288,7 @@ typedef enum {
 
 /**
 * @details a driving lane
-* @param DB_V2X_PT_LV_DRIVE_STATUS_E
+* @param DB_V2X_PT_FV_DRIVE_STATUS_E
 */
 typedef enum {
     eDB_V2X_PT_FV_DRIVE_STATUS_STAY_LANE       = 0,
@@ -319,7 +326,7 @@ typedef enum {
 typedef struct DB_V2X_PT_FV_PATH_PLAN_t {
     int32_t                          anFvLatitude[DB_V2X_PT_FV_PATH_PLAN_MAX_LEN];
     int32_t                          anFvLongitude[DB_V2X_PT_FV_PATH_PLAN_MAX_LEN];
-} DB_V2X_PT_FV_PATH_PLAN_T;
+} __attribute__((__packed__)) DB_V2X_PT_FV_PATH_PLAN_T;
 
 
 /**
@@ -354,7 +361,8 @@ typedef struct DB_V2X_PLATOONING_LV_t {
     DB_V2X_PT_LV_CROSSWAY_E          eLvCrossway;
     DB_V2X_PT_LV_LANE_MANEUVER_E     eLvLaneManeuver;
     DB_V2X_PT_LV_PATH_PLAN_T         stLvPathPlan;
-} DB_V2X_PLATOONING_LV_T;
+    uint64_t                         unReserved1;
+} __attribute__((__packed__)) DB_V2X_PLATOONING_LV_T;
 
 /**
 * @details Service ID of the follow vehicle (PTFV)
@@ -385,7 +393,13 @@ typedef struct DB_V2X_PLATOONING_FV_t {
     DB_V2X_PT_FV_PATH_PLAN_T         stFvPathPlan;
     uint16_t                         usFvRecommDistance;
     uint16_t                         usFvRecommSpeed;
-} DB_V2X_PLATOONING_FV_T;
+    uint64_t                         unReserved1;
+    uint64_t                         unReserved2;
+    uint64_t                         unReserved3;
+    uint64_t                         unReserved4;
+    uint32_t                         unReserved5;
+    uint16_t                         unReserved6;
+} __attribute__((__packed__)) DB_V2X_PLATOONING_FV_T;
 
 /**
 * @details DB V2X Platooning Struct
@@ -394,7 +408,7 @@ typedef struct DB_V2X_PLATOONING_FV_t {
 typedef struct DB_V2X_PLATOONING_t {
     DB_V2X_PLATOONING_TYPE_E         eDbV2XPtType;
     uint16_t                         usV2xGroupId;
-} DB_V2X_PLATOONING_T;
+} __attribute__((__packed__)) DB_V2X_PLATOONING_T;
 
 /***************************** Function Protype ******************************/
 
