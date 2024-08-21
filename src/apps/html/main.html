@@ -89,12 +89,13 @@
     }
     #traffic-light {
         position: absolute;
-        top: 0px;  /* 위치를 지정하세요 */
-        left: 1600px; /* 위치를 지정하세요 */
+        top: 225px;  /* 위치를 지정하세요 */
+        left: 10px; /* 위치를 지정하세요 */
         z-index: 10; /* z-index 값을 높게 설정해서 다른 요소 위에 위치하도록 설정 */
         text-align: center; /* 이미지와 텍스트를 가운데 정렬 */
         padding: 5px; /* 여백 추가 */
         border-radius: 5px; /* 모서리를 둥글게 */
+        background-color: rgba(0, 0, 0, 0.8); /* 투명한 배경 추가로 가독성 향상 */
     }
     #traffic-light img {
         width: 110px; /* 신호등 크기 조정 */
@@ -103,6 +104,7 @@
     #traffic-light-status {
         font-size: 30px;
         margin-top: 5px; /* 이미지와 텍스트 사이의 여백 */
+        font-weight: bold; /* 글씨 굵게 */
     }
 </style>
 </head>
