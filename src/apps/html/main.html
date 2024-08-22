@@ -46,22 +46,32 @@
         color: white; /* 텍스트 색상을 흰색으로 설정 */
     }
 
+    /* 그래프 컨테이너 스타일 */
     #graphs {
         position: absolute;
         top: 0;
         bottom: 0;
         right: 0;
-        width: 25%;
+        width: 23.5%; /* 더 좁은 너비로 설정하여 맵과 겹치지 않도록 함 */
+        background-color: rgba(0, 0, 0, 0.7); /* 동일한 어두운 배경 */
+        padding: 15px; /* 내부 여백 추가 */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 그림자 효과 */
         display: flex;
         flex-direction: column;
-        z-index: 1; /* 그래프의 z-index 명확하게 설정 */
+        z-index: 2; /* 맵 위에 그래프가 보이도록 설정 */
     }
+
+    /* 개별 그래프 스타일 */
     .graph {
         flex: 1;
         position: relative;
-        margin-top: 50px;
-        z-index: 2;
+        margin-top: 30px; /* 그래프 간 간격 조정 */
+        margin-left: 10px; /* 왼쪽 여백 추가하여 맵과 겹치지 않도록 설정 */
+        background-color: rgba(0, 0, 0, 0.7); /* 동일한 배경색 */
+        padding: 10px;
+        border-radius: 10px; /* 둥근 모서리 */
     }
+
     #current-values {
         position: absolute;
         top: 0;
@@ -120,6 +130,7 @@
         padding: 5px;
         border-radius: 5px;
         background-color: rgba(0, 0, 0, 0.8);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 그림자 효과 */
     }
     #traffic-light img {
         width: 110px;
@@ -950,7 +961,6 @@ window.onload = function() {
                 console.error('Invalid data points for Graph2.');
             }
         }
-
         Plotly.newPlot('graph1', [{
             x: [],
             y: [],
@@ -959,12 +969,30 @@ window.onload = function() {
             line: { color: 'green', width: 2 },
             marker: { color: 'green', size: 6 }
         }], {
-            margin: { t: 30, b: 40, l: 50, r: 30 },
+            margin: { t: 60, b: 40, l: 50, r: 30 }, // 타이틀 높이에 맞게 top margin 증가
             yaxis: { range: [80, 100], title: 'PDR (%)', showgrid: true, zeroline: true, dtick: 1 },
             xaxis: { title: 'ulTotalPacketCnt', showgrid: true },
-            title: 'Real-time PDR Monitoring',
-            plot_bgcolor: '#f0f0f0',
-            paper_bgcolor: '#ffffff'
+            title: {
+                text: 'Real-time PDR Monitoring',
+                font: {
+                    size: 24,  // 타이틀 글자 크기만 설정
+                    color: 'white'
+                },
+                x: 0.5,  // 중앙 정렬
+                xanchor: 'center',
+                yanchor: 'top'
+            },
+            plot_bgcolor: 'rgba(0, 0, 0, 0.7)',  // 그래프 내부 배경
+            paper_bgcolor: 'rgba(0, 0, 0, 0.7)', // 그래프 전체 배경
+            font: {
+                color: 'white'
+            },
+            xaxis: {
+                gridcolor: 'rgba(255, 255, 255, 0.3)',
+            },
+            yaxis: {
+                gridcolor: 'rgba(255, 255, 255, 0.3)',
+            }
         });
 
         Plotly.newPlot('graph2', [{
@@ -975,12 +1003,30 @@ window.onload = function() {
             line: { color: 'blue', width: 2 },
             marker: { color: 'blue', size: 6 }
         }], {
-            margin: { t: 30, b: 40, l: 50, r: 30 },
-            yaxis: { range: [0, 15], title: 'Modem Latency (Air to Air)', showgrid: true, zeroline: true, dtick: 1 },
+            margin: { t: 60, b: 40, l: 50, r: 30 }, // 타이틀 높이에 맞게 top margin 증가
+            yaxis: { range: [0, 15], title: 'Latency (ms)', showgrid: true, zeroline: true, dtick: 1 },
             xaxis: { title: 'ulTotalPacketCnt', showgrid: true },
-            title: 'Real-time Latency Monitoring',
-            plot_bgcolor: '#f0f0f0',
-            paper_bgcolor: '#ffffff'
+            title: {
+                text: 'Real-time Latency Monitoring',
+                font: {
+                    size: 24,  // 타이틀 글자 크기만 설정
+                    color: 'white'
+                },
+                x: 0.5,  // 중앙 정렬
+                xanchor: 'center',
+                yanchor: 'top'
+            },
+            plot_bgcolor: 'rgba(0, 0, 0, 0.7)',  // 그래프 내부 배경
+            paper_bgcolor: 'rgba(0, 0, 0, 0.7)', // 그래프 전체 배경
+            font: {
+                color: 'white'
+            },
+            xaxis: {
+                gridcolor: 'rgba(255, 255, 255, 0.3)',
+            },
+            yaxis: {
+                gridcolor: 'rgba(255, 255, 255, 0.3)',
+            }
         });
 
         const weatherApiKey = '0384422edd4701383345e4e16d05b903';
