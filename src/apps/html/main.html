@@ -18,17 +18,34 @@
     }
     #weather-info {
         position: absolute;
-        top: 50px;
+        top: 60px;
         left: 10px;
-        background-color: rgba(255, 255, 255, 0.8);
-        padding: 10px;
-        border-radius: 5px;
+        background-color: rgba(0, 0, 0, 0.7); /* 약간 투명한 검은색 배경 */
+        padding: 15px; /* 충분한 여백 */
+        border-radius: 10px; /* 부드러운 모서리 */
         font-family: Arial, sans-serif;
         display: flex;
         flex-direction: column;
         align-items: center;
-        z-index: 2; /* 날씨 정보의 z-index 명확하게 설정 */
+        z-index: 2;
+        width: 180px; /* 일정한 너비 */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 약간의 그림자 효과 */
     }
+
+    #weather-icon {
+        width: 80px; /* 아이콘 크기 조정 */
+        height: 80px;
+        margin-bottom: 10px;
+    }
+
+    #location, #temperature, #humidity {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        text-align: center; /* 텍스트 가운데 정렬 */
+        color: white; /* 텍스트 색상을 흰색으로 설정 */
+    }
+
     #graphs {
         position: absolute;
         top: 0;
@@ -61,29 +78,42 @@
         color: blue;
     }
 
-    #center-button, #centerToggleButton, #lineToggleButton{
+    /* 버튼 스타일 */
+    #center-button, #centerToggleButton, #lineToggleButton {
         position: absolute;
-        padding: 10px;
-        background-color: white;
-        border: 1px solid #ccc;
+        padding: 10px 20px;
+        background-color: rgba(0, 0, 0, 0.7); /* 약간 투명한 검은색 배경 */
+        border: none;
+        border-radius: 10px; /* 부드러운 모서리 */
+        color: white; /* 흰색 텍스트 */
         cursor: pointer;
+        font-size: 16px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 그림자 효과 */
         z-index: 3; /* 버튼들의 z-index를 높여서 모달 창 뒤에 숨지 않도록 설정 */
     }
+
     #center-button {
         top: 10px;
         left: 10px;
     }
+
     #centerToggleButton {
         top: 10px;
-        left: 170px;
+        left: 220px;
     }
+
     #lineToggleButton {
         top: 10px;
-        left: 300px;
+        left: 395px;
     }
+
+    #center-button:hover, #centerToggleButton:hover, #lineToggleButton:hover {
+        background-color: rgba(0, 0, 0, 0.8); /* 마우스를 올렸을 때 더 어두운 배경 */
+    }
+
     #traffic-light {
         position: absolute;
-        top: 225px;
+        top: 290px;
         left: 10px;
         z-index: 10;
         text-align: center;
