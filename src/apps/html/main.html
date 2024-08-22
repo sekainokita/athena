@@ -942,20 +942,28 @@ window.onload = function() {
         );
 
         function updateVehiclePosition(vehicleId, coordinates, heading) {
-            map.getSource(`vehicle_src_${vehicleId}`).setData({
-                'type': 'FeatureCollection',
-                'features': [{
-                    'type': 'Feature',
-                    'geometry': {
-                        'type': 'Point',
-                        'coordinates': coordinates
-                    },
-                    'properties': {
-                        'heading': heading
-                    }
-                }]
-            });
+            let vehicleSource = map.getSource(`vehicle_src_${vehicleId}`);
 
+            // vehicle source가 존재하는지 확인
+            if (vehicleSource) {
+                vehicleSource.setData({
+                    'type': 'FeatureCollection',
+                    'features': [{
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': coordinates
+                        },
+                        'properties': {
+                            'heading': heading
+                        }
+                    }]
+                });
+            } else {
+                console.warn(`Vehicle source vehicle_src_${vehicleId} not found.`);
+            }
+
+            // 상태 업데이트
             if (vehicleId === 0) {
                 vehicleLongitude0 = coordinates[0];
                 vehicleLatitude0 = coordinates[1];
@@ -964,8 +972,8 @@ window.onload = function() {
                 vehicleLatitude1 = coordinates[1];
             }
 
-            if (isCvLineEnabled)
-            {
+            // 연결된 선 업데이트 (isCvLineEnabled가 true일 때만)
+            if (isCvLineEnabled && map.getSource('line')) {
                 map.getSource('line').setData({
                     'type': 'Feature',
                     'geometry': {
@@ -975,6 +983,7 @@ window.onload = function() {
                 });
             }
 
+            // 지도 중심 설정 (isCenteringEnabled가 true일 때만)
             if (isCenteringEnabled && vehicleId === 0) {
                 map.setCenter(coordinates);
             }
