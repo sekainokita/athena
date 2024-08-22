@@ -136,6 +136,15 @@
 <button id="lineToggleButton">Enable Connected Vehicle</button>
 
 <script>
+    let testType = prompt("Tx Test를 실행하려면 't'를, Rx Test를 실행하려면 'r'를 입력하세요:");
+    let ipAddress = prompt("WebSocket 서버의 IP 주소를 입력하세요 (예: 10.252.110.58):");
+
+    if (!ipAddress) {
+        ipAddress = "10.252.110.58";  // 기본 IP 주소
+    }
+
+    console.log("입력된 IP 주소: " + ipAddress);
+
     // KETI Pangyo
     const cKetiPangyoLatitude = 37.4064;
     const cKetiPangyolongitude = 127.1021;
@@ -170,10 +179,27 @@
     let s_unPdr, s_ulLatencyL1, s_ulTotalPacketCnt, s_unSeqNum;
 
     let s_unTempTxCnt = 0;
-    let isTempTxTest = false;
+    // 사용자 입력에 따라 변수 설정
+    let isTxTest;
+    let testMode;
+
+    if (testType.toLowerCase() === 't') {
+        isTxTest = true; // Tx Test가 선택된 경우
+        console.log("Tx Test 모드가 선택되었습니다.");
+        testMode = "Tx Test";
+    } else if (testType.toLowerCase() === 'r') {
+        isTxTest = false; // Rx Test가 선택된 경우
+        console.log("Rx Test 모드가 선택되었습니다.");
+        testMode = "Rx Test";
+    } else {
+        alert("잘못된 입력입니다. 기본적으로 Tx Test 모드가 선택됩니다.");
+        isTxTest = true; // 기본값 Tx Test로 설정
+        testMode = "Tx Test (default)";
+    }
+
+    alert(`현재 선택된 테스트 모드: ${testMode}\n입력된 IP 주소: ${ipAddress}`);
 
     let isCenteringEnabled = false;
-
     let isCvLineEnabled = false;
 
 	mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
@@ -207,10 +233,7 @@
 
     window.onload = () => {
         if ('WebSocket' in window) {
-            let ws = new WebSocket('ws://10.252.110.58:3001/websocket');
-            //let ws = new WebSocket('ws://192.168.2.249:3001/websocket');
-            //let ws = new WebSocket('ws://10.252.110.34:3001/websocket');
-
+            let ws = new WebSocket(`ws://${ipAddress}:3001/websocket`);
             ws.onopen = () => {
                 console.log('WebSocket connection established');
                 ws.send('Client connected');
@@ -222,7 +245,7 @@
                 return reversedHeading;
             }
 
-            if(isTempTxTest) {
+            if(isTxTest) {
                 ws.onmessage = (message) => {
                     let data = message.data.split(',');
                     s_nRxLatitude = data[23]; // Mine
