@@ -100,7 +100,11 @@
 #define MSG_MANAGER_WEBSOCKET_PORT                  (3001)
 #define MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN           (1024)
 
-#define MSG_MANAGER_WEBSERVER_FILE_SAMPLE           "/tmp/rx_ctrack_240820.csv"
+#define MSG_MANAGER_DB_FILE_PATH                    "/tmp"
+
+#define MSG_MANAGER_WEBSERVER_FILE_SAMPLE_RX        "rx_pangyo_240819.csv"
+#define MSG_MANAGER_WEBSERVER_FILE_SAMPLE_TX        "tx_ctrack_240820.csv"
+
 #define MSG_MANAGER_WEBSERVER_FILE_TX               "/tmp/db_v2x_tx_temp_writing.csv"
 #define MSG_MANAGER_WEBSERVER_FILE_RX               "/tmp/db_v2x_rx_temp_writing.csv"
 
@@ -147,7 +151,8 @@ typedef enum
     eMSG_MANAGER_FILE_TYPE_UNKNOWN = 0,
     eMSG_MANAGER_FILE_TYPE_TX,
     eMSG_MANAGER_FILE_TYPE_RX,
-    eMSG_MANAGER_FILE_TYPE_SAMPLE,
+    eMSG_MANAGER_FILE_TYPE_SAMPLE_TX,
+    eMSG_MANAGER_FILE_TYPE_SAMPLE_RX,
     eMSG_MANAGER_FILE_TYPE_MAX = 0xFF
 } MSG_MANAGER_FILE_TYPE_E;
 

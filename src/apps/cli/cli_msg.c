@@ -117,14 +117,36 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
             if(s_eFileType == eMSG_MANAGER_FILE_TYPE_TX)
             {
                 s_hWebSocket = fopen(MSG_MANAGER_WEBSERVER_FILE_TX, "r");
+                PrintTrace("MSG_MANAGER_WEBSERVER_FILE_TX:%s", MSG_MANAGER_WEBSERVER_FILE_TX);
             }
             else if(s_eFileType == eMSG_MANAGER_FILE_TYPE_RX)
             {
                 s_hWebSocket = fopen(MSG_MANAGER_WEBSERVER_FILE_RX, "r");
+                PrintTrace("MSG_MANAGER_WEBSERVER_FILE_RX:%s", MSG_MANAGER_WEBSERVER_FILE_RX);
             }
-            else if(s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE)
+            else if(s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_TX)
             {
-                s_hWebSocket = fopen(MSG_MANAGER_WEBSERVER_FILE_SAMPLE, "r");
+                nRet = system("cp -f ~/work/athena/src/apps/html/db/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_TX " "MSG_MANAGER_DB_FILE_PATH);
+                if(nRet < FRAMEWORK_OK)
+                {
+                    PrintError("system() is failed! [nRet:%d], locate your source code at ~/work/athena", nRet);
+                    return nRet;
+                }
+
+                s_hWebSocket = fopen("/tmp/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_TX, "r");
+                PrintTrace("MSG_MANAGER_WEBSERVER_FILE_SAMPLE_TX:/tmp/%s", MSG_MANAGER_WEBSERVER_FILE_SAMPLE_TX);
+            }
+            else if(s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_RX)
+            {
+                nRet = system("cp -f ~/work/athena/src/apps/html/db/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_RX " "MSG_MANAGER_DB_FILE_PATH);
+                if(nRet < FRAMEWORK_OK)
+                {
+                    PrintError("system() is failed! [nRet:%d], locate your source code at ~/work/athena", nRet);
+                    return nRet;
+                }
+
+                s_hWebSocket = fopen("/tmp/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_RX, "r");
+                PrintTrace("eMSG_MANAGER_FILE_TYPE_SAMPLE_RX:/tmp/%s", MSG_MANAGER_WEBSERVER_FILE_SAMPLE_RX);
             }
             else
             {
@@ -141,7 +163,7 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
                 PrintTrace("file type[%d] is opened", s_eFileType);
             }
 
-            if(s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE)
+            if((s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_TX) || (s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_RX))
             {
                 /* read from the first */
                 fseek(s_hWebSocket, 0, SEEK_SET);
@@ -157,7 +179,7 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
             break;
 
         case LWS_CALLBACK_SERVER_WRITEABLE:
-            if(s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE)
+            if((s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_TX) || (s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_RX))
             {
                 if (fgets(chLine, sizeof(chLine), s_hWebSocket))
                 {
@@ -1408,7 +1430,7 @@ int32_t CLI_MSG_InitCmds(void)
                "  pl_type         [0]UNKONWN, [1]SAE J2735 BSM, [2]SAE J2736 PVD, [201]Platooning(default), [301]Sensor sharing, [401]Remote driving, [501] Advanced driving\n"
                "  comm_id         [0]UNKONWN, [1]V2V(default), [2]V2I,...\n"
                "msg get           get setting values of v2x structures\n"
-               "msg web file [id] set file type, 0:unknown, 1:tx, 2:rx(default), 3:sample\n"
+               "msg web file [id] set file type, 0:unknown, 1:tx, 2:rx(default), 3:sample Tx, 4:sample Rx\n"
                "msg web start     start web server, set file type first\n"
                "msg web stop      stop web server\n"
                "msg tcp [OPTIONS]\n"
