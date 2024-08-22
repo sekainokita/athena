@@ -447,6 +447,75 @@ window.onload = function() {
         document.getElementById('lineToggleButton').addEventListener('click', function() {
             isCvLineEnabled = !isCvLineEnabled;
             this.textContent = isCvLineEnabled ? 'Disable Connected Vehicle' : 'Enable Connected Vehicle';
+
+            if (isCvLineEnabled) {
+                if (!map.getLayer('lineLayer')) {
+                    map.addSource('line', {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'LineString',
+                                'coordinates': [[vehicleLongitude0, vehicleLatitude0], [vehicleLongitude1, vehicleLatitude1]]
+                            }
+                        }
+                    });
+
+                    map.addLayer({
+                        'id': 'lineLayer',
+                        'type': 'line',
+                        'source': 'line',
+                        'layout': {},
+                        'paint': {
+                            'line-color': [
+                                'interpolate',
+                                ['linear'],
+                                ['line-progress'],
+                                0, '#00FFFF',
+                                1, '#008B8B'
+                            ],
+                            'line-width': 1.5
+                        }
+                    });
+
+                    map.addLayer({
+                        'id': 'lineLabelLayer',
+                        'type': 'symbol',
+                        'source': 'line',
+                        'layout': {
+                            'symbol-placement': 'line',
+                            'text-field': 'Connected V2X',
+                            'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+                            'text-size': 12,
+                            'text-anchor': 'center'
+                        },
+                        'paint': {
+                            'text-color': '#000000',
+                            'text-halo-color': '#FFFFFF',
+                            'text-halo-width': 2
+                        }
+                    });
+                } else {
+                    map.getSource('line').setData({
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': [[vehicleLongitude0, vehicleLatitude0], [vehicleLongitude1, vehicleLatitude1]]
+                        }
+                    });
+                }
+            } else {
+                // 연결 선 제거
+                if (map.getLayer('lineLayer')) {
+                    map.removeLayer('lineLayer');
+                }
+                if (map.getLayer('lineLabelLayer')) {
+                    map.removeLayer('lineLabelLayer');
+                }
+                if (map.getSource('line')) {
+                    map.removeSource('line');
+                }
+            }
         });
 
         document.getElementById('workZoneButton').addEventListener('click', function() {
@@ -800,72 +869,6 @@ window.onload = function() {
                         ]
                     }
                 });
-
-                map.addSource('line', {
-                    'type': 'geojson',
-                    'data': {
-                        'type': 'Feature',
-                        'geometry': {
-                            'type': 'LineString',
-                            'coordinates': [[vehicleLongitude0, vehicleLatitude0], [vehicleLongitude1, vehicleLatitude1]]
-                        }
-                    }
-                });
-
-                map.addLayer({
-                    'id': 'lineLayer',
-                    'type': 'line',
-                    'source': 'line',
-                    'layout': {},
-                    'paint': {
-                        'line-color': [
-                            'interpolate',
-                            ['linear'],
-                            ['line-progress'],
-                            0, '#00FFFF',
-                            1, '#008B8B'
-                        ],
-                        'line-width': 1.5
-                    }
-                });
-
-                map.addLayer({
-                    'id': 'lineLabelLayer',
-                    'type': 'symbol',
-                    'source': 'line',
-                    'layout': {
-                        'symbol-placement': 'line',
-                        'text-field': 'Connected V2X',
-                        'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
-                        'text-size': 12,
-                        'text-anchor': 'center'
-                    },
-                    'paint': {
-                        'text-color': '#000000',
-                        'text-halo-color': '#FFFFFF',
-                        'text-halo-width': 2
-                    }
-                });
-
-                map.addLayer({
-                    'id': 'vehicle1',
-                    'type': 'symbol',
-                    'source': 'vehicle_src_1',
-                    'layout': {
-                        'icon-image': 'vehicle1',
-                        'icon-size': 0.2,
-                        'icon-rotate': ['get', 'heading'],
-                        'text-field': ['concat', 'Heading ', ['get', 'heading']],
-                        'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-                        'text-offset': [0, 1.25], // Adjust this value to position the text
-                        'text-anchor': 'top'
-                    },
-                    'paint': {
-                        'text-color': '#000000',
-                        'text-halo-color': '#FFFFFF',
-                        'text-halo-width': 2
-                    }
-                });
             }
         );
 
@@ -894,13 +897,13 @@ window.onload = function() {
 
             if (isCvLineEnabled)
             {
-            map.getSource('line').setData({
-                'type': 'Feature',
-                'geometry': {
-                    'type': 'LineString',
-                    'coordinates': [[vehicleLongitude0, vehicleLatitude0], [vehicleLongitude1, vehicleLatitude1]]
-                }
-            });
+                map.getSource('line').setData({
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'LineString',
+                        'coordinates': [[vehicleLongitude0, vehicleLatitude0], [vehicleLongitude1, vehicleLatitude1]]
+                    }
+                });
             }
 
             if (isCenteringEnabled && vehicleId === 0) {
