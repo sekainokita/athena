@@ -12,10 +12,31 @@
     #map {
         position: absolute;
         top: 0;
-        bottom: 0;
+        bottom: 5%;
         width: 75%;
         z-index: 1; /* 지도의 z-index 명확하게 설정 */
     }
+
+    #right-info-background {
+        position: absolute;
+        top: 0;
+        bottom: 5%;
+        right: 0;
+        width: 25%; /* 남은 25%를 차지하는 배경 설정 */
+        background-color: rgba(0, 0, 0, 0.8); /* 어두운 배경색 */
+        z-index: 1; /* 그래프와 동일한 z-index 설정 */
+    }
+
+    /* 아래쪽 검정색 바 */
+    #bottom-info-background {
+        position: absolute;
+        bottom: 0;
+        height: 5%; /* 전체 높이의 5%를 차지하는 검정 바 */
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.8); /* 어두운 배경색 */
+        z-index: 1;
+    }
+
     #weather-info {
         position: absolute;
         top: 60px;
@@ -49,10 +70,10 @@
     /* 그래프 컨테이너 스타일 */
     #graphs {
         position: absolute;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        width: 23.5%; /* 더 좁은 너비로 설정하여 맵과 겹치지 않도록 함 */
+        top: 100px;
+        bottom: 5%;
+        right: 0px;
+        width: 23%; /* 더 좁은 너비로 설정하여 맵과 겹치지 않도록 함 */
         background-color: rgba(0, 0, 0, 0.7); /* 동일한 어두운 배경 */
         padding: 15px; /* 내부 여백 추가 */
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 그림자 효과 */
@@ -72,20 +93,46 @@
         border-radius: 10px; /* 둥근 모서리 */
     }
 
-    #current-values {
+    /* PDR 상태 정보 스타일 */
+    #pdr-status {
         position: absolute;
         top: 0;
         right: 10px;
-        background-color: rgba(255, 255, 255, 0.8);
-        padding: 5px;
-        border-radius: 5px;
+        background-color: rgba(0, 0, 0, 0.8); /* 약간 투명한 검은색 배경 */
+        padding: 10px 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        font-family: 'Arial', sans-serif;
+        font-size: 20px;
+        color: white;
         z-index: 2;
+        text-align: center;
     }
-    #current-value-graph1 {
-        color: green;
+
+    /* Latency 상태 정보 스타일 */
+    #latency-status {
+        position: absolute;
+        top: 50px; /* PDR 상태 정보 아래 */
+        right: 10px;
+        background-color: rgba(0, 0, 0, 0.8); /* 약간 투명한 검은색 배경 */
+        padding: 10px 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        font-family: 'Arial', sans-serif;
+        font-size: 20px;
+        color: white;
+        z-index: 2;
+        text-align: center;
     }
-    #current-value-graph2 {
-        color: blue;
+
+    #pdr-value {
+        color: #32CD32; /* PDR 문구의 초록색 */
+        font-weight: bold;
+    }
+
+    #latency-value {
+        color: #1E90FF; /* Latency 문구의 파란색 */
+        font-weight: bold;
     }
 
     /* 버튼 스타일 */
@@ -190,10 +237,27 @@
     .modal-button:hover {
         background-color: #45a049; /* 마우스를 올릴 때 색상 변경 */
     }
+
+    #ci-logo {
+        position: absolute;
+        bottom: 0;  /* 맨 아래에서 5% 위로 띄워줍니다 (검정색 바 바로 위) */
+        left: 10px;  /* 왼쪽에 고정 */
+        z-index: 2;  /* 다른 요소들보다 위에 배치 */
+        padding: 5px; /* 여백 추가 */
+    }
+
+    #ci-logo img {
+        width: 270px;  /* CI 이미지의 너비를 적절한 크기로 조정 */
+        height: auto;
+    }
+
 </style>
 </head>
 <body>
 <div id="map"></div>
+<div id="right-info-background"></div>
+<div id="bottom-info-background"></div>
+
 <div id="weather-info">
     <img id="weather-icon" src="" alt="Weather Icon"/>
     <div id="location">Location: --</div>
@@ -201,13 +265,16 @@
     <div id="humidity">Humidity: --%</div>
 </div>
 
+<div id="pdr-status">
+    <span id="pdr-value">PDR (Packet Delivery Rate): --</span>
+</div>
+<div id="latency-status">
+    <span id="latency-value">Latency (Air to Air): --</span>
+</div>
+
 <div id="graphs">
     <div id="graph1" class="graph"></div>
     <div id="graph2" class="graph"></div>
-    <div id="current-values">
-        <span id="current-value-graph1">PDR (Packet Delivery Rate): --</span>,
-        <span id="current-value-graph2">Latency (Air to Air): --</span>
-    </div>
 </div>
 
 <div id="traffic-light">
@@ -230,6 +297,10 @@
     <label for="ipAddress">IP 주소를 입력하세요:</label><br>
     <input type="text" id="ipAddress" class="modal-input" placeholder="기본값: 10.252.110.58"><br>
     <button id="submit-button" class="modal-button">확인</button>
+</div>
+
+<div id="ci-logo">
+    <img src="https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/keti_ci.png" alt="CI Logo">
 </div>
 
 <script>
@@ -890,7 +961,7 @@ window.onload = function() {
                     ]
                 });
 
-                document.getElementById('current-value-graph1').innerText = `PDR (Packet Delivery Rate): ${unPdrValue[0]}%`;
+                document.getElementById('pdr-value').innerText = `PDR(Packet Delivery Rate) ${unPdrValue[0]}%`;
             } else {
                 console.error('Invalid data points for Graph1.');
             }
@@ -956,7 +1027,7 @@ window.onload = function() {
                     ]
                 });
 
-                document.getElementById('current-value-graph2').innerText = `Latency (Air to Air): ${ulLatencyValue[0]}ms, Avg: ${avgLatency.toFixed(2)}ms`;
+                document.getElementById('latency-value').innerText = `Latency(Air to Air) ${ulLatencyValue[0]}ms, Avg: ${avgLatency.toFixed(2)}ms`;
             } else {
                 console.error('Invalid data points for Graph2.');
             }
