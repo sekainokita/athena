@@ -14,6 +14,7 @@
         top: 0;
         bottom: 0;
         width: 75%;
+        z-index: 1; /* 지도의 z-index 명확하게 설정 */
     }
     #weather-info {
         position: absolute;
@@ -26,17 +27,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        z-index: 1;
-    }
-    #weather-icon {
-        width: 70px;
-        height: 70px;
-        margin-bottom: 5px;
-    }
-    #location, #temperature, #humidity {
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 5px;
+        z-index: 2; /* 날씨 정보의 z-index 명확하게 설정 */
     }
     #graphs {
         position: absolute;
@@ -46,11 +37,13 @@
         width: 25%;
         display: flex;
         flex-direction: column;
+        z-index: 1; /* 그래프의 z-index 명확하게 설정 */
     }
     .graph {
         flex: 1;
         position: relative;
         margin-top: 50px;
+        z-index: 2;
     }
     #current-values {
         position: absolute;
@@ -59,7 +52,7 @@
         background-color: rgba(255, 255, 255, 0.8);
         padding: 5px;
         border-radius: 5px;
-        z-index: 1;
+        z-index: 2;
     }
     #current-value-graph1 {
         color: green;
@@ -67,13 +60,14 @@
     #current-value-graph2 {
         color: blue;
     }
+
     #center-button, #centerToggleButton, #lineToggleButton{
         position: absolute;
-        z-index: 1;
         padding: 10px;
         background-color: white;
         border: 1px solid #ccc;
         cursor: pointer;
+        z-index: 3; /* 버튼들의 z-index를 높여서 모달 창 뒤에 숨지 않도록 설정 */
     }
     #center-button {
         top: 10px;
@@ -89,22 +83,71 @@
     }
     #traffic-light {
         position: absolute;
-        top: 225px;  /* 위치를 지정하세요 */
-        left: 10px; /* 위치를 지정하세요 */
-        z-index: 10; /* z-index 값을 높게 설정해서 다른 요소 위에 위치하도록 설정 */
-        text-align: center; /* 이미지와 텍스트를 가운데 정렬 */
-        padding: 5px; /* 여백 추가 */
-        border-radius: 5px; /* 모서리를 둥글게 */
-        background-color: rgba(0, 0, 0, 0.8); /* 투명한 배경 추가로 가독성 향상 */
+        top: 225px;
+        left: 10px;
+        z-index: 10;
+        text-align: center;
+        padding: 5px;
+        border-radius: 5px;
+        background-color: rgba(0, 0, 0, 0.8);
     }
     #traffic-light img {
-        width: 110px; /* 신호등 크기 조정 */
+        width: 110px;
         height: auto;
     }
     #traffic-light-status {
         font-size: 30px;
-        margin-top: 5px; /* 이미지와 텍스트 사이의 여백 */
-        font-weight: bold; /* 글씨 굵게 */
+        margin-top: 5px;
+        font-weight: bold;
+    }
+    /* 모달 배경 */
+    #modal-background {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+    }
+    /* 모달 창 */
+    #modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 400px; /* 모달 너비 */
+        padding: 30px; /* 충분한 패딩 */
+        background-color: white;
+        border-radius: 10px; /* 부드러운 모서리 */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+        z-index: 1001;
+        text-align: center;
+        font-family: Arial, sans-serif;
+    }
+    /* 입력 필드 */
+    .modal-input {
+        width: calc(100% - 20px); /* 입력 필드 너비 조정 */
+        padding: 10px;
+        margin: 10px 0;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    /* 모달 버튼 스타일 */
+    .modal-button {
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .modal-button:hover {
+        background-color: #45a049; /* 마우스를 올릴 때 색상 변경 */
     }
 </style>
 </head>
@@ -131,107 +174,136 @@
     <p id="traffic-light-status" style="color: red;">RED Light<br>(STOP)</p>
 </div>
 
-<button id="center-button" style="position: absolute; top: 10px; left: 10px; z-index: 1;">Center on Coordinates</button>
+<button id="center-button">Center on Coordinates</button>
 <button id="centerToggleButton">Enable Centering</button>
 <button id="lineToggleButton">Enable Connected Vehicle</button>
 
+<!-- 모달 배경 -->
+<div id="modal-background"></div>
+
+<!-- 모달 창 -->
+<div id="modal">
+    <h2>테스트 모드를 선택하세요</h2>
+    <label for="testType">Tx 또는 Rx를 입력하세요:</label><br>
+    <input type="text" id="testType" class="modal-input" placeholder="Tx 또는 Rx"><br>
+    <label for="ipAddress">IP 주소를 입력하세요:</label><br>
+    <input type="text" id="ipAddress" class="modal-input" placeholder="기본값: 10.252.110.58"><br>
+    <button id="submit-button" class="modal-button">확인</button>
+</div>
+
 <script>
-    let testType = prompt("Tx Test를 실행하려면 't'를, Rx Test를 실행하려면 'r'를 입력하세요:");
-    let ipAddress = prompt("WebSocket 서버의 IP 주소를 입력하세요 (예: 10.252.110.58):");
+window.onload = function() {
+    // 모달 창 열기
+    document.getElementById('modal-background').style.display = 'block';
+    document.getElementById('modal').style.display = 'block';
 
-    if (!ipAddress) {
-        ipAddress = "10.252.110.58";  // 기본 IP 주소
-    }
+    // 기본값 설정
+    let defaultIpAddress = "10.252.110.58";
 
-    console.log("입력된 IP 주소: " + ipAddress);
+    // 버튼 클릭 이벤트 처리
+    document.getElementById('submit-button').onclick = function() {
+        // 사용자 입력 값 가져오기
+        let testType = document.getElementById('testType').value.toLowerCase();
+        let ipAddress = document.getElementById('ipAddress').value || defaultIpAddress;
 
-    // KETI Pangyo
-    const cKetiPangyoLatitude = 37.4064;
-    const cKetiPangyolongitude = 127.1021;
+        // 테스트 모드 확인 및 설정
+        let testMode;
+        let isTxTest;
+        if (testType === "tx") {
+            testMode = "Tx Test";
+            isTxTest = true;
+        } else if (testType === "rx") {
+            testMode = "Rx Test";
+            isTxTest = false;
+        } else {
+            alert("잘못된 입력입니다. 기본적으로 Tx Test 모드가 선택됩니다.");
+            testMode = "Tx Test";
+            isTxTest = true;
+        }
 
-    // RSU Location
-    const cPangyoRsuLatitude16 = 37.409221;
-    const cPangyoRsuLongitude16 = 127.099505;
+        // 모달 닫기
+        document.getElementById('modal-background').style.display = 'none';
+        document.getElementById('modal').style.display = 'none';
 
-    const cPangyoRsuLatitude17 = 37.406536;
-    const cPangyoRsuLongitude17 = 127.100765;
+        // alert 창으로 현재 테스트 모드와 IP 주소를 출력
+        alert(`현재 선택된 테스트 모드: ${testMode}\n입력된 IP 주소: ${ipAddress}`);
 
-    const cPangyoRsuLatitude18 = 37.405254;
-    const cPangyoRsuLongitude18 = 127.103609;
+        // 버튼이 제대로 표시되도록 모달 창이 닫힌 후 버튼을 다시 표시
+        document.getElementById('center-button').style.display = 'block';
+        document.getElementById('centerToggleButton').style.display = 'block';
+        document.getElementById('lineToggleButton').style.display = 'block';
 
-    const cPangyoRsuLatitude5 = 37.410922;
-    const cPangyoRsuLongitude5 = 127.094732;
+        // 입력이 완료된 후 메인 로직 실행
+        main(isTxTest, ipAddress);
+    };
 
-    const cPangyoRsuLatitude31 = 37.411751;
-    const cPangyoRsuLongitude31 = 127.095019;
+    function main(isTxTest, ipAddress) {
+        // KETI Pangyo
+        const cKetiPangyoLatitude = 37.4064;
+        const cKetiPangyolongitude = 127.1021;
 
-    var vehicleLatitude0 = 37.4062;
-    var vehicleLongitude0 = 127.1032;
+        // RSU Location
+        const cPangyoRsuLatitude16 = 37.409221;
+        const cPangyoRsuLongitude16 = 127.099505;
 
-    var vehicleLatitude1 = 37.4058;
-    var vehicleLongitude1 = 127.1035;
+        const cPangyoRsuLatitude17 = 37.406536;
+        const cPangyoRsuLongitude17 = 127.100765;
 
-    var vehicleHeading0 = 320;
-    var vehicleHeading1 = 320;
+        const cPangyoRsuLatitude18 = 37.405254;
+        const cPangyoRsuLongitude18 = 127.103609;
 
-    let s_nRxLatitude, s_nRxLongitude, s_unRxVehicleHeading;
-    let s_nTxLatitude, s_nTxLongitude, s_unTxVehicleHeading;
-    let s_unPdr, s_ulLatencyL1, s_ulTotalPacketCnt, s_unSeqNum;
+        const cPangyoRsuLatitude5 = 37.410922;
+        const cPangyoRsuLongitude5 = 127.094732;
 
-    let s_unTempTxCnt = 0;
-    // 사용자 입력에 따라 변수 설정
-    let isTxTest;
-    let testMode;
+        const cPangyoRsuLatitude31 = 37.411751;
+        const cPangyoRsuLongitude31 = 127.095019;
 
-    if (testType.toLowerCase() === 't') {
-        isTxTest = true; // Tx Test가 선택된 경우
-        console.log("Tx Test 모드가 선택되었습니다.");
-        testMode = "Tx Test";
-    } else if (testType.toLowerCase() === 'r') {
-        isTxTest = false; // Rx Test가 선택된 경우
-        console.log("Rx Test 모드가 선택되었습니다.");
-        testMode = "Rx Test";
-    } else {
-        alert("잘못된 입력입니다. 기본적으로 Tx Test 모드가 선택됩니다.");
-        isTxTest = true; // 기본값 Tx Test로 설정
-        testMode = "Tx Test (default)";
-    }
+        var vehicleLatitude0 = 37.4062;
+        var vehicleLongitude0 = 127.1032;
 
-    alert(`현재 선택된 테스트 모드: ${testMode}\n입력된 IP 주소: ${ipAddress}`);
+        var vehicleLatitude1 = 37.4058;
+        var vehicleLongitude1 = 127.1035;
 
-    let isCenteringEnabled = false;
-    let isCvLineEnabled = false;
+        var vehicleHeading0 = 320;
+        var vehicleHeading1 = 320;
 
-	mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
-    const map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/yesbman/clyzkeh8900dr01pxdqow8awk',
-        projection: 'globe',
-        zoom: 19,
-        center: [cKetiPangyolongitude, cKetiPangyoLatitude]
-    });
+        let s_nRxLatitude, s_nRxLongitude, s_unRxVehicleHeading;
+        let s_nTxLatitude, s_nTxLongitude, s_unTxVehicleHeading;
+        let s_unPdr, s_ulLatencyL1, s_ulTotalPacketCnt, s_unSeqNum;
 
-    map.addControl(new mapboxgl.NavigationControl());
+        let s_unTempTxCnt = 0;
+        let isCenteringEnabled = false;
+        let isCvLineEnabled = false;
 
-    map.on('style.load', () => {
-        map.setFog({});
-
-        document.getElementById('center-button').addEventListener('click', function() {
-            map.setCenter([s_nRxLongitude, s_nRxLatitude]);
+        mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/yesbman/clyzkeh8900dr01pxdqow8awk',
+            projection: 'globe',
+            zoom: 19,
+            center: [cKetiPangyolongitude, cKetiPangyoLatitude]
         });
-    });
 
-    document.getElementById('centerToggleButton').addEventListener('click', function() {
-        isCenteringEnabled = !isCenteringEnabled;
-        this.textContent = isCenteringEnabled ? 'Disable Centering' : 'Enable Centering';
-    });
+        map.addControl(new mapboxgl.NavigationControl());
 
-    document.getElementById('lineToggleButton').addEventListener('click', function() {
-        isCvLineEnabled = !isCvLineEnabled;
-        this.textContent = isCvLineEnabled ? 'Disable Connected Vehicle' : 'Enable Connected Vehicle';
-    });
+        map.on('style.load', () => {
+            map.setFog({});
 
-    window.onload = () => {
+            document.getElementById('center-button').addEventListener('click', function() {
+                map.setCenter([s_nRxLongitude, s_nRxLatitude]);
+            });
+        });
+
+        document.getElementById('centerToggleButton').addEventListener('click', function() {
+            isCenteringEnabled = !isCenteringEnabled;
+            this.textContent = isCenteringEnabled ? 'Disable Centering' : 'Enable Centering';
+        });
+
+        document.getElementById('lineToggleButton').addEventListener('click', function() {
+            isCvLineEnabled = !isCvLineEnabled;
+            this.textContent = isCvLineEnabled ? 'Disable Connected Vehicle' : 'Enable Connected Vehicle';
+        });
+
         if ('WebSocket' in window) {
             let ws = new WebSocket(`ws://${ipAddress}:3001/websocket`);
             ws.onopen = () => {
@@ -289,202 +361,141 @@
         } else {
             console.error('WebSocket is not supported by this browser');
         }
-    };
 
-    map.on('load', () => {
+        map.on('load', () => {
 
-        map.on('zoom', () => {
-            map.resize();  // 확대/축소 시 강제로 지도를 리렌더링
-        });
+            map.on('zoom', () => {
+                map.resize();  // 확대/축소 시 강제로 지도를 리렌더링
+            });
 
-        map.on('move', () => {
-            map.resize();  // 지도가 이동될 때 리렌더링
-        });
+            map.on('move', () => {
+                map.resize();  // 지도가 이동될 때 리렌더링
+            });
 
-        map.loadImage(
-            'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/keti_ci.png',
-            (error, image) => {
-                if (error) throw error;
+            map.loadImage(
+                'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/keti_ci.png',
+                (error, image) => {
+                    if (error) throw error;
 
-                map.addImage('keti-log', image);
+                    map.addImage('keti-log', image);
 
-                map.addSource('keti_log_src', {
-                    'type': 'geojson',
-                    'data': {
-                        'type': 'FeatureCollection',
-                        'features': [
-                            {
-                                'type': 'Feature',
-                                'geometry': {
-                                    'type': 'Point',
-                                    'coordinates': [cKetiPangyolongitude, cKetiPangyoLatitude]
+                    map.addSource('keti_log_src', {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'FeatureCollection',
+                            'features': [
+                                {
+                                    'type': 'Feature',
+                                    'geometry': {
+                                        'type': 'Point',
+                                        'coordinates': [cKetiPangyolongitude, cKetiPangyoLatitude]
+                                    }
                                 }
-                            }
-                        ]
-                    }
-                });
-
-                map.addLayer({
-                    'id': 'keti',
-                    'type': 'symbol',
-                    'source': 'keti_log_src',
-                    'layout': {
-                        'icon-image': 'keti-log',
-                        'icon-size': 0.50
-                    }
-                });
-            }
-        );
-
-        map.loadImage(
-            'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/fixed-rsu.png',
-            (error, image) => {
-                if (error) throw error;
-
-                map.addImage('rsu', image);
-
-                map.addSource('rsu-src-18', {
-                    'type': 'geojson',
-                    'data': {
-                        'type': 'FeatureCollection',
-                        'features': [
-                            {
-                                'type': 'Feature',
-                                'geometry': {
-                                    'type': 'Point',
-                                    'coordinates': [cPangyoRsuLongitude18, cPangyoRsuLatitude18]
-                                }
-                            }
-                        ]
-                    }
-                });
-
-                map.addLayer({
-                    'id': 'rsu18',
-                    'type': 'symbol',
-                    'source': 'rsu-src-18',
-                    'layout': {
-                        'icon-image': 'rsu',
-                        'icon-size': 0.5
-                    }
-                });
-
-                map.addSource('rsu-src-16', {
-                    'type': 'geojson',
-                    'data': {
-                        'type': 'FeatureCollection',
-                        'features': [
-                            {
-                                'type': 'Feature',
-                                'geometry': {
-                                    'type': 'Point',
-                                    'coordinates': [cPangyoRsuLongitude16, cPangyoRsuLatitude16]
-                                }
-                            }
-                        ]
-                    }
-                });
-
-                map.addLayer({
-                    'id': 'rsu16',
-                    'type': 'symbol',
-                    'source': 'rsu-src-16',
-                    'layout': {
-                        'icon-image': 'rsu',
-                        'icon-size': 0.5
-                    }
-                });
-
-                map.addSource('rsu-src-17', {
-                    'type': 'geojson',
-                    'data': {
-                        'type': 'FeatureCollection',
-                        'features': [
-                            {
-                                'type': 'Feature',
-                                'geometry': {
-                                    'type': 'Point',
-                                    'coordinates': [cPangyoRsuLongitude17, cPangyoRsuLatitude17]
-                                }
-                            }
-                        ]
-                    }
-                });
-
-                map.addLayer({
-                    'id': 'rsu17',
-                    'type': 'symbol',
-                    'source': 'rsu-src-17',
-                    'layout': {
-                        'icon-image': 'rsu',
-                        'icon-size': 0.5
-                    }
-                });
-
-            }
-        );
-
-        map.addSource('rsu-src-31', {
-            'type': 'geojson',
-            'data': {
-                'type': 'FeatureCollection',
-                'features': [
-                    {
-                        'type': 'Feature',
-                        'geometry': {
-                            'type': 'Point',
-                            'coordinates': [cPangyoRsuLongitude31, cPangyoRsuLatitude31]
+                            ]
                         }
-                    }
-                ]
-            }
-        });
+                    });
 
-        map.addLayer({
-            'id': 'rsu31',
-            'type': 'symbol',
-            'source': 'rsu-src-31',
-            'layout': {
-                'icon-image': 'rsu',
-                'icon-size': 0.5
-            }
-        });
-
-        map.addSource('rsu-src-5', {
-            'type': 'geojson',
-            'data': {
-                'type': 'FeatureCollection',
-                'features': [
-                    {
-                        'type': 'Feature',
-                        'geometry': {
-                            'type': 'Point',
-                            'coordinates': [cPangyoRsuLongitude5, cPangyoRsuLatitude5]
+                    map.addLayer({
+                        'id': 'keti',
+                        'type': 'symbol',
+                        'source': 'keti_log_src',
+                        'layout': {
+                            'icon-image': 'keti-log',
+                            'icon-size': 0.50
                         }
-                    }
-                ]
-            }
-        });
+                    });
+                }
+            );
 
-        map.addLayer({
-            'id': 'rsu5',
-            'type': 'symbol',
-            'source': 'rsu-src-5',
-            'layout': {
-                'icon-image': 'rsu',
-                'icon-size': 0.5
-            }
-        });
-    });
+            map.loadImage(
+                'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/fixed-rsu.png',
+                (error, image) => {
+                    if (error) throw error;
 
-    map.loadImage(
-        'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq5.png',
-        (error, image) => {
-            if (error) throw error;
+                    map.addImage('rsu', image);
 
-            map.addImage('vehicle', image);
+                    map.addSource('rsu-src-18', {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'FeatureCollection',
+                            'features': [
+                                {
+                                    'type': 'Feature',
+                                    'geometry': {
+                                        'type': 'Point',
+                                        'coordinates': [cPangyoRsuLongitude18, cPangyoRsuLatitude18]
+                                    }
+                                }
+                            ]
+                        }
+                    });
 
-            map.addSource('vehicle_src_0', {
+                    map.addLayer({
+                        'id': 'rsu18',
+                        'type': 'symbol',
+                        'source': 'rsu-src-18',
+                        'layout': {
+                            'icon-image': 'rsu',
+                            'icon-size': 0.5
+                        }
+                    });
+
+                    map.addSource('rsu-src-16', {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'FeatureCollection',
+                            'features': [
+                                {
+                                    'type': 'Feature',
+                                    'geometry': {
+                                        'type': 'Point',
+                                        'coordinates': [cPangyoRsuLongitude16, cPangyoRsuLatitude16]
+                                    }
+                                }
+                            ]
+                        }
+                    });
+
+                    map.addLayer({
+                        'id': 'rsu16',
+                        'type': 'symbol',
+                        'source': 'rsu-src-16',
+                        'layout': {
+                            'icon-image': 'rsu',
+                            'icon-size': 0.5
+                        }
+                    });
+
+                    map.addSource('rsu-src-17', {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'FeatureCollection',
+                            'features': [
+                                {
+                                    'type': 'Feature',
+                                    'geometry': {
+                                        'type': 'Point',
+                                        'coordinates': [cPangyoRsuLongitude17, cPangyoRsuLatitude17]
+                                    }
+                                }
+                            ]
+                        }
+                    });
+
+                    map.addLayer({
+                        'id': 'rsu17',
+                        'type': 'symbol',
+                        'source': 'rsu-src-17',
+                        'layout': {
+                            'icon-image': 'rsu',
+                            'icon-size': 0.5
+                        }
+                    });
+
+                }
+            );
+
+            map.addSource('rsu-src-31', {
                 'type': 'geojson',
                 'data': {
                     'type': 'FeatureCollection',
@@ -493,7 +504,7 @@
                             'type': 'Feature',
                             'geometry': {
                                 'type': 'Point',
-                                'coordinates': [vehicleLongitude0, vehicleLatitude0]
+                                'coordinates': [cPangyoRsuLongitude31, cPangyoRsuLatitude31]
                             }
                         }
                     ]
@@ -501,35 +512,16 @@
             });
 
             map.addLayer({
-                'id': 'vehicle0',
+                'id': 'rsu31',
                 'type': 'symbol',
-                'source': 'vehicle_src_0',
+                'source': 'rsu-src-31',
                 'layout': {
-                    'icon-image': 'vehicle',
-                    'icon-size': 0.2,
-                    'icon-rotate': ['get', 'heading'],
-                    'text-field': ['concat', 'Heading ', ['get', 'heading']],
-                    'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-                    'text-offset': [0, 1.25], // Adjust this value to position the text
-                    'text-anchor': 'top'
-                },
-                'paint': {
-                    'text-color': '#000000',
-                    'text-halo-color': '#FFFFFF',
-                    'text-halo-width': 2
+                    'icon-image': 'rsu',
+                    'icon-size': 0.5
                 }
             });
-        }
-    );
 
-    map.loadImage(
-        'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq-electric.png',
-        (error, image) => {
-            if (error) throw error;
-
-            map.addImage('vehicle1', image);
-
-            map.addSource('vehicle_src_1', {
+            map.addSource('rsu-src-5', {
                 'type': 'geojson',
                 'data': {
                     'type': 'FeatureCollection',
@@ -538,395 +530,476 @@
                             'type': 'Feature',
                             'geometry': {
                                 'type': 'Point',
-                                'coordinates': [vehicleLongitude1, vehicleLatitude1]
+                                'coordinates': [cPangyoRsuLongitude5, cPangyoRsuLatitude5]
                             }
                         }
                     ]
                 }
             });
 
-            map.addSource('line', {
-                'type': 'geojson',
-                'data': {
+            map.addLayer({
+                'id': 'rsu5',
+                'type': 'symbol',
+                'source': 'rsu-src-5',
+                'layout': {
+                    'icon-image': 'rsu',
+                    'icon-size': 0.5
+                }
+            });
+        });
+
+        map.loadImage(
+            'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq5.png',
+            (error, image) => {
+                if (error) throw error;
+
+                map.addImage('vehicle', image);
+
+                map.addSource('vehicle_src_0', {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'FeatureCollection',
+                        'features': [
+                            {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [vehicleLongitude0, vehicleLatitude0]
+                                }
+                            }
+                        ]
+                    }
+                });
+
+                map.addLayer({
+                    'id': 'vehicle0',
+                    'type': 'symbol',
+                    'source': 'vehicle_src_0',
+                    'layout': {
+                        'icon-image': 'vehicle',
+                        'icon-size': 0.2,
+                        'icon-rotate': ['get', 'heading'],
+                        'text-field': ['concat', 'Heading ', ['get', 'heading']],
+                        'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+                        'text-offset': [0, 1.25], // Adjust this value to position the text
+                        'text-anchor': 'top'
+                    },
+                    'paint': {
+                        'text-color': '#000000',
+                        'text-halo-color': '#FFFFFF',
+                        'text-halo-width': 2
+                    }
+                });
+            }
+        );
+
+        map.loadImage(
+            'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq-electric.png',
+            (error, image) => {
+                if (error) throw error;
+
+                map.addImage('vehicle1', image);
+
+                map.addSource('vehicle_src_1', {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'FeatureCollection',
+                        'features': [
+                            {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [vehicleLongitude1, vehicleLatitude1]
+                                }
+                            }
+                        ]
+                    }
+                });
+
+                map.addSource('line', {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': [[vehicleLongitude0, vehicleLatitude0], [vehicleLongitude1, vehicleLatitude1]]
+                        }
+                    }
+                });
+
+                map.addLayer({
+                    'id': 'lineLayer',
+                    'type': 'line',
+                    'source': 'line',
+                    'layout': {},
+                    'paint': {
+                        'line-color': [
+                            'interpolate',
+                            ['linear'],
+                            ['line-progress'],
+                            0, '#00FFFF',
+                            1, '#008B8B'
+                        ],
+                        'line-width': 1.5
+                    }
+                });
+
+                map.addLayer({
+                    'id': 'lineLabelLayer',
+                    'type': 'symbol',
+                    'source': 'line',
+                    'layout': {
+                        'symbol-placement': 'line',
+                        'text-field': 'Connected V2X',
+                        'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+                        'text-size': 12,
+                        'text-anchor': 'center'
+                    },
+                    'paint': {
+                        'text-color': '#000000',
+                        'text-halo-color': '#FFFFFF',
+                        'text-halo-width': 2
+                    }
+                });
+
+                map.addLayer({
+                    'id': 'vehicle1',
+                    'type': 'symbol',
+                    'source': 'vehicle_src_1',
+                    'layout': {
+                        'icon-image': 'vehicle1',
+                        'icon-size': 0.2,
+                        'icon-rotate': ['get', 'heading'],
+                        'text-field': ['concat', 'Heading ', ['get', 'heading']],
+                        'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+                        'text-offset': [0, 1.25], // Adjust this value to position the text
+                        'text-anchor': 'top'
+                    },
+                    'paint': {
+                        'text-color': '#000000',
+                        'text-halo-color': '#FFFFFF',
+                        'text-halo-width': 2
+                    }
+                });
+            }
+        );
+
+        function updateVehiclePosition(vehicleId, coordinates, heading) {
+            map.getSource(`vehicle_src_${vehicleId}`).setData({
+                'type': 'FeatureCollection',
+                'features': [{
                     'type': 'Feature',
                     'geometry': {
-                        'type': 'LineString',
-                        'coordinates': [[vehicleLongitude0, vehicleLatitude0], [vehicleLongitude1, vehicleLatitude1]]
+                        'type': 'Point',
+                        'coordinates': coordinates
+                    },
+                    'properties': {
+                        'heading': heading
                     }
-                }
+                }]
             });
 
-            map.addLayer({
-                'id': 'lineLayer',
-                'type': 'line',
-                'source': 'line',
-                'layout': {},
-                'paint': {
-                    'line-color': [
-                        'interpolate',
-                        ['linear'],
-                        ['line-progress'],
-                        0, '#00FFFF',
-                        1, '#008B8B'
-                    ],
-                    'line-width': 1.5
-                }
-            });
+            if (vehicleId === 0) {
+                vehicleLongitude0 = coordinates[0];
+                vehicleLatitude0 = coordinates[1];
+            } else if (vehicleId === 1) {
+                vehicleLongitude1 = coordinates[0];
+                vehicleLatitude1 = coordinates[1];
+            }
 
-            map.addLayer({
-                'id': 'lineLabelLayer',
-                'type': 'symbol',
-                'source': 'line',
-                'layout': {
-                    'symbol-placement': 'line',
-                    'text-field': 'Connected V2X',
-                    'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
-                    'text-size': 12,
-                    'text-anchor': 'center'
-                },
-                'paint': {
-                    'text-color': '#000000',
-                    'text-halo-color': '#FFFFFF',
-                    'text-halo-width': 2
-                }
-            });
-
-            map.addLayer({
-                'id': 'vehicle1',
-                'type': 'symbol',
-                'source': 'vehicle_src_1',
-                'layout': {
-                    'icon-image': 'vehicle1',
-                    'icon-size': 0.2,
-                    'icon-rotate': ['get', 'heading'],
-                    'text-field': ['concat', 'Heading ', ['get', 'heading']],
-                    'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-                    'text-offset': [0, 1.25], // Adjust this value to position the text
-                    'text-anchor': 'top'
-                },
-                'paint': {
-                    'text-color': '#000000',
-                    'text-halo-color': '#FFFFFF',
-                    'text-halo-width': 2
-                }
-            });
-        }
-    );
-
-    function updateVehiclePosition(vehicleId, coordinates, heading) {
-        map.getSource(`vehicle_src_${vehicleId}`).setData({
-            'type': 'FeatureCollection',
-            'features': [{
+            if (isCvLineEnabled)
+            {
+            map.getSource('line').setData({
                 'type': 'Feature',
                 'geometry': {
-                    'type': 'Point',
-                    'coordinates': coordinates
-                },
-                'properties': {
-                    'heading': heading
+                    'type': 'LineString',
+                    'coordinates': [[vehicleLongitude0, vehicleLatitude0], [vehicleLongitude1, vehicleLatitude1]]
                 }
-            }]
-        });
-
-        if (vehicleId === 0) {
-            vehicleLongitude0 = coordinates[0];
-            vehicleLatitude0 = coordinates[1];
-        } else if (vehicleId === 1) {
-            vehicleLongitude1 = coordinates[0];
-            vehicleLatitude1 = coordinates[1];
-        }
-
-        if (isCvLineEnabled)
-        {
-        map.getSource('line').setData({
-            'type': 'Feature',
-            'geometry': {
-                'type': 'LineString',
-                'coordinates': [[vehicleLongitude0, vehicleLatitude0], [vehicleLongitude1, vehicleLatitude1]]
+            });
             }
-        });
+
+            if (isCenteringEnabled && vehicleId === 0) {
+                map.setCenter(coordinates);
+            }
         }
 
-        if (isCenteringEnabled && vehicleId === 0) {
-            map.setCenter(coordinates);
-        }
-    }
+        function updateTrafficLightBasedOnHeading(heading) {
+            const trafficLightImage = document.getElementById('traffic-light-image');
+            const trafficLightStatus = document.getElementById('traffic-light-status');
 
-    function updateTrafficLightBasedOnHeading(heading) {
-        const trafficLightImage = document.getElementById('traffic-light-image');
-        const trafficLightStatus = document.getElementById('traffic-light-status');
-
-        if (heading >= 0 && heading <= 90) {
-            trafficLightImage.src = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/green-light.png';  // 초록 불로 변경
-            trafficLightStatus.innerHTML = 'Green Light<br>(GO)';       // 텍스트 업데이트
-            trafficLightStatus.style.color = 'green';
-        } else if (heading >= 91 && heading <= 180) {
-            trafficLightImage.src = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/yellow-light.png';  // 주황 불로 변경
-            trafficLightStatus.innerHTML = 'Yellow Light<br>(SLOW)';      // 텍스트 업데이트
-            trafficLightStatus.style.color = 'orange';
-        } else if (heading >= 181 && heading <= 359) {
-            trafficLightImage.src = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/red-light.png';  // 빨간 불로 변경
-            trafficLightStatus.innerHTML = 'RED Light<br>(STOP)';         // 텍스트 업데이트
-            trafficLightStatus.style.color = 'red';
-        }
-    }
-
-    function fetchAndUpdate() {
-        const latitude0 = parseFloat(s_nRxLatitude);
-        const longitude0 = parseFloat(s_nRxLongitude);
-        const heading0 = parseFloat(s_unRxVehicleHeading);
-        const latitude1 = parseFloat(s_nTxLatitude);
-        const longitude1 = parseFloat(s_nTxLongitude);
-        const heading1 = parseFloat(s_unTxVehicleHeading);
-
-        if (!isNaN(latitude0) && !isNaN(longitude0)) {
-            updateVehiclePosition(0, [longitude0, latitude0], heading0);
-            updateTrafficLightBasedOnHeading(heading0);  // 신호등 업데이트
+            if (heading >= 0 && heading <= 90) {
+                trafficLightImage.src = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/green-light.png';  // 초록 불로 변경
+                trafficLightStatus.innerHTML = 'Green Light<br>(GO)';       // 텍스트 업데이트
+                trafficLightStatus.style.color = 'green';
+            } else if (heading >= 91 && heading <= 180) {
+                trafficLightImage.src = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/yellow-light.png';  // 주황 불로 변경
+                trafficLightStatus.innerHTML = 'Yellow Light<br>(SLOW)';      // 텍스트 업데이트
+                trafficLightStatus.style.color = 'orange';
+            } else if (heading >= 181 && heading <= 359) {
+                trafficLightImage.src = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/red-light.png';  // 빨간 불로 변경
+                trafficLightStatus.innerHTML = 'RED Light<br>(STOP)';         // 텍스트 업데이트
+                trafficLightStatus.style.color = 'red';
+            }
         }
 
-        if (!isNaN(latitude1) && !isNaN(longitude1)) {
-            updateVehiclePosition(1, [longitude1, latitude1], heading1);
-        }
-    }
+        function fetchAndUpdate() {
+            const latitude0 = parseFloat(s_nRxLatitude);
+            const longitude0 = parseFloat(s_nRxLongitude);
+            const heading0 = parseFloat(s_unRxVehicleHeading);
+            const latitude1 = parseFloat(s_nTxLatitude);
+            const longitude1 = parseFloat(s_nTxLongitude);
+            const heading1 = parseFloat(s_unTxVehicleHeading);
 
-    fetchAndUpdate();
-    setInterval(fetchAndUpdate, 10);
+            if (!isNaN(latitude0) && !isNaN(longitude0)) {
+                updateVehiclePosition(0, [longitude0, latitude0], heading0);
+                updateTrafficLightBasedOnHeading(heading0);  // 신호등 업데이트
+            }
 
-    function fetchAndUpdateGraph() {
-        const latitude0 = parseFloat(s_nRxLatitude);
-        const longitude0 = parseFloat(s_nRxLongitude);
-        const heading0 = parseFloat(s_unRxVehicleHeading);
-        const latitude1 = parseFloat(s_nTxLatitude);
-        const longitude1 = parseFloat(s_nTxLongitude);
-        const heading1 = parseFloat(s_unTxVehicleHeading);
-        const unPdr = parseFloat(s_unPdr);
-        const ulLatencyL1 = parseFloat(s_ulLatencyL1);
-        const ulTotalPacketCnt = parseFloat(s_ulTotalPacketCnt);
-        const unSeqNum = parseFloat(s_unSeqNum);
-
-        /*
-        console.log(`latitude0: ${latitude0}`);
-        console.log(`longitude0: ${longitude0}`);
-        console.log(`heading0: ${heading0}`);
-        console.log(`latitude1: ${latitude1}`);
-        console.log(`longitude1: ${longitude1}`);
-        console.log(`heading1: ${heading1}`);
-        console.log(`unPdr: ${unPdr}`);
-        console.log(`ulLatencyL1: ${ulLatencyL1}`);
-        console.log(`ulTotalPacketCnt: ${ulTotalPacketCnt}`);
-        console.log(`unSeqNum: ${unSeqNum}`);
-        */
-
-        if (!isNaN(unPdr) && !isNaN(ulTotalPacketCnt)) {
-            updateGraph1(ulTotalPacketCnt, unPdr);
-        } else {
-            console.error('Invalid data points for Graph1.');
+            if (!isNaN(latitude1) && !isNaN(longitude1)) {
+                updateVehiclePosition(1, [longitude1, latitude1], heading1);
+            }
         }
 
-        if (!isNaN(ulLatencyL1) && !isNaN(ulTotalPacketCnt)) {
-            updateGraph2(ulTotalPacketCnt, ulLatencyL1 / 100);
-        } else {
-            console.error('Invalid data points for Graph2.');
-        }
-    }
+        fetchAndUpdate();
+        setInterval(fetchAndUpdate, 10);
 
-    fetchAndUpdateGraph();
-    setInterval(fetchAndUpdateGraph, 100);
+        function fetchAndUpdateGraph() {
+            const latitude0 = parseFloat(s_nRxLatitude);
+            const longitude0 = parseFloat(s_nRxLongitude);
+            const heading0 = parseFloat(s_unRxVehicleHeading);
+            const latitude1 = parseFloat(s_nTxLatitude);
+            const longitude1 = parseFloat(s_nTxLongitude);
+            const heading1 = parseFloat(s_unTxVehicleHeading);
+            const unPdr = parseFloat(s_unPdr);
+            const ulLatencyL1 = parseFloat(s_ulLatencyL1);
+            const ulTotalPacketCnt = parseFloat(s_ulTotalPacketCnt);
+            const unSeqNum = parseFloat(s_unSeqNum);
 
-    function updateGraph1(xValue, unPdrValue) {
-        if (!Array.isArray(xValue)) {
-            xValue = [xValue];
-        }
-        if (!Array.isArray(unPdrValue)) {
-            unPdrValue = [unPdrValue];
-        }
+            /*
+            console.log(`latitude0: ${latitude0}`);
+            console.log(`longitude0: ${longitude0}`);
+            console.log(`heading0: ${heading0}`);
+            console.log(`latitude1: ${latitude1}`);
+            console.log(`longitude1: ${longitude1}`);
+            console.log(`heading1: ${heading1}`);
+            console.log(`unPdr: ${unPdr}`);
+            console.log(`ulLatencyL1: ${ulLatencyL1}`);
+            console.log(`ulTotalPacketCnt: ${ulTotalPacketCnt}`);
+            console.log(`unSeqNum: ${unSeqNum}`);
+            */
 
-        if (!isNaN(xValue[0]) && !isNaN(unPdrValue[0])) {
-            Plotly.extendTraces('graph1', {
-                x: [xValue],
-                y: [unPdrValue]
-            }, [0]);
+            if (!isNaN(unPdr) && !isNaN(ulTotalPacketCnt)) {
+                updateGraph1(ulTotalPacketCnt, unPdr);
+            } else {
+                console.error('Invalid data points for Graph1.');
+            }
 
-            // TotalPacketCount 텍스트 추가
-            let totalPacketCount = xValue[0];
-            let middleYValue = (80 + 100) / 2;
-
-            Plotly.relayout('graph1', {
-                yaxis: { range: [80, 100], title: 'PDR (Packet Delivery Rate) (%)', dtick: 1 },
-                xaxis: { title: 'The Total Received Rx Packets' },
-                annotations: [
-                    {
-                        x: totalPacketCount,
-                        y: middleYValue,
-                        xref: 'x',
-                        yref: 'y',
-                        text: `Received Total Tx Packets: ${s_unSeqNum}<br>Received Total Rx Packets: ${totalPacketCount}`,
-                        showarrow: false,
-                        font: {
-                            family: 'Arial, sans-serif',
-                            size: 16,
-                            color: 'black',
-                            weight: 'bold'
-                        },
-                        align: 'center',
-                        bordercolor: 'black',
-                        borderwidth: 1,
-                        borderpad: 4,
-                        bgcolor: '#ffffff',
-                        opacity: 0.8
-                    }
-                ]
-            });
-
-            document.getElementById('current-value-graph1').innerText = `PDR (Packet Delivery Rate): ${unPdrValue[0]}%`;
-        } else {
-            console.error('Invalid data points for Graph1.');
-        }
-    }
-
-    let latencyData = [];
-
-    function updateGraph2(xValue, ulLatencyValue) {
-        if (!Array.isArray(xValue)) {
-            xValue = [xValue];
-        }
-        if (!Array.isArray(ulLatencyValue)) {
-            ulLatencyValue = [ulLatencyValue];
+            if (!isNaN(ulLatencyL1) && !isNaN(ulTotalPacketCnt)) {
+                updateGraph2(ulTotalPacketCnt, ulLatencyL1 / 100);
+            } else {
+                console.error('Invalid data points for Graph2.');
+            }
         }
 
-        if (!isNaN(xValue[0]) && !isNaN(ulLatencyValue[0])) {
-            latencyData.push({x: xValue[0], y: ulLatencyValue[0]});
+        fetchAndUpdateGraph();
+        setInterval(fetchAndUpdateGraph, 100);
 
-            Plotly.update('graph2', {
-                x: [latencyData.map(point => point.x)],
-                y: [latencyData.map(point => point.y)]
-            }, [0]);
+        function updateGraph1(xValue, unPdrValue) {
+            if (!Array.isArray(xValue)) {
+                xValue = [xValue];
+            }
+            if (!Array.isArray(unPdrValue)) {
+                unPdrValue = [unPdrValue];
+            }
 
-            let avgLatency = latencyData.reduce((sum, point) => sum + point.y, 0) / latencyData.length;
+            if (!isNaN(xValue[0]) && !isNaN(unPdrValue[0])) {
+                Plotly.extendTraces('graph1', {
+                    x: [xValue],
+                    y: [unPdrValue]
+                }, [0]);
 
-            Plotly.relayout('graph2', {
-                yaxis: { range: [0, 15], title: 'Latency (ms)', dtick: 1 },
-                xaxis: { title: 'The Total Received Rx Packets' },
-                shapes: [
-                    {
-                        type: 'line',
-                        x0: latencyData[0].x, x1: latencyData[latencyData.length - 1].x,
-                        y0: avgLatency, y1: avgLatency,
-                        line: {
-                            color: 'red',
-                            width: 2,
-                            dash: 'dash'
+                // TotalPacketCount 텍스트 추가
+                let totalPacketCount = xValue[0];
+                let middleYValue = (80 + 100) / 2;
+
+                Plotly.relayout('graph1', {
+                    yaxis: { range: [80, 100], title: 'PDR (Packet Delivery Rate) (%)', dtick: 1 },
+                    xaxis: { title: 'The Total Received Rx Packets' },
+                    annotations: [
+                        {
+                            x: totalPacketCount,
+                            y: middleYValue,
+                            xref: 'x',
+                            yref: 'y',
+                            text: `Received Total Tx Packets: ${s_unSeqNum}<br>Received Total Rx Packets: ${totalPacketCount}`,
+                            showarrow: false,
+                            font: {
+                                family: 'Arial, sans-serif',
+                                size: 16,
+                                color: 'black',
+                                weight: 'bold'
+                            },
+                            align: 'center',
+                            bordercolor: 'black',
+                            borderwidth: 1,
+                            borderpad: 4,
+                            bgcolor: '#ffffff',
+                            opacity: 0.8
                         }
-                    }
-                ],
-                annotations: [
-                    {
-                        x: latencyData[latencyData.length - 1].x,
-                        y: avgLatency,
-                        xref: 'x',
-                        yref: 'y',
-                        text: `Avg: ${avgLatency.toFixed(2)} ms`,
-                        showarrow: false,
-                        font: {
-                            family: 'Arial, sans-serif',
-                            size: 16,
-                            color: 'red',
-                        },
-                        align: 'right',
-                        xanchor: 'left',
-                        yanchor: 'bottom',
-                        bordercolor: 'red',
-                        borderwidth: 2,
-                        borderpad: 4,
-                        bgcolor: '#ffffff',
-                        opacity: 0.8
-                    }
-                ]
-            });
+                    ]
+                });
 
-            document.getElementById('current-value-graph2').innerText = `Latency (Air to Air): ${ulLatencyValue[0]}ms, Avg: ${avgLatency.toFixed(2)}ms`;
-        } else {
-            console.error('Invalid data points for Graph2.');
+                document.getElementById('current-value-graph1').innerText = `PDR (Packet Delivery Rate): ${unPdrValue[0]}%`;
+            } else {
+                console.error('Invalid data points for Graph1.');
+            }
         }
-    }
 
-    Plotly.newPlot('graph1', [{
-        x: [],
-        y: [],
-        type: 'scatter',
-        mode: 'lines+markers',
-        line: { color: 'green', width: 2 },
-        marker: { color: 'green', size: 6 }
-    }], {
-        margin: { t: 30, b: 40, l: 50, r: 30 },
-        yaxis: { range: [80, 100], title: 'PDR (%)', showgrid: true, zeroline: true, dtick: 1 },
-        xaxis: { title: 'ulTotalPacketCnt', showgrid: true },
-        title: 'Real-time PDR Monitoring',
-        plot_bgcolor: '#f0f0f0',
-        paper_bgcolor: '#ffffff'
-    });
+        let latencyData = [];
 
-    Plotly.newPlot('graph2', [{
-        x: [],
-        y: [],
-        type: 'scatter',
-        mode: 'lines+markers',
-        line: { color: 'blue', width: 2 },
-        marker: { color: 'blue', size: 6 }
-    }], {
-        margin: { t: 30, b: 40, l: 50, r: 30 },
-        yaxis: { range: [0, 15], title: 'Modem Latency (Air to Air)', showgrid: true, zeroline: true, dtick: 1 },
-        xaxis: { title: 'ulTotalPacketCnt', showgrid: true },
-        title: 'Real-time Latency Monitoring',
-        plot_bgcolor: '#f0f0f0',
-        paper_bgcolor: '#ffffff'
-    });
+        function updateGraph2(xValue, ulLatencyValue) {
+            if (!Array.isArray(xValue)) {
+                xValue = [xValue];
+            }
+            if (!Array.isArray(ulLatencyValue)) {
+                ulLatencyValue = [ulLatencyValue];
+            }
 
-    const weatherApiKey = '0384422edd4701383345e4e16d05b903';
+            if (!isNaN(xValue[0]) && !isNaN(ulLatencyValue[0])) {
+                latencyData.push({x: xValue[0], y: ulLatencyValue[0]});
 
-    function updateWeather() {
-        const center = map.getCenter();
-        const lat = center.lat;
-        const lon = center.lng;
+                Plotly.update('graph2', {
+                    x: [latencyData.map(point => point.x)],
+                    y: [latencyData.map(point => point.y)]
+                }, [0]);
 
-        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${weatherApiKey}`)
-            .then(response => response.json())
-            .then(data => {
-                console.log(data); // API 응답 데이터를 콘솔에 출력하여 확인
+                let avgLatency = latencyData.reduce((sum, point) => sum + point.y, 0) / latencyData.length;
 
-                if (data.cod === 200) {
-                    const icon = data.weather[0].icon;
-                    const temp = data.main.temp;
-                    const humidity = data.main.humidity;
-                    const location = data.name;
+                Plotly.relayout('graph2', {
+                    yaxis: { range: [0, 15], title: 'Latency (ms)', dtick: 1 },
+                    xaxis: { title: 'The Total Received Rx Packets' },
+                    shapes: [
+                        {
+                            type: 'line',
+                            x0: latencyData[0].x, x1: latencyData[latencyData.length - 1].x,
+                            y0: avgLatency, y1: avgLatency,
+                            line: {
+                                color: 'red',
+                                width: 2,
+                                dash: 'dash'
+                            }
+                        }
+                    ],
+                    annotations: [
+                        {
+                            x: latencyData[latencyData.length - 1].x,
+                            y: avgLatency,
+                            xref: 'x',
+                            yref: 'y',
+                            text: `Avg: ${avgLatency.toFixed(2)} ms`,
+                            showarrow: false,
+                            font: {
+                                family: 'Arial, sans-serif',
+                                size: 16,
+                                color: 'red',
+                            },
+                            align: 'right',
+                            xanchor: 'left',
+                            yanchor: 'bottom',
+                            bordercolor: 'red',
+                            borderwidth: 2,
+                            borderpad: 4,
+                            bgcolor: '#ffffff',
+                            opacity: 0.8
+                        }
+                    ]
+                });
 
-                    document.getElementById('weather-icon').src = `https://openweathermap.org/img/wn/${icon}.png`;
-                    document.getElementById('location').textContent = `Location: ${location}`;
-                    document.getElementById('temperature').textContent = `Temperature: ${temp.toFixed(1)}°C`;
-                    document.getElementById('humidity').textContent = `Humidity: ${humidity}%`;
-                } else {
-                    console.error(`Error: ${data.message}`);
+                document.getElementById('current-value-graph2').innerText = `Latency (Air to Air): ${ulLatencyValue[0]}ms, Avg: ${avgLatency.toFixed(2)}ms`;
+            } else {
+                console.error('Invalid data points for Graph2.');
+            }
+        }
+
+        Plotly.newPlot('graph1', [{
+            x: [],
+            y: [],
+            type: 'scatter',
+            mode: 'lines+markers',
+            line: { color: 'green', width: 2 },
+            marker: { color: 'green', size: 6 }
+        }], {
+            margin: { t: 30, b: 40, l: 50, r: 30 },
+            yaxis: { range: [80, 100], title: 'PDR (%)', showgrid: true, zeroline: true, dtick: 1 },
+            xaxis: { title: 'ulTotalPacketCnt', showgrid: true },
+            title: 'Real-time PDR Monitoring',
+            plot_bgcolor: '#f0f0f0',
+            paper_bgcolor: '#ffffff'
+        });
+
+        Plotly.newPlot('graph2', [{
+            x: [],
+            y: [],
+            type: 'scatter',
+            mode: 'lines+markers',
+            line: { color: 'blue', width: 2 },
+            marker: { color: 'blue', size: 6 }
+        }], {
+            margin: { t: 30, b: 40, l: 50, r: 30 },
+            yaxis: { range: [0, 15], title: 'Modem Latency (Air to Air)', showgrid: true, zeroline: true, dtick: 1 },
+            xaxis: { title: 'ulTotalPacketCnt', showgrid: true },
+            title: 'Real-time Latency Monitoring',
+            plot_bgcolor: '#f0f0f0',
+            paper_bgcolor: '#ffffff'
+        });
+
+        const weatherApiKey = '0384422edd4701383345e4e16d05b903';
+
+        function updateWeather() {
+            const center = map.getCenter();
+            const lat = center.lat;
+            const lon = center.lng;
+
+            fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${weatherApiKey}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data); // API 응답 데이터를 콘솔에 출력하여 확인
+
+                    if (data.cod === 200) {
+                        const icon = data.weather[0].icon;
+                        const temp = data.main.temp;
+                        const humidity = data.main.humidity;
+                        const location = data.name;
+
+                        document.getElementById('weather-icon').src = `https://openweathermap.org/img/wn/${icon}.png`;
+                        document.getElementById('location').textContent = `Location: ${location}`;
+                        document.getElementById('temperature').textContent = `Temperature: ${temp.toFixed(1)}°C`;
+                        document.getElementById('humidity').textContent = `Humidity: ${humidity}%`;
+                    } else {
+                        console.error(`Error: ${data.message}`);
+                        document.getElementById('weather-icon').src = '';
+                        document.getElementById('location').textContent = 'Location: Data not available';
+                        document.getElementById('temperature').textContent = 'Temperature: Data not available';
+                        document.getElementById('humidity').textContent = 'Humidity: Data not available';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching weather data:', error);
                     document.getElementById('weather-icon').src = '';
-                    document.getElementById('location').textContent = 'Location: Data not available';
-                    document.getElementById('temperature').textContent = 'Temperature: Data not available';
-                    document.getElementById('humidity').textContent = 'Humidity: Data not available';
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching weather data:', error);
-                document.getElementById('weather-icon').src = '';
-                document.getElementById('location').textContent = 'Location: Error fetching data';
-                document.getElementById('temperature').textContent = 'Temperature: Error fetching data';
-                document.getElementById('humidity').textContent = 'Humidity: Error fetching data';
-            });
+                    document.getElementById('location').textContent = 'Location: Error fetching data';
+                    document.getElementById('temperature').textContent = 'Temperature: Error fetching data';
+                    document.getElementById('humidity').textContent = 'Humidity: Error fetching data';
+                });
+        }
+
+        updateWeather();
+        setInterval(updateWeather, 600000);
+
+
+        updateWeather();
+        setInterval(updateWeather, 600000);
     }
-
-    updateWeather();
-    setInterval(updateWeather, 600000);
-
-
-    updateWeather();
-    setInterval(updateWeather, 600000);
+};
 
 </script>
 </body>
