@@ -869,6 +869,26 @@ window.onload = function() {
                         ]
                     }
                 });
+
+                map.addLayer({
+                    'id': 'vehicle1',
+                    'type': 'symbol',
+                    'source': 'vehicle_src_1',
+                    'layout': {
+                        'icon-image': 'vehicle1',
+                        'icon-size': 0.2,
+                        'icon-rotate': ['get', 'heading'],
+                        'text-field': ['concat', 'Heading ', ['get', 'heading']],
+                        'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+                        'text-offset': [0, 1.25], // Adjust this value to position the text
+                        'text-anchor': 'top'
+                    },
+                    'paint': {
+                        'text-color': '#000000',
+                        'text-halo-color': '#FFFFFF',
+                        'text-halo-width': 2
+                    }
+                });
             }
         );
 
