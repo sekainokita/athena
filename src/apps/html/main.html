@@ -308,6 +308,9 @@
 <div id="ci-logo">
     <img src="https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/keti_ci.png" alt="CI Logo">
 </div>
+<div id="coordinate-popup" style="display: none; position: absolute; padding: 10px; background-color: rgba(0, 0, 0, 0.8); color: white; border-radius: 5px; font-size: 14px; z-index: 10;">
+    <p id="coordinate-text"></p>
+</div>
 
 <script>
 window.onload = function() {
@@ -414,6 +417,26 @@ window.onload = function() {
             document.getElementById('center-button').addEventListener('click', function() {
                 map.setCenter([s_nRxLongitude, s_nRxLatitude]);
             });
+        });
+
+        map.on('contextmenu', function (e) {
+            const lngLat = e.lngLat;
+            const latitude = lngLat.lat.toFixed(6);
+            const longitude = lngLat.lng.toFixed(6);
+
+            const popup = document.getElementById('coordinate-popup');
+            const coordinateText = document.getElementById('coordinate-text');
+
+            coordinateText.textContent = `위도(${latitude}) 경도(${longitude})`;
+
+            popup.style.left = `${e.point.x}px`;
+            popup.style.top = `${e.point.y}px`;
+
+            popup.style.display = 'block';
+
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 5000);
         });
 
         document.getElementById('centerToggleButton').addEventListener('click', function() {
