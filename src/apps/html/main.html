@@ -326,6 +326,7 @@ window.onload = function() {
 
     // 기본값 설정
     let defaultIpAddress = "10.252.110.58";
+    let isVisibleKdTreeMap = true;
 
     // 버튼 클릭 이벤트 처리
     document.getElementById('submit-button').onclick = function() {
@@ -387,14 +388,14 @@ window.onload = function() {
         const cPangyoRsuLatitude31 = 37.411751;
         const cPangyoRsuLongitude31 = 127.095019;
 
-        var vehicleLatitude0 = 37.4062;
-        var vehicleLongitude0 = 127.1032;
+        var vehicleLatitude0 = 37.406380;
+        var vehicleLongitude0 = 127.102701;
 
-        var vehicleLatitude1 = 37.4058;
-        var vehicleLongitude1 = 127.1035;
+        var vehicleLatitude1 = 37.406402;
+        var vehicleLongitude1 = 127.102532;
 
-        var vehicleHeading0 = 320;
-        var vehicleHeading1 = 320;
+        var vehicleHeading0 = 90;
+        var vehicleHeading1 = 90;
 
         let s_nRxLatitude, s_nRxLongitude, s_unRxVehicleHeading;
         let s_nTxLatitude, s_nTxLongitude, s_unTxVehicleHeading;
@@ -715,7 +716,279 @@ window.onload = function() {
             console.error('WebSocket is not supported by this browser');
         }
 
+        /************************************************************/
+        /* KD Tree */
+        /************************************************************/
+        let roadNetworkCoordinates = [];
+        let tree;
+
+        map.on('style.load', () => {
+            console.log("Map style loaded successfully.");
+            addRoadNetworkSource(); // 스타일 로드 후 즉시 소스 추가 시도
+        });
+
+        function addRoadNetworkSource() {
+            fetch('https://raw.githubusercontent.com/KETI-A/athena/main/src/packages/maps/ctrack-utm52n_ellipsoid/c-track-a2-link.geojson')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.json(); // JSON으로 변환
+                })
+                .then(geojsonData => {
+                    console.log("Fetched GeoJSON Data:", geojsonData);
+
+                    // GeoJSON 데이터가 유효한지 확인
+                    if (geojsonData && geojsonData.type === 'FeatureCollection' && Array.isArray(geojsonData.features)) {
+                        console.log("GeoJSON data validated. Adding to map...");
+
+                        // GeoJSON 데이터를 Mapbox에 소스로 추가
+                        map.addSource('road-network', {
+                            'type': 'geojson',
+                            'data': geojsonData
+                        });
+
+                        console.log("Road network source successfully added.");
+
+                        // KD-Tree 빌드 함수 호출
+                        buildKdTreeFromGeoJSON(geojsonData);
+                    } else {
+                        console.error("GeoJSON data is invalid or missing features.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Failed to fetch GeoJSON data:", error);
+                });
+        }
+
+        class KDTree {
+            constructor(points, metric) {
+                this.metric = metric;
+                this.dimensions = ["x", "y"];  // x와 y 좌표에 대해 트리를 빌드합니다.
+                this.root = this.buildTree(points, 0);
+            }
+
+            buildTree(points, depth) {
+                if (points.length === 0) return null;
+
+                const axis = depth % this.dimensions.length;
+                const median = Math.floor(points.length / 2);
+
+                // 각 축에 따라 포인트를 정렬합니다.
+                points.sort((a, b) => a[axis] - b[axis]);
+
+                return {
+                    point: points[median],
+                    left: this.buildTree(points.slice(0, median), depth + 1),
+                    right: this.buildTree(points.slice(median + 1), depth + 1)
+                };
+            }
+
+            nearest(point, maxNodes, maxDistance) {
+                const bestNodes = new BinaryHeap((e) => -e[1]);
+
+                const nearestSearch = (node, depth) => {
+                    if (node === null) return;
+
+                    const axis = depth % this.dimensions.length;
+
+                    const ownDistance = this.metric(point, node.point);
+                    const linearPoint = {};
+                    for (let i = 0; i < this.dimensions.length; i++) {
+                        if (i === axis) {
+                            linearPoint[this.dimensions[i]] = point[this.dimensions[i]];
+                        } else {
+                            linearPoint[this.dimensions[i]] = node.point[this.dimensions[i]];
+                        }
+                    }
+                    const linearDistance = this.metric(linearPoint, node.point);
+
+                    let bestChild, otherChild;
+                    if (point[this.dimensions[axis]] < node.point[this.dimensions[axis]]) {
+                        bestChild = node.left;
+                        otherChild = node.right;
+                    } else {
+                        bestChild = node.right;
+                        otherChild = node.left;
+                    }
+
+                    nearestSearch(bestChild, depth + 1);
+
+                    if (bestNodes.size() < maxNodes || ownDistance < bestNodes.peek()[1]) {
+                        bestNodes.push([node.point, ownDistance]);
+                        if (bestNodes.size() > maxNodes) bestNodes.pop();
+                    }
+
+                    if (bestNodes.size() < maxNodes || Math.abs(linearDistance) < bestNodes.peek()[1]) {
+                        nearestSearch(otherChild, depth + 1);
+                    }
+                };
+
+                nearestSearch(this.root, 0);
+
+                const result = [];
+                for (let i = 0; i < Math.min(maxNodes, bestNodes.size()); i++) {
+                    result.push(bestNodes.pop()[0]);
+                }
+                return result;
+            }
+        }
+
+        class BinaryHeap {
+            constructor(scoreFunction) {
+                this.content = [];
+                this.scoreFunction = scoreFunction;
+            }
+
+            push(element) {
+                this.content.push(element);
+                this.bubbleUp(this.content.length - 1);
+            }
+
+            pop() {
+                const result = this.content[0];
+                const end = this.content.pop();
+                if (this.content.length > 0) {
+                    this.content[0] = end;
+                    this.sinkDown(0);
+                }
+                return result;
+            }
+
+            size() {
+                return this.content.length;
+            }
+
+            peek() {
+                return this.content[0];
+            }
+
+            bubbleUp(n) {
+                const element = this.content[n];
+                const score = this.scoreFunction(element);
+                while (n > 0) {
+                    const parentN = Math.floor((n + 1) / 2) - 1;
+                    const parent = this.content[parentN];
+                    if (score >= this.scoreFunction(parent)) break;
+                    this.content[parentN] = element;
+                    this.content[n] = parent;
+                    n = parentN;
+                }
+            }
+
+            sinkDown(n) {
+                const length = this.content.length;
+                const element = this.content[n];
+                const elemScore = this.scoreFunction(element);
+
+                while (true) {
+                    const child2N = (n + 1) * 2;
+                    const child1N = child2N - 1;
+                    let swap = null;
+                    let child1Score;
+
+                    if (child1N < length) {
+                        const child1 = this.content[child1N];
+                        child1Score = this.scoreFunction(child1);
+                        if (child1Score < elemScore) swap = child1N;
+                    }
+
+                    if (child2N < length) {
+                        const child2 = this.content[child2N];
+                        const child2Score = this.scoreFunction(child2);
+                        if (child2Score < (swap === null ? elemScore : child1Score)) swap = child2N;
+                    }
+
+                    if (swap === null) break;
+                    this.content[n] = this.content[swap];
+                    this.content[swap] = element;
+                    n = swap;
+                }
+            }
+        }
+
+        // 유클리드 거리 측정 함수
+        function euclideanDistance(a, b) {
+            return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
+        }
+
+        function buildKdTreeFromGeoJSON(geojsonData) {
+            let roadNetworkCoordinates = [];
+
+            // MultiLineString 및 LineString 처리
+            geojsonData.features.forEach(feature => {
+                if (feature.geometry.type === "LineString") {
+                    feature.geometry.coordinates.forEach(coord => {
+                        console.log("KD-Tree Input Coordinate:", coord); // 좌표를 출력
+                        roadNetworkCoordinates.push([coord[0], coord[1]]);
+                    });
+                } else if (feature.geometry.type === "MultiLineString") {
+                    feature.geometry.coordinates.forEach(line => {
+                        line.forEach(coord => {
+                            console.log("KD-Tree Input Coordinate:", coord); // 좌표를 출력
+                            roadNetworkCoordinates.push([coord[0], coord[1]]);
+                        });
+                    });
+                }
+            });
+
+            // KD-Tree 생성 및 전역 변수로 설정
+            tree = new KDTree(roadNetworkCoordinates, euclideanDistance);
+
+            console.log("KD-Tree built successfully with", roadNetworkCoordinates.length, "points.");
+
+            // KD-Tree 좌표를 지도에 추가
+            if(isVisibleKdTreeMap) {
+                addPointsToMap(roadNetworkCoordinates);
+            }
+        }
+
+        // 지도에 점 추가 함수
+        function addPointsToMap(coordinates) {
+            // 지도에 추가할 점 데이터
+            const points = coordinates.map(coord => ({
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': coord
+                }
+            }));
+
+            // 기존의 소스가 있으면 삭제
+            if (map.getSource('kd-tree-points')) {
+                map.removeSource('kd-tree-points');
+            }
+
+            // 지도에 점 추가
+            map.addSource('kd-tree-points', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': points
+                }
+            });
+
+            // 기존의 레이어가 있으면 삭제
+            if (map.getLayer('kd-tree-points-layer')) {
+                map.removeLayer('kd-tree-points-layer');
+            }
+
+            map.addLayer({
+                'id': 'kd-tree-points-layer',
+                'type': 'circle',
+                'source': 'kd-tree-points',
+                'paint': {
+                    'circle-radius': 3,
+                    'circle-color': '#FF0000'
+                }
+            });
+        }
+
+        /************************************************************/
+        /* Map */
+        /************************************************************/
         map.on('load', () => {
+            console.log("Map loaded successfully.");
 
             map.on('zoom', () => {
                 map.resize();  // 확대/축소 시 강제로 지도를 리렌더링
@@ -725,6 +998,9 @@ window.onload = function() {
                 map.resize();  // 지도가 이동될 때 리렌더링
             });
 
+            /************************************************************/
+            /* CI */
+            /************************************************************/
             map.loadImage(
                 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/keti_ci.png',
                 (error, image) => {
@@ -760,6 +1036,9 @@ window.onload = function() {
                 }
             );
 
+            /************************************************************/
+            /* RSU */
+            /************************************************************/
             map.loadImage(
                 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/fixed-rsu.png',
                 (error, image) => {
@@ -899,99 +1178,139 @@ window.onload = function() {
                     'icon-size': 0.5
                 }
             });
+
+            /************************************************************/
+            /* Vehicle 0 */
+            /************************************************************/
+            map.loadImage(
+                'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq5.png',
+                (error, image) => {
+                    if (error) throw error;
+
+                    map.addImage('vehicle', image);
+
+                    map.addSource('vehicle_src_0', {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'FeatureCollection',
+                            'features': [
+                                {
+                                    'type': 'Feature',
+                                    'geometry': {
+                                        'type': 'Point',
+                                        'coordinates': [vehicleLongitude0, vehicleLatitude0]
+                                    }
+                                }
+                            ]
+                        }
+                    });
+
+                    map.addLayer({
+                        'id': 'vehicle0',
+                        'type': 'symbol',
+                        'source': 'vehicle_src_0',
+                        'layout': {
+                            'icon-image': 'vehicle',
+                            'icon-size': 0.2,
+                            'icon-rotate': ['get', 'heading'],
+                            'text-field': ['concat', 'Heading ', ['get', 'heading']],
+                            'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+                            'text-offset': [0, 1.25], // Adjust this value to position the text
+                            'text-anchor': 'top'
+                        },
+                        'paint': {
+                            'text-color': '#000000',
+                            'text-halo-color': '#FFFFFF',
+                            'text-halo-width': 2
+                        }
+                    });
+
+                    fetchAndUpdate();
+                    setInterval(fetchAndUpdate, 10);
+                }
+            );
+
+            /************************************************************/
+            /* Vehicle 1 */
+            /************************************************************/
+            map.loadImage(
+                'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq-electric.png',
+                (error, image) => {
+                    if (error) throw error;
+
+                    map.addImage('vehicle1', image);
+
+                    map.addSource('vehicle_src_1', {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'FeatureCollection',
+                            'features': [
+                                {
+                                    'type': 'Feature',
+                                    'geometry': {
+                                        'type': 'Point',
+                                        'coordinates': [vehicleLongitude1, vehicleLatitude1]
+                                    }
+                                }
+                            ]
+                        }
+                    });
+
+                    map.addLayer({
+                        'id': 'vehicle1',
+                        'type': 'symbol',
+                        'source': 'vehicle_src_1',
+                        'layout': {
+                            'icon-image': 'vehicle1',
+                            'icon-size': 0.2,
+                            'icon-rotate': ['get', 'heading'],
+                            'text-field': ['concat', 'Heading ', ['get', 'heading']],
+                            'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+                            'text-offset': [0, 1.25], // Adjust this value to position the text
+                            'text-anchor': 'top'
+                        },
+                        'paint': {
+                            'text-color': '#000000',
+                            'text-halo-color': '#FFFFFF',
+                            'text-halo-width': 2
+                        }
+                    });
+
+                    fetchAndUpdate();
+                    setInterval(fetchAndUpdate, 10);
+                }
+            );
+
+            console.log("Road network and vehicle sources added successfully.");
         });
 
-        map.loadImage(
-            'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq5.png',
-            (error, image) => {
-                if (error) throw error;
-
-                map.addImage('vehicle', image);
-
-                map.addSource('vehicle_src_0', {
-                    'type': 'geojson',
-                    'data': {
-                        'type': 'FeatureCollection',
-                        'features': [
-                            {
-                                'type': 'Feature',
-                                'geometry': {
-                                    'type': 'Point',
-                                    'coordinates': [vehicleLongitude0, vehicleLatitude0]
-                                }
-                            }
-                        ]
-                    }
-                });
-
-                map.addLayer({
-                    'id': 'vehicle0',
-                    'type': 'symbol',
-                    'source': 'vehicle_src_0',
-                    'layout': {
-                        'icon-image': 'vehicle',
-                        'icon-size': 0.2,
-                        'icon-rotate': ['get', 'heading'],
-                        'text-field': ['concat', 'Heading ', ['get', 'heading']],
-                        'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-                        'text-offset': [0, 1.25], // Adjust this value to position the text
-                        'text-anchor': 'top'
-                    },
-                    'paint': {
-                        'text-color': '#000000',
-                        'text-halo-color': '#FFFFFF',
-                        'text-halo-width': 2
-                    }
-                });
-            }
-        );
-
-        map.loadImage(
-            'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq-electric.png',
-            (error, image) => {
-                if (error) throw error;
-
-                map.addImage('vehicle1', image);
-
-                map.addSource('vehicle_src_1', {
-                    'type': 'geojson',
-                    'data': {
-                        'type': 'FeatureCollection',
-                        'features': [
-                            {
-                                'type': 'Feature',
-                                'geometry': {
-                                    'type': 'Point',
-                                    'coordinates': [vehicleLongitude1, vehicleLatitude1]
-                                }
-                            }
-                        ]
-                    }
-                });
-
-                map.addLayer({
-                    'id': 'vehicle1',
-                    'type': 'symbol',
-                    'source': 'vehicle_src_1',
-                    'layout': {
-                        'icon-image': 'vehicle1',
-                        'icon-size': 0.2,
-                        'icon-rotate': ['get', 'heading'],
-                        'text-field': ['concat', 'Heading ', ['get', 'heading']],
-                        'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-                        'text-offset': [0, 1.25], // Adjust this value to position the text
-                        'text-anchor': 'top'
-                    },
-                    'paint': {
-                        'text-color': '#000000',
-                        'text-halo-color': '#FFFFFF',
-                        'text-halo-width': 2
-                    }
-                });
-            }
-        );
-
+        /************************************************************/
+        /* Update Position */
+        /************************************************************/
         function updateVehiclePosition(vehicleId, coordinates, heading) {
+            /*
+            if (tree) {
+                // 좌표를 {longitude: <경도>, latitude: <위도>} 형식으로 변환
+                let point = {
+                    longitude: coordinates[0],
+                    latitude: coordinates[1]
+                };
+
+                console.log("point:", point);  // 스냅된 좌표 확인
+                let nearest = tree.nearest(point, 1);  // KD-Tree에서 반환된 값 확인
+
+                if (nearest.length > 0) {
+                    console.log("KD-Tree Nearest Result:", nearest);  // KD-Tree 반환값을 로그로 확인
+
+                    // 반환값의 구조에 맞게 coordinates 값 추출
+                    //coordinates = nearest[0][0];  // nearest[0]은 [node, distance] 형식일 수 있으므로 [0][0]으로 접근
+                    coordinates = [nearest[0][0], nearest[0][1]];
+                    console.log("Snapped Coordinates:", coordinates);  // 스냅된 좌표 확인
+                }
+            } else {
+                console.warn("KD-Tree is not built yet.");
+            }*/
+
             let vehicleSource = map.getSource(`vehicle_src_${vehicleId}`);
 
             // vehicle source가 존재하는지 확인
@@ -1002,7 +1321,7 @@ window.onload = function() {
                         'type': 'Feature',
                         'geometry': {
                             'type': 'Point',
-                            'coordinates': coordinates
+                            'coordinates': coordinates  // 스냅된 좌표를 사용
                         },
                         'properties': {
                             'heading': heading
@@ -1059,6 +1378,11 @@ window.onload = function() {
         }
 
         function fetchAndUpdate() {
+            if (!tree) {
+                console.warn("KD-Tree is not built yet. Waiting...");
+                return;
+            }
+
             const latitude0 = parseFloat(s_nRxLatitude);
             const longitude0 = parseFloat(s_nRxLongitude);
             const heading0 = parseFloat(s_unRxVehicleHeading);
@@ -1076,9 +1400,9 @@ window.onload = function() {
             }
         }
 
-        fetchAndUpdate();
-        setInterval(fetchAndUpdate, 10);
-
+        /************************************************************/
+        /* Graph */
+        /************************************************************/
         function fetchAndUpdateGraph() {
             const latitude0 = parseFloat(s_nRxLatitude);
             const longitude0 = parseFloat(s_nRxLongitude);
