@@ -760,51 +760,45 @@ window.onload = function() {
                     console.error("Failed to fetch GeoJSON data:", error);
                 });
         }
-
         class KDTree {
             constructor(points, metric) {
                 this.metric = metric;
-                this.dimensions = ["x", "y"];  // x와 y 좌표에 대해 트리를 빌드합니다.
+                this.dimensions = [0, 1];  // 경도와 위도 인덱스 (0: longitude, 1: latitude)
                 this.root = this.buildTree(points, 0);
             }
 
             buildTree(points, depth) {
                 if (points.length === 0) return null;
 
-                const axis = depth % this.dimensions.length;
-                const median = Math.floor(points.length / 2);
+                const axis = depth % this.dimensions.length; // 경도와 위도를 번갈아가며 분할
+                points.sort((a, b) => a[axis] - b[axis]); // 각 축에 따라 정렬
 
-                // 각 축에 따라 포인트를 정렬합니다.
-                points.sort((a, b) => a[axis] - b[axis]);
+                const median = Math.floor(points.length / 2); // 중간값
 
                 return {
-                    point: points[median],
-                    left: this.buildTree(points.slice(0, median), depth + 1),
-                    right: this.buildTree(points.slice(median + 1), depth + 1)
+                    point: points[median], // 중간값 기준으로 노드를 설정
+                    left: this.buildTree(points.slice(0, median), depth + 1), // 왼쪽 하위 트리
+                    right: this.buildTree(points.slice(median + 1), depth + 1) // 오른쪽 하위 트리
                 };
             }
 
-            nearest(point, maxNodes, maxDistance) {
-                const bestNodes = new BinaryHeap((e) => -e[1]);
+            nearest(point, maxNodes = 1) {
+                const bestNodes = new BinaryHeap((e) => -e[1]);  // 최소 힙을 사용하여 최근접 노드를 추적
 
                 const nearestSearch = (node, depth) => {
                     if (node === null) return;
 
-                    const axis = depth % this.dimensions.length;
+                    const axis = depth % this.dimensions.length; // 현재 비교할 축 (경도 또는 위도)
 
-                    const ownDistance = this.metric(point, node.point);
-                    const linearPoint = {};
-                    for (let i = 0; i < this.dimensions.length; i++) {
-                        if (i === axis) {
-                            linearPoint[this.dimensions[i]] = point[this.dimensions[i]];
-                        } else {
-                            linearPoint[this.dimensions[i]] = node.point[this.dimensions[i]];
-                        }
-                    }
-                    const linearDistance = this.metric(linearPoint, node.point);
+                    const ownDistance = this.metric(point, node.point); // 현재 노드와의 거리 계산
+                    const linearPoint = [...point]; // 입력된 좌표의 복사본을 만듦
+                    linearPoint[axis] = node.point[axis]; // 한 축을 고정하여 계산
 
-                    let bestChild, otherChild;
-                    if (point[this.dimensions[axis]] < node.point[this.dimensions[axis]]) {
+                    let bestChild = null;
+                    let otherChild = null;
+
+                    // 입력된 좌표와 현재 노드의 비교 축에 따라 왼쪽 또는 오른쪽 자식 노드 선택
+                    if (point[axis] < node.point[axis]) {
                         bestChild = node.left;
                         otherChild = node.right;
                     } else {
@@ -812,14 +806,19 @@ window.onload = function() {
                         otherChild = node.left;
                     }
 
+                    // 더 가까운 쪽 자식 노드를 먼저 검색
                     nearestSearch(bestChild, depth + 1);
 
+                    // 현재 노드와의 거리가 현재 가장 가까운 거리보다 작다면 갱신
                     if (bestNodes.size() < maxNodes || ownDistance < bestNodes.peek()[1]) {
                         bestNodes.push([node.point, ownDistance]);
                         if (bestNodes.size() > maxNodes) bestNodes.pop();
                     }
 
-                    if (bestNodes.size() < maxNodes || Math.abs(linearDistance) < bestNodes.peek()[1]) {
+                    const linearDistance = this.metric(linearPoint, node.point); // 축을 고정한 거리 계산
+
+                    // 고정된 축을 기준으로 계산된 거리가 더 가까울 수 있는지 검사
+                    if (bestNodes.size() < maxNodes || linearDistance < bestNodes.peek()[1]) {
                         nearestSearch(otherChild, depth + 1);
                     }
                 };
@@ -827,9 +826,10 @@ window.onload = function() {
                 nearestSearch(this.root, 0);
 
                 const result = [];
-                for (let i = 0; i < Math.min(maxNodes, bestNodes.size()); i++) {
+                while (bestNodes.size()) {
                     result.push(bestNodes.pop()[0]);
                 }
+
                 return result;
             }
         }
@@ -866,6 +866,7 @@ window.onload = function() {
             bubbleUp(n) {
                 const element = this.content[n];
                 const score = this.scoreFunction(element);
+
                 while (n > 0) {
                     const parentN = Math.floor((n + 1) / 2) - 1;
                     const parent = this.content[parentN];
@@ -900,6 +901,7 @@ window.onload = function() {
                     }
 
                     if (swap === null) break;
+
                     this.content[n] = this.content[swap];
                     this.content[swap] = element;
                     n = swap;
@@ -909,7 +911,9 @@ window.onload = function() {
 
         // 유클리드 거리 측정 함수
         function euclideanDistance(a, b) {
-            return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
+            const dx = a[0] - b[0]; // 경도 차이
+            const dy = a[1] - b[1]; // 위도 차이
+            return Math.sqrt(dx * dx + dy * dy);
         }
 
         function buildKdTreeFromGeoJSON(geojsonData) {
@@ -1289,32 +1293,10 @@ window.onload = function() {
         /* Update Position */
         /************************************************************/
         function updateVehiclePosition(vehicleId, coordinates, heading) {
-            /*
-            if (tree) {
-                // 좌표를 {longitude: <경도>, latitude: <위도>} 형식으로 변환
-                let point = {
-                    longitude: coordinates[0],
-                    latitude: coordinates[1]
-                };
-
-                console.log("point:", point);  // 스냅된 좌표 확인
-                let nearest = tree.nearest(point, 1);  // KD-Tree에서 반환된 값 확인
-
-                if (nearest.length > 0) {
-                    console.log("KD-Tree Nearest Result:", nearest);  // KD-Tree 반환값을 로그로 확인
-
-                    // 반환값의 구조에 맞게 coordinates 값 추출
-                    //coordinates = nearest[0][0];  // nearest[0]은 [node, distance] 형식일 수 있으므로 [0][0]으로 접근
-                    coordinates = [nearest[0][0], nearest[0][1]];
-                    console.log("Snapped Coordinates:", coordinates);  // 스냅된 좌표 확인
-                }
-            } else {
-                console.warn("KD-Tree is not built yet.");
-            }*/
 
             let vehicleSource = map.getSource(`vehicle_src_${vehicleId}`);
 
-            // vehicle source가 존재하는지 확인
+            /* Real GPS Path */
             if (vehicleSource) {
                 vehicleSource.setData({
                     'type': 'FeatureCollection',
@@ -1331,6 +1313,28 @@ window.onload = function() {
                 });
             } else {
                 console.warn(`Vehicle source vehicle_src_${vehicleId} not found.`);
+            }
+
+            /* KD Tree Path */
+            if (tree) {
+                let point = {
+                    longitude: coordinates[0],
+                    latitude: coordinates[1]
+                };
+
+                let nearest = tree.nearest([point.longitude, point.latitude], 1);
+
+                if (nearest.length > 0) {
+                    let snappedCoordinates = nearest[0]; // 가장 가까운 점
+                    console.log("Snapped Coordinates:", snappedCoordinates);  // 스냅된 좌표 확인
+
+                    // 파란색 점을 지도에 찍음
+                    updateSnappedPath(snappedCoordinates);
+                } else {
+                    console.warn("No nearest point found in KD Tree.");
+                }
+            } else {
+                console.warn("KD Tree not available.");
             }
 
             // 상태 업데이트
@@ -1398,6 +1402,51 @@ window.onload = function() {
                     'paint': {
                         'circle-radius': 3,
                         'circle-color': '#FF0000',
+                    }
+                });
+            }
+        }
+
+        /************************************************************/
+        /* Update Snapped (KD Tree) Path with Blue Dots */
+        /************************************************************/
+        function updateSnappedPath(coordinate) {
+            // 기존 소스가 없으면 생성
+            if (!map.getSource('snapped-path')) {
+                map.addSource('snapped-path', {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'FeatureCollection',
+                        'features': []
+                    }
+                });
+            }
+
+            // 현재 소스 데이터 가져오기
+            const source = map.getSource('snapped-path');
+            const data = source._data || { 'type': 'FeatureCollection', 'features': [] };
+
+            // 새로운 스냅된 점 추가
+            data.features.push({
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': coordinate
+                }
+            });
+
+            // 소스 데이터 업데이트
+            source.setData(data);
+
+            // 레이어가 없으면 추가
+            if (!map.getLayer('snapped-path-layer')) {
+                map.addLayer({
+                    'id': 'snapped-path-layer',
+                    'type': 'circle',
+                    'source': 'snapped-path',
+                    'paint': {
+                        'circle-radius': 3,
+                        'circle-color': '#0000FF',  // 파란색 점
                     }
                 });
             }
