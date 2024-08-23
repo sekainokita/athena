@@ -751,7 +751,8 @@ window.onload = function() {
                         console.log("Road network source successfully added.");
 
                         // KD-Tree 빌드 함수 호출
-                        buildKdTreeFromGeoJSON(geojsonData);
+                        //buildKdTreeFromGeoJSON(geojsonData);
+                        buildKdTreeInterPolateFromGeoJSON(geojsonData);
                     } else {
                         console.error("GeoJSON data is invalid or missing features.");
                     }
@@ -760,6 +761,7 @@ window.onload = function() {
                     console.error("Failed to fetch GeoJSON data:", error);
                 });
         }
+
         class KDTree {
             constructor(points, metric) {
                 this.metric = metric;
@@ -946,6 +948,123 @@ window.onload = function() {
                 addPointsToMapOfKdTree(roadNetworkCoordinates);
             }
         }
+
+        function buildKdTreeInterPolateFromGeoJSON(geojsonData) {
+            let roadNetworkCoordinates = [];
+
+            // MultiLineString 및 LineString 처리
+            geojsonData.features.forEach(feature => {
+                if (feature.geometry.type === "LineString") {
+                    for (let i = 0; i < feature.geometry.coordinates.length - 1; i++) {
+                        let startCoord = feature.geometry.coordinates[i];
+                        let endCoord = feature.geometry.coordinates[i + 1];
+
+                        // 두 점 사이의 거리 계산 (Haversine Formula 사용)
+                        let distance = haversineDistance([startCoord[0], startCoord[1]], [endCoord[0], endCoord[1]]);
+                        //console.log(`Distance between points: ${distance} meters`);
+
+                        // 원래 좌표 추가
+                        roadNetworkCoordinates.push([startCoord[0], startCoord[1]]);
+
+                        // 두 점 사이의 거리가 1m 이상 10m 이하일 때만 보간
+                        if (distance >= 1 && distance <= 10) {
+                            // 두 점 사이를 30cm 단위로 보간하여 추가
+                            let interpolatedPoints = interpolatePoints([startCoord, endCoord], 0.3);  // 간격을 30cm로 설정
+                            roadNetworkCoordinates.push(...interpolatedPoints);  // 보간된 좌표 추가
+                        } else {
+                            //console.log(`No interpolation: Distance is ${distance} meters`);
+                        }
+
+                        // 마지막 점 추가
+                        if (i === feature.geometry.coordinates.length - 2) {
+                            roadNetworkCoordinates.push([endCoord[0], endCoord[1]]);
+                        }
+                    }
+                } else if (feature.geometry.type === "MultiLineString") {
+                    feature.geometry.coordinates.forEach(line => {
+                        for (let i = 0; i < line.length - 1; i++) {
+                            let startCoord = line[i];
+                            let endCoord = line[i + 1];
+
+                            // 두 점 사이의 거리 계산 (Haversine Formula 사용)
+                            let distance = haversineDistance([startCoord[0], startCoord[1]], [endCoord[0], endCoord[1]]);
+                            //console.log(`Distance between points: ${distance} meters`);
+
+                            // 원래 좌표 추가
+                            roadNetworkCoordinates.push([startCoord[0], startCoord[1]]);
+
+                            // 두 점 사이의 거리가 1m 이상 10m 이하일 때만 보간
+                            if (distance >= 1 && distance <= 10) {
+                                // 두 점 사이를 30cm 단위로 보간하여 추가
+                                let interpolatedPoints = interpolatePoints([startCoord, endCoord], 0.3);  // 간격을 30cm로 설정
+                                roadNetworkCoordinates.push(...interpolatedPoints);  // 보간된 좌표 추가
+                            } else {
+                               //console.log(`No interpolation: Distance is ${distance} meters`);
+                            }
+
+                            // 마지막 점 추가
+                            if (i === line.length - 2) {
+                                roadNetworkCoordinates.push([endCoord[0], endCoord[1]]);
+                            }
+                        }
+                    });
+                }
+            });
+
+            console.log("Total Points After Interpolation:", roadNetworkCoordinates.length);  // 보간된 좌표 로그 출력
+
+            // KD-Tree 생성 및 전역 변수로 설정
+            tree = new KDTree(roadNetworkCoordinates, euclideanDistance);
+
+            console.log("KD-Tree built successfully with", roadNetworkCoordinates.length, "points.");
+
+            // KD-Tree 좌표를 지도에 추가
+            if (isVisibleKdTreeMap) {
+                addPointsToMapOfKdTree(roadNetworkCoordinates);
+            }
+        }
+
+        // Haversine formula를 사용한 거리 계산 (메트릭 단위로 반환)
+        function haversineDistance(coord1, coord2) {
+            const R = 6371000; // 지구의 반지름 (미터)
+            const lat1 = toRadians(coord1[1]);
+            const lat2 = toRadians(coord2[1]);
+            const deltaLat = toRadians(coord2[1] - coord1[1]);
+            const deltaLon = toRadians(coord2[0] - coord1[0]);
+
+            const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+                      Math.cos(lat1) * Math.cos(lat2) *
+                      Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            return R * c; // 거리 (미터 단위)
+        }
+
+        // 각도를 라디안으로 변환
+        function toRadians(degrees) {
+            return degrees * Math.PI / 180;
+        }
+
+        // 보간 함수: 두 점 사이의 빈 공간을 30cm 단위로 채우는 좌표 생성
+        function interpolatePoints(points, spacing) {
+            let interpolatedPoints = [];
+            let [x1, y1] = points[0];
+            let [x2, y2] = points[1];
+            let distance = haversineDistance([x1, y1], [x2, y2]);
+            let steps = Math.floor(distance / spacing);
+
+            for (let j = 1; j < steps; j++) {  // 30cm 간격으로 중간 점 추가 (끝 점 제외)
+                let t = j / steps;
+                let x = x1 + t * (x2 - x1);
+                let y = y1 + t * (y2 - y1);
+                interpolatedPoints.push([x, y]);
+            }
+
+            return interpolatedPoints;
+        }
+
+
 
         // 지도에 점 추가 함수
         function addPointsToMapOfKdTree(coordinates) {
