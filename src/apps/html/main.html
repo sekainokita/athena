@@ -1014,7 +1014,9 @@ window.onload = function() {
             console.log("Total Points After Interpolation:", roadNetworkCoordinates.length);  // 보간된 좌표 로그 출력
 
             // KD-Tree 생성 및 전역 변수로 설정
-            tree = new KDTree(roadNetworkCoordinates, euclideanDistance);
+            //tree = new KDTree(roadNetworkCoordinates, euclideanDistance);
+            // KD-Tree 생성 시 거리 계산을 Haversine Formula로 변경
+            tree = new KDTree(roadNetworkCoordinates, haversineDistance);
 
             console.log("KD-Tree built successfully with", roadNetworkCoordinates.length, "points.");
 
