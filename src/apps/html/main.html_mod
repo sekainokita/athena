@@ -559,37 +559,13 @@ window.onload = function() {
 
         function createWorkZoneMarker(imageUrl)
         {
-            const workzonecontainer = document.createElement('div');
-            workzonecontainer.style.display = 'flex';
-            workzonecontainer.style.flexDirection = 'column';
-            workzonecontainer.style.alignItems = 'center';
-
-            const img = document.createElement('div');
-            img.style.backgroundImage = `url(${imageUrl})`;
-            img.style.width = '80px';
-            img.style.height = '80px';
-            img.style.backgroundSize = 'contain';
-            img.style.backgroundRepeat = 'no-repeat';
-
-            const label = document.createElement('div');
-            label.textContent = "공사중";
-            label.style.color = 'white';
-            label.style.textAlign = 'center';
-            label.style.fontWeight = 'bold';
-            label.style.backgroundColor = 'rgba(255, 0, 0, 0.97)';
-            label.style.padding = '5px 10px';
-            label.style.borderRadius = '10px';
-            label.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
-            label.style.textShadow = '0 0 10px #00ccff, 0 0 20px #00ccff, 0 0 30px #00ccff';
-            label.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.3)';
-            label.style.width = 'auto';
-            label.style.display = 'inline-block';
-            label.style.fontSize = '18px';
-
-            workzonecontainer.appendChild(img);
-            workzonecontainer.appendChild(label);
-
-            return workzonecontainer;
+            const el = document.createElement('div');
+            el.style.backgroundImage = `url(${imageUrl})`;
+            el.style.width = '80px';
+            el.style.height = '80px';
+            el.style.backgroundSize = 'contain';
+            el.style.backgroundRepeat = 'no-repeat';
+            return el;
         }
 
         document.getElementById('mrsuButton').addEventListener('click', function() {
@@ -623,39 +599,13 @@ window.onload = function() {
 
         function createMrsuMarker(imageUrl)
         {
-            const mrsucontainer = document.createElement('div');
-            mrsucontainer.style.display = 'flex';
-            mrsucontainer.style.flexDirection = 'column';
-            mrsucontainer.style.alignItems = 'center';
-            mrsucontainer.style.width = '200px';
-
-            const img = document.createElement('div');
-            img.style.backgroundImage = `url(${imageUrl})`;
-            img.style.width = '200px';
-            img.style.height = '150px';
-            img.style.backgroundSize = 'contain';
-            img.style.backgroundRepeat = 'no-repeat';
-
-            const label = document.createElement('div');
-            label.textContent = "RSU";
-            label.style.color = 'white';
-            label.style.textAlign = 'center';
-            label.style.fontWeight = 'bold';
-            label.style.backgroundColor = 'rgba(0, 204, 255, 0.8)';
-            label.style.padding = '5px 10px';
-            label.style.borderRadius = '10px';
-            label.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
-            label.style.textShadow = '0 0 10px #00ccff, 0 0 20px #00ccff, 0 0 30px #00ccff';
-            label.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.3)';
-            label.style.width = 'auto';
-            label.style.display = 'inline-block';
-            label.style.fontSize = '18px';
-            label.style.marginLeft = '-20px';
-
-            mrsucontainer.appendChild(img);
-            mrsucontainer.appendChild(label);
-
-            return mrsucontainer;
+            const el = document.createElement('div');
+            el.style.backgroundImage = `url(${imageUrl})`;
+            el.style.width = '200px';
+            el.style.height = '200px';
+            el.style.backgroundSize = 'contain';
+            el.style.backgroundRepeat = 'no-repeat';
+            return el;
         }
 
         if ('WebSocket' in window) {
