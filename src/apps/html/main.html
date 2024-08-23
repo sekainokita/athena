@@ -1508,8 +1508,6 @@ window.onload = function() {
             if (isCenteringEnabled && vehicleId === 0) {
                 map.setCenter(snappedCoordinates); // 지도 중심을 스냅된 좌표로 설정
                 updateGpsPath(coordinates); // 실제 GPS 좌표를 경로로 업데이트
-            } else if (!isCenteringEnabled && vehicleId === 0) {
-                map.setCenter(coordinates); // 지도 중심을 실제 GPS 좌표로 설정
             }
         }
 
