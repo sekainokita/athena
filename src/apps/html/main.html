@@ -326,6 +326,7 @@ window.onload = function() {
 
     // 기본값 설정
     let defaultIpAddress = "10.252.110.58";
+    let isVisibleKdTreeMap = true;
 
     // 버튼 클릭 이벤트 처리
     document.getElementById('submit-button').onclick = function() {
@@ -885,6 +886,52 @@ window.onload = function() {
             tree = new KDTree(roadNetworkCoordinates, euclideanDistance);
 
             console.log("KD-Tree built successfully with", roadNetworkCoordinates.length, "points.");
+
+            // KD-Tree 좌표를 지도에 추가
+            if(isVisibleKdTreeMap) {
+                addPointsToMap(roadNetworkCoordinates);
+            }
+        }
+
+        // 지도에 점 추가 함수
+        function addPointsToMap(coordinates) {
+            // 지도에 추가할 점 데이터
+            const points = coordinates.map(coord => ({
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': coord
+                }
+            }));
+
+            // 기존의 소스가 있으면 삭제
+            if (map.getSource('kd-tree-points')) {
+                map.removeSource('kd-tree-points');
+            }
+
+            // 지도에 점 추가
+            map.addSource('kd-tree-points', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': points
+                }
+            });
+
+            // 기존의 레이어가 있으면 삭제
+            if (map.getLayer('kd-tree-points-layer')) {
+                map.removeLayer('kd-tree-points-layer');
+            }
+
+            map.addLayer({
+                'id': 'kd-tree-points-layer',
+                'type': 'circle',
+                'source': 'kd-tree-points',
+                'paint': {
+                    'circle-radius': 3,
+                    'circle-color': '#FF0000'
+                }
+            });
         }
 
         /************************************************************/
