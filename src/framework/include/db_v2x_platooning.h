@@ -141,8 +141,10 @@ typedef enum {
     eDB_V2X_PT_LV_MSG_ID_INVALID               = 0,
     eDB_V2X_PT_LV_MSG_ID_REQ_L2F               = 1,
     eDB_V2X_PT_LV_MSG_ID_REQ_F2F               = 2,
-    eDB_V2X_PT_LV_MSG_ID_RES_F2L               = 3,
-    eDB_V2X_PT_LV_MSG_ID_RES_F2F               = 4,
+    eDB_V2X_PT_LV_MSG_ID_REQ_L2L               = 3,
+    eDB_V2X_PT_LV_MSG_ID_RES_F2L               = 4,
+    eDB_V2X_PT_LV_MSG_ID_RES_F2F               = 5,
+    eDB_V2X_PT_LV_MSG_ID_REQ_L2L               = 6,
     eDB_V2X_PT_LV_MSG_ID_MAX
 } DB_V2X_PT_LV_MSG_ID_E;
 
