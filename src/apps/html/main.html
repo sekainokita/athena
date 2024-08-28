@@ -12,7 +12,7 @@
     #map {
         position: absolute;
         top: 0;
-        bottom: 5%;
+        bottom: 7%;
         width: 75%;
         z-index: 1; /* 지도의 z-index 명확하게 설정 */
     }
@@ -20,18 +20,17 @@
     #right-info-background {
         position: absolute;
         top: 0;
-        bottom: 5%;
+        bottom: 7%;
         right: 0;
         width: 25%; /* 남은 25%를 차지하는 배경 설정 */
         background-color: rgba(0, 0, 0, 0.8); /* 어두운 배경색 */
         z-index: 1; /* 그래프와 동일한 z-index 설정 */
     }
 
-    /* 아래쪽 검정색 바 */
     #bottom-info-background {
         position: absolute;
         bottom: 0;
-        height: 5%; /* 전체 높이의 5%를 차지하는 검정 바 */
+        height: 7%; /* 전체 높이의 5%를 차지하는 검정 바 */
         width: 100%;
         background-color: rgba(0, 0, 0, 0.8); /* 어두운 배경색 */
         z-index: 1;
@@ -135,8 +134,8 @@
         font-weight: bold;
     }
 
-    /* 버튼 스타일 */
-    #center-button, #pathPlanButton, #lineToggleButton, #workZoneButton, #mrsuButton, #classBButton, #visiblePathButton, #CB3 {
+    /* TOP BUTTON */
+    #autoTrackButton, #projectionButton, #connectedStatusButton, #visiblePathButton {
         position: absolute;
         padding: 10px 20px;
         background-color: rgba(0, 0, 0, 0.7); /* 약간 투명한 검은색 배경 */
@@ -149,47 +148,61 @@
         z-index: 3; /* 버튼들의 z-index를 높여서 모달 창 뒤에 숨지 않도록 설정 */
     }
 
-    #center-button {
+    #autoTrackButton {
         top: 10px;
         left: 10px;
     }
 
-    #pathPlanButton {
+    #projectionButton {
         top: 10px;
-        left: 185px;
+        left: 160px;
     }
 
-    #lineToggleButton {
+    #connectedStatusButton {
         top: 10px;
-        left: 355px;
-    }
-
-    #workZoneButton {
-        top: 10px;
-        left: 595px;
-    }
-
-    #mrsuButton {
-        top: 10px;
-        left: 780px;
+        left: 310px;
     }
 
     #visiblePathButton {
         top: 10px;
-        left: 975px;
+        left: 675px;
     }
 
-    #classBButton {
+    /* BOTTOM BUTTON */
+    #workZoneButton, #mrsuButton, #CB1, #CB3 {
+        position: absolute;
+        padding: 5px 20px;
+        background-color: rgba(0, 0, 0, 0.7); /* 약간 투명한 검은색 배경 */
+        border: none;
+        border-radius: 10px; /* 부드러운 모서리 */
+        color: white; /* 흰색 텍스트 */
+        cursor: pointer;
+        font-size: 16px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 그림자 효과 */
+        z-index: 3; /* 버튼들의 z-index를 높여서 모달 창 뒤에 숨지 않도록 설정 */
+    }
+
+    #workZoneButton {
         bottom: 15px;
         left: 300px;
     }
 
-    #CB3 {
-        bottom: 15px;
-        left: 460px;
+    #mrsuButton {
+        bottom: 50px;
+        left: 300px;
     }
 
-    #center-button:hover, #pathPlanButton:hover, #lineToggleButton:hover, #workZoneButton:hover, #mrsuButton:hover, #classBButton:hover, #visiblePathButton:hover, #CB3:hover {
+    #CB1 {
+        bottom: 50px;
+        left: 450px;
+    }
+
+    #CB3 {
+        bottom: 15px;
+        left: 450px;
+    }
+
+    #autoTrackButton:hover, #projectionButton:hover, #connectedStatusButton:hover, #workZoneButton:hover, #mrsuButton:hover, #CB1:hover, #visiblePathButton:hover, #CB3:hover {
         background-color: rgba(0, 0, 0, 0.8); /* 마우스를 올렸을 때 더 어두운 배경 */
     }
 
@@ -307,13 +320,13 @@
     <p id="traffic-light-status" style="color: red;">RED Light<br>(STOP)</p>
 </div>
 
-<button id="center-button">Enable Centering</button>
-<button id="pathPlanButton">Enable PathPlan</button>
-<button id="lineToggleButton">Enable Connected Vehicle</button>
-<button id="workZoneButton">Enable Work Zone</button>
-<button id="mrsuButton">Enable Moving RSU</button>
-<button id="visiblePathButton">Enable Visible Path</button>
-<button id="classBButton">Enable Class B</button>
+<button id="autoTrackButton">AUTO TRACK</button>
+<button id="projectionButton">PROJECTION</button>
+<button id="connectedStatusButton">CONNECTED STATUS</button>
+<button id="workZoneButton">WORK ZONE</button>
+<button id="mrsuButton">M-RSU</button>
+<button id="visiblePathButton">VISIBLE PATH</button>
+<button id="CB1">CB1</button>
 <button id="CB3">CB3</button>
 
 <!-- 모달 배경 -->
@@ -388,13 +401,14 @@ window.onload = function() {
         alert(`현재 선택된 테스트 모드: ${testMode}\n입력된 IP 주소: ${ipAddress}\nVisible Path ${VisiblePathMode}`);
 
         // 버튼이 제대로 표시되도록 모달 창이 닫힌 후 버튼을 다시 표시
-        document.getElementById('center-button').style.display = 'block';
-        document.getElementById('pathPlanButton').style.display = 'block';
-        document.getElementById('lineToggleButton').style.display = 'block';
+        document.getElementById('autoTrackButton').style.display = 'block';
+        document.getElementById('projectionButton').style.display = 'block';
+        document.getElementById('connectedStatusButton').style.display = 'block';
         document.getElementById('workZoneButton').style.display = 'block';
         document.getElementById('mrsuButton').style.display = 'block';
         document.getElementById('visiblePathButton').style.display = 'block';
-        document.getElementById('classBButton').style.display = 'block';
+        document.getElementById('CB1').style.display = 'block';
+        document.getElementById('CB3').style.display = 'block';
 
         // 입력이 완료된 후 메인 로직 실행
         main(isTxTest, ipAddress);
@@ -440,7 +454,7 @@ window.onload = function() {
         let isWorkZoneEnabled = false;
         let isMrsuEnabled = false;
         let isCentering = false;
-        let isClassBEnabled = false;
+        let isCB1 = false;
         let isCB3 = false;
 
         let workZoneMarker = new mapboxgl.Marker({element: createWorkZoneMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/work-zone.png')});
@@ -460,9 +474,16 @@ window.onload = function() {
         map.on('style.load', () => {
             map.setFog({});
 
-            document.getElementById('center-button').addEventListener('click', function() {
+            document.getElementById('autoTrackButton').addEventListener('click', function() {
                 isCentering = !isCentering;
-                this.textContent = isCentering ? 'Disable Centering' : 'Enable Centering';
+                if (isCentering) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+
                 map.setCenter([s_nRxLongitude, s_nRxLatitude]);
             });
         });
@@ -487,16 +508,29 @@ window.onload = function() {
             }, 5000);
         });
 
-        document.getElementById('pathPlanButton').addEventListener('click', function() {
+        document.getElementById('projectionButton').addEventListener('click', function() {
             isPathPlan = !isPathPlan;
-            this.textContent = isPathPlan ? 'Disable PathPlan' : 'Enable PathPlan';
+            if (isPathPlan) {
+                this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                this.style.color = 'white';
+            } else {
+                this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                this.style.color = 'white';
+            }
 
             map.setCenter([s_nRxLongitude, s_nRxLatitude]);
         });
 
-        document.getElementById('lineToggleButton').addEventListener('click', function() {
+        document.getElementById('connectedStatusButton').addEventListener('click', function() {
             isCvLineEnabled = !isCvLineEnabled;
-            this.textContent = isCvLineEnabled ? 'Disable Connected Vehicle' : 'Enable Connected Vehicle';
+            if (isCvLineEnabled) {
+                this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                this.style.color = 'white';
+            } else {
+                this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                this.style.color = 'white';
+            }
+
 
             if (isCvLineEnabled) {
                 if (!map.getLayer('lineLayer')) {
@@ -570,14 +604,19 @@ window.onload = function() {
 
         document.getElementById('workZoneButton').addEventListener('click', function() {
             isWorkZoneEnabled = !isWorkZoneEnabled;
-            this.textContent = isWorkZoneEnabled ? 'Disable Work Zone' : 'Enable Work Zone';
+            if (isWorkZoneEnabled) {
+                this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                this.style.color = 'white';
+            } else {
+                this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                this.style.color = 'white';
+            }
             toggleWorkZone();
         });
 
         function toggleWorkZone()
         {
             const WorkZoneCoordinate = [127.4401043, 36.7298408];
-
             if (isWorkZoneEnabled)
             {
                 if (workZoneMarker === null)
@@ -634,13 +673,27 @@ window.onload = function() {
 
         document.getElementById('mrsuButton').addEventListener('click', function() {
             isMrsuEnabled = !isMrsuEnabled;
-            this.textContent = isMrsuEnabled ? 'Disable Moving RSU' : 'Enable Moving RSU';
+            if (isMrsuEnabled) {
+                this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                this.style.color = 'white';
+            } else {
+                this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                this.style.color = 'white';
+            }
+
             toggleMrsu();
         });
 
         document.getElementById('visiblePathButton').addEventListener('click', function() {
             isVisiblePath = !isVisiblePath;
-            this.textContent = isVisiblePath ? 'Disable Visible Path' : 'Enable Visible Path';
+            if (isVisiblePath) {
+                this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                this.style.color = 'white';
+            } else {
+                this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                this.style.color = 'white';
+            }
+
         });
 
         function toggleMrsu()
@@ -761,15 +814,21 @@ window.onload = function() {
 
             map.addImage('arrowB-icon', image);
 
-            document.getElementById('classBButton').addEventListener('click', function()
+            document.getElementById('CB1').addEventListener('click', function()
             {
-                isClassBEnabled = !isClassBEnabled;
-                this.textContent = isClassBEnabled ? 'Disable Class-B' : 'Enable Class-B';
+                isCB1 = !isCB1;
+                if (isCB1) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
 
                 if (map.getLayer('classBPath'))
                 {
-                    map.setLayoutProperty('classBPath', 'visibility', isClassBEnabled ? 'visible' : 'none');
-                    map.setLayoutProperty('classBArrows', 'visibility', isClassBEnabled ? 'visible' : 'none');
+                    map.setLayoutProperty('classBPath', 'visibility', isCB1 ? 'visible' : 'none');
+                    map.setLayoutProperty('classBArrows', 'visibility', isCB1 ? 'visible' : 'none');
                 }
                 else
                 {
@@ -862,7 +921,13 @@ window.onload = function() {
             document.getElementById('CB3').addEventListener('click', function()
             {
                 isCB3 = !isCB3;
-                this.textContent = isCB3 ? "Disable CB3" : "Enable CB3";
+                if (isCB3) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
 
                 if (map.getLayer('CB3Path'))
                 {
