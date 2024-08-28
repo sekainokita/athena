@@ -136,7 +136,7 @@
     }
 
     /* 버튼 스타일 */
-    #center-button, #pathPlanButton, #lineToggleButton, #workZoneButton, #mrsuButton, #classBButton, #visiblePathButton {
+    #center-button, #pathPlanButton, #lineToggleButton, #workZoneButton, #mrsuButton, #visiblePathButton {
         position: absolute;
         padding: 10px 20px;
         background-color: rgba(0, 0, 0, 0.7); /* 약간 투명한 검은색 배경 */
@@ -179,12 +179,7 @@
         left: 975px;
     }
 
-    #classBButton {
-        bottom: 13px;
-        left: 300px;
-    }
-
-    #center-button:hover, #pathPlanButton:hover, #lineToggleButton:hover, #workZoneButton:hover, #mrsuButton:hover, #classBButton:hover, #visiblePathButton:hover {
+    #center-button:hover, #pathPlanButton:hover, #lineToggleButton:hover, #workZoneButton:hover, #mrsuButton:hover, #visiblePathButton:hover {
         background-color: rgba(0, 0, 0, 0.8); /* 마우스를 올렸을 때 더 어두운 배경 */
     }
 
@@ -308,7 +303,6 @@
 <button id="workZoneButton">Enable Work Zone</button>
 <button id="mrsuButton">Enable Moving RSU</button>
 <button id="visiblePathButton">Enable Visible Path</button>
-<button id="classBButton">Enable Class B</button>
 
 <!-- 모달 배경 -->
 <div id="modal-background"></div>
@@ -388,7 +382,6 @@ window.onload = function() {
         document.getElementById('workZoneButton').style.display = 'block';
         document.getElementById('mrsuButton').style.display = 'block';
         document.getElementById('visiblePathButton').style.display = 'block';
-        document.getElementById('classBButton').style.display = 'block';
 
         // 입력이 완료된 후 메인 로직 실행
         main(isTxTest, ipAddress);
@@ -434,7 +427,6 @@ window.onload = function() {
         let isWorkZoneEnabled = false;
         let isMrsuEnabled = false;
         let isCentering = false;
-        let isClassBEnabled = false;
 
         let workZoneMarker = new mapboxgl.Marker({element: createWorkZoneMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/work-zone.png')});
         let mrsuMarker = new mapboxgl.Marker({element: createWorkZoneMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/m-rsu-front.png')});
@@ -695,88 +687,6 @@ window.onload = function() {
 
             return mrsucontainer;
         }
-
-        const classBCoordinates = [
-            [127.439641, 36.730080],
-            [127.439703, 36.730085], //첫번째 노란점
-            [127.439820, 36.730091],
-            [127.439885, 36.730050], //두번째 노란점
-            [127.439991, 36.729972], //세번째 노란점
-            [127.440131, 36.729958],
-            [127.440254, 36.730017], //네번째
-            [127.440304, 36.730084], //다섯번째
-            [127.440352, 36.730148],
-            [127.440451, 36.730166] //마지막
-        ];
-
-        function interpolateCatmullRom(points, numPointsBetween) {
-            let interpolatedPoints = [];
-
-            function interpolate(p0, p1, p2, p3, t) {
-                const t2 = t * t;
-                const t3 = t2 * t;
-                const out = [
-                    0.5 * (2 * p1[0] + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3),
-                    0.5 * (2 * p1[1] + (-p0[1] + p2[1]) * t + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3)
-                ];
-                return out;
-            }
-
-            for (let i = 1; i < points.length - 2; i++) {
-                const p0 = points[i - 1];
-                const p1 = points[i];
-                const p2 = points[i + 1];
-                const p3 = points[i + 2];
-
-                interpolatedPoints.push(p1);
-                for (let t = 0; t < numPointsBetween; t++) {
-                    const tNorm = t / numPointsBetween;
-                    interpolatedPoints.push(interpolate(p0, p1, p2, p3, tNorm));
-                }
-            }
-            interpolatedPoints.push(points[points.length - 2]);
-            interpolatedPoints.push(points[points.length - 1]);
-
-            return interpolatedPoints;
-        }
-
-        const smoothPath = interpolateCatmullRom(classBCoordinates, 100);
-
-        document.getElementById('classBButton').addEventListener('click', function() {
-            isClassBEnabled = !isClassBEnabled;
-            this.textContent = isClassBEnabled ? 'Disable Class-B' : 'Enable Class-B';
-
-            if (map.getLayer('classBPath')) {
-                map.setLayoutProperty('classBPath', 'visibility', isClassBEnabled ? 'visible' : 'none');
-            } else {
-                map.addSource('classBPath', {
-                    'type': 'geojson',
-                    'data': {
-                        'type': 'Feature',
-                        'geometry': {
-                            'type': 'LineString',
-                            'coordinates': smoothPath
-                        }
-                    }
-                });
-
-                map.addLayer({
-                    'id': 'classBPath',
-                    'type': 'line',
-                    'source': 'classBPath',
-                    'layout': {
-                        'line-join': 'round',
-                        'line-cap': 'round',
-                        'visibility': 'visible'
-                    },
-                    'paint': {
-                        'line-color': 'rgba(0, 150, 255, 0.8)',
-                        'line-width': 20,
-                        'line-blur': 0.5
-                    }
-                });
-            }
-        });
 
         if ('WebSocket' in window) {
             let ws = new WebSocket(`ws://${ipAddress}:3001/websocket`);
@@ -1566,7 +1476,7 @@ window.onload = function() {
                     }
 
                     if(isVisiblePath) {
-                    updateSnappedPath(snappedCoordinates);
+                        updateSnappedPath(snappedCoordinates);
                     }
                 } else {
                     console.warn("No nearest point found in KD Tree.");
