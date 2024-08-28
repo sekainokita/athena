@@ -136,7 +136,7 @@
     }
 
     /* 버튼 스타일 */
-    #center-button, #pathPlanButton, #lineToggleButton, #workZoneButton, #mrsuButton, #classBButton, #visiblePathButton {
+    #center-button, #pathPlanButton, #lineToggleButton, #workZoneButton, #mrsuButton, #classBButton, #visiblePathButton, #CB3 {
         position: absolute;
         padding: 10px 20px;
         background-color: rgba(0, 0, 0, 0.7); /* 약간 투명한 검은색 배경 */
@@ -184,7 +184,12 @@
         left: 300px;
     }
 
-    #center-button:hover, #pathPlanButton:hover, #lineToggleButton:hover, #workZoneButton:hover, #mrsuButton:hover, #classBButton:hover, #visiblePathButton:hover {
+    #CB3 {
+        bottom: 15px;
+        left: 460px;
+    }
+
+    #center-button:hover, #pathPlanButton:hover, #lineToggleButton:hover, #workZoneButton:hover, #mrsuButton:hover, #classBButton:hover, #visiblePathButton:hover, #CB3:hover {
         background-color: rgba(0, 0, 0, 0.8); /* 마우스를 올렸을 때 더 어두운 배경 */
     }
 
@@ -309,6 +314,7 @@
 <button id="mrsuButton">Enable Moving RSU</button>
 <button id="visiblePathButton">Enable Visible Path</button>
 <button id="classBButton">Enable Class B</button>
+<button id="CB3">CB3</button>
 
 <!-- 모달 배경 -->
 <div id="modal-background"></div>
@@ -435,6 +441,7 @@ window.onload = function() {
         let isMrsuEnabled = false;
         let isCentering = false;
         let isClassBEnabled = false;
+        let isCB3 = false;
 
         let workZoneMarker = new mapboxgl.Marker({element: createWorkZoneMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/work-zone.png')});
         let mrsuMarker = new mapboxgl.Marker({element: createWorkZoneMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/m-rsu-front.png')});
@@ -838,6 +845,111 @@ window.onload = function() {
                 }
                 });
             });
+        });
+
+        map.on('style.load', function()
+        {
+            map.loadImage('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/arrowG.png', function(error, image)
+            {
+                if (error)
+                {
+                    console.error('fail load image', error);
+                    return;
+                }
+
+            map.addImage('arrow-icon', image);
+
+            document.getElementById('CB3').addEventListener('click', function()
+            {
+                isCB3 = !isCB3;
+                this.textContent = isCB3 ? "Disable CB3" : "Enable CB3";
+
+                if (map.getLayer('CB3Path'))
+                {
+                    map.setLayoutProperty('CB3Path', 'visibility', isCB3 ? 'visible' : 'none');
+                    map.setLayoutProperty('CB3Arrows', 'visibility', isCB3 ? 'visible' : 'none');
+                }
+                else
+                {
+                    const CB3Coordinates = [
+                        { coord: [127.440170, 36.729793]},
+                        { coord: [127.440157, 36.729847], rotate: 0},
+                        { coord: [127.440181, 36.729961]},
+                        { coord: [127.440254, 36.730017], rotate: 45},
+                        { coord: [127.440304, 36.730084], rotate: 30},
+                        { coord: [127.440350, 36.730151]},
+                        { coord: [127.440451, 36.730166], rotate: 85}
+                    ];
+
+                    const CB3route = CB3Coordinates.map(point => point.coord);
+                    const smoothCB3route = interpolateCatmullRom(CB3route, 100);
+
+                    map.addSource('CB3Path', {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'LineString',
+                                'coordinates': smoothCB3route
+                            }
+                        }
+                    });
+
+                    map.addLayer({
+                        'id': 'CB3Path',
+                        'type': 'line',
+                        'source': 'CB3Path',
+                        'layout': {
+                            'line-join': 'round',
+                            'line-cap': 'round',
+                            'visibility': 'visible'
+                        },
+                        'paint': {
+                            'line-color': 'rgba(50, 205, 50, 0.7)',
+                            'line-width': 20,
+                            'line-blur': 1,
+                            'line-opacity': 0.8
+                        }
+                    });
+
+                    const arrowFeatures = CB3Coordinates
+                        .filter(arrow => arrow.rotate !== undefined)
+                        .map(arrow => {
+                        return {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': arrow.coord
+                            },
+                            'properties': {
+                                'rotate': arrow.rotate
+                            }
+                        };
+                    });
+
+                    map.addSource('CB3Arrows', {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'FeatureCollection',
+                            'features': arrowFeatures
+                        }
+                    });
+
+                    map.addLayer({
+                        'id': 'CB3Arrows',
+                        'type': 'symbol',
+                        'source': 'CB3Arrows',
+                        'layout': {
+                            'icon-image': 'arrow-icon',
+                            'icon-size': 0.05,
+                            'icon-rotate': ['get', 'rotate'],
+                            'icon-allow-overlap': true,
+                            'visibility': 'visible'
+                        }
+                    });
+                }
+            });
+        });
         });
 
         if ('WebSocket' in window) {
