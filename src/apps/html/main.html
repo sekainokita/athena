@@ -180,7 +180,7 @@
     }
 
     #classBButton {
-        bottom: 13px;
+        bottom: 15px;
         left: 300px;
     }
 
@@ -742,40 +742,102 @@ window.onload = function() {
 
         const smoothPath = interpolateCatmullRom(classBCoordinates, 100);
 
-        document.getElementById('classBButton').addEventListener('click', function() {
-            isClassBEnabled = !isClassBEnabled;
-            this.textContent = isClassBEnabled ? 'Disable Class-B' : 'Enable Class-B';
+        map.on('style.load', function()
+        {
+            map.loadImage('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/arrow.png', function(error, image)
+            {
+                if (error)
+                {
+                    console.error('fail load image', error);
+                    return;
+                }
 
-            if (map.getLayer('classBPath')) {
-                map.setLayoutProperty('classBPath', 'visibility', isClassBEnabled ? 'visible' : 'none');
-            } else {
-                map.addSource('classBPath', {
-                    'type': 'geojson',
-                    'data': {
-                        'type': 'Feature',
-                        'geometry': {
-                            'type': 'LineString',
-                            'coordinates': smoothPath
+            map.addImage('arrow-icon', image);
+
+            document.getElementById('classBButton').addEventListener('click', function()
+            {
+                isClassBEnabled = !isClassBEnabled;
+                this.textContent = isClassBEnabled ? 'Disable Class-B' : 'Enable Class-B';
+
+                if (map.getLayer('classBPath'))
+                {
+                    map.setLayoutProperty('classBPath', 'visibility', isClassBEnabled ? 'visible' : 'none');
+                    map.setLayoutProperty('classBArrows', 'visibility', isClassBEnabled ? 'visible' : 'none');
+                }
+                else
+                {
+                    map.addSource('classBPath', {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'LineString',
+                                'coordinates': smoothPath
+                            }
                         }
-                    }
-                });
+                    });
 
-                map.addLayer({
-                    'id': 'classBPath',
-                    'type': 'line',
-                    'source': 'classBPath',
-                    'layout': {
-                        'line-join': 'round',
-                        'line-cap': 'round',
-                        'visibility': 'visible'
-                    },
-                    'paint': {
-                        'line-color': 'rgba(0, 150, 255, 0.8)',
-                        'line-width': 20,
-                        'line-blur': 0.5
-                    }
+                    map.addLayer({
+                        'id': 'classBPath',
+                        'type': 'line',
+                        'source': 'classBPath',
+                        'layout': {
+                            'line-join': 'round',
+                            'line-cap': 'round',
+                            'visibility': 'visible'
+                        },
+                        'paint': {
+                            'line-color': 'rgba(0, 150, 255, 0.8)',
+                            'line-width': 20,
+                            'line-blur': 0.5
+                        }
+                    });
+
+                    const arrowCoordinates = [
+                        { coord: [127.439703, 36.730085], rotate: 90},
+                        { coord: [127.439885, 36.730050], rotate: 140},
+                        { coord: [127.439991, 36.729972], rotate: 110},
+                        { coord: [127.440254, 36.730017], rotate: 45},
+                        { coord: [127.440304, 36.730084], rotate: 30},
+                        { coord: [127.440451, 36.730166], rotate: 85}
+                    ];
+
+                    const arrowFeatures = arrowCoordinates.map(arrow => {
+                        return {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': arrow.coord
+                            },
+                            'properties': {
+                                'rotate': arrow.rotate
+                            }
+                        };
+                    });
+
+                    map.addSource('classBArrows', {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'FeatureCollection',
+                            'features': arrowFeatures
+                        }
+                    });
+
+                    map.addLayer({
+                        'id': 'classBArrows',
+                        'type': 'symbol',
+                        'source': 'classBArrows',
+                        'layout': {
+                            'icon-image': 'arrow-icon',
+                            'icon-size': 0.05,
+                            'icon-rotate': ['get', 'rotate'],
+                            'icon-allow-overlap': true,
+                            'visibility': 'visible'
+                        }
+                    });
+                }
                 });
-            }
+            });
         });
 
         if ('WebSocket' in window) {
