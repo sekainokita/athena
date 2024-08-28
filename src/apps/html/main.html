@@ -165,11 +165,11 @@
 
     #visiblePathButton {
         top: 10px;
-        left: 675px;
+        left: 525px;
     }
 
     /* BOTTOM BUTTON */
-    #workZoneButton, #mrsuButton, #CB1, #CB3 {
+    #workZoneButton, #mrsuButton, #CB1, #CB2, #CB3, #CB4, #CB5, #CB6 {
         position: absolute;
         padding: 5px 20px;
         background-color: rgba(0, 0, 0, 0.7); /* 약간 투명한 검은색 배경 */
@@ -197,12 +197,32 @@
         left: 450px;
     }
 
-    #CB3 {
+    #CB2 {
         bottom: 15px;
         left: 450px;
     }
 
-    #autoTrackButton:hover, #projectionButton:hover, #connectedStatusButton:hover, #workZoneButton:hover, #mrsuButton:hover, #CB1:hover, #visiblePathButton:hover, #CB3:hover {
+    #CB3 {
+        bottom: 50px;
+        left: 535px;
+    }
+
+    #CB4 {
+        bottom: 15px;
+        left: 535px;
+    }
+
+    #CB5 {
+        bottom: 50px;
+        left: 620px;
+    }
+
+    #CB6 {
+        bottom: 10px;
+        left: 620px;
+    }
+
+    #autoTrackButton:hover, #projectionButton:hover, #connectedStatusButton:hover, #workZoneButton:hover, #mrsuButton:hover, #visiblePathButton:hover, #CB1:hover, #CB2:hover, #CB3:hover, #CB4:hover, #CB5:hover, #CB6:hover{
         background-color: rgba(0, 0, 0, 0.8); /* 마우스를 올렸을 때 더 어두운 배경 */
     }
 
@@ -217,16 +237,18 @@
         background-color: rgba(0, 0, 0, 0.8);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 그림자 효과 */
     }
+
     #traffic-light img {
         width: 110px;
         height: auto;
     }
+
     #traffic-light-status {
         font-size: 30px;
         margin-top: 5px;
         font-weight: bold;
     }
-    /* 모달 배경 */
+
     #modal-background {
         display: none;
         position: fixed;
@@ -237,7 +259,7 @@
         background-color: rgba(0, 0, 0, 0.5);
         z-index: 1000;
     }
-    /* 모달 창 */
+
     #modal {
         display: none;
         position: fixed;
@@ -327,14 +349,16 @@
 <button id="mrsuButton">M-RSU</button>
 <button id="visiblePathButton">VISIBLE PATH</button>
 <button id="CB1">CB1</button>
+<button id="CB2">CB2</button>
 <button id="CB3">CB3</button>
+<button id="CB4">CB4</button>
+<button id="CB5">CB5</button>
+<button id="CB6">CB6</button>
 
-<!-- 모달 배경 -->
 <div id="modal-background"></div>
 
-<!-- 모달 창 -->
 <div id="modal">
-    <h2>테스트 모드를 선택하세요</h2>
+    <h2>KETI ATHENA Application Software</h2>
     <label for="testType">Tx 또는 Rx를 입력하세요:</label><br>
     <input type="text" id="testType" class="modal-input" placeholder="Tx 또는 Rx"><br>
     <label for="ipAddress">IP 주소를 입력하세요:</label><br>
@@ -408,9 +432,12 @@ window.onload = function() {
         document.getElementById('mrsuButton').style.display = 'block';
         document.getElementById('visiblePathButton').style.display = 'block';
         document.getElementById('CB1').style.display = 'block';
+        document.getElementById('CB2').style.display = 'block';
         document.getElementById('CB3').style.display = 'block';
+        document.getElementById('CB4').style.display = 'block';
+        document.getElementById('CB5').style.display = 'block';
+        document.getElementById('CB6').style.display = 'block';
 
-        // 입력이 완료된 후 메인 로직 실행
         main(isTxTest, ipAddress);
     };
 
@@ -455,7 +482,11 @@ window.onload = function() {
         let isMrsuEnabled = false;
         let isCentering = false;
         let isCB1 = false;
+        let isCB2 = false;
         let isCB3 = false;
+        let isCB4 = false;
+        let isCB5 = false;
+        let isCB6 = false;
 
         let workZoneMarker = new mapboxgl.Marker({element: createWorkZoneMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/work-zone.png')});
         let mrsuMarker = new mapboxgl.Marker({element: createWorkZoneMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/m-rsu-front.png')});
@@ -906,6 +937,19 @@ window.onload = function() {
             });
         });
 
+        map.on('style.load', () => {
+            document.getElementById('CB2').addEventListener('click', function() {
+                isCB2 = !isCB2;
+                if (isCB2) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+            });
+        });
+
         map.on('style.load', function()
         {
             map.loadImage('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/arrowG.png', function(error, image)
@@ -1015,6 +1059,45 @@ window.onload = function() {
                 }
             });
         });
+        });
+
+        map.on('style.load', () => {
+            document.getElementById('CB4').addEventListener('click', function() {
+                isCB4 = !isCB4;
+                if (isCB4) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+            });
+        });
+
+        map.on('style.load', () => {
+            document.getElementById('CB5').addEventListener('click', function() {
+                isCB5 = !isCB5;
+                if (isCB5) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+            });
+        });
+
+        map.on('style.load', () => {
+            document.getElementById('CB6').addEventListener('click', function() {
+                isCB6 = !isCB6;
+                if (isCB6) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+            });
         });
 
         if ('WebSocket' in window) {
