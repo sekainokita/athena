@@ -798,7 +798,7 @@ window.onload = function() {
             if(isTxTest) {
                 ws.onmessage = (message) => {
                     let data = message.data.split(',');
-                    s_unRxDevId = data[3];
+                    s_unRxDevId = data[2];
                     s_nRxLatitude = data[23];
                     s_nRxLongitude = data[24];
                     s_unRxVehicleSpeed = data[28];
