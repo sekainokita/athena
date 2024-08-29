@@ -161,6 +161,7 @@ window.onload = function() {
 
         let workZoneMarker = new mapboxgl.Marker({element: createWorkZoneMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/work-zone.png')});
         let mrsuMarker = new mapboxgl.Marker({element: createWorkZoneMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/m-rsu-front.png')});
+        let V2XLabelMarker = null;
 
         mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
         const map = new mapboxgl.Map({
@@ -639,193 +640,199 @@ window.onload = function() {
             });
         });
 
-        map.on('style.load', function()
-        {
-            map.loadImage('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/arrowG.png', function(error, image)
-            {
-                if (error)
-                {
+        map.on('style.load', function() {
+            map.loadImage('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/arrowG.png', function(error, image) {
+                if (error) {
                     console.error('fail load image', error);
                     return;
                 }
-
-            map.addImage('arrowG-icon', image);
-
-            document.getElementById('CB3').addEventListener('click', function()
-            {
-                isCB3 = !isCB3;
-                if (isCB3) {
-                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
-                    this.style.color = 'white';
-                } else {
-                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-                    this.style.color = 'white';
-                }
-                if (vehMode === "C-VEH") {
-                    trafficLight = 'red';
-                } else if (vehMode === "A-VEH") {
-                    trafficLight = 'red';
-                } else {
-                    trafficLight = 'red';
-                }
-                updateTrafficLight(trafficLight);
-
-                if (map.getLayer('CB3Path'))
-                {
-                    map.setLayoutProperty('CB3Path', 'visibility', isCB3 ? 'visible' : 'none');
-                    map.setLayoutProperty('CB3Arrows', 'visibility', isCB3 ? 'visible' : 'none');
-                    map.setLayoutProperty('V2XPath', 'visibility', isCB3 ? 'visible' : 'none');
-                    map.setLayoutProperty('V2XLabel', 'visibility', isCB3 ? 'visible' : 'none');
-                }
-                else
-                {
-                    const CB3Coordinates = [
-                        { coord: [127.440170, 36.729793]},
-                        { coord: [127.440157, 36.729847], rotate: 0},
-                        { coord: [127.440181, 36.729961]},
-                        { coord: [127.440254, 36.730017], rotate: 45},
-                        { coord: [127.440304, 36.730084], rotate: 30},
-                        { coord: [127.440350, 36.730151]},
-                        { coord: [127.440451, 36.730166], rotate: 85}
-                    ];
-
-                    const CB3route = CB3Coordinates.map(point => point.coord);
-                    const smoothCB3route = interpolateCatmullRom(CB3route, 100);
-
-                    map.addSource('CB3Path', {
-                        'type': 'geojson',
-                        'data': {
-                            'type': 'Feature',
-                            'geometry': {
-                                'type': 'LineString',
-                                'coordinates': smoothCB3route
+        
+                map.addImage('arrowG-icon', image);
+        
+                document.getElementById('CB3').addEventListener('click', function() {
+                    isCB3 = !isCB3;
+                    if (isCB3) {
+                        this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                        this.style.color = 'white';
+                    } else {
+                        this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                        this.style.color = 'white';
+                    }
+                    if (vehMode === "C-VEH") {
+                        trafficLight = 'red';
+                    } else if (vehMode === "A-VEH") {
+                        trafficLight = 'red';
+                    } else {
+                        trafficLight = 'red';
+                    }
+                    updateTrafficLight(trafficLight);
+        
+                    if (map.getLayer('CB3Path')) {
+                        map.setLayoutProperty('CB3Path', 'visibility', isCB3 ? 'visible' : 'none');
+                        map.setLayoutProperty('CB3Arrows', 'visibility', isCB3 ? 'visible' : 'none');
+                        map.setLayoutProperty('V2XPath', 'visibility', isCB3 ? 'visible' : 'none');
+        
+                        // V2XLabel 표시 또는 제거
+                        if (V2XLabelMarker) {
+                            if (isCB3) {
+                                V2XLabelMarker.addTo(map);  // 마커 추가
+                            } else {
+                                V2XLabelMarker.remove();  // 마커 제거
                             }
                         }
-                    });
-
-                    map.addLayer({
-                        'id': 'CB3Path',
-                        'type': 'line',
-                        'source': 'CB3Path',
-                        'layout': {
-                            'line-join': 'round',
-                            'line-cap': 'round',
-                            'visibility': 'visible'
-                        },
-                        'paint': {
-                            'line-color': 'rgba(50, 205, 50, 0.7)',
-                            'line-width': 20,
-                            'line-blur': 1,
-                            'line-opacity': 0.8
-                        }
-                    });
-
-                    const arrowFeatures = CB3Coordinates
-                        .filter(arrow => arrow.rotate !== undefined)
-                        .map(arrow => {
-                        return {
-                            'type': 'Feature',
-                            'geometry': {
-                                'type': 'Point',
-                                'coordinates': arrow.coord
+                    } else {
+                        const CB3Coordinates = [
+                            { coord: [127.440170, 36.729793] },
+                            { coord: [127.440157, 36.729847], rotate: 0 },
+                            { coord: [127.440181, 36.729961] },
+                            { coord: [127.440254, 36.730017], rotate: 45 },
+                            { coord: [127.440304, 36.730084], rotate: 30 },
+                            { coord: [127.440350, 36.730151] },
+                            { coord: [127.440451, 36.730166], rotate: 85 }
+                        ];
+        
+                        const CB3route = CB3Coordinates.map(point => point.coord);
+                        const smoothCB3route = interpolateCatmullRom(CB3route, 100);
+        
+                        map.addSource('CB3Path', {
+                            'type': 'geojson',
+                            'data': {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'LineString',
+                                    'coordinates': smoothCB3route
+                                }
+                            }
+                        });
+        
+                        map.addLayer({
+                            'id': 'CB3Path',
+                            'type': 'line',
+                            'source': 'CB3Path',
+                            'layout': {
+                                'line-join': 'round',
+                                'line-cap': 'round',
+                                'visibility': 'visible'
                             },
-                            'properties': {
-                                'rotate': arrow.rotate
+                            'paint': {
+                                'line-color': 'rgba(50, 205, 50, 0.7)',
+                                'line-width': 20,
+                                'line-blur': 1,
+                                'line-opacity': 0.8
                             }
-                        };
-                    });
-
-                    map.addSource('CB3Arrows', {
-                        'type': 'geojson',
-                        'data': {
-                            'type': 'FeatureCollection',
-                            'features': arrowFeatures
-                        }
-                    });
-
-                    map.addLayer({
-                        'id': 'CB3Arrows',
-                        'type': 'symbol',
-                        'source': 'CB3Arrows',
-                        'layout': {
-                            'icon-image': 'arrowG-icon',
-                            'icon-size': 0.05,
-                            'icon-rotate': ['get', 'rotate'],
-                            'icon-allow-overlap': true,
-                            'visibility': 'visible'
-                        }
-                    });
-
-                    const newCoordinates = [
-                        [127.440166, 36.729791],
-                        [127.439703, 36.730085]
-                    ];
-
-                    map.addSource('V2XPath', {
-                        'type': 'geojson',
-                        'data': {
-                            'type': 'Feature',
-                            'geometry': {
-                                'type': 'LineString',
-                                'coordinates': newCoordinates
+                        });
+        
+                        const arrowFeatures = CB3Coordinates
+                            .filter(arrow => arrow.rotate !== undefined)
+                            .map(arrow => {
+                                return {
+                                    'type': 'Feature',
+                                    'geometry': {
+                                        'type': 'Point',
+                                        'coordinates': arrow.coord
+                                    },
+                                    'properties': {
+                                        'rotate': arrow.rotate
+                                    }
+                                };
+                            });
+        
+                        map.addSource('CB3Arrows', {
+                            'type': 'geojson',
+                            'data': {
+                                'type': 'FeatureCollection',
+                                'features': arrowFeatures
                             }
-                        }
-                    });
-
-                    map.addLayer({
-                        'id': 'V2XPath',
-                        'type': 'line',
-                        'source': 'V2XPath',
-                        'layout': {
-                            'line-join': 'round',
-                            'line-cap': 'round',
-                            'visibility': 'visible'
-                        },
-                        'paint': {
-                            'line-color': '#27FFFF',
-                            'line-width': 4,
-                            'line-opacity': 0.8
-                        }
-                    });
-                    const midPoint = [
-                        (newCoordinates[0][0] + newCoordinates[1][0]) / 2,
-                        (newCoordinates[0][1] + newCoordinates[1][1]) / 2
-                    ];
-
-                    map.addSource('V2XLabel', {
-                        'type': 'geojson',
-                        'data': {
-                            'type': 'Feature',
-                            'geometry': {
-                                'type': 'Point',
-                                'coordinates': midPoint
+                        });
+        
+                        map.addLayer({
+                            'id': 'CB3Arrows',
+                            'type': 'symbol',
+                            'source': 'CB3Arrows',
+                            'layout': {
+                                'icon-image': 'arrowG-icon',
+                                'icon-size': 0.05,
+                                'icon-rotate': ['get', 'rotate'],
+                                'icon-allow-overlap': true,
+                                'visibility': 'visible'
+                            }
+                        });
+        
+                        const newCoordinates = [
+                            [127.440166, 36.729791],
+                            [127.439703, 36.730085]
+                        ];
+        
+                        map.addSource('V2XPath', {
+                            'type': 'geojson',
+                            'data': {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'LineString',
+                                    'coordinates': newCoordinates
+                                }
+                            }
+                        });
+        
+                        map.addLayer({
+                            'id': 'V2XPath',
+                            'type': 'line',
+                            'source': 'V2XPath',
+                            'layout': {
+                                'line-join': 'round',
+                                'line-cap': 'round',
+                                'visibility': 'visible'
                             },
-                            'properties': {
-                                'title': 'V2X\n(Route Sharing)'
+                            'paint': {
+                                'line-color': '#27FFFF',
+                                'line-width': 4,
+                                'line-opacity': 0.8
                             }
-                        }
-                    });
-
-                    map.addLayer({
-                        'id': 'V2XLabel',
-                        'type': 'symbol',
-                        'source': 'V2XLabel',
-                        'layout': {
-                            'text-field': ['get', 'title'],
-                            'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-                            'text-size': 16,
-                            'text-anchor': 'top',
-                            'visibility': 'visible'
-                        },
-                        'paint': {
-                            'text-color': '#00FFFF',
-                            'text-halo-color': '#000000',
-                            'text-halo-width': 1
-                        }
-                    });
+                        });
+        
+                        const midPoint = [
+                            (newCoordinates[0][0] + newCoordinates[1][0]) / 2,
+                            (newCoordinates[0][1] + newCoordinates[1][1]) / 2
+                        ];
+        
+                        // 커스텀 마커 생성 및 지도에 추가
+                        V2XLabelMarker = new mapboxgl.Marker({element: createCustomLabel()})
+                            .setLngLat(midPoint)
+                            .addTo(map);
+                    }
+                });
+        
+                function createCustomLabel() {
+                    const labelContainer = document.createElement('div');
+                    labelContainer.style.display = 'flex';
+                    labelContainer.style.flexDirection = 'column';
+                    labelContainer.style.alignItems = 'center';
+                    labelContainer.style.width = 'auto';
+        
+                    // 직사각형 배경
+                    const background = document.createElement('div');
+                    background.style.width = 'auto';
+                    background.style.height = 'auto';
+                    background.style.padding = '5px 10px';
+                    background.style.backgroundColor = 'rgba(0, 204, 255, 0.8)';
+                    background.style.borderRadius = '10px';
+                    background.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
+                    
+                    // 텍스트
+                    const text = document.createElement('div');
+                    text.textContent = "V2X (Route Sharing)";
+                    text.style.color = 'white';
+                    text.style.fontWeight = 'bold';
+                    text.style.textAlign = 'center';
+                    text.style.textShadow = '0 0 10px #00ccff, 0 0 20px #00ccff, 0 0 30px #00ccff';
+                    text.style.fontSize = '16px';
+        
+                    background.appendChild(text);
+                    labelContainer.appendChild(background);
+        
+                    return labelContainer;
                 }
             });
-        });
         });
 
         map.on('style.load', () => {
