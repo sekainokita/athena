@@ -36,6 +36,9 @@ window.onload = function() {
     document.getElementById('modal-background').style.display = 'block';
     document.getElementById('modal').style.display = 'block';
 
+    const s_C_VehId = 23120008;
+    const s_A_VehId = 23120002;
+
     // 기본값 설정
     let defaultIpAddress = "10.252.110.58";
     let testMode;
@@ -1467,7 +1470,15 @@ window.onload = function() {
                             'icon-image': 'vehicle',
                             'icon-size': 0.2,
                             'icon-rotate': ['get', 'heading'],
-                            'text-field': ['concat', 'OBU#', ['get', 'deviceID']],
+                            'text-field': [
+                                'concat',
+                                ['case',
+                                    ['==', ['get', 'deviceID'], s_C_VehId], 'C-VEH#',
+                                    ['==', ['get', 'deviceID'], s_A_VehId], 'A-VEH#',
+                                    'OBU#'
+                                ],
+                                ['get', 'deviceID']
+                            ],
                             'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
                             'text-offset': [0, 2], // Adjust this value to position the text
                             'text-anchor': 'top',
@@ -1519,7 +1530,15 @@ window.onload = function() {
                             'icon-image': 'vehicle1',
                             'icon-size': 0.2,
                             'icon-rotate': ['get', 'heading'],
-                            'text-field': ['concat', 'OBU#', ['get', 'deviceID']],
+                            'text-field': [
+                                'concat',
+                                ['case',
+                                    ['==', ['get', 'deviceID'], s_C_VehId], 'C-VEH#',
+                                    ['==', ['get', 'deviceID'], s_A_VehId], 'A-VEH#',
+                                    'OBU#'
+                                ],
+                                ['get', 'deviceID']
+                            ],
                             'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
                             'text-offset': [0, 2],
                             'text-anchor': 'top',
