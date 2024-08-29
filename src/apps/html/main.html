@@ -787,6 +787,19 @@ window.onload = function() {
             return mrsucontainer;
         }
 
+        map.on('style.load', () => {
+            document.getElementById('CB1').addEventListener('click', function() {
+                isCB1 = !isCB1;
+                if (isCB1) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+            });
+        });
+
         const classBCoordinates = [
             [127.439641, 36.730080],
             [127.439703, 36.730085], //첫번째 노란점
@@ -845,10 +858,10 @@ window.onload = function() {
 
             map.addImage('arrowB-icon', image);
 
-            document.getElementById('CB1').addEventListener('click', function()
+            document.getElementById('CB2').addEventListener('click', function()
             {
-                isCB1 = !isCB1;
-                if (isCB1) {
+                isCB2 = !isCB2;
+                if (isCB2) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
                 } else {
@@ -858,8 +871,8 @@ window.onload = function() {
 
                 if (map.getLayer('classBPath'))
                 {
-                    map.setLayoutProperty('classBPath', 'visibility', isCB1 ? 'visible' : 'none');
-                    map.setLayoutProperty('classBArrows', 'visibility', isCB1 ? 'visible' : 'none');
+                    map.setLayoutProperty('classBPath', 'visibility', isCB2 ? 'visible' : 'none');
+                    map.setLayoutProperty('classBArrows', 'visibility', isCB2 ? 'visible' : 'none');
                 }
                 else
                 {
@@ -934,19 +947,6 @@ window.onload = function() {
                     });
                 }
                 });
-            });
-        });
-
-        map.on('style.load', () => {
-            document.getElementById('CB2').addEventListener('click', function() {
-                isCB2 = !isCB2;
-                if (isCB2) {
-                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
-                    this.style.color = 'white';
-                } else {
-                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-                    this.style.color = 'white';
-                }
             });
         });
 
