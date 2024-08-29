@@ -786,7 +786,8 @@ window.onload = function() {
                             'paint': {
                                 'line-color': '#27FFFF',
                                 'line-width': 4,
-                                'line-opacity': 0.8
+                                'line-opacity': 0.8,
+                                'line-dasharray': [0.5, 1.5]
                             }
                         });
         
