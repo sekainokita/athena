@@ -162,6 +162,7 @@ window.onload = function() {
         let workZoneMarker = new mapboxgl.Marker({element: createWorkZoneMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/work-zone.png')});
         let mrsuMarker = new mapboxgl.Marker({element: createWorkZoneMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/m-rsu-front.png')});
         let V2XLabelMarker = null;
+        let NegotiationMarker = null;
 
         mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
         const map = new mapboxgl.Map({
@@ -837,7 +838,7 @@ window.onload = function() {
             });
         });
 
-        map.on('style.load', () => {
+        map.on('style.load', function() {
             document.getElementById('CB4').addEventListener('click', function() {
                 isCB4 = !isCB4;
                 if (isCB4) {
@@ -857,7 +858,94 @@ window.onload = function() {
                 }
                 updateTrafficLight(trafficLight);
 
+                if (isCB4) {
+                    const CB4Coordinates = [
+                        [127.440170, 36.729793],
+                        [127.439703, 36.730085]
+                    ];
+
+                    if (!map.getSource('CB4Path')) {
+                        map.addSource('CB4Path', {
+                            'type': 'geojson',
+                            'data': {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'LineString',
+                                    'coordinates': CB4Coordinates
+                                }
+                            }
+                        });
+
+                        map.addLayer({
+                            'id': 'CB4Path',
+                            'type': 'line',
+                            'source': 'CB4Path',
+                            'layout': {
+                                'line-join': 'round',
+                                'line-cap': 'round',
+                                'visibility': 'visible'
+                            },
+                            'paint': {
+                                'line-color': '#007AFF',
+                                'line-width': 4,
+                                'line-opacity': 0.8,
+                                'line-dasharray': [0.5, 1.5]
+                            }
+                        });
+                    }
+                    const midPoint = [
+                        (CB4Coordinates[0][0] + CB4Coordinates[1][0]) / 2,
+                        (CB4Coordinates[0][1] + CB4Coordinates[1][1]) / 2
+                    ];
+
+                    if (!NegotiationMarker) {
+                        NegotiationMarker = new mapboxgl.Marker({element: createCustomLabelCB4()})
+                        .setLngLat(midPoint)
+                        .addTo(map);
+                    } else {
+                        NegotiationMarker.addTo(map);
+                    }
+                } else {
+                    if (map.getLayer('CB4Path')) {
+                        map.removeLayer('CB4Path');
+                        map.removeSource('CB4Path');
+                    }
+
+                    if (NegotiationMarker) {
+                        NegotiationMarker.remove();
+                    }
+                }
             });
+            function createCustomLabelCB4() {
+                const labelContainer = document.createElement('div');
+                labelContainer.style.display = 'flex';
+                labelContainer.style.flexDirection = 'column';
+                labelContainer.style.alignItems = 'center';
+                labelContainer.style.width = 'auto';
+
+                // 직사각형 배경
+                const background = document.createElement('div');
+                background.style.width = 'auto';
+                background.style.height = 'auto';
+                background.style.padding = '5px 10px';
+                background.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                background.style.borderRadius = '10px';
+                background.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
+
+                // 텍스트
+                const text = document.createElement('div');
+                text.textContent = "V2X (Negotiation Completed)";
+                text.style.color = 'white';
+                text.style.fontWeight = 'bold';
+                text.style.textAlign = 'center';
+                text.style.textShadow = '0 0 10px #00ccff, 0 0 20px #00ccff, 0 0 30px #00ccff';
+                text.style.fontSize = '16px';
+
+                background.appendChild(text);
+                labelContainer.appendChild(background);
+
+                return labelContainer;
+            }
         });
 
         let CB5Marker = new mapboxgl.Marker({
