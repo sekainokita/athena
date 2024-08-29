@@ -31,18 +31,6 @@
 #
 #******************************************************************************/
 
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-}
-
-html {
-    box-sizing: border-box;
-}
-
 #map {
     position: absolute;
     top: 0;
@@ -72,32 +60,32 @@ html {
 
 #weather-info {
     position: absolute;
-    top: 60px;
-    left: 10px;
-    background-color: rgba(0, 0, 0, 0.7); /* 약간 투명한 검은색 배경 */
-    padding: 15px; /* 충분한 여백 */
-    border-radius: 10px; /* 부드러운 모서리 */
+    top: 45px;
+    left: 7.5px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 11.25px;
+    border-radius: 7.5px;
     font-family: Arial, sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
     z-index: 2;
-    width: 180px; /* 일정한 너비 */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 약간의 그림자 효과 */
+    width: 135px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
 }
 
 #weather-icon {
-    width: 80px; /* 아이콘 크기 조정 */
-    height: 80px;
-    margin-bottom: 10px;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 7.5px;
 }
 
 #location, #temperature, #humidity {
-    font-size: 18px;
+    font-size: 13.5px;
     font-weight: bold;
-    margin-bottom: 5px;
-    text-align: center; /* 텍스트 가운데 정렬 */
-    color: white; /* 텍스트 색상을 흰색으로 설정 */
+    margin-bottom: 3.75px;
+    text-align: center;
+    color: white;
 }
 
 /* 그래프 컨테이너 스타일 */
@@ -168,118 +156,116 @@ html {
     font-weight: bold;
 }
 
-/* TOP BUTTON */
 #autoTrackButton, #projectionButton, #connectedStatusButton, #visiblePathButton {
     position: absolute;
-    padding: 10px 20px;
-    background-color: rgba(0, 0, 0, 0.7); /* 약간 투명한 검은색 배경 */
+    padding: 7.5px 15px;
+    background-color: rgba(0, 0, 0, 0.7);
     border: none;
-    border-radius: 10px; /* 부드러운 모서리 */
-    color: white; /* 흰색 텍스트 */
+    border-radius: 7.5px;
+    color: white;
     cursor: pointer;
-    font-size: 16px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 그림자 효과 */
-    z-index: 3; /* 버튼들의 z-index를 높여서 모달 창 뒤에 숨지 않도록 설정 */
+    font-size: 12px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    z-index: 3;
 }
 
 #autoTrackButton {
-    top: 10px;
-    left: 10px;
+    top: 7.5px;
+    left: 7.5px;
 }
 
 #projectionButton {
-    top: 10px;
-    left: 160px;
+    top: 7.5px;
+    left: 120px;
 }
 
 #connectedStatusButton {
-    top: 10px;
-    left: 310px;
+    top: 7.5px;
+    left: 232.5px;
 }
 
 #visiblePathButton {
-    top: 10px;
-    left: 525px;
+    top: 7.5px;
+    left: 393.75px;
 }
 
-/* BOTTOM BUTTON */
 #workZoneButton, #mrsuButton, #CB1, #CB2, #CB3, #CB4, #CB5, #CB6 {
     position: absolute;
-    padding: 5px 20px;
-    background-color: rgba(0, 0, 0, 0.7); /* 약간 투명한 검은색 배경 */
+    padding: 3.75px 15px;
+    background-color: rgba(0, 0, 0, 0.7);
     border: none;
-    border-radius: 10px; /* 부드러운 모서리 */
-    color: white; /* 흰색 텍스트 */
+    border-radius: 7.5px;
+    color: white;
     cursor: pointer;
-    font-size: 16px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 그림자 효과 */
-    z-index: 3; /* 버튼들의 z-index를 높여서 모달 창 뒤에 숨지 않도록 설정 */
+    font-size: 12px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    z-index: 3;
 }
 
 #workZoneButton {
-    bottom: 15px;
-    left: 300px;
+    bottom: 11.25px;
+    left: 225px;
 }
 
 #mrsuButton {
-    bottom: 50px;
-    left: 300px;
+    bottom: 37.5px;
+    left: 225px;
 }
 
 #CB1 {
-    bottom: 50px;
-    left: 450px;
+    bottom: 37.5px;
+    left: 337.5px;
 }
 
 #CB2 {
-    bottom: 15px;
-    left: 450px;
+    bottom: 11.25px;
+    left: 337.5px;
 }
 
 #CB3 {
-    bottom: 50px;
-    left: 535px;
+    bottom: 37.5px;
+    left: 401.25px;
 }
 
 #CB4 {
-    bottom: 15px;
-    left: 535px;
+    bottom: 11.25px;
+    left: 401.25px;
 }
 
 #CB5 {
-    bottom: 50px;
-    left: 620px;
+    bottom: 37.5px;
+    left: 465px;
 }
 
 #CB6 {
-    bottom: 10px;
-    left: 620px;
+    bottom: 7.5px;
+    left: 465px;
 }
 
 #autoTrackButton:hover, #projectionButton:hover, #connectedStatusButton:hover, #workZoneButton:hover, #mrsuButton:hover, #visiblePathButton:hover, #CB1:hover, #CB2:hover, #CB3:hover, #CB4:hover, #CB5:hover, #CB6:hover{
-    background-color: rgba(0, 0, 0, 0.8); /* 마우스를 올렸을 때 더 어두운 배경 */
+    background-color: rgba(0, 0, 0, 0.8);
 }
 
 #traffic-light {
     position: absolute;
-    top: 290px;
-    left: 10px;
+    top: 217.5px;
+    left: 7.5px;
     z-index: 10;
     text-align: center;
-    padding: 5px;
-    border-radius: 5px;
+    padding: 3.75px;
+    border-radius: 3.75px;
     background-color: rgba(0, 0, 0, 0.8);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 그림자 효과 */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
 }
 
 #traffic-light img {
-    width: 110px;
+    width: 82.5px;
     height: auto;
 }
 
 #traffic-light-status {
-    font-size: 30px;
-    margin-top: 5px;
+    font-size: 22.5px;
+    margin-top: 3.75px;
     font-weight: bold;
 }
 
@@ -300,47 +286,48 @@ html {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 400px; /* 모달 너비 */
-    padding: 30px; /* 충분한 패딩 */
+    width: 300px;
+    padding: 22.5px;
     background-color: white;
-    border-radius: 10px; /* 부드러운 모서리 */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+    border-radius: 7.5px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
     z-index: 1001;
     text-align: center;
     font-family: Arial, sans-serif;
 }
-/* 입력 필드 */
+
 .modal-input {
-    width: calc(100% - 20px); /* 입력 필드 너비 조정 */
-    padding: 10px;
-    margin: 10px 0;
-    font-size: 16px;
+    width: calc(100% - 15px);
+    padding: 7.5px;
+    margin: 7.5px 0;
+    font-size: 12px;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 3.75px;
 }
-/* 모달 버튼 스타일 */
+
 .modal-button {
-    padding: 10px 20px;
+    padding: 7.5px 15px;
     background-color: #4CAF50;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 3.75px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 12px;
 }
+
 .modal-button:hover {
-    background-color: #45a049; /* 마우스를 올릴 때 색상 변경 */
+    background-color: #45a049;
 }
 
 #ci-logo {
     position: absolute;
-    bottom: 0;  /* 맨 아래에서 5% 위로 띄워줍니다 (검정색 바 바로 위) */
-    left: 10px;  /* 왼쪽에 고정 */
-    z-index: 2;  /* 다른 요소들보다 위에 배치 */
-    padding: 5px; /* 여백 추가 */
+    bottom: 0;
+    left: 7.5px;
+    z-index: 2;
+    padding: 3.75px;
 }
 
 #ci-logo img {
-    width: 270px;  /* CI 이미지의 너비를 적절한 크기로 조정 */
+    width: 202.5px;
     height: auto;
 }

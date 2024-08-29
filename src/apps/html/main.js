@@ -1803,8 +1803,20 @@ window.onload = function() {
                 let middleYValue = (80 + 100) / 2;
 
                 Plotly.relayout('graph1', {
-                    yaxis: { range: [80, 100], title: 'PDR (Packet Delivery Rate) (%)', dtick: 1 },
-                    xaxis: { title: 'The Total Received Rx Packets' },
+                    yaxis: {
+                        range: [80, 100],
+                        title: 'PDR (Packet Delivery Rate) (%)',
+                        dtick: 1,
+                        tickfont: {
+                            size: 10  // y축 숫자 글씨 크기 줄이기
+                        }
+                    },
+                    xaxis: {
+                        title: 'The Total Received Rx Packets',
+                        tickfont: {
+                            size: 10  // x축 숫자 글씨 크기 줄이기
+                        }
+                    },
                     annotations: [
                         {
                             x: totalPacketCount,
@@ -1856,8 +1868,20 @@ window.onload = function() {
                 let avgLatency = latencyData.reduce((sum, point) => sum + point.y, 0) / latencyData.length;
 
                 Plotly.relayout('graph2', {
-                    yaxis: { range: [0, 15], title: 'Latency (ms)', dtick: 1 },
-                    xaxis: { title: 'The Total Received Rx Packets' },
+                    yaxis: {
+                        range: [0, 15],
+                        title: 'Latency (ms)',
+                        dtick: 1,
+                        tickfont: {
+                            size: 10  // y축 숫자 글씨 크기 줄이기
+                        }
+                    },
+                    xaxis: {
+                        title: 'The Total Received Rx Packets',
+                        tickfont: {
+                            size: 10  // x축 숫자 글씨 크기 줄이기
+                        }
+                    },
                     shapes: [
                         {
                             type: 'line',
@@ -1900,6 +1924,7 @@ window.onload = function() {
                 console.error('Invalid data points for Graph2.');
             }
         }
+
         Plotly.newPlot('graph1', [{
             x: [],
             y: [],
@@ -1914,7 +1939,7 @@ window.onload = function() {
             title: {
                 text: 'Real-time PDR Monitoring',
                 font: {
-                    size: 24,  // 타이틀 글자 크기만 설정
+                    size: 20,  // 타이틀 글자 크기만 설정
                     color: 'white'
                 },
                 x: 0.5,  // 중앙 정렬
@@ -1948,7 +1973,7 @@ window.onload = function() {
             title: {
                 text: 'Real-time Latency Monitoring',
                 font: {
-                    size: 24,  // 타이틀 글자 크기만 설정
+                    size: 20,  // 타이틀 글자 크기만 설정
                     color: 'white'
                 },
                 x: 0.5,  // 중앙 정렬
