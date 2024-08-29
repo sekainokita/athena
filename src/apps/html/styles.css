@@ -294,25 +294,32 @@
     z-index: 1001;
     text-align: center;
     font-family: Arial, sans-serif;
+    font-size: 12px; /* 기본 글씨 크기를 더 작게 설정 */
+}
+
+#modal h2 {
+    font-size: 20px; /* 제목의 글씨 크기 */
+    line-height: 1.2; /* 줄 간격 */
+    margin-bottom: 15px; /* 아래 여백 */
 }
 
 .modal-input {
     width: calc(100% - 15px);
-    padding: 7.5px;
+    padding: 7px; /* 입력 필드의 패딩을 약간 줄임 */
     margin: 7.5px 0;
-    font-size: 12px;
+    font-size: 12px; /* 입력 필드 내부 글씨 크기를 줄임 */
     border: 1px solid #ccc;
     border-radius: 3.75px;
 }
 
 .modal-button {
-    padding: 7.5px 15px;
+    padding: 7.5px 15px; /* 버튼의 패딩을 줄임 */
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 3.75px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 12px; /* 버튼 글씨 크기를 줄임 */
 }
 
 .modal-button:hover {
