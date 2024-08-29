@@ -726,18 +726,48 @@ window.onload = function() {
             });
         });
 
+        let CB5Marker = new mapboxgl.Marker({
+            element: createCB5Marker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/stop3.png')
+            }).setLngLat([127.440172, 36.729915]);
+
         map.on('style.load', () => {
             document.getElementById('CB5').addEventListener('click', function() {
                 isCB5 = !isCB5;
                 if (isCB5) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
+
+                    if (!CB5Marker._map) {
+                        CB5Marker.addTo(map);
+                    }
                 } else {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
+
+                    if (CB5Marker._map) {
+                        CB5Marker.remove();
+                    }
                 }
             });
         });
+
+        function createCB5Marker(imageUrl)
+        {
+            const CB5Container = document.createElement('div');
+            CB5Container.style.display = 'flex';
+            CB5Container.style.flexDirection = 'column';
+            CB5Container.style.alignItems = 'center';
+
+            const img = document.createElement('div');
+            img.style.backgroundImage = `url(${imageUrl})`;
+            img.style.width = '50px';
+            img.style.height = '50px';
+            img.style.backgroundSize = 'contain';
+            img.style.backgroundRepeat = 'no-repeat';
+
+            CB5Container.appendChild(img);
+            return CB5Container;
+        }
 
         map.on('style.load', () => {
             document.getElementById('CB6').addEventListener('click', function() {
