@@ -674,7 +674,8 @@ window.onload = function() {
                 {
                     map.setLayoutProperty('CB3Path', 'visibility', isCB3 ? 'visible' : 'none');
                     map.setLayoutProperty('CB3Arrows', 'visibility', isCB3 ? 'visible' : 'none');
-                    map.setLayoutProperty('newPath', 'visibility', isCB3 ? 'visible' : 'none');
+                    map.setLayoutProperty('V2XPath', 'visibility', isCB3 ? 'visible' : 'none');
+                    map.setLayoutProperty('V2XLabel', 'visibility', isCB3 ? 'visible' : 'none');
                 }
                 else
                 {
@@ -760,7 +761,7 @@ window.onload = function() {
                         [127.439703, 36.730085]
                     ];
 
-                    map.addSource('newPath', {
+                    map.addSource('V2XPath', {
                         'type': 'geojson',
                         'data': {
                             'type': 'Feature',
@@ -772,9 +773,9 @@ window.onload = function() {
                     });
 
                     map.addLayer({
-                        'id': 'newPath',
+                        'id': 'V2XPath',
                         'type': 'line',
-                        'source': 'newPath',
+                        'source': 'V2XPath',
                         'layout': {
                             'line-join': 'round',
                             'line-cap': 'round',
@@ -784,6 +785,42 @@ window.onload = function() {
                             'line-color': '#27FFFF',
                             'line-width': 4,
                             'line-opacity': 0.8
+                        }
+                    });
+                    const midPoint = [
+                        (newCoordinates[0][0] + newCoordinates[1][0]) / 2,
+                        (newCoordinates[0][1] + newCoordinates[1][1]) / 2
+                    ];
+
+                    map.addSource('V2XLabel', {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': midPoint
+                            },
+                            'properties': {
+                                'title': 'V2X\n(Route Sharing)'
+                            }
+                        }
+                    });
+
+                    map.addLayer({
+                        'id': 'V2XLabel',
+                        'type': 'symbol',
+                        'source': 'V2XLabel',
+                        'layout': {
+                            'text-field': ['get', 'title'],
+                            'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                            'text-size': 16,
+                            'text-anchor': 'top',
+                            'visibility': 'visible'
+                        },
+                        'paint': {
+                            'text-color': '#00FFFF',
+                            'text-halo-color': '#000000',
+                            'text-halo-width': 1
                         }
                     });
                 }
