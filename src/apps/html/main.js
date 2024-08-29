@@ -674,6 +674,7 @@ window.onload = function() {
                 {
                     map.setLayoutProperty('CB3Path', 'visibility', isCB3 ? 'visible' : 'none');
                     map.setLayoutProperty('CB3Arrows', 'visibility', isCB3 ? 'visible' : 'none');
+                    map.setLayoutProperty('newPath', 'visibility', isCB3 ? 'visible' : 'none');
                 }
                 else
                 {
@@ -751,6 +752,38 @@ window.onload = function() {
                             'icon-rotate': ['get', 'rotate'],
                             'icon-allow-overlap': true,
                             'visibility': 'visible'
+                        }
+                    });
+
+                    const newCoordinates = [
+                        [127.440166, 36.729791],
+                        [127.439703, 36.730085]
+                    ];
+
+                    map.addSource('newPath', {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'LineString',
+                                'coordinates': newCoordinates
+                            }
+                        }
+                    });
+
+                    map.addLayer({
+                        'id': 'newPath',
+                        'type': 'line',
+                        'source': 'newPath',
+                        'layout': {
+                            'line-join': 'round',
+                            'line-cap': 'round',
+                            'visibility': 'visible'
+                        },
+                        'paint': {
+                            'line-color': '#27FFFF',
+                            'line-width': 4,
+                            'line-opacity': 0.8
                         }
                     });
                 }
