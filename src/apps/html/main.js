@@ -45,6 +45,7 @@ window.onload = function() {
     let isTxTest;
     let VisiblePathMode;
     let isVisiblePath;
+    let trafficLight;
 
     // 버튼 클릭 이벤트 처리
     document.getElementById('submit-button').onclick = function() {
@@ -467,6 +468,16 @@ window.onload = function() {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
                 }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'yellow';  // C-VEH 모드일 때 노란 불
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'green';   // A-VEH 모드일 때 초록 불
+                } else {
+                    trafficLight = 'red';     // 그 외의 경우 빨간 불 (기본값)
+                }
+
+                updateTrafficLight(trafficLight);
             });
         });
 
@@ -1766,22 +1777,24 @@ window.onload = function() {
             }
         }
 
-        function updateTrafficLightBasedOnHeading(heading) {
+        function updateTrafficLight(trafficLight) {
             const trafficLightImage = document.getElementById('traffic-light-image');
             const trafficLightStatus = document.getElementById('traffic-light-status');
 
-            if (heading >= 0 && heading <= 90) {
+            if (trafficLight.toLowerCase() === 'green') {
                 trafficLightImage.src = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/green-light.png';  // 초록 불로 변경
                 trafficLightStatus.innerHTML = 'Green Light<br>(GO)';       // 텍스트 업데이트
                 trafficLightStatus.style.color = 'green';
-            } else if (heading >= 91 && heading <= 180) {
+            } else if (trafficLight.toLowerCase() === 'yellow') {
                 trafficLightImage.src = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/yellow-light.png';  // 주황 불로 변경
                 trafficLightStatus.innerHTML = 'Yellow Light<br>(SLOW)';      // 텍스트 업데이트
                 trafficLightStatus.style.color = 'orange';
-            } else if (heading >= 181 && heading <= 359) {
+            } else if (trafficLight.toLowerCase() === 'red') {
                 trafficLightImage.src = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/red-light.png';  // 빨간 불로 변경
                 trafficLightStatus.innerHTML = 'RED Light<br>(STOP)';         // 텍스트 업데이트
                 trafficLightStatus.style.color = 'red';
+            } else {
+                console.warn('Invalid traffic light color:', trafficLight);
             }
         }
 
@@ -1814,7 +1827,6 @@ window.onload = function() {
 
             if (!isNaN(latitude0) && !isNaN(longitude0)) {
                 updateVehiclePosition(0, [longitude0, latitude0], heading0, devId0);  // device ID 전달
-                updateTrafficLightBasedOnHeading(heading0);
                 updateHeadingInfo(heading0);
                 updateSpeedInfo(speed0);
             }
