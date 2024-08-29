@@ -399,3 +399,15 @@
     margin: 0;
     font-weight: bold;
 }
+
+#datetime-info {
+    position: absolute;
+    bottom: 10px; /* 아래쪽 여백 */
+    right: 10px; /* 오른쪽 여백 */
+    padding: 10px;
+    color: white; /* 글자 색상 */
+    font-family: 'Arial', sans-serif;
+    font-size: 14px; /* 글자 크기 */
+    border-radius: 5px;
+    z-index: 10; /* 다른 요소들 위에 표시되도록 설정 */
+}

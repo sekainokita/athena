@@ -2076,3 +2076,27 @@ window.onload = function() {
     });
 };
 
+function updateDateTime() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
+    const weekDay = weekDays[now.getDay()];
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    const dateTimeString = `${year}년 ${month}월 ${day}일 (${weekDay})      ${hours}시 ${minutes}분 ${seconds}초`;
+
+    document.getElementById('datetime-info').innerText = dateTimeString;
+}
+
+// 1초마다 업데이트
+setInterval(updateDateTime, 1000);
+
+// 페이지 로드 시 즉시 한 번 실행
+updateDateTime();
+
+
