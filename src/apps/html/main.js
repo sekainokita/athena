@@ -470,13 +470,12 @@ window.onload = function() {
                 }
 
                 if (vehMode === "C-VEH") {
-                    trafficLight = 'yellow';  // C-VEH 모드일 때 노란 불
+                    trafficLight = 'yellow';
                 } else if (vehMode === "A-VEH") {
-                    trafficLight = 'green';   // A-VEH 모드일 때 초록 불
+                    trafficLight = 'yellow';
                 } else {
-                    trafficLight = 'red';     // 그 외의 경우 빨간 불 (기본값)
+                    trafficLight = 'red';
                 }
-
                 updateTrafficLight(trafficLight);
             });
         });
@@ -549,6 +548,15 @@ window.onload = function() {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
                 }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'red';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
 
                 if (map.getLayer('classBPath'))
                 {
@@ -653,6 +661,14 @@ window.onload = function() {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
                 }
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'red';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
 
                 if (map.getLayer('CB3Path'))
                 {
@@ -752,6 +768,16 @@ window.onload = function() {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
                 }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'red';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
+
             });
         });
 
@@ -777,6 +803,15 @@ window.onload = function() {
                         CB5Marker.remove();
                     }
                 }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'yellow';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
             });
         });
 
@@ -808,6 +843,15 @@ window.onload = function() {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
                 }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'green';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
             });
         });
 
