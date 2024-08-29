@@ -123,11 +123,8 @@ window.onload = function() {
         var vehicleLatitude1 = 37.406402;
         var vehicleLongitude1 = 127.102532;
 
-        var vehicleHeading0 = 90;
-        var vehicleHeading1 = 90;
-
-        let s_nRxLatitude, s_nRxLongitude, s_unRxVehicleHeading;
-        let s_nTxLatitude, s_nTxLongitude, s_unTxVehicleHeading;
+        let s_nRxLatitude, s_nRxLongitude, s_unRxVehicleHeading, s_unRxVehicleSpeed;
+        let s_nTxLatitude, s_nTxLongitude, s_unTxVehicleHeading, s_unTxVehicleSpeed;
         let s_unPdr, s_ulLatencyL1, s_ulTotalPacketCnt, s_unSeqNum;
 
         let s_unTempTxCnt = 0;
@@ -771,12 +768,13 @@ window.onload = function() {
             if(isTxTest) {
                 ws.onmessage = (message) => {
                     let data = message.data.split(',');
-                    s_nRxLatitude = data[23]; // Mine
-                    s_nRxLongitude = data[24]; // Mine
-                    s_unRxVehicleHeading = reverseHeading(data[29]); // 변환된 heading 값
+                    s_nRxLatitude = data[23];
+                    s_nRxLongitude = data[24];
+                    s_unRxVehicleSpeed = data[28];
+                    s_unRxVehicleHeading = reverseHeading(data[29]);
                     s_nTxLatitude = vehicleLatitude1;
                     s_nTxLongitude = vehicleLongitude1;
-                    s_unTxVehicleHeading = vehicleHeading1;
+                    s_unTxVehicleHeading = 90;
                     s_unPdr = 100;
                     s_ulLatencyL1 = 500;
                     s_ulTotalPacketCnt = 1 + s_unTempTxCnt;
@@ -791,9 +789,11 @@ window.onload = function() {
                     let data = message.data.split(',');
                     s_nRxLatitude = data[62];
                     s_nRxLongitude = data[63];
+                    s_unRxVehicleSpeed = data[55];
                     s_unRxVehicleHeading = reverseHeading(data[56]);
                     s_nTxLatitude = data[32];
                     s_nTxLongitude = data[33];
+                    s_unTxVehicleSpeed = data[37];
                     s_unTxVehicleHeading = reverseHeading(data[38]);
                     s_unPdr = data[68];
                     s_ulLatencyL1 = data[43];
@@ -1722,6 +1722,12 @@ window.onload = function() {
             headingText.innerText = `${heading}°`;
         }
 
+        function updateSpeedInfo(speed) {
+            const speedValue = document.getElementById('speed-value');
+            speedValue.innerText = speed;
+        }
+
+
         function fetchAndUpdate() {
             if (!tree) {
                 console.warn("KD-Tree is not built yet. Waiting...");
@@ -1731,6 +1737,7 @@ window.onload = function() {
             const latitude0 = parseFloat(s_nRxLatitude);
             const longitude0 = parseFloat(s_nRxLongitude);
             const heading0 = parseFloat(s_unRxVehicleHeading);
+            const speed0 = parseFloat(s_unRxVehicleSpeed);
             const latitude1 = parseFloat(s_nTxLatitude);
             const longitude1 = parseFloat(s_nTxLongitude);
             const heading1 = parseFloat(s_unTxVehicleHeading);
@@ -1739,6 +1746,7 @@ window.onload = function() {
                 updateVehiclePosition(0, [longitude0, latitude0], heading0);
                 updateTrafficLightBasedOnHeading(heading0);  // 신호등 업데이트
                 updateHeadingInfo(heading0);
+                updateSpeedInfo(speed0);
             }
 
             if (!isNaN(latitude1) && !isNaN(longitude1)) {
@@ -1750,29 +1758,9 @@ window.onload = function() {
         /* Graph */
         /************************************************************/
         function fetchAndUpdateGraph() {
-            const latitude0 = parseFloat(s_nRxLatitude);
-            const longitude0 = parseFloat(s_nRxLongitude);
-            const heading0 = parseFloat(s_unRxVehicleHeading);
-            const latitude1 = parseFloat(s_nTxLatitude);
-            const longitude1 = parseFloat(s_nTxLongitude);
-            const heading1 = parseFloat(s_unTxVehicleHeading);
             const unPdr = parseFloat(s_unPdr);
             const ulLatencyL1 = parseFloat(s_ulLatencyL1);
             const ulTotalPacketCnt = parseFloat(s_ulTotalPacketCnt);
-            const unSeqNum = parseFloat(s_unSeqNum);
-
-            /*
-            console.log(`latitude0: ${latitude0}`);
-            console.log(`longitude0: ${longitude0}`);
-            console.log(`heading0: ${heading0}`);
-            console.log(`latitude1: ${latitude1}`);
-            console.log(`longitude1: ${longitude1}`);
-            console.log(`heading1: ${heading1}`);
-            console.log(`unPdr: ${unPdr}`);
-            console.log(`ulLatencyL1: ${ulLatencyL1}`);
-            console.log(`ulTotalPacketCnt: ${ulTotalPacketCnt}`);
-            console.log(`unSeqNum: ${unSeqNum}`);
-            */
 
             if (!isNaN(unPdr) && !isNaN(ulTotalPacketCnt)) {
                 updateGraph1(ulTotalPacketCnt, unPdr);
