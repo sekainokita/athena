@@ -726,48 +726,18 @@ window.onload = function() {
             });
         });
 
-        let CB5Marker = new mapboxgl.Marker({
-            element: createCB5Marker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/stop3.png')
-            }).setLngLat([127.440172, 36.729915]);
-
         map.on('style.load', () => {
             document.getElementById('CB5').addEventListener('click', function() {
                 isCB5 = !isCB5;
                 if (isCB5) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
-
-                    if (!CB5Marker._map) {
-                        CB5Marker.addTo(map);
-                    }
                 } else {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
-
-                    if (CB5Marker._map) {
-                        CB5Marker.remove();
-                    }
                 }
             });
         });
-
-        function createCB5Marker(imageUrl)
-        {
-            const CB5Container = document.createElement('div');
-            CB5Container.style.display = 'flex';
-            CB5Container.style.flexDirection = 'column';
-            CB5Container.style.alignItems = 'center';
-
-            const img = document.createElement('div');
-            img.style.backgroundImage = `url(${imageUrl})`;
-            img.style.width = '50px';
-            img.style.height = '50px';
-            img.style.backgroundSize = 'contain';
-            img.style.backgroundRepeat = 'no-repeat';
-
-            CB5Container.appendChild(img);
-            return CB5Container;
-        }
 
         map.on('style.load', () => {
             document.getElementById('CB6').addEventListener('click', function() {
@@ -818,12 +788,12 @@ window.onload = function() {
             {
                 ws.onmessage = (message) => {
                     let data = message.data.split(',');
-                    s_unRxDevId = data[48];
+                    s_unRxDevId = data[47];
                     s_nRxLatitude = data[62];
                     s_nRxLongitude = data[63];
                     s_unRxVehicleSpeed = data[55];
                     s_unRxVehicleHeading = reverseHeading(data[56]);
-                    s_unTxDevId = data[18];
+                    s_unTxDevId = data[17];
                     s_nTxLatitude = data[32];
                     s_nTxLongitude = data[33];
                     s_unTxVehicleSpeed = data[37];
@@ -1467,11 +1437,10 @@ window.onload = function() {
                             'icon-image': 'vehicle',
                             'icon-size': 0.2,
                             'icon-rotate': ['get', 'heading'],
-                            'text-field': ['concat', 'OBU#', ['get', 'deviceID']],
+                            'text-field': ['concat', 'Device ID: ', ['get', 'deviceID']],
                             'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-                            'text-offset': [0, 2], // Adjust this value to position the text
-                            'text-anchor': 'top',
-                            'text-size' : 13
+                            'text-offset': [0, 1.25], // Adjust this value to position the text
+                            'text-anchor': 'top'
                         },
                         'paint': {
                             'text-color': '#000000',
@@ -1519,11 +1488,10 @@ window.onload = function() {
                             'icon-image': 'vehicle1',
                             'icon-size': 0.2,
                             'icon-rotate': ['get', 'heading'],
-                            'text-field': ['concat', 'OBU#', ['get', 'deviceID']],
+                            'text-field': ['concat', 'Device ID: ', ['get', 'deviceID']],
                             'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-                            'text-offset': [0, 2],
-                            'text-anchor': 'top',
-                            'text-size' : 13
+                            'text-offset': [0, 1.25], // Adjust this value to position the text
+                            'text-anchor': 'top'
                         },
                         'paint': {
                             'text-color': '#000000',
@@ -1578,7 +1546,7 @@ window.onload = function() {
                     }
 
                     if(isVisiblePath) {
-                    updateSnappedPath(snappedCoordinates);
+                        updateSnappedPath(snappedCoordinates);
                     }
                 } else {
                     console.warn("No nearest point found in KD Tree.");
@@ -1767,28 +1735,29 @@ window.onload = function() {
                 return;
             }
 
-            const devId0 = parseFloat(s_unRxDevId);  // device ID를 파싱
+            const devId0 = parserFloat(s_unRxDevId);
             const latitude0 = parseFloat(s_nRxLatitude);
             const longitude0 = parseFloat(s_nRxLongitude);
             const heading0 = parseFloat(s_unRxVehicleHeading);
             const speed0 = parseFloat(s_unRxVehicleSpeed);
 
-            const devId1 = parseFloat(s_unTxDevId);  // device ID를 파싱
+            const devId1 = parserFloat(s_unTxDevId);
             const latitude1 = parseFloat(s_nTxLatitude);
             const longitude1 = parseFloat(s_nTxLongitude);
             const heading1 = parseFloat(s_unTxVehicleHeading);
 
             if (!isNaN(latitude0) && !isNaN(longitude0)) {
-                updateVehiclePosition(0, [longitude0, latitude0], heading0, devId0);  // device ID 전달
-                updateTrafficLightBasedOnHeading(heading0);
+                updateVehiclePosition(0, [longitude0, latitude0], heading0);
+                updateTrafficLightBasedOnHeading(heading0);  // 신호등 업데이트
                 updateHeadingInfo(heading0);
                 updateSpeedInfo(speed0);
             }
 
             if (!isNaN(latitude1) && !isNaN(longitude1)) {
-                updateVehiclePosition(1, [longitude1, latitude1], heading1, devId1);  // device ID 전달
+                updateVehiclePosition(1, [longitude1, latitude1], heading1);
             }
         }
+
         /************************************************************/
         /* Graph */
         /************************************************************/
