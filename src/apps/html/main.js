@@ -36,7 +36,6 @@ window.onload = function() {
     document.getElementById('modal-background').style.display = 'block';
     document.getElementById('modal').style.display = 'block';
 
-    let vehType;
     let vehMode;
     let CVehId;
     let AVehId;
