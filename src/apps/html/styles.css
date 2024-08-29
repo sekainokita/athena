@@ -338,3 +338,16 @@
     width: 202.5px;
     height: auto;
 }
+
+#compass {
+    position: absolute;
+    top: 10px;
+    left: 1370px;
+    width: 100px;
+    height: 100px;
+    background-image: url('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/compass.png');
+    background-size: cover;
+    z-index: 1;
+    pointer-events: none;
+    transform-origin: center;
+}
