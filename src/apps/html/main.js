@@ -36,9 +36,10 @@ window.onload = function() {
     document.getElementById('modal-background').style.display = 'block';
     document.getElementById('modal').style.display = 'block';
 
-    const s_C_VehId = 23120008;
-    const s_A_VehId = 23120002;
-
+    let vehType;
+    let vehMode;
+    let CVehId;
+    let AVehId;
     // 기본값 설정
     let defaultIpAddress = "10.252.110.58";
     let testMode;
@@ -49,9 +50,24 @@ window.onload = function() {
     // 버튼 클릭 이벤트 처리
     document.getElementById('submit-button').onclick = function() {
         // 사용자 입력 값 가져오기
+        let vehType = document.getElementById('vehType').value.toLowerCase();
         let testType = document.getElementById('testType').value.toLowerCase();
         let ipAddress = document.getElementById('ipAddress').value || defaultIpAddress;
         let visiblePath = document.getElementById('visiblePath').value.toLowerCase();
+
+        if (vehType === "cv") {
+            vehMode = "C-VEH";
+            CVehId = 23120008;
+            AVehId = 23120002;
+        } else if (vehType === "av") {
+            vehMode = "A-VEH";
+            CVehId = 23120008;
+            AVehId = 23120002;
+        } else {
+            vehMode = "C-VEH";
+            CVehId = 23120008;
+            AVehId = 23120002;
+        }
 
         if (testType === "tx") {
             testMode = "Tx Test";
@@ -80,7 +96,7 @@ window.onload = function() {
         document.getElementById('modal').style.display = 'none';
 
         // alert 창으로 현재 테스트 모드와 IP 주소를 출력
-        alert(`현재 선택된 테스트 모드: ${testMode}\n입력된 IP 주소: ${ipAddress}\nVisible Path ${VisiblePathMode}`);
+        alert(`현재 선택된 설정: ${vehMode}, ${testMode}\n입력된 IP 주소: ${ipAddress}\nVisible Path ${VisiblePathMode}`);
 
         // 버튼이 제대로 표시되도록 모달 창이 닫힌 후 버튼을 다시 표시
         document.getElementById('autoTrackButton').style.display = 'block';
@@ -1473,8 +1489,8 @@ window.onload = function() {
                             'text-field': [
                                 'concat',
                                 ['case',
-                                    ['==', ['get', 'deviceID'], s_C_VehId], 'C-VEH#',
-                                    ['==', ['get', 'deviceID'], s_A_VehId], 'A-VEH#',
+                                    ['==', ['get', 'deviceID'], CVehId], 'C-VEH#',
+                                    ['==', ['get', 'deviceID'], AVehId], 'A-VEH#',
                                     'OBU#'
                                 ],
                                 ['get', 'deviceID']
@@ -1533,8 +1549,8 @@ window.onload = function() {
                             'text-field': [
                                 'concat',
                                 ['case',
-                                    ['==', ['get', 'deviceID'], s_C_VehId], 'C-VEH#',
-                                    ['==', ['get', 'deviceID'], s_A_VehId], 'A-VEH#',
+                                    ['==', ['get', 'deviceID'], CVehId], 'C-VEH#',
+                                    ['==', ['get', 'deviceID'], AVehId], 'A-VEH#',
                                     'OBU#'
                                 ],
                                 ['get', 'deviceID']
