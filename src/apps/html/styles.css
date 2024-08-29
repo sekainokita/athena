@@ -351,3 +351,23 @@
     pointer-events: none;
     transform-origin: center;
 }
+
+#heading-info {
+    position: absolute;
+    bottom: 80px;
+    left: 1450px;
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 2;
+    font-family: 'Bungee Inline', cursive; /* 글씨체를 Bungee Inline으로 변경 */
+    color: black; /* 글씨를 검정색으로 변경 */
+    font-size: 25px; /* 글씨 크기를 더 크게 조정 */
+    text-align: center;
+    background-color: transparent; /* 배경을 없앰 */
+    box-shadow: none; /* 그림자 효과 제거 */
+}
+
+#heading-text {
+    margin: 0;
+    font-weight: bold;
+}

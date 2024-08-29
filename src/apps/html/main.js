@@ -1717,6 +1717,11 @@ window.onload = function() {
             }
         }
 
+        function updateHeadingInfo(heading) {
+            const headingText = document.getElementById('heading-text');
+            headingText.innerText = `${heading}°`;
+        }
+
         function fetchAndUpdate() {
             if (!tree) {
                 console.warn("KD-Tree is not built yet. Waiting...");
@@ -1733,6 +1738,7 @@ window.onload = function() {
             if (!isNaN(latitude0) && !isNaN(longitude0)) {
                 updateVehiclePosition(0, [longitude0, latitude0], heading0);
                 updateTrafficLightBasedOnHeading(heading0);  // 신호등 업데이트
+                updateHeadingInfo(heading0);
             }
 
             if (!isNaN(latitude1) && !isNaN(longitude1)) {
