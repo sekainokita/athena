@@ -688,7 +688,8 @@ window.onload = function() {
                             { coord: [127.440254, 36.730017], rotate: 45 },
                             { coord: [127.440304, 36.730084], rotate: 30 },
                             { coord: [127.440350, 36.730151] },
-                            { coord: [127.440451, 36.730166], rotate: 85 }
+                            { coord: [127.440451, 36.730166], rotate: 85 },
+                            { coord: [127.440557, 36.730178], rotate: 85 }
                         ];
         
                         const CB3route = CB3Coordinates.map(point => point.coord);
