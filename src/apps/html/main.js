@@ -1048,7 +1048,7 @@ window.onload = function() {
                                 'visibility': 'visible'
                             },
                             'paint': {
-                                'line-color': '#007AFF',
+                                'line-color': '#4CAF50',
                                 'line-width': 4,
                                 'line-opacity': 0.8,
                                 'line-dasharray': [2,2]
@@ -1126,9 +1126,9 @@ window.onload = function() {
             background.style.width = 'auto';
             background.style.height = 'auto';
             background.style.padding = '5px 10px';
-            background.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+            background.style.backgroundColor = '#81C784';
             background.style.borderRadius = '10px';
-            background.style.boxShadow = '0 0 15px #007AFF, 0 0 30px #007AFF, 0 0 45px #007AFF';
+            background.style.boxShadow = '0 0 15px #4CAF50, 0 0 30px #4CAF50, 0 0 45px #4CAF50';
 
             // 텍스트
             const text = document.createElement('div');
@@ -1136,7 +1136,7 @@ window.onload = function() {
             text.style.color = 'white';
             text.style.fontWeight = 'bold';
             text.style.textAlign = 'center';
-            text.style.textShadow = '0 0 10px #007AFF, 0 0 20px #007AFF, 0 0 30px #007AFF';
+            text.style.textShadow = '0 0 10px #4CAF50, 0 0 20px #4CAF50, 0 0 30px #4CAF50';
             text.style.fontSize = '16px';
 
             background.appendChild(text);
