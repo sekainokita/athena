@@ -1007,7 +1007,7 @@ window.onload = function() {
                 if (vehMode === "C-VEH") {
                     trafficLight = 'red';
                 } else if (vehMode === "A-VEH") {
-                    trafficLight = 'yellow';
+                    trafficLight = 'green';
                 } else {
                     trafficLight = 'red';
                 }
