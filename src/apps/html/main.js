@@ -429,7 +429,7 @@ window.onload = function() {
             mrsucontainer.style.display = 'flex';
             mrsucontainer.style.flexDirection = 'column';
             mrsucontainer.style.alignItems = 'center';
-            mrsucontainer.style.width = '200px';
+            mrsucontainer.style.width = '225px';
 
             const img = document.createElement('div');
             img.style.backgroundImage = `url(${imageUrl})`;
@@ -460,15 +460,44 @@ window.onload = function() {
             return mrsucontainer;
         }
 
-        map.on('style.load', () => {
+        map.on('style.load', function() {
             document.getElementById('CB1').addEventListener('click', function() {
                 isCB1 = !isCB1;
                 if (isCB1) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
+
+                    // MRsu Marker 추가
+                    const MRsuCoordinate = [127.440227, 36.730164];
+                    if (!mrsuMarker) {
+                        mrsuMarker = new mapboxgl.Marker({element: createMrsuMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/m-rsu-front.png')})
+                        .setLngLat(MRsuCoordinate)
+                        .addTo(map);
+                    } else if (!mrsuMarker._map) {
+                        mrsuMarker.setLngLat(MRsuCoordinate).addTo(map);
+                    }
+
+                    // Work Zone Marker 추가
+                    const WorkZoneCoordinate = [127.4401043, 36.7298408];
+                    if (!workZoneMarker) {
+                        workZoneMarker = new mapboxgl.Marker({element: createWorkZoneMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/work-zone.png')})
+                        .setLngLat(WorkZoneCoordinate)
+                        .addTo(map);
+                    } else if (!workZoneMarker._map) {
+                        workZoneMarker.setLngLat(WorkZoneCoordinate).addTo(map);
+                    }
+
                 } else {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
+
+                    if (mrsuMarker && mrsuMarker._map) {
+                        mrsuMarker.remove();
+                    }
+
+                    if (workZoneMarker && workZoneMarker._map) {
+                        workZoneMarker.remove();
+                    }
                 }
 
                 if (vehMode === "C-VEH") {
