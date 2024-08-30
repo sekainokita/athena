@@ -1034,7 +1034,7 @@ window.onload = function() {
         }
 
         let CB6Marker = new mapboxgl.Marker({
-            element: createCB6Marker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/stop3.png')
+            element: createCB6Marker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/go-straight.png')
             }).setLngLat([127.440172, 36.729915]);
 
         let customMarkerCB6 = null;
