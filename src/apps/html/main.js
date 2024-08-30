@@ -1004,19 +1004,90 @@ window.onload = function() {
             return CB5Container;
         }
 
+        let CB6Marker = new mapboxgl.Marker({
+            element: createCB6Marker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/stop3.png')
+            }).setLngLat([127.440172, 36.729915]);
+
+        let customMarkerCB6 = null;
+
         map.on('style.load', () => {
             document.getElementById('CB6').addEventListener('click', function() {
                 isCB6 = !isCB6;
                 if (isCB6) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
+
+                    if (!CB6Marker._map) {
+                        CB6Marker.addTo(map);
+                    }
+
+                    const CB6Coordinates = [
+                        [127.440170, 36.729793],
+                        [127.440553, 36.730175]
+                    ];
+
+                    if (!map.getSource('CB6Path')) {
+                        map.addSource('CB6Path', {
+                            'type': 'geojson',
+                            'data': {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'LineString',
+                                    'coordinates': CB6Coordinates
+                                }
+                            }
+                        });
+
+                        map.addLayer({
+                            'id': 'CB6Path',
+                            'type': 'line',
+                            'source': 'CB6Path',
+                            'layout': {
+                                'line-join': 'round',
+                                'line-cap': 'round',
+                                'visibility': 'visible'
+                            },
+                            'paint': {
+                                'line-color': '#007AFF',
+                                'line-width': 4,
+                                'line-opacity': 0.8,
+                                'line-dasharray': [2,2]
+                            }
+                        });
+                    }
+
+                    const midPoint = [
+                        (CB6Coordinates[0][0] + CB6Coordinates[1][0]) / 2,
+                        (CB6Coordinates[0][1] + CB6Coordinates[1][1]) / 2
+                    ];
+
+                    if (!customMarkerCB6) {
+                        customMarkerCB6 = new mapboxgl.Marker({element: createCustomLabelCB6()})
+                        .setLngLat(midPoint)
+                        .addTo(map);
+                    } else {
+                        customMarkerCB6.addTo(map);
+                    }
                 } else {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
+
+                    if (CB6Marker._map) {
+                        CB6Marker.remove();
+                    }
+
+                    if (map.getLayer('CB6Path')) {
+                        map.removeLayer('CB6Path');
+                        map.removeSource('CB6Path');
+                    }
+
+                    if (customMarkerCB6) {
+                        customMarkerCB6.remove();
+                    }
                 }
 
                 if (vehMode === "C-VEH") {
-                    trafficLight = 'red';
+                    trafficLight = 'green';
                 } else if (vehMode === "A-VEH") {
                     trafficLight = 'green';
                 } else {
@@ -1025,6 +1096,54 @@ window.onload = function() {
                 updateTrafficLight(trafficLight);
             });
         });
+
+        function createCB6Marker(imageUrl) {
+            const CB6Container = document.createElement('div');
+            CB6Container.style.display = 'flex';
+            CB6Container.style.flexDirection = 'column';
+            CB6Container.style.alignItems = 'center';
+
+            const img = document.createElement('div');
+            img.style.backgroundImage = `url(${imageUrl})`;
+            img.style.width = '50px';
+            img.style.height = '50px';
+            img.style.backgroundSize = 'contain';
+            img.style.backgroundRepeat = 'no-repeat';
+
+            CB6Container.appendChild(img);
+            return CB6Container;
+        }
+
+        function createCustomLabelCB6() {
+            const labelContainer = document.createElement('div');
+            labelContainer.style.display = 'flex';
+            labelContainer.style.flexDirection = 'column';
+            labelContainer.style.alignItems = 'center';
+            labelContainer.style.width = 'auto';
+
+            // 직사각형 배경
+            const background = document.createElement('div');
+            background.style.width = 'auto';
+            background.style.height = 'auto';
+            background.style.padding = '5px 10px';
+            background.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+            background.style.borderRadius = '10px';
+            background.style.boxShadow = '0 0 15px #007AFF, 0 0 30px #007AFF, 0 0 45px #007AFF';
+
+            // 텍스트
+            const text = document.createElement('div');
+            text.innerHTML = "Class B Completed<br>(A-Veh has exited the roundabout)";
+            text.style.color = 'white';
+            text.style.fontWeight = 'bold';
+            text.style.textAlign = 'center';
+            text.style.textShadow = '0 0 10px #007AFF, 0 0 20px #007AFF, 0 0 30px #007AFF';
+            text.style.fontSize = '16px';
+
+            background.appendChild(text);
+            labelContainer.appendChild(background);
+
+            return labelContainer;
+        }
 
         if ('WebSocket' in window) {
             let ws = new WebSocket(`ws://${ipAddress}:3001/websocket`);
