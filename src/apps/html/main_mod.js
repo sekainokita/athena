@@ -1397,251 +1397,25 @@ window.onload = function() {
             }
         });
 
-        const CD3CCoordinates = [
-            [127.439541, 36.729890],
-            [127.439527, 36.729955],
-            [127.439535, 36.730056],
-            [127.439641, 36.730080],
-            [127.439703, 36.730085], //첫번째 노란점
-            [127.439820, 36.730091],
-            [127.439885, 36.730050], //두번째 노란점
-            [127.439991, 36.729972], //세번째 노란점
-            [127.440131, 36.729958],
-            [127.440254, 36.730017], //네번째
-            [127.440304, 36.730084], //다섯번째
-            [127.440352, 36.730148],
-            [127.440451, 36.730166] //마지막
-        ];
-
-        const CD3ACoordinates = [
-            [127.439641, 36.730080],
-            [127.439703, 36.730085], //첫번째 노란점
-            [127.439820, 36.730091],
-            [127.439885, 36.730050], //두번째 노란점
-            [127.439991, 36.729972], //세번째 노란점
-            [127.440066, 36.729928],
-            [127.440083, 36.729863] //네번째 노란점
-        ];
-
-        function interpolateCatmullRom(points, numPointsBetween) {
-            let interpolatedPoints = [];
-
-            function interpolate(p0, p1, p2, p3, t) {
-                const t2 = t * t;
-                const t3 = t2 * t;
-                const out = [
-                    0.5 * (2 * p1[0] + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3),
-                    0.5 * (2 * p1[1] + (-p0[1] + p2[1]) * t + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3)
-                ];
-                return out;
-            }
-
-            for (let i = 1; i < points.length - 2; i++) {
-                const p0 = points[i - 1];
-                const p1 = points[i];
-                const p2 = points[i + 1];
-                const p3 = points[i + 2];
-
-                interpolatedPoints.push(p1);
-                for (let t = 0; t < numPointsBetween; t++) {
-                    const tNorm = t / numPointsBetween;
-                    interpolatedPoints.push(interpolate(p0, p1, p2, p3, tNorm));
+        map.on('style.load', () => {
+            document.getElementById('CD3').addEventListener('click', function() {
+                isCD3 = !isCD3;
+                if (isCD3) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
                 }
-            }
-            interpolatedPoints.push(points[points.length - 2]);
-            interpolatedPoints.push(points[points.length - 1]);
 
-            return interpolatedPoints;
-        }
-
-        const CD3CsmoothPath = interpolateCatmullRom(CD3CCoordinates, 100);
-        const CD3AsmoothPath = interpolateCatmullRom(CD3ACoordinates, 100);
-
-        map.on('style.load',function() {
-            map.loadImage('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/arrowR.png', function(error, image) {
-                if (error) {
-                    console.error('fail load image', error);
-                    return;
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'red';
+                } else {
+                    trafficLight = 'red';
                 }
-                map.addImage('arrowR-icon', image);
-
-                map.loadImage('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/arrowB.png', function(error, image) {
-                    if (error) {
-                        console.error('fail load image', error);
-                        return;
-                    }
-                    map.addImage('arrowB-icon', image);
-
-                    document.getElementById('CD3').addEventListener('click', function() {
-                        isCD3 = !isCD3;
-                        if (isCD3) {
-                            this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
-                            this.style.color = 'white';
-                        } else {
-                            this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-                            this.style.color = 'white';
-                        }
-
-                        if (vehMode === "C-VEH") {
-                            trafficLight = 'red';
-                        } else if (vehMode === "A-VEH") {
-                            trafficLight = 'red';
-                        } else {
-                            trafficLight = 'red';
-                        }
-                        updateTrafficLight(trafficLight);
-
-                        if (map.getLayer('CD3CPath')) {
-                            map.setLayoutProperty('CD3CPath', 'visibility', isCD3 ? 'visible' : 'none');
-                            map.setLayoutProperty('CD3CPathArrows', 'visibility', isCD3 ? 'visible' : 'none');
-                        } else {
-                            map.addSource('CD3CPath', {
-                                'type': 'geojson',
-                                'data': {
-                                    'type': 'Feature',
-                                    'geometry': {
-                                        'type': 'LineString',
-                                        'coordinates': CD3CsmoothPath
-                                    }
-                                }
-                            });
-
-                            map.addLayer({
-                                'id': 'CD3CPath',
-                                'type': 'line',
-                                'source': 'CD3CPath',
-                                'layout': {
-                                    'line-join': 'round',
-                                    'line-cap': 'round',
-                                    'visibility': 'visible'
-                                },
-                                'paint': {
-                                    'line-color': 'rgba(255, 0, 0, 0.5)',
-                                    'line-width': 20,
-                                    'line-blur': 0.5
-                                }
-                            });
-
-                            const CD3CarrowCoordinates = [
-                                { coord: [127.439527, 36.729955], rotate: 350},
-                                { coord: [127.439535, 36.730056], rotate: 45},
-                                { coord: [127.439703, 36.730085], rotate: 90},
-                                { coord: [127.439885, 36.730050], rotate: 140},
-                                { coord: [127.439991, 36.729972], rotate: 110},
-                                { coord: [127.440254, 36.730017], rotate: 45},
-                                { coord: [127.440304, 36.730084], rotate: 30},
-                                { coord: [127.440451, 36.730166], rotate: 85}
-                            ];
-
-                            const CD3CarrowFeatures = CD3CarrowCoordinates.map(arrow => {
-                                return {
-                                    'type': 'Feature',
-                                    'geometry': {
-                                        'type': 'Point',
-                                        'coordinates': arrow.coord
-                                    },
-                                    'properties': {
-                                        'rotate': arrow.rotate
-                                    }
-                                };
-                            });
-
-                            map.addSource('CD3CPathArrows', {
-                                'type': 'geojson',
-                                'data': {
-                                    'type': 'FeatureCollection',
-                                    'features': CD3CarrowFeatures
-                                }
-                            });
-
-                            map.addLayer({
-                                'id': 'CD3CPathArrows',
-                                'type': 'symbol',
-                                'source': 'CD3CPathArrows',
-                                'layout': {
-                                    'icon-image': 'arrowR-icon',
-                                    'icon-size': 0.05,
-                                    'icon-rotate': ['get', 'rotate'],
-                                    'icon-allow-overlap': true,
-                                    'visibility': 'visible'
-                                }
-                            });
-                        }
-
-                        if (map.getLayer('CD3APath')) {
-                            map.setLayoutProperty('CD3APath', 'visibility', isCD3 ? 'visible' : 'none');
-                            map.setLayoutProperty('CD3APathArrows', 'visibility', isCD3 ? 'visible' : 'none');
-                        } else {
-                            map.addSource('CD3APath', {
-                                'type': 'geojson',
-                                'data': {
-                                    'type': 'Feature',
-                                    'geometry': {
-                                        'type': 'LineString',
-                                        'coordinates': CD3AsmoothPath
-                                    }
-                                }
-                            });
-
-                            map.addLayer({
-                                'id': 'CD3APath',
-                                'type': 'line',
-                                'source': 'CD3APath',
-                                'layout': {
-                                    'line-join': 'round',
-                                    'line-cap': 'round',
-                                    'visibility': 'visible'
-                                },
-                                'paint': {
-                                    'line-color': 'rgba(0, 150, 255, 0.8)',
-                                    'line-width': 20,
-                                    'line-blur': 0.5
-                                }
-                            });
-
-                            const CD3AarrowCoordinates = [
-                                { coord: [127.439703, 36.730085], rotate: 90},
-                                { coord: [127.439885, 36.730050], rotate: 140},
-                                { coord: [127.439991, 36.729972], rotate: 110},
-                                { coord: [127.440083, 36.729863], rotate: 170}
-                            ];
-
-                            const CD3AarrowFeatures = CD3AarrowCoordinates.map(arrow => {
-                                return {
-                                    'type': 'Feature',
-                                    'geometry': {
-                                        'type': 'Point',
-                                        'coordinates': arrow.coord
-                                    },
-                                    'properties': {
-                                        'rotate': arrow.rotate
-                                    }
-                                };
-                            });
-
-                            map.addSource('CD3APathArrows', {
-                                'type': 'geojson',
-                                'data': {
-                                    'type': 'FeatureCollection',
-                                    'features': CD3AarrowFeatures
-                                }
-                            });
-
-                            map.addLayer({
-                                'id': 'CD3APathArrows',
-                                'type': 'symbol',
-                                'source': 'CD3APathArrows',
-                                'layout': {
-                                    'icon-image': 'arrowB-icon',
-                                    'icon-size': 0.05,
-                                    'icon-rotate': ['get', 'rotate'],
-                                    'icon-allow-overlap': true,
-                                    'visibility': 'visible'
-                                }
-                            });
-                        }
-                    })
-                })
+                updateTrafficLight(trafficLight);
             });
         });
 
@@ -2459,8 +2233,8 @@ window.onload = function() {
                             'text-offset': [0, 2], // Adjust this value to position the text
                             'text-anchor': 'top',
                             'text-size' : 13,
-                            'icon-allow-overlap': true,
-                            'text-allow-overlap': true
+                            'icon-allow-overlap': true,  // 아이콘 겹침 허용
+                            'text-allow-overlap': true   // 텍스트 겹침 허용
                         },
                         'paint': {
                             'text-color': '#000000',
@@ -2521,8 +2295,8 @@ window.onload = function() {
                             'text-offset': [0, 2],
                             'text-anchor': 'top',
                             'text-size' : 13,
-                            'icon-allow-overlap': true,
-                            'text-allow-overlap': true
+                            'icon-allow-overlap': true,  // 아이콘 겹침 허용
+                            'text-allow-overlap': true   // 텍스트 겹침 허용
                         },
                         'paint': {
                             'text-color': '#000000',
