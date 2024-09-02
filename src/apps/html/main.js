@@ -531,7 +531,7 @@ window.onload = function() {
             });
         });
 
-        const classBCoordinates = [
+        const CB2Coordinates = [
             [127.439641, 36.730080],
             [127.439703, 36.730085], //첫번째 노란점
             [127.439820, 36.730091],
@@ -575,7 +575,7 @@ window.onload = function() {
             return interpolatedPoints;
         }
 
-        const smoothPath = interpolateCatmullRom(classBCoordinates, 100);
+        const CB2smoothPath = interpolateCatmullRom(CB2Coordinates, 100);
 
         map.on('style.load', function()
         {
@@ -586,11 +586,11 @@ window.onload = function() {
                     console.error('fail load image', error);
                     return;
                 }
+                if (!map.hasImage('arrowB-icon')) {
+                    map.addImage('arrowB-icon', image);
+                }
 
-            map.addImage('arrowB-icon', image);
-
-            document.getElementById('CB2').addEventListener('click', function()
-            {
+            document.getElementById('CB2').addEventListener('click', function() {
                 isCB2 = !isCB2;
                 if (isCB2) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
@@ -610,30 +610,35 @@ window.onload = function() {
                 updateTrafficLight(trafficLight);
 
                 if (vehMode === "C-VEH") {
-                    map.setLayoutProperty('classBPath', 'visibility', 'none');
-                    map.setLayoutProperty('classBArrows', 'visibility', 'none');
-                } else {
-                    if (map.getLayer('classBPath'))
+                    if (map.getLayer('CB2Path')) {
+                        map.setLayoutProperty('CB2Path', 'visibility', 'none');
+                    }
+                    if (map.getLayer('CB2Arrows')) {
+                        map.setLayoutProperty('CB2Arrows', 'visibility', 'none');
+                    }
+                }
+                else {
+                    if (map.getLayer('CB2Path'))
                     {
-                        map.setLayoutProperty('classBPath', 'visibility', isCB2 ? 'visible' : 'none');
-                        map.setLayoutProperty('classBArrows', 'visibility', isCB2 ? 'visible' : 'none');
+                        map.setLayoutProperty('CB2Path', 'visibility', isCB2 ? 'visible' : 'none');
+                        map.setLayoutProperty('CB2Arrows', 'visibility', isCB2 ? 'visible' : 'none');
                     } else
                     {
-                        map.addSource('classBPath', {
+                        map.addSource('CB2Path', {
                             'type': 'geojson',
                             'data': {
                                 'type': 'Feature',
                                 'geometry': {
                                     'type': 'LineString',
-                                    'coordinates': smoothPath
+                                    'coordinates': CB2smoothPath
                                 }
                             }
                         });
 
                         map.addLayer({
-                            'id': 'classBPath',
+                            'id': 'CB2Path',
                             'type': 'line',
-                            'source': 'classBPath',
+                            'source': 'CB2Path',
                             'layout': {
                                 'line-join': 'round',
                                 'line-cap': 'round',
@@ -646,7 +651,7 @@ window.onload = function() {
                             }
                         });
 
-                        const arrowCoordinates = [
+                        const CB2arrowCoordinates = [
                             { coord: [127.439703, 36.730085], rotate: 90},
                             { coord: [127.439885, 36.730050], rotate: 140},
                             { coord: [127.439991, 36.729972], rotate: 110},
@@ -655,7 +660,7 @@ window.onload = function() {
                             { coord: [127.440451, 36.730166], rotate: 85}
                         ];
 
-                        const arrowFeatures = arrowCoordinates.map(arrow => {
+                        const CB2arrowFeatures = CB2arrowCoordinates.map(arrow => {
                             return {
                                 'type': 'Feature',
                                 'geometry': {
@@ -668,18 +673,18 @@ window.onload = function() {
                             };
                         });
 
-                        map.addSource('classBArrows', {
+                        map.addSource('CB2Arrows', {
                             'type': 'geojson',
                             'data': {
                                 'type': 'FeatureCollection',
-                                'features': arrowFeatures
+                                'features': CB2arrowFeatures
                             }
                         });
 
                         map.addLayer({
-                            'id': 'classBArrows',
+                            'id': 'CB2Arrows',
                             'type': 'symbol',
-                            'source': 'classBArrows',
+                            'source': 'CB2Arrows',
                             'layout': {
                                 'icon-image': 'arrowB-icon',
                                 'icon-size': 0.05,
