@@ -59,6 +59,10 @@ static char s_chSetEth[CLI_DB_V2X_DEFAULT_BUF_LEN];
 static char s_chSetIp[CLI_DB_V2X_DEFAULT_BUF_LEN];
 #endif
 
+#define MODEL_PREFIX "model="
+#define MODEL_PREFIX_LEN (sizeof(MODEL_PREFIX) - 1)
+#define MODEL_NAME_FILE_SUFFIX ".conf"
+#define MAX_MODEL_NAME_LEN 256
 /***************************** Function Protype ******************************/
 
 static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
@@ -303,9 +307,59 @@ static int P_CLI_CP_ReadyV2xStatusScenario(void)
 {
     int32_t nRet = APP_OK;
     SVC_CP_T *pstSvcCp;
+    char chModelNameFile[MAX_MODEL_NAME_LEN] = {0};
+    FILE *h_fdModelConf;
+
     pstSvcCp = APP_GetSvcCpInstance();
 
+    if (pstSvcCp == NULL)
+    {
+        PrintError("Failed to get service control point instance.");
+        return APP_ERROR;
+    }
+
     (void)SVC_CP_ShowSettings(pstSvcCp);
+
+    snprintf(chModelNameFile, sizeof(chModelNameFile), "%s%s", CONFIG_MODEL_NAME, MODEL_NAME_FILE_SUFFIX);
+
+    h_fdModelConf = fopen(chModelNameFile, "r+");
+    if (h_fdModelConf == NULL)
+    {
+        h_fdModelConf = fopen(chModelNameFile, "w");
+        if (h_fdModelConf == NULL)
+        {
+            PrintError("Failed to open or create file: %s", chModelNameFile);
+            return APP_ERROR;
+        }
+        fprintf(h_fdModelConf, "model=%s\n", CONFIG_MODEL_NAME);
+    }
+    else
+    {
+        char chExistingModelName[MAX_MODEL_NAME_LEN] = {0};
+        if (fgets(chExistingModelName, sizeof(chExistingModelName), h_fdModelConf) != NULL)
+        {
+            if ((strncmp(chExistingModelName, MODEL_PREFIX, MODEL_PREFIX_LEN) != 0) || (strcmp(chExistingModelName + MODEL_PREFIX_LEN, CONFIG_MODEL_NAME) != 0))
+            {
+                h_fdModelConf = freopen(chModelNameFile, "w", h_fdModelConf);
+                if (h_fdModelConf == NULL)
+                {
+                    PrintError("Failed to reopen file: %s", chModelNameFile);
+                    return APP_ERROR;
+                }
+                fprintf(h_fdModelConf, "model=%s\n", CONFIG_MODEL_NAME);
+            }
+        }
+    }
+
+    if (h_fdModelConf != NULL)
+    {
+        fclose(h_fdModelConf);
+    }
+    else
+    {
+        PrintError("h_fdModelConf is NULL!!");
+    }
+
 
     nRet = SVC_CP_Open(pstSvcCp);
     if(nRet != APP_OK)
