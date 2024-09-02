@@ -180,6 +180,7 @@ window.onload = function() {
         let ioniqMarker = new mapboxgl.Marker({element: createIoniqMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq-electric-sky.png')});
         let V2XLabelMarker = null;
         let NegotiationMarker = null;
+        let CD2NegotiationMarker = null;
 
         mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
         const map = new mapboxgl.Map({
@@ -1285,7 +1286,7 @@ window.onload = function() {
             });
         });
 
-        map.on('style.load', () => {
+        map.on('style.load', function() {
             document.getElementById('CD2').addEventListener('click', function() {
                 isCD2 = !isCD2;
                 if (isCD2) {
@@ -1304,7 +1305,95 @@ window.onload = function() {
                     trafficLight = 'red';
                 }
                 updateTrafficLight(trafficLight);
+
+                if (isCD2) {
+                    const CD2Coordinates = [
+                        [127.439523, 36.729963],
+                        [127.439703, 36.730085]
+                    ];
+
+                    if (!map.getSource('CD2Path')) {
+                        map.addSource('CD2Path', {
+                            'type': 'geojson',
+                            'data': {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'LineString',
+                                    'coordinates': CD2Coordinates
+                                }
+                            }
+                        });
+
+                        map.addLayer({
+                            'id': 'CD2Path',
+                            'type': 'line',
+                            'source': 'CD2Path',
+                            'layout': {
+                                'line-join': 'round',
+                                'line-cap': 'round',
+                                'visibility': 'visible'
+                            },
+                            'paint': {
+                                'line-color': '#FF0000',
+                                'line-width': 4,
+                                'line-opacity': 0.8,
+                                'line-dasharray': [0.5, 1.5]
+                            }
+                        });
+                    }
+                    const CD2midPoint = [
+                        (CD2Coordinates[0][0] + CD2Coordinates[1][0]) / 2,
+                        (CD2Coordinates[0][1] + CD2Coordinates[1][1]) / 2
+                    ];
+
+                    if (!CD2NegotiationMarker) {
+                        CD2NegotiationMarker = new mapboxgl.Marker({element: createCustomLabelCD2()})
+                        .setLngLat(CD2midPoint)
+                        .addTo(map);
+                    } else {
+                        CD2NegotiationMarker.addTo(map);
+                    }
+                } else {
+                    if (map.getLayer('CD2Path')) {
+                        map.removeLayer('CD2Path');
+                        map.removeSource('CD2Path');
+                    }
+
+                    if (CD2NegotiationMarker) {
+                        CD2NegotiationMarker.remove();
+                    }
+                }
             });
+            function createCustomLabelCD2() {
+                const CD2labelContainer = document.createElement('div');
+                CD2labelContainer.style.display = 'flex';
+                CD2labelContainer.style.flexDirection = 'column';
+                CD2labelContainer.style.alignItems = 'center';
+                CD2labelContainer.style.width = 'auto';
+
+                // 직사각형 배경
+                const background = document.createElement('div');
+                background.style.width = 'auto';
+                background.style.height = 'auto';
+                background.style.padding = '5px 10px';
+                background.style.backgroundColor = 'rgba(255, 0, 0, 0.9)';
+                background.style.borderRadius = '10px';
+                background.style.boxShadow = '0 0 15px #ff6666, 0 0 30px #ff6666, 0 0 45px #ff6666';
+
+                // 텍스트
+                const text = document.createElement('div');
+                text.innerHTML = "Driving Negotiation<br>(Emergency Vehicle Priority Negotiation)";
+                text.style.color = 'white';
+                text.style.fontWeight = 'bold';
+                text.style.textAlign = 'center';
+                text.style.textShadow = '0 0 10px #ffcccc, 0 0 20px #ffcccc, 0 0 30px #ffcccc';
+                text.style.fontSize = '16px';
+
+                background.appendChild(text);
+                CD2labelContainer.appendChild(background);
+
+                return CD2labelContainer;
+            }
         });
 
         map.on('style.load', () => {
