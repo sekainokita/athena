@@ -2558,6 +2558,8 @@ window.onload = function() {
                         }
                     });
 
+                    map.moveLayer('vehicle0');
+
                     fetchAndUpdate();
                     setInterval(fetchAndUpdate, 10);
                 }
@@ -2619,6 +2621,8 @@ window.onload = function() {
                             'text-halo-width': 2
                         }
                     });
+
+                    map.moveLayer('vehicle1');
 
                     fetchAndUpdate();
                     setInterval(fetchAndUpdate, 10);
