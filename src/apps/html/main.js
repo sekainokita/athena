@@ -2563,6 +2563,8 @@ window.onload = function() {
                         }
                     });
 
+                    map.moveLayer('vehicle0');
+
                     fetchAndUpdate();
                     setInterval(fetchAndUpdate, 10);
                 }
@@ -2624,6 +2626,8 @@ window.onload = function() {
                             'text-halo-width': 2
                         }
                     });
+
+                    map.moveLayer('vehicle1');
 
                     fetchAndUpdate();
                     setInterval(fetchAndUpdate, 10);
@@ -3162,12 +3166,6 @@ window.onload = function() {
         updateWeather();
         setInterval(updateWeather, 600000);
     }
-
-    map.on('rotate', function() {
-        const bearing = map.getBearing();
-        const compass = document.getElementById('compass');
-        compass.style.transform = `rotate(${bearing}deg)`;
-    });
 };
 
 function updateDateTime() {
