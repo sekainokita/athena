@@ -3161,12 +3161,6 @@ window.onload = function() {
         updateWeather();
         setInterval(updateWeather, 600000);
     }
-
-    map.on('rotate', function() {
-        const bearing = map.getBearing();
-        const compass = document.getElementById('compass');
-        compass.style.transform = `rotate(${bearing}deg)`;
-    });
 };
 
 function updateDateTime() {
