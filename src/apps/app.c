@@ -97,6 +97,7 @@ int32_t APP_Init(APP_T *pstApp)
     printf(COLOR_YELLOW "Korea Electronics Technology Institute\r\n");
     printf(COLOR_YELLOW "\r\n");
     printf(COLOR_YELLOW "ATHENA SW (VERSION : %.1f)\r\n", CONFIG_SW_VERSION);
+    printf(COLOR_YELLOW "Model Name (%s)\r\n", CONFIG_MODEL_NAME);
     printf(COLOR_YELLOW "\r\n");
     printf(COLOR_YELLOW "=======================================================\r\n");
 

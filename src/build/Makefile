@@ -78,6 +78,9 @@ TARGET_CFLAGS += -std=gnu99 -g
 TARGET_CFLAGS += -Wall -Wextra -Wstrict-prototypes -O3 -fomit-frame-pointer -pipe
 TARGET_CFLAGS += -std=c11
 
+TARGET_CFLAGS += -DCONFIG_MODEL_NAME=\"\\\"$(APP_MODEL_NAME)\\\"\"
+TARGET_CXXFLAGS += -DCONFIG_MODEL_NAME=\"\\\"$(APP_MODEL_NAME)\\\"\"
+
 ifeq ($(CONFIG_NVIDIA_JETSON_UTILS),y)
 TARGET_CFLAGS += -I/usr/local/include/jetson-inference
 TARGET_CFLAGS += -I/usr/local/include/jetson-utils
