@@ -181,6 +181,7 @@ window.onload = function() {
         let V2XLabelMarker = null;
         let NegotiationMarker = null;
         let CD2NegotiationMarker = null;
+        let CD4NegotiationMarker = null;
 
         mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
         const map = new mapboxgl.Map({
@@ -1645,7 +1646,7 @@ window.onload = function() {
             });
         });
 
-        map.on('style.load', () => {
+        map.on('style.load', function() {
             document.getElementById('CD4').addEventListener('click', function() {
                 isCD4 = !isCD4;
                 if (isCD4) {
@@ -1664,7 +1665,95 @@ window.onload = function() {
                     trafficLight = 'red';
                 }
                 updateTrafficLight(trafficLight);
+
+                if (isCD4) {
+                    const CD4Coordinates = [
+                        [127.439703, 36.730085],
+                        [127.440227, 36.730164]
+                    ];
+
+                    if (!map.getSource('CD4Path')) {
+                        map.addSource('CD4Path', {
+                            'type': 'geojson',
+                            'data': {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'LineString',
+                                    'coordinates': CD4Coordinates
+                                }
+                            }
+                        });
+
+                        map.addLayer({
+                            'id': 'CD4Path',
+                            'type': 'line',
+                            'source': 'CD4Path',
+                            'layout': {
+                                'line-join': 'round',
+                                'line-cap': 'round',
+                                'visibility': 'visible'
+                            },
+                            'paint': {
+                                'line-color': '#007AFF',
+                                'line-width': 4,
+                                'line-opacity': 0.8,
+                                'line-dasharray': [0.5, 1.5]
+                            }
+                        });
+                    }
+                    const CD4midPoint = [
+                        (CD4Coordinates[0][0] + CD4Coordinates[1][0]) / 2,
+                        (CD4Coordinates[0][1] + CD4Coordinates[1][1]) / 2
+                    ];
+
+                    if (!CD4NegotiationMarker) {
+                        CD4NegotiationMarker = new mapboxgl.Marker({element: createCustomLabelCD4()})
+                        .setLngLat(CD4midPoint)
+                        .addTo(map);
+                    } else {
+                        CD4NegotiationMarker.addTo(map);
+                    }
+                } else {
+                    if (map.getLayer('CD4Path')) {
+                        map.removeLayer('CD4Path');
+                        map.removeSource('CD4Path');
+                    }
+
+                    if (CD4NegotiationMarker) {
+                        CD4NegotiationMarker.remove();
+                    }
+                }
             });
+            function createCustomLabelCD4() {
+                const CD4labelContainer = document.createElement('div');
+                CD4labelContainer.style.display = 'flex';
+                CD4labelContainer.style.flexDirection = 'column';
+                CD4labelContainer.style.alignItems = 'center';
+                CD4labelContainer.style.width = 'auto';
+
+                // 직사각형 배경
+                const background = document.createElement('div');
+                background.style.width = 'auto';
+                background.style.height = 'auto';
+                background.style.padding = '3px 7px';
+                background.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                background.style.borderRadius = '8px';
+                background.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
+
+                // 텍스트
+                const text = document.createElement('div');
+                text.innerHTML = "Driving Negotiation<br>(Emergency Vehicle Priority Negotiation Information Sharing)";
+                text.style.color = 'white';
+                text.style.fontWeight = 'bold';
+                text.style.textAlign = 'center';
+                text.style.textShadow = '0 0 5px #00ccff, 0 0 10px #00ccff, 0 0 15px #00ccff';
+                text.style.fontSize = '11px';
+
+                background.appendChild(text);
+                CD4labelContainer.appendChild(background);
+
+                return CD4labelContainer;
+            }
         });
 
         map.on('style.load', () => {
