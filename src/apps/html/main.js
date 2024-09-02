@@ -111,6 +111,14 @@ window.onload = function() {
         document.getElementById('CB4').style.display = 'block';
         document.getElementById('CB5').style.display = 'block';
         document.getElementById('CB6').style.display = 'block';
+        document.getElementById('CD1').style.display = 'block';
+        document.getElementById('CD2').style.display = 'block';
+        document.getElementById('CD3').style.display = 'block';
+        document.getElementById('CD4').style.display = 'block';
+        document.getElementById('CD5').style.display = 'block';
+        document.getElementById('CD6').style.display = 'block';
+        document.getElementById('CD7').style.display = 'block';
+        document.getElementById('CD8').style.display = 'block';
 
         main(isTxTest, ipAddress);
     };
@@ -158,9 +166,18 @@ window.onload = function() {
         let isCB4 = false;
         let isCB5 = false;
         let isCB6 = false;
+        let isCD1 = false;
+        let isCD2 = false;
+        let isCD3 = false;
+        let isCD4 = false;
+        let isCD5 = false;
+        let isCD6 = false;
+        let isCD7 = false;
+        let isCD8 = false;
 
         let workZoneMarker = new mapboxgl.Marker({element: createWorkZoneMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/work-zone.png')});
-        let mrsuMarker = new mapboxgl.Marker({element: createWorkZoneMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/m-rsu-front.png')});
+        let mrsuMarker = new mapboxgl.Marker({element: createMrsuMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/m-rsu-front.png')});
+        let ioniqMarker = new mapboxgl.Marker({element: createIoniqMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq-electric-sky.png')});
         let V2XLabelMarker = null;
         let NegotiationMarker = null;
 
@@ -1173,6 +1190,254 @@ window.onload = function() {
 
             return labelContainer;
         }
+
+        function toggleIoniq()
+        {
+            const IoniqCoordinate = [127.440161, 36.729833];
+
+            if (ioniqMarker)
+            {
+                if (ioniqMarker === null)
+                {
+                    ioniqMarker = new mapboxgl.Marker({element: createIoniqMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq-electric-sky.png')})
+                    .setLngLat(IoniqCoordinate)
+                    .addTo(map);
+                }
+            }
+            else
+            {
+                if (ioniqMarker !== null)
+                {
+                    ioniqMarker.remove();
+                    ioniqMarker = null;
+                }
+            }
+        }
+
+        function createIoniqMarker(imageUrl)
+        {
+            const ioniqcontainer = document.createElement('div');
+            ioniqcontainer.style.display = 'flex';
+            ioniqcontainer.style.flexDirection = 'column';
+            ioniqcontainer.style.alignItems = 'center';
+            ioniqcontainer.style.width = '225px';
+
+            const img = document.createElement('div');
+            img.style.backgroundImage = `url(${imageUrl})`;
+            img.style.width = '100px';
+            img.style.height = '100px';
+            img.style.backgroundSize = 'contain';
+            img.style.backgroundRepeat = 'no-repeat';
+            img.style.transform = 'rotate(350deg)';
+
+            ioniqcontainer.appendChild(img);
+
+            return ioniqcontainer;
+        }
+
+        map.on('style.load', function() {
+            document.getElementById('CD1').addEventListener('click', function() {
+                isCD1 = !isCD1;
+                if (isCD1) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+
+                    // MRsu Marker 추가
+                    const MRsuCoordinate = [127.440227, 36.730164];
+                    if (!mrsuMarker) {
+                        mrsuMarker = new mapboxgl.Marker({element: createMrsuMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/m-rsu-front.png')})
+                        .setLngLat(MRsuCoordinate)
+                        .addTo(map);
+                    } else if (!mrsuMarker._map) {
+                        mrsuMarker.setLngLat(MRsuCoordinate).addTo(map);
+                    }
+
+                    // ioniq Marker 추가
+                    const IoniqCoordinate = [127.440161, 36.729833];
+                    if (!ioniqMarker) {
+                        ioniqMarker = new mapboxgl.Marker({element: createIoniqMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq-electric-sky.png')})
+                        .setLngLat(IoniqCoordinate)
+                        .addTo(map);
+                    } else if (!ioniqMarker._map) {
+                        ioniqMarker.setLngLat(IoniqCoordinate).addTo(map);
+                    }
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+
+                    if (mrsuMarker && mrsuMarker._map) {
+                        mrsuMarker.remove();
+                    }
+
+                    if (ioniqMarker && ioniqMarker._map) {
+                        ioniqMarker.remove();
+                    }
+                }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'yellow';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'yellow';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
+            });
+        });
+
+        map.on('style.load', () => {
+            document.getElementById('CD2').addEventListener('click', function() {
+                isCD2 = !isCD2;
+                if (isCD2) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'red';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
+            });
+        });
+
+        map.on('style.load', () => {
+            document.getElementById('CD3').addEventListener('click', function() {
+                isCD3 = !isCD3;
+                if (isCD3) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'red';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
+            });
+        });
+
+        map.on('style.load', () => {
+            document.getElementById('CD4').addEventListener('click', function() {
+                isCD4 = !isCD4;
+                if (isCD4) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'red';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
+            });
+        });
+
+        map.on('style.load', () => {
+            document.getElementById('CD5').addEventListener('click', function() {
+                isCD5 = !isCD5;
+                if (isCD5) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'red';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
+            });
+        });
+
+        map.on('style.load', () => {
+            document.getElementById('CD6').addEventListener('click', function() {
+                isCD6 = !isCD6;
+                if (isCD6) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'red';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
+            });
+        });
+
+        map.on('style.load', () => {
+            document.getElementById('CD7').addEventListener('click', function() {
+                isCD7 = !isCD7;
+                if (isCD7) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'red';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
+            });
+        });
+
+        map.on('style.load', () => {
+            document.getElementById('CD8').addEventListener('click', function() {
+                isCD8 = !isCD8;
+                if (isCD8) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'red';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
+            });
+        });
 
         if ('WebSocket' in window) {
             let ws = new WebSocket(`ws://${ipAddress}:3001/websocket`);
