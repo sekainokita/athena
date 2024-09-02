@@ -350,6 +350,7 @@ static int P_CLI_CP_ReadyV2xStatusScenario(void)
         fprintf(h_fdModelConf, "unDeviceId=%u\n", pstSvcCp->stDbV2x.unDeviceId);
         fprintf(h_fdModelConf, "pchIfaceName=%s\n", pstSvcCp->pchIfaceName);
         fprintf(h_fdModelConf, "pchIpAddr=%s\n", pstSvcCp->pchIpAddr);
+        fprintf(h_fdModelConf, "pchIpAddr=%d\n", pstSvcCp->unPort);
     }
     else
     {
@@ -369,6 +370,7 @@ static int P_CLI_CP_ReadyV2xStatusScenario(void)
                 fprintf(h_fdModelConf, "unDeviceId=%u\n", pstSvcCp->stDbV2x.unDeviceId);
                 fprintf(h_fdModelConf, "pchIfaceName=%s\n", pstSvcCp->pchIfaceName);
                 fprintf(h_fdModelConf, "pchIpAddr=%s\n", pstSvcCp->pchIpAddr);
+                fprintf(h_fdModelConf, "pchIpAddr=%d\n", pstSvcCp->unPort);
             }
         }
         else
@@ -385,6 +387,7 @@ static int P_CLI_CP_ReadyV2xStatusScenario(void)
             fprintf(h_fdModelConf, "unDeviceId=%u\n", pstSvcCp->stDbV2x.unDeviceId);
             fprintf(h_fdModelConf, "pchIfaceName=%s\n", pstSvcCp->pchIfaceName);
             fprintf(h_fdModelConf, "pchIpAddr=%s\n", pstSvcCp->pchIpAddr);
+            fprintf(h_fdModelConf, "pchIpAddr=%d\n", pstSvcCp->unPort);
         }
     }
 
