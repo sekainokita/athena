@@ -2180,26 +2180,159 @@ window.onload = function() {
             })
         });
 
-        map.on('style.load', () => {
-            document.getElementById('CD7').addEventListener('click', function() {
-                isCD7 = !isCD7;
-                if (isCD7) {
-                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
-                    this.style.color = 'white';
-                } else {
-                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-                    this.style.color = 'white';
+        const CD7Coordinates = [
+            [127.439541, 36.729890],
+            [127.439527, 36.729955],
+            [127.439535, 36.730056],
+            [127.439641, 36.730080],
+            [127.439703, 36.730085], //첫번째 노란점
+            [127.439820, 36.730091],
+            [127.439885, 36.730050], //두번째 노란점
+            [127.439991, 36.729972], //세번째 노란점
+            [127.440131, 36.729958],
+            [127.440254, 36.730017], //네번째
+            [127.440304, 36.730084], //다섯번째
+            [127.440352, 36.730148],
+            [127.440451, 36.730166] //마지막
+        ]
+
+        const CD7smoothPath = interpolateCatmullRom(CD7Coordinates, 100);
+
+        let CD7Marker = new mapboxgl.Marker({
+            element: createCD7Marker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/stop3.png')
+            }).setLngLat([127.440172, 36.729915]);
+
+        function createCD7Marker(imageUrl)
+        {
+            const CD7Container = document.createElement('div');
+            CD7Container.style.display = 'flex';
+            CD7Container.style.flexDirection = 'column';
+            CD7Container.style.alignItems = 'center';
+
+            const img = document.createElement('div');
+            img.style.backgroundImage = `url(${imageUrl})`;
+            img.style.width = '50px';
+            img.style.height = '50px';
+            img.style.backgroundSize = 'contain';
+            img.style.backgroundRepeat = 'no-repeat';
+
+            CD7Container.appendChild(img);
+            return CD7Container;
+        }
+
+        map.on('style.load', function() {
+            map.loadImage('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/arrowR.png', function(error, image)
+            {
+                if (error) {
+                    console.error('fail load image', error);
+                    return;
+                }
+                if (!map.hasImage('arrowR-icon')) {
+                    map.addImage('arrowR-icon', image);
                 }
 
-                if (vehMode === "C-VEH") {
-                    trafficLight = 'red';
-                } else if (vehMode === "A-VEH") {
-                    trafficLight = 'red';
-                } else {
-                    trafficLight = 'red';
-                }
-                updateTrafficLight(trafficLight);
-            });
+                document.getElementById('CD7').addEventListener('click', function() {
+                    isCD7 = !isCD7;
+                    if (isCD7) {
+                        this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                        this.style.color = 'white';
+                    } else {
+                        this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                        this.style.color = 'white';
+                    }
+
+                    if (vehMode === "C-VEH") {
+                        trafficLight = 'red';
+                    } else if (vehMode === "A-VEH") {
+                        trafficLight = 'red';
+                    } else {
+                        trafficLight = 'red';
+                    }
+                    updateTrafficLight(trafficLight);
+
+                    if (map.getLayer('CD7Path')) {
+                        map.setLayoutProperty('CD7Path', 'visibility', isCD7 ? 'visible' : 'none');
+                        map.setLayoutProperty('CD7PathArrows', 'visibility', isCD7 ? 'visible' : 'none');
+                    } else {
+                        map.addSource('CD7Path', {
+                            'type': 'geojson',
+                            'data': {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'LineString',
+                                    'coordinates': CD7smoothPath
+                                }
+                            }
+                        });
+
+                        map.addLayer({
+                            'id': 'CD7Path',
+                            'type': 'line',
+                            'source': 'CD7Path',
+                            'layout': {
+                                'line-join': 'round',
+                                'line-cap': 'round',
+                                'visibility': 'visible'
+                            },
+                            'paint': {
+                                'line-color': 'rgba(255, 0, 0, 0.5)',
+                                'line-width': 20,
+                                'line-blur': 0.5
+                            }
+                        });
+
+                        const CD7arrowCoordinates = [
+                            { coord: [127.439527, 36.729955], rotate: 350},
+                            { coord: [127.439535, 36.730056], rotate: 45},
+                            { coord: [127.439703, 36.730085], rotate: 90},
+                            { coord: [127.439885, 36.730050], rotate: 140},
+                            { coord: [127.439991, 36.729972], rotate: 110},
+                            { coord: [127.440254, 36.730017], rotate: 45},
+                            { coord: [127.440304, 36.730084], rotate: 30},
+                            { coord: [127.440451, 36.730166], rotate: 85}
+                        ];
+
+                        const CD7arrowFeatures = CD7arrowCoordinates.map(arrow => {
+                            return {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': arrow.coord
+                                },
+                                'properties': {
+                                    'rotate': arrow.rotate
+                                }
+                            };
+                        });
+
+                        map.addSource('CD7PathArrows', {
+                            'type': 'geojson',
+                            'data': {
+                                'type': 'FeatureCollection',
+                                'features': CD7arrowFeatures
+                            }
+                        });
+
+                        map.addLayer({
+                            'id': 'CD7PathArrows',
+                            'type': 'symbol',
+                            'source': 'CD7PathArrows',
+                            'layout': {
+                                'icon-image': 'arrowR-icon',
+                                'icon-size': 0.05,
+                                'icon-rotate': ['get', 'rotate'],
+                                'icon-allow-overlap': true,
+                                'visibility': 'visible'
+                            }
+                        });
+                    }
+                    if (isCD7) {
+                        CD7Marker.addTo(map);
+                    } else {
+                        CD7Marker.remove();
+                    }
+                });
+            })
         });
 
         map.on('style.load', () => {
