@@ -182,6 +182,8 @@ window.onload = function() {
         let NegotiationMarker = null;
         let CD2NegotiationMarker = null;
         let CD4NegotiationMarker = null;
+        let CD5CNegotiationMarker = null;
+        let CD5ANegotiationMarker = null;
 
         mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
         const map = new mapboxgl.Map({
@@ -1699,7 +1701,7 @@ window.onload = function() {
                                 'visibility': 'visible'
                             },
                             'paint': {
-                                'line-color': '#007AFF',
+                                'line-color': '#27FFFF',
                                 'line-width': 4,
                                 'line-opacity': 0.8,
                                 'line-dasharray': [0.5, 1.5]
@@ -1741,7 +1743,7 @@ window.onload = function() {
                 background.style.width = 'auto';
                 background.style.height = 'auto';
                 background.style.padding = '3px 7px';
-                background.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                background.style.backgroundColor = 'rgba(0, 204, 255, 0.8)';
                 background.style.borderRadius = '8px';
                 background.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
 
@@ -1761,7 +1763,7 @@ window.onload = function() {
             }
         });
 
-        map.on('style.load', () => {
+        map.on('style.load', function() {
             document.getElementById('CD5').addEventListener('click', function() {
                 isCD5 = !isCD5;
                 if (isCD5) {
@@ -1780,7 +1782,152 @@ window.onload = function() {
                     trafficLight = 'red';
                 }
                 updateTrafficLight(trafficLight);
+
+                if (isCD5) {
+                    const CD5CCoordinates = [
+                        [127.440227, 36.730164], //M-RSU
+                        [127.440161, 36.729833]
+                    ];
+
+                    if (!map.getSource('CD5CPath')) {
+                        map.addSource('CD5CPath', {
+                            'type': 'geojson',
+                            'data': {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'LineString',
+                                    'coordinates': CD5CCoordinates
+                                }
+                            }
+                        });
+
+                        map.addLayer({
+                            'id': 'CD5CPath',
+                            'type': 'line',
+                            'source': 'CD5CPath',
+                            'layout': {
+                                'line-join': 'round',
+                                'line-cap': 'round',
+                                'visibility': 'visible'
+                            },
+                            'paint': {
+                                'line-color': '#007AFF',
+                                'line-width': 4,
+                                'line-opacity': 0.8,
+                                'line-dasharray': [0.5, 1.5]
+                            }
+                        });
+                    }
+                    const CD5CmidPoint = [
+                        (CD5CCoordinates[0][0] + CD5CCoordinates[1][0]) / 2,
+                        (CD5CCoordinates[0][1] + CD5CCoordinates[1][1]) / 2
+                    ];
+
+                    if (!CD5CNegotiationMarker) {
+                        CD5CNegotiationMarker = new mapboxgl.Marker({element: createCustomLabelCD5()})
+                        .setLngLat(CD5CmidPoint)
+                        .addTo(map);
+                    } else {
+                        CD5CNegotiationMarker.addTo(map);
+                    }
+
+                    const CD5ACoordinates = [
+                        [127.440227, 36.730164], // M-RSU
+                        [127.439703, 36.730085]
+                    ];
+
+                    if (!map.getSource('CD5APath')) {
+                        map.addSource('CD5APath', {
+                            'type': 'geojson',
+                            'data': {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'LineString',
+                                    'coordinates': CD5ACoordinates
+                                }
+                            }
+                        });
+
+                        map.addLayer({
+                            'id': 'CD5APath',
+                            'type': 'line',
+                            'source': 'CD5APath',
+                            'layout': {
+                                'line-join': 'round',
+                                'line-cap': 'round',
+                                'visibility': 'visible'
+                            },
+                            'paint': {
+                                'line-color': '#007AFF',
+                                'line-width': 4,
+                                'line-opacity': 0.8,
+                                'line-dasharray': [0.5, 1.5]
+                            }
+                        });
+                    }
+
+                    const CD5AmidPoint = [
+                        (CD5ACoordinates[0][0] + CD5ACoordinates[1][0]) / 2,
+                        (CD5ACoordinates[0][1] + CD5ACoordinates[1][1]) / 2
+                    ];
+
+                    if (!CD5ANegotiationMarker) {
+                        CD5ANegotiationMarker = new mapboxgl.Marker({element: createCustomLabelCD5()})
+                        .setLngLat(CD5AmidPoint)
+                        .addTo(map);
+                    } else {
+                        CD5ANegotiationMarker.addTo(map);
+                    }
+                } else {
+                    if (map.getLayer('CD5CPath')) {
+                        map.removeLayer('CD5CPath');
+                        map.removeSource('CD5CPath');
+                    }
+
+                    if(CD5CNegotiationMarker) {
+                        CD5CNegotiationMarker.remove();
+                    }
+
+                    if (map.getLayer('CD5APath')) {
+                        map.removeLayer('CD5APath');
+                        map.removeSource('CD5APath');
+                    }
+
+                    if(CD5ANegotiationMarker) {
+                        CD5ANegotiationMarker.remove();
+                    }
+                }
             });
+            function createCustomLabelCD5() {
+                const CD5labelContainer = document.createElement('div');
+                CD5labelContainer.style.display = 'flex';
+                CD5labelContainer.style.flexDirection = 'column';
+                CD5labelContainer.style.alignItems = 'center';
+                CD5labelContainer.style.width = 'auto';
+
+                // 직사각형 배경
+                const background = document.createElement('div');
+                background.style.width = 'auto';
+                background.style.height = 'auto';
+                background.style.padding = '3px 7px';
+                background.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                background.style.borderRadius = '8px';
+                background.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
+
+                // 텍스트
+                const text = document.createElement('div');
+                text.innerHTML = "Road Condition Update";
+                text.style.color = 'white';
+                text.style.fontWeight = 'bold';
+                text.style.textAlign = 'center';
+                text.style.textShadow = '0 0 5px #00ccff, 0 0 10px #00ccff, 0 0 15px #00ccff';
+                text.style.fontSize = '11px';
+
+                background.appendChild(text);
+                CD5labelContainer.appendChild(background);
+
+                return CD5labelContainer;
+            }
         });
 
         map.on('style.load', () => {
