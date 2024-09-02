@@ -320,6 +320,20 @@ static int P_CLI_CP_ReadyV2xStatusScenario(void)
 
     (void)SVC_CP_ShowSettings(pstSvcCp);
 
+    nRet = SVC_CP_Open(pstSvcCp);
+    if (nRet != APP_OK)
+    {
+        PrintError("SVC_CP_Open() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    nRet = SVC_CP_GetSettings(pstSvcCp);
+    if (nRet != APP_OK)
+    {
+        PrintError("SVC_CP_GetSettings() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
     snprintf(chModelNameFile, sizeof(chModelNameFile), "%s%s", CONFIG_MODEL_NAME, MODEL_NAME_FILE_SUFFIX);
 
     h_fdModelConf = fopen(chModelNameFile, "r+");
@@ -332,6 +346,10 @@ static int P_CLI_CP_ReadyV2xStatusScenario(void)
             return APP_ERROR;
         }
         fprintf(h_fdModelConf, "model=%s\n", CONFIG_MODEL_NAME);
+        fprintf(h_fdModelConf, "pchDeviceName=%s\n", pstSvcCp->pchDeviceName);
+        fprintf(h_fdModelConf, "unDeviceId=%u\n", pstSvcCp->stDbV2x.unDeviceId);
+        fprintf(h_fdModelConf, "pchIfaceName=%s\n", pstSvcCp->pchIfaceName);
+        fprintf(h_fdModelConf, "pchIpAddr=%s\n", pstSvcCp->pchIpAddr);
     }
     else
     {
@@ -347,7 +365,26 @@ static int P_CLI_CP_ReadyV2xStatusScenario(void)
                     return APP_ERROR;
                 }
                 fprintf(h_fdModelConf, "model=%s\n", CONFIG_MODEL_NAME);
+                fprintf(h_fdModelConf, "pchDeviceName=%s\n", pstSvcCp->pchDeviceName);
+                fprintf(h_fdModelConf, "unDeviceId=%u\n", pstSvcCp->stDbV2x.unDeviceId);
+                fprintf(h_fdModelConf, "pchIfaceName=%s\n", pstSvcCp->pchIfaceName);
+                fprintf(h_fdModelConf, "pchIpAddr=%s\n", pstSvcCp->pchIpAddr);
             }
+        }
+        else
+        {
+            // If we couldn't read the existing content, rewrite the file
+            h_fdModelConf = freopen(chModelNameFile, "w", h_fdModelConf);
+            if (h_fdModelConf == NULL)
+            {
+                PrintError("Failed to reopen file: %s", chModelNameFile);
+                return APP_ERROR;
+            }
+            fprintf(h_fdModelConf, "model=%s\n", CONFIG_MODEL_NAME);
+            fprintf(h_fdModelConf, "pchDeviceName=%s\n", pstSvcCp->pchDeviceName);
+            fprintf(h_fdModelConf, "unDeviceId=%u\n", pstSvcCp->stDbV2x.unDeviceId);
+            fprintf(h_fdModelConf, "pchIfaceName=%s\n", pstSvcCp->pchIfaceName);
+            fprintf(h_fdModelConf, "pchIpAddr=%s\n", pstSvcCp->pchIpAddr);
         }
     }
 
@@ -360,27 +397,15 @@ static int P_CLI_CP_ReadyV2xStatusScenario(void)
         PrintError("h_fdModelConf is NULL!!");
     }
 
-
-    nRet = SVC_CP_Open(pstSvcCp);
-    if(nRet != APP_OK)
-    {
-        PrintError("SVC_CP_Open() is failed! [nRet:%d]", nRet);
-    }
-
-    nRet = SVC_CP_GetSettings(pstSvcCp);
-    if(nRet != APP_OK)
-    {
-        PrintError("SVC_CP_GetSettings() is failed! [nRet:%d]", nRet);
-    }
-
     nRet = SVC_CP_SetSettings(pstSvcCp);
-    if(nRet != APP_OK)
+    if (nRet != APP_OK)
     {
         PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
     }
 
     return nRet;
 }
+
 
 static int P_CLI_CP_StartV2xStatusScenario(void)
 {
