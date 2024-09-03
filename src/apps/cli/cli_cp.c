@@ -64,6 +64,15 @@ static char s_chSetIp[CLI_DB_V2X_DEFAULT_BUF_LEN];
 #define MODEL_NAME_FILE_SUFFIX ".conf"
 #define MAX_MODEL_NAME_LEN 256
 /***************************** Function Protype ******************************/
+void P_CLI_CP_WriteConfigToFile(FILE *h_fdModelConf, SVC_CP_T *pstSvcCp)
+{
+    fprintf(h_fdModelConf, "model=%s\n", CONFIG_MODEL_NAME);
+    fprintf(h_fdModelConf, "pchDeviceName=%s\n", pstSvcCp->pchDeviceName);
+    fprintf(h_fdModelConf, "unDeviceId=%u\n", pstSvcCp->stDbV2x.unDeviceId);
+    fprintf(h_fdModelConf, "pchIfaceName=%s\n", pstSvcCp->pchIfaceName);
+    fprintf(h_fdModelConf, "pchIpAddr=%s\n", pstSvcCp->pchIpAddr);
+    fprintf(h_fdModelConf, "unPort=%d\n", pstSvcCp->unPort);
+}
 
 static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
 {
@@ -261,12 +270,7 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             PrintError("Failed to open or create file: %s", chModelNameFile);
             return APP_ERROR;
         }
-        fprintf(h_fdModelConf, "model=%s\n", CONFIG_MODEL_NAME);
-        fprintf(h_fdModelConf, "pchDeviceName=%s\n", pstSvcCp->pchDeviceName);
-        fprintf(h_fdModelConf, "unDeviceId=%u\n", pstSvcCp->stDbV2x.unDeviceId);
-        fprintf(h_fdModelConf, "pchIfaceName=%s\n", pstSvcCp->pchIfaceName);
-        fprintf(h_fdModelConf, "pchIpAddr=%s\n", pstSvcCp->pchIpAddr);
-        fprintf(h_fdModelConf, "pchIpAddr=%d\n", pstSvcCp->unPort);
+        P_CLI_CP_WriteConfigToFile(h_fdModelConf, pstSvcCp);
     }
     else
     {
@@ -281,12 +285,7 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
                     PrintError("Failed to reopen file: %s", chModelNameFile);
                     return APP_ERROR;
                 }
-                fprintf(h_fdModelConf, "model=%s\n", CONFIG_MODEL_NAME);
-                fprintf(h_fdModelConf, "pchDeviceName=%s\n", pstSvcCp->pchDeviceName);
-                fprintf(h_fdModelConf, "unDeviceId=%u\n", pstSvcCp->stDbV2x.unDeviceId);
-                fprintf(h_fdModelConf, "pchIfaceName=%s\n", pstSvcCp->pchIfaceName);
-                fprintf(h_fdModelConf, "pchIpAddr=%s\n", pstSvcCp->pchIpAddr);
-                fprintf(h_fdModelConf, "pchIpAddr=%d\n", pstSvcCp->unPort);
+                P_CLI_CP_WriteConfigToFile(h_fdModelConf, pstSvcCp);
             }
         }
         else
@@ -298,12 +297,7 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
                 PrintError("Failed to reopen file: %s", chModelNameFile);
                 return APP_ERROR;
             }
-            fprintf(h_fdModelConf, "model=%s\n", CONFIG_MODEL_NAME);
-            fprintf(h_fdModelConf, "pchDeviceName=%s\n", pstSvcCp->pchDeviceName);
-            fprintf(h_fdModelConf, "unDeviceId=%u\n", pstSvcCp->stDbV2x.unDeviceId);
-            fprintf(h_fdModelConf, "pchIfaceName=%s\n", pstSvcCp->pchIfaceName);
-            fprintf(h_fdModelConf, "pchIpAddr=%s\n", pstSvcCp->pchIpAddr);
-            fprintf(h_fdModelConf, "pchIpAddr=%d\n", pstSvcCp->unPort);
+            P_CLI_CP_WriteConfigToFile(h_fdModelConf, pstSvcCp);
         }
     }
 
