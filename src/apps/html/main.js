@@ -1356,8 +1356,8 @@ window.onload = function() {
                         [127.439703, 36.730085]
                     ];
 
-                    if (!map.getSource('CD2Path')) {
-                        map.addSource('CD2Path', {
+                    if (!map.getSource('CD2V2XPath')) {
+                        map.addSource('CD2V2XPath', {
                             'type': 'geojson',
                             'data': {
                                 'type': 'Feature',
@@ -1369,9 +1369,9 @@ window.onload = function() {
                         });
 
                         map.addLayer({
-                            'id': 'CD2Path',
+                            'id': 'CD2V2XPath',
                             'type': 'line',
-                            'source': 'CD2Path',
+                            'source': 'CD2V2XPath',
                             'layout': {
                                 'line-join': 'round',
                                 'line-cap': 'round',
@@ -1398,9 +1398,9 @@ window.onload = function() {
                         CD2NegotiationMarker.addTo(map);
                     }
                 } else {
-                    if (map.getLayer('CD2Path')) {
-                        map.removeLayer('CD2Path');
-                        map.removeSource('CD2Path');
+                    if (map.getLayer('CD2V2XPath')) {
+                        map.removeLayer('CD2V2XPath');
+                        map.removeSource('CD2V2XPath');
                     }
 
                     if (CD2NegotiationMarker) {
@@ -3440,6 +3440,11 @@ window.onload = function() {
             // CB6이 활성화된 경우 경로 업데이트
             if (isCB6) {
                 updateV2XPath('CB6V2XPath', CB6NegotiationMarker);
+            }
+
+            // CD2가 활성화된 경우 경로 업데이트
+            if (isCD2) {
+                updateV2XPath('CD2V2XPath', CD2NegotiationMarker);
             }
         }
 
