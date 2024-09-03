@@ -2019,7 +2019,7 @@ window.onload = function() {
                     if (vehMode === "C-VEH") {
                         trafficLight = 'red';
                     } else if (vehMode === "A-VEH") {
-                        trafficLight = 'red';
+                        trafficLight = 'green';
                     } else {
                         trafficLight = 'red';
                     }
