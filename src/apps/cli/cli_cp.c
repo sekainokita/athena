@@ -70,12 +70,21 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
     int32_t nRet = APP_OK;
     SVC_CP_T *pstSvcCp;
     char *pcCmd;
+    char chModelNameFile[MAX_MODEL_NAME_LEN] = {0};
+    FILE *h_fdModelConf;
+
     pstSvcCp = APP_GetSvcCpInstance();
 
     if(pstCmd == NULL)
     {
         PrintError("pstCmd == NULL!!");
         return CLI_CMD_Showusage(pstCmd);
+    }
+
+    nRet = SVC_CP_GetSettings(pstSvcCp);
+    if(nRet != APP_OK)
+    {
+        PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
     }
 
     pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
@@ -91,12 +100,6 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
         {
             PrintError("pcCmd == NULL!!");
             return CLI_CMD_Showusage(pstCmd);
-        }
-
-        nRet = SVC_CP_GetSettings(pstSvcCp);
-        if(nRet != APP_OK)
-        {
-            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
         }
 
         pstSvcCp->stDbV2x.unDeviceId = (uint32_t)atoi(pcCmd);
@@ -129,12 +132,6 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             return CLI_CMD_Showusage(pstCmd);
         }
 
-        nRet = SVC_CP_GetSettings(pstSvcCp);
-        if(nRet != APP_OK)
-        {
-            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
-        }
-
         sprintf(s_chSetEth, "%s", pcCmd);
         pstSvcCp->pchIfaceName = s_chSetEth;
 
@@ -154,12 +151,6 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
         {
             PrintError("pcCmd == NULL!!");
             return CLI_CMD_Showusage(pstCmd);
-        }
-
-        nRet = SVC_CP_GetSettings(pstSvcCp);
-        if(nRet != APP_OK)
-        {
-            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
         }
 
         pstSvcCp->stMsgManagerTx.unTxDelay = (uint16_t)atoi(pcCmd);
@@ -183,12 +174,6 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             return CLI_CMD_Showusage(pstCmd);
         }
 
-        nRet = SVC_CP_GetSettings(pstSvcCp);
-        if(nRet != APP_OK)
-        {
-            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
-        }
-
         pstSvcCp->stDbV2xStatusTx.unTxVehicleSpeed = (uint32_t)atoi(pcCmd);
 
         PrintDebug("SET:unTxVehicleSpeed[%d]", pstSvcCp->stDbV2xStatusTx.unTxVehicleSpeed);
@@ -206,12 +191,6 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
         {
             PrintError("pcCmd == NULL!!");
             return CLI_CMD_Showusage(pstCmd);
-        }
-
-        nRet = SVC_CP_GetSettings(pstSvcCp);
-        if(nRet != APP_OK)
-        {
-            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
         }
 
         pstSvcCp->stDbV2x.eRegionId = (uint32_t)atoi(pcCmd);
@@ -234,12 +213,6 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             return CLI_CMD_Showusage(pstCmd);
         }
 
-        nRet = SVC_CP_GetSettings(pstSvcCp);
-        if(nRet != APP_OK)
-        {
-            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
-        }
-
         sprintf(s_chSetIp, "%s", pcCmd);
         pstSvcCp->pchIpAddr = s_chSetIp;
 
@@ -260,12 +233,6 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             return CLI_CMD_Showusage(pstCmd);
         }
 
-        nRet = SVC_CP_GetSettings(pstSvcCp);
-        if(nRet != APP_OK)
-        {
-            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
-        }
-
         pstSvcCp->unPort = (uint32_t)atoi(pcCmd);
 
         PrintDebug("SET:port[%d]", pstSvcCp->unPort);
@@ -281,57 +248,6 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
     {
         PrintWarn("unknown set type");
         nRet = APP_ERROR;
-    }
-
-    return nRet;
-}
-
-static int P_CLI_CP_CheckV2xStatusScenario(void)
-{
-    int32_t nRet = APP_OK;
-    SVC_CP_T *pstSvcCp;
-    pstSvcCp = APP_GetSvcCpInstance();
-
-    nRet = SVC_CP_GetSettings(pstSvcCp);
-    if(nRet != APP_OK)
-    {
-        PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
-    }
-
-    (void)SVC_CP_ShowSettings(pstSvcCp);
-
-    return nRet;
-}
-
-static int P_CLI_CP_ReadyV2xStatusScenario(void)
-{
-    int32_t nRet = APP_OK;
-    SVC_CP_T *pstSvcCp;
-    char chModelNameFile[MAX_MODEL_NAME_LEN] = {0};
-    FILE *h_fdModelConf;
-
-    pstSvcCp = APP_GetSvcCpInstance();
-
-    if (pstSvcCp == NULL)
-    {
-        PrintError("Failed to get service control point instance.");
-        return APP_ERROR;
-    }
-
-    (void)SVC_CP_ShowSettings(pstSvcCp);
-
-    nRet = SVC_CP_Open(pstSvcCp);
-    if (nRet != APP_OK)
-    {
-        PrintError("SVC_CP_Open() is failed! [nRet:%d]", nRet);
-        return nRet;
-    }
-
-    nRet = SVC_CP_GetSettings(pstSvcCp);
-    if (nRet != APP_OK)
-    {
-        PrintError("SVC_CP_GetSettings() is failed! [nRet:%d]", nRet);
-        return nRet;
     }
 
     snprintf(chModelNameFile, sizeof(chModelNameFile), "%s%s", CONFIG_MODEL_NAME, MODEL_NAME_FILE_SUFFIX);
@@ -398,6 +314,55 @@ static int P_CLI_CP_ReadyV2xStatusScenario(void)
     else
     {
         PrintError("h_fdModelConf is NULL!!");
+    }
+
+    return nRet;
+}
+
+static int P_CLI_CP_CheckV2xStatusScenario(void)
+{
+    int32_t nRet = APP_OK;
+    SVC_CP_T *pstSvcCp;
+    pstSvcCp = APP_GetSvcCpInstance();
+
+    nRet = SVC_CP_GetSettings(pstSvcCp);
+    if(nRet != APP_OK)
+    {
+        PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+    }
+
+    (void)SVC_CP_ShowSettings(pstSvcCp);
+
+    return nRet;
+}
+
+static int P_CLI_CP_ReadyV2xStatusScenario(void)
+{
+    int32_t nRet = APP_OK;
+    SVC_CP_T *pstSvcCp;
+
+    pstSvcCp = APP_GetSvcCpInstance();
+
+    if (pstSvcCp == NULL)
+    {
+        PrintError("Failed to get service control point instance.");
+        return APP_ERROR;
+    }
+
+    (void)SVC_CP_ShowSettings(pstSvcCp);
+
+    nRet = SVC_CP_Open(pstSvcCp);
+    if (nRet != APP_OK)
+    {
+        PrintError("SVC_CP_Open() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
+    nRet = SVC_CP_GetSettings(pstSvcCp);
+    if (nRet != APP_OK)
+    {
+        PrintError("SVC_CP_GetSettings() is failed! [nRet:%d]", nRet);
+        return nRet;
     }
 
     nRet = SVC_CP_SetSettings(pstSvcCp);
