@@ -154,6 +154,32 @@ window.onload = function() {
         let s_unTxDevId, s_nTxLatitude, s_nTxLongitude, s_unTxVehicleHeading, s_unTxVehicleSpeed;
         let s_unPdr, s_ulLatencyL1, s_ulTotalPacketCnt, s_unSeqNum;
 
+        function updateV2XPath(pathId, marker) {
+            const newCoordinates = [
+                [vehicleLongitude0, vehicleLatitude0],
+                [vehicleLongitude1, vehicleLatitude1]
+            ];
+
+            if (map.getSource(pathId)) {
+                map.getSource(pathId).setData({
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'LineString',
+                        'coordinates': newCoordinates
+                    }
+                });
+
+                // 중간 지점 마커 업데이트
+                const midPoint = [
+                    (newCoordinates[0][0] + newCoordinates[1][0]) / 2,
+                    (newCoordinates[0][1] + newCoordinates[1][1]) / 2
+                ];
+                if (marker) {
+                    marker.setLngLat(midPoint);
+                }
+            }
+        }
+
         let s_unTempTxCnt = 0;
         let isPathPlan = false;
         let isCvLineEnabled = false;
@@ -178,8 +204,8 @@ window.onload = function() {
         let workZoneMarker = new mapboxgl.Marker({element: createWorkZoneMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/work-zone.png')});
         let mrsuMarker = new mapboxgl.Marker({element: createMrsuMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/m-rsu-front.png')});
         let ioniqMarker = new mapboxgl.Marker({element: createIoniqMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq-electric-sky.png')});
-        let V2XLabelMarker = null;
-        let NegotiationMarker = null;
+        let CB3NegotiationMarker = null;
+        let CB4NegotiationMarker = null;
         let CD2NegotiationMarker = null;
         let CD4NegotiationMarker = null;
         let CD5CNegotiationMarker = null;
@@ -731,17 +757,26 @@ window.onload = function() {
                     if (map.getLayer('CB3Path')) {
                         map.setLayoutProperty('CB3Path', 'visibility', isCB3 ? 'visible' : 'none');
                         map.setLayoutProperty('CB3Arrows', 'visibility', isCB3 ? 'visible' : 'none');
-                        map.setLayoutProperty('V2XPath', 'visibility', isCB3 ? 'visible' : 'none');
+                        map.setLayoutProperty('CB3V2XPath', 'visibility', isCB3 ? 'visible' : 'none');
+
+                        if (isCB3) {
+                            updateV2XPath();
+                        }
 
                         // V2XLabel 표시 또는 제거
-                        if (V2XLabelMarker) {
+                        if (CB3NegotiationMarker) {
                             if (isCB3) {
-                                V2XLabelMarker.addTo(map);  // 마커 추가
+                                CB3NegotiationMarker.addTo(map);  // 마커 추가
                             } else {
-                                V2XLabelMarker.remove();  // 마커 제거
+                                CB3NegotiationMarker.remove();  // 마커 제거
                             }
                         }
                     } else {
+                        initializeCB3Path();
+                    }
+                });
+
+                function initializeCB3Path() {
                         const CB3Coordinates = [
                             { coord: [127.440170, 36.729793] },
                             { coord: [127.440157, 36.729847], rotate: 0 },
@@ -820,26 +855,21 @@ window.onload = function() {
                             }
                         });
 
-                        const newCoordinates = [
-                            [127.440166, 36.729791],
-                            [127.439703, 36.730085]
-                        ];
-
-                        map.addSource('V2XPath', {
+                        map.addSource('CB3V2XPath', {
                             'type': 'geojson',
                             'data': {
                                 'type': 'Feature',
                                 'geometry': {
                                     'type': 'LineString',
-                                    'coordinates': newCoordinates
+                                    'coordinates': [[vehicleLongitude0, vehicleLatitude0], [vehicleLongitude1, vehicleLatitude1]]
                                 }
                             }
                         });
 
                         map.addLayer({
-                            'id': 'V2XPath',
+                            'id': 'CB3V2XPath',
                             'type': 'line',
-                            'source': 'V2XPath',
+                            'source': 'CB3V2XPath',
                             'layout': {
                                 'line-join': 'round',
                                 'line-cap': 'round',
@@ -854,16 +884,15 @@ window.onload = function() {
                         });
 
                         const midPoint = [
-                            (newCoordinates[0][0] + newCoordinates[1][0]) / 2,
-                            (newCoordinates[0][1] + newCoordinates[1][1]) / 2
+                            (vehicleLongitude0 + vehicleLongitude1) / 2,
+                            (vehicleLatitude0 + vehicleLatitude1) / 2
                         ];
 
                         // 커스텀 마커 생성 및 지도에 추가
-                        V2XLabelMarker = new mapboxgl.Marker({element: createCustomLabel()})
+                        CB3NegotiationMarker = new mapboxgl.Marker({element: createCustomLabel()})
                             .setLngLat(midPoint)
                             .addTo(map);
                     }
-                });
 
                 function createCustomLabel() {
                     const labelContainer = document.createElement('div');
@@ -904,9 +933,19 @@ window.onload = function() {
                 if (isCB4) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
+                    updateCB4PathAndMarker();
                 } else {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
+
+                    if (map.getLayer('CB4V2XPath')) {
+                        map.removeLayer('CB4V2XPath');
+                        map.removeSource('CB4V2XPath');
+                    }
+
+                    if (CB4NegotiationMarker) {
+                        CB4NegotiationMarker.remove();
+                    }
                 }
 
                 if (vehMode === "C-VEH") {
@@ -917,15 +956,16 @@ window.onload = function() {
                     trafficLight = 'red';
                 }
                 updateTrafficLight(trafficLight);
+            });
 
-                if (isCB4) {
-                    const CB4Coordinates = [
-                        [127.440170, 36.729793],
-                        [127.439703, 36.730085]
+            function updateCB4PathAndMarker() {
+                    let CB4Coordinates = [
+                        [vehicleLongitude0, vehicleLatitude0],
+                        [vehicleLongitude1, vehicleLatitude1]
                     ];
 
-                    if (!map.getSource('CB4Path')) {
-                        map.addSource('CB4Path', {
+                    if (!map.getSource('CB4V2XPath')) {
+                        map.addSource('CB4V2XPath', {
                             'type': 'geojson',
                             'data': {
                                 'type': 'Feature',
@@ -937,9 +977,9 @@ window.onload = function() {
                         });
 
                         map.addLayer({
-                            'id': 'CB4Path',
+                            'id': 'CB4V2XPath',
                             'type': 'line',
-                            'source': 'CB4Path',
+                            'source': 'CB4V2XPath',
                             'layout': {
                                 'line-join': 'round',
                                 'line-cap': 'round',
@@ -952,30 +992,30 @@ window.onload = function() {
                                 'line-dasharray': [0.5, 1.5]
                             }
                         });
+                    } else {
+                        map.getSource('CB4V2XPath').setData({
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'LineString',
+                                'coordinates': CB4Coordinates
                     }
+                });
+            }
                     const midPoint = [
                         (CB4Coordinates[0][0] + CB4Coordinates[1][0]) / 2,
                         (CB4Coordinates[0][1] + CB4Coordinates[1][1]) / 2
                     ];
 
-                    if (!NegotiationMarker) {
-                        NegotiationMarker = new mapboxgl.Marker({element: createCustomLabelCB4()})
+                    if (!CB4NegotiationMarker) {
+                        CB4NegotiationMarker = new mapboxgl.Marker({element: createCustomLabelCB4()})
                         .setLngLat(midPoint)
                         .addTo(map);
                     } else {
-                        NegotiationMarker.addTo(map);
-                    }
-                } else {
-                    if (map.getLayer('CB4Path')) {
-                        map.removeLayer('CB4Path');
-                        map.removeSource('CB4Path');
-                    }
-
-                    if (NegotiationMarker) {
-                        NegotiationMarker.remove();
+                        CB4NegotiationMarker.setLngLat(midPoint);
+                        CB4NegotiationMarker.addTo(map);
                     }
                 }
-            });
+
             function createCustomLabelCB4() {
                 const labelContainer = document.createElement('div');
                 labelContainer.style.display = 'flex';
@@ -3390,6 +3430,15 @@ window.onload = function() {
 
             if(isVisiblePath) {
                 updateGpsPath(coordinates); // 실제 GPS 좌표를 경로로 업데이트
+            }
+
+            // CB3이 활성화된 경우 경로 업데이트
+            if (isCB3) {
+                updateV2XPath('CB3V2XPath', CB3NegotiationMarker);
+            }
+
+            if (isCB4) {
+                updateV2XPath('CB4V2XPath', CB4NegotiationMarker);
             }
         }
 
