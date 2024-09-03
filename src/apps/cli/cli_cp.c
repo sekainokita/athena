@@ -59,10 +59,6 @@ static char s_chSetEth[CLI_DB_V2X_DEFAULT_BUF_LEN];
 static char s_chSetIp[CLI_DB_V2X_DEFAULT_BUF_LEN];
 #endif
 
-#define MODEL_PREFIX "model="
-#define MODEL_PREFIX_LEN (sizeof(MODEL_PREFIX) - 1)
-#define MODEL_NAME_FILE_SUFFIX ".conf"
-#define MAX_MODEL_NAME_LEN 256
 /***************************** Function Protype ******************************/
 void P_CLI_CP_WriteConfigToFile(FILE *h_fdModelConf, SVC_CP_T *pstSvcCp)
 {
@@ -345,13 +341,6 @@ static int P_CLI_CP_ReadyV2xStatusScenario(void)
 
     (void)SVC_CP_ShowSettings(pstSvcCp);
 
-    nRet = SVC_CP_Open(pstSvcCp);
-    if (nRet != APP_OK)
-    {
-        PrintError("SVC_CP_Open() is failed! [nRet:%d]", nRet);
-        return nRet;
-    }
-
     nRet = SVC_CP_GetSettings(pstSvcCp);
     if (nRet != APP_OK)
     {
@@ -359,10 +348,24 @@ static int P_CLI_CP_ReadyV2xStatusScenario(void)
         return nRet;
     }
 
+    nRet = SVC_CP_UpdateSettings(pstSvcCp);
+    if (nRet != APP_OK)
+    {
+        PrintError("SVC_CP_UpdateSettings() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
     nRet = SVC_CP_SetSettings(pstSvcCp);
     if (nRet != APP_OK)
     {
         PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+    }
+
+    nRet = SVC_CP_Open(pstSvcCp);
+    if (nRet != APP_OK)
+    {
+        PrintError("SVC_CP_Open() is failed! [nRet:%d]", nRet);
+        return nRet;
     }
 
     return nRet;
