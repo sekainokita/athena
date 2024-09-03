@@ -175,7 +175,7 @@ window.onload = function() {
                     (V2VCoordinates[0][1] + V2VCoordinates[1][1]) / 2
                 ];
                 if (marker) {
-                    marker.setLngLat(midPoint);
+                    marker.setLngLat(midPoint).addTo(map);
                 }
             }
         }
@@ -203,7 +203,7 @@ window.onload = function() {
 
                 // 마커 위치를 차량 위치에 맞게 업데이트
                 if (marker) {
-                    marker.setLngLat(midPoint);
+                    marker.setLngLat(midPoint).addTo(map);
                 }
             }
         }
@@ -1899,10 +1899,9 @@ window.onload = function() {
                         CD5CNegotiationMarker.addTo(map);
                     }
 
-                    const CD5ACoordinates = [
-                        [127.440227, 36.730164], // M-RSU
-                        [127.439703, 36.730085]
-                    ];
+                    if (!CD5ANegotiationMarker) {
+                        CD5ANegotiationMarker = new mapboxgl.Marker({element: createCustomLabelCD5()});
+                    }
 
                     if (!map.getSource('CD5APath')) {
                         map.addSource('CD5APath', {
@@ -1911,7 +1910,10 @@ window.onload = function() {
                                 'type': 'Feature',
                                 'geometry': {
                                     'type': 'LineString',
-                                    'coordinates': CD5ACoordinates
+                                    'coordinates': [
+                                        [vehicleLongitude0, vehicleLatitude0], // 실시간 차량 위치
+                                        [127.440227, 36.730164]
+                                    ]
                                 }
                             }
                         });
@@ -1934,18 +1936,8 @@ window.onload = function() {
                         });
                     }
 
-                    const CD5AmidPoint = [
-                        (CD5ACoordinates[0][0] + CD5ACoordinates[1][0]) / 2,
-                        (CD5ACoordinates[0][1] + CD5ACoordinates[1][1]) / 2
-                    ];
+                    updateV2IPath('CD5APath', CD5ANegotiationMarker);
 
-                    if (!CD5ANegotiationMarker) {
-                        CD5ANegotiationMarker = new mapboxgl.Marker({element: createCustomLabelCD5()})
-                        .setLngLat(CD5AmidPoint)
-                        .addTo(map);
-                    } else {
-                        CD5ANegotiationMarker.addTo(map);
-                    }
                 } else {
                     if (map.getLayer('CD5CPath')) {
                         map.removeLayer('CD5CPath');
@@ -3478,6 +3470,10 @@ window.onload = function() {
 
             if (isCD4) {
                 updateV2IPath('CD4V2IPath', CD4NegotiationMarker);
+            }
+
+            if (isCD5) {
+                updateV2IPath('CD5APath', CD5ANegotiationMarker);
             }
         }
 
