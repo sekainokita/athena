@@ -206,6 +206,7 @@ window.onload = function() {
         let ioniqMarker = new mapboxgl.Marker({element: createIoniqMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq-electric-sky.png')});
         let CB3NegotiationMarker = null;
         let CB4NegotiationMarker = null;
+        let CB6NegotiationMarker = null;
         let CD2NegotiationMarker = null;
         let CD4NegotiationMarker = null;
         let CD5CNegotiationMarker = null;
@@ -759,10 +760,6 @@ window.onload = function() {
                         map.setLayoutProperty('CB3Arrows', 'visibility', isCB3 ? 'visible' : 'none');
                         map.setLayoutProperty('CB3V2XPath', 'visibility', isCB3 ? 'visible' : 'none');
 
-                        if (isCB3) {
-                            updateV2XPath();
-                        }
-
                         // V2XLabel 표시 또는 제거
                         if (CB3NegotiationMarker) {
                             if (isCB3) {
@@ -1104,8 +1101,6 @@ window.onload = function() {
             element: createCB6Marker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/go-straight.png')
             }).setLngLat([127.440172, 36.729915]);
 
-        let customMarkerCB6 = null;
-
         map.on('style.load', () => {
             document.getElementById('CB6').addEventListener('click', function() {
                 isCB6 = !isCB6;
@@ -1122,8 +1117,8 @@ window.onload = function() {
                         [127.440553, 36.730175]
                     ];
 
-                    if (!map.getSource('CB6Path')) {
-                        map.addSource('CB6Path', {
+                    if (!map.getSource('CB6V2XPath')) {
+                        map.addSource('CB6V2XPath', {
                             'type': 'geojson',
                             'data': {
                                 'type': 'Feature',
@@ -1135,9 +1130,9 @@ window.onload = function() {
                         });
 
                         map.addLayer({
-                            'id': 'CB6Path',
+                            'id': 'CB6V2XPath',
                             'type': 'line',
-                            'source': 'CB6Path',
+                            'source': 'CB6V2XPath',
                             'layout': {
                                 'line-join': 'round',
                                 'line-cap': 'round',
@@ -1157,12 +1152,12 @@ window.onload = function() {
                         (CB6Coordinates[0][1] + CB6Coordinates[1][1]) / 2
                     ];
 
-                    if (!customMarkerCB6) {
-                        customMarkerCB6 = new mapboxgl.Marker({element: createCustomLabelCB6()})
+                    if (!CB6NegotiationMarker) {
+                        CB6NegotiationMarker = new mapboxgl.Marker({element: createCustomLabelCB6()})
                         .setLngLat(midPoint)
                         .addTo(map);
                     } else {
-                        customMarkerCB6.addTo(map);
+                        CB6NegotiationMarker.addTo(map);
                     }
                 } else {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
@@ -1172,13 +1167,13 @@ window.onload = function() {
                         CB6Marker.remove();
                     }
 
-                    if (map.getLayer('CB6Path')) {
-                        map.removeLayer('CB6Path');
-                        map.removeSource('CB6Path');
+                    if (map.getLayer('CB6V2XPath')) {
+                        map.removeLayer('CB6V2XPath');
+                        map.removeSource('CB6V2XPath');
                     }
 
-                    if (customMarkerCB6) {
-                        customMarkerCB6.remove();
+                    if (CB6NegotiationMarker) {
+                        CB6NegotiationMarker.remove();
                     }
                 }
 
@@ -3437,8 +3432,14 @@ window.onload = function() {
                 updateV2XPath('CB3V2XPath', CB3NegotiationMarker);
             }
 
+            // CB4가 활성화된 경우 경로 업데이트
             if (isCB4) {
                 updateV2XPath('CB4V2XPath', CB4NegotiationMarker);
+            }
+
+            // CB6이 활성화된 경우 경로 업데이트
+            if (isCB6) {
+                updateV2XPath('CB6V2XPath', CB6NegotiationMarker);
             }
         }
 
