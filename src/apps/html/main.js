@@ -239,6 +239,7 @@ window.onload = function() {
         let CD4NegotiationMarker = null;
         let CD5CNegotiationMarker = null;
         let CD5ANegotiationMarker = null;
+        let CD8NegotiationMarker = null;
 
         mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
         const map = new mapboxgl.Map({
@@ -2403,7 +2404,6 @@ window.onload = function() {
 
         let CD8Marker = null;
         let CD8addMarker = null;
-        let customMarkerCD8 = null;
 
         map.on('style.load', function() {
             document.getElementById('CD8').addEventListener('click', function() {
@@ -2428,27 +2428,29 @@ window.onload = function() {
                         CD8addMarker.addTo(map);
                     }
 
-                    const CD8Coordinates = [
-                        [127.440227, 36.730164],
-                        [127.440553, 36.730175]
-                    ];
+                    if (!CD8NegotiationMarker) {
+                        CD8NegotiationMarker = new mapboxgl.Marker({element: createCustomLabelCD8()});
+                    }
 
-                    if (!map.getSource('CD8Path')) {
-                        map.addSource('CD8Path', {
+                    if (!map.getSource('CD8V2IPath')) {
+                        map.addSource('CD8V2IPath', {
                             'type': 'geojson',
                             'data': {
                                 'type': 'Feature',
                                 'geometry': {
                                     'type': 'LineString',
-                                    'coordinates': CD8Coordinates
+                                    'coordinates': [
+                                        [vehicleLongitude0, vehicleLatitude0], // 실시간 차량 위치
+                                        [127.440227, 36.730164]
+                                    ]
                                 }
                             }
                         });
 
                         map.addLayer({
-                            'id': 'CD8Path',
+                            'id': 'CD8V2IPath',
                             'type': 'line',
-                            'source': 'CD8Path',
+                            'source': 'CD8V2IPath',
                             'layout': {
                                 'line-join': 'round',
                                 'line-cap': 'round',
@@ -2462,19 +2464,7 @@ window.onload = function() {
                             }
                         });
                     }
-
-                    const CD8midPoint = [
-                        (CD8Coordinates[0][0] + CD8Coordinates[1][0]) / 2,
-                        (CD8Coordinates[0][1] + CD8Coordinates[1][1]) / 2
-                    ];
-
-                    if (!customMarkerCD8) {
-                        customMarkerCD8 = new mapboxgl.Marker({element: createCustomLabelCD8()})
-                        .setLngLat(CD8midPoint)
-                        .addTo(map);
-                    } else {
-                        customMarkerCD8.addTo(map);
-                    }
+                    updateV2IPath('CD8V2IPath', CD8NegotiationMarker);
                 } else {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
@@ -2487,13 +2477,13 @@ window.onload = function() {
                         CD8addMarker.remove();
                     }
 
-                    if (map.getLayer('CD8Path')) {
-                        map.removeLayer('CD8Path');
-                        map.removeSource('CD8Path');
+                    if (map.getLayer('CD8V2IPath')) {
+                        map.removeLayer('CD8V2IPath');
+                        map.removeSource('CD8V2IPath');
                     }
 
-                    if (customMarkerCD8) {
-                        customMarkerCD8.remove();
+                    if (CD8NegotiationMarker) {
+                        CD8NegotiationMarker.remove();
                     }
                 }
 
@@ -3474,6 +3464,10 @@ window.onload = function() {
 
             if (isCD5) {
                 updateV2IPath('CD5APath', CD5ANegotiationMarker);
+            }
+
+            if (isCD8) {
+                updateV2IPath('CD8V2IPath', CD8NegotiationMarker);
             }
         }
 
