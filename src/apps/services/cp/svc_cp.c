@@ -60,6 +60,7 @@
 
 /***************************** Definition ************************************/
 #define SVC_CP_GPS_SPEED_CAL_CNT_MAX    (10)
+#define SVC_CP_SET_BUF_SIZE             (256)
 
 /***************************** Enum and Structure ****************************/
 
@@ -87,6 +88,10 @@ static char s_chStrBufDevId[SVC_CP_STR_BUF_LEN];
 static char s_chStrBufStartTime[SVC_CP_STR_BUF_LEN];
 static char s_chStrBufEndTime[SVC_CP_STR_BUF_LEN];
 static char s_chStrBufTotalTime[SVC_CP_STR_BUF_LEN];
+
+static char s_chDeviceName[SVC_CP_SET_BUF_SIZE] = DB_MGR_DEFAULT_COMM_DEV_ID;
+static char s_chIfaceName[SVC_CP_SET_BUF_SIZE] = SVC_CP_DEFAULT_ETH_DEV;
+static char s_chIpAddr[SVC_CP_SET_BUF_SIZE] = SVC_CP_DEFAULT_IP;
 
 /***************************** Function  *************************************/
 
@@ -119,6 +124,87 @@ int32_t P_SVC_CP_GetSettings(SVC_CP_T *pstSvcCp)
 
     return nRet;
 }
+
+int32_t SVC_CP_UpdateSettings(SVC_CP_T *pstSvcCp)
+{
+    int32_t nRet = APP_ERROR;
+    char chModelNameFile[MAX_MODEL_NAME_LEN] = {0};
+    FILE *h_fdModelConf;
+
+    if(pstSvcCp == NULL)
+    {
+        PrintError("pstSvcCp == NULL!!");
+        return nRet;
+    }
+
+    snprintf(chModelNameFile, sizeof(chModelNameFile), "%s%s", CONFIG_MODEL_NAME, MODEL_NAME_FILE_SUFFIX);
+
+    char chBuf[SVC_CP_SET_BUF_SIZE] = {0};
+
+    h_fdModelConf = fopen(chModelNameFile, "r");
+    if (h_fdModelConf != NULL)
+    {
+        char chLine[MAX_MODEL_NAME_LEN] = {0};
+
+        while (fgets(chLine, sizeof(chLine), h_fdModelConf) != NULL)
+        {
+            size_t len = strcspn(chLine, "\n"); // \n 위치 찾기
+            chLine[len] = '\0'; // \n을 null-terminator로 대체
+
+            if (strncmp(chLine, MODEL_PREFIX, MODEL_PREFIX_LEN) == 0)
+            {
+                strncpy(chBuf, chLine + MODEL_PREFIX_LEN, sizeof(chBuf) - 1);
+                PrintTrace("Model Name: %s", chBuf);
+            }
+            else if (strncmp(chLine, DEVICE_NAME_PREFIX, DEVICE_NAME_PREFIX_LEN) == 0)
+            {
+                strncpy(chBuf, chLine + DEVICE_NAME_PREFIX_LEN, sizeof(chBuf) - 1);
+                strncpy(s_chDeviceName, chBuf, SVC_CP_SET_BUF_SIZE); // Static buffer 사용
+                pstSvcCp->pchDeviceName = s_chDeviceName;
+                PrintTrace("Updated Device Name: %s", pstSvcCp->pchDeviceName);
+            }
+            else if (strncmp(chLine, DEVICE_ID_PREFIX, DEVICE_ID_PREFIX_LEN) == 0)
+            {
+                strncpy(chBuf, chLine + DEVICE_ID_PREFIX_LEN, sizeof(chBuf) - 1);
+                pstSvcCp->stDbV2x.unDeviceId = (uint32_t)atoi(chBuf);
+                PrintTrace("Updated Device ID: %u", pstSvcCp->stDbV2x.unDeviceId);
+            }
+            else if (strncmp(chLine, IFACE_NAME_PREFIX, IFACE_NAME_PREFIX_LEN) == 0)
+            {
+                strncpy(chBuf, chLine + IFACE_NAME_PREFIX_LEN, sizeof(chBuf) - 1);
+                strncpy(s_chIfaceName, chBuf, SVC_CP_SET_BUF_SIZE); // Static buffer 사용
+                pstSvcCp->pchIfaceName = s_chIfaceName;
+                PrintTrace("Updated Interface Name: %s", pstSvcCp->pchIfaceName);
+            }
+            else if (strncmp(chLine, IP_ADDR_PREFIX, IP_ADDR_PREFIX_LEN) == 0)
+            {
+                strncpy(chBuf, chLine + IP_ADDR_PREFIX_LEN, sizeof(chBuf) - 1);
+                strncpy(s_chIpAddr, chBuf, SVC_CP_SET_BUF_SIZE); // Static buffer 사용
+                pstSvcCp->pchIpAddr = s_chIpAddr;
+                PrintTrace("Updated IP Address: %s", pstSvcCp->pchIpAddr);
+            }
+            else if (strncmp(chLine, PORT_PREFIX, PORT_PREFIX_LEN) == 0)
+            {
+                strncpy(chBuf, chLine + PORT_PREFIX_LEN, sizeof(chBuf) - 1);
+                pstSvcCp->unPort = (uint32_t)atoi(chBuf);
+                PrintTrace("Updated Port: %d", pstSvcCp->unPort);
+            }
+        }
+
+        fclose(h_fdModelConf);
+    }
+    else
+    {
+        PrintWarn("chModelNameFile[%s] is not exist!", chModelNameFile);
+    }
+
+    nRet = APP_OK;
+
+    PrintDebug("SVC_CP_UpdateSettings() set is finished.[eth:%s,ip:%s,port:%d]", pstSvcCp->pchIfaceName, pstSvcCp->pchIpAddr, pstSvcCp->unPort);
+
+    return nRet;
+}
+
 
 int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
 {
@@ -204,6 +290,7 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
 
     return nRet;
 }
+
 static int32_t P_SVC_CP_Start(SVC_CP_EVENT_MSG_T *stEventMsg)
 {
     int32_t nRet = APP_ERROR;

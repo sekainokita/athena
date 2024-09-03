@@ -97,6 +97,23 @@
 #define ON                  true
 #define OFF                 false
 
+#define MODEL_PREFIX            "model="
+#define DEVICE_NAME_PREFIX       "pchDeviceName="
+#define DEVICE_ID_PREFIX        "unDeviceId="
+#define IFACE_NAME_PREFIX       "pchIfaceName="
+#define IP_ADDR_PREFIX          "pchIpAddr="
+#define PORT_PREFIX             "unPort="
+
+#define MODEL_PREFIX_LEN        (sizeof(MODEL_PREFIX) - 1)
+#define DEVICE_NAME_PREFIX_LEN  (sizeof(DEVICE_NAME_PREFIX) - 1)
+#define DEVICE_ID_PREFIX_LEN    (sizeof(DEVICE_ID_PREFIX) - 1)
+#define IFACE_NAME_PREFIX_LEN   (sizeof(IFACE_NAME_PREFIX) - 1)
+#define IP_ADDR_PREFIX_LEN      (sizeof(IP_ADDR_PREFIX) - 1)
+#define PORT_PREFIX_LEN         (sizeof(PORT_PREFIX) - 1)
+
+#define MODEL_NAME_FILE_SUFFIX  ".conf"
+#define MAX_MODEL_NAME_LEN      256
+
 #define PrintError(fmt, args...) \
     do { \
         printf(COLOR_RED "[%s][%d] """ fmt"\n" COLOR_RESET , __FUNCTION__, __LINE__, ##args); \

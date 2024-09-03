@@ -153,6 +153,7 @@ void SVC_CP_ShowSettings(SVC_CP_T *pstSvcCp);
 
 int32_t SVC_CP_SetSettings(SVC_CP_T *pstSvcCp);
 int32_t SVC_CP_GetSettings(SVC_CP_T *pstSvcCp);
+int32_t SVC_CP_UpdateSettings(SVC_CP_T *pstSvcCp);
 
 int32_t SVC_CP_Init(SVC_CP_T *pstSvcCp);
 int32_t SVC_CP_DeInit(SVC_CP_T *pstSvcCp);
