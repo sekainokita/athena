@@ -2253,7 +2253,7 @@ window.onload = function() {
                 }
 
                 if (vehMode === "C-VEH") {
-                    trafficLight = 'red';
+                    trafficLight = 'green';
                 } else if (vehMode === "A-VEH") {
                     trafficLight = 'red';
                 } else {
