@@ -154,9 +154,9 @@ window.onload = function() {
         let s_unTxDevId, s_nTxLatitude, s_nTxLongitude, s_unTxVehicleHeading, s_unTxVehicleSpeed;
         let s_unPdr, s_ulLatencyL1, s_ulTotalPacketCnt, s_unSeqNum;
 
-        function updateV2XPath(pathId, marker) {
-            const newCoordinates = [
-                [vehicleLongitude0, vehicleLatitude0],
+        function updateV2VPath(pathId, marker) {
+            const V2VCoordinates = [
+                [vehicleLongitude0, vehicleLatitude0], //실시간 본인 차량
                 [vehicleLongitude1, vehicleLatitude1]
             ];
 
@@ -165,15 +165,43 @@ window.onload = function() {
                     'type': 'Feature',
                     'geometry': {
                         'type': 'LineString',
-                        'coordinates': newCoordinates
+                        'coordinates': V2VCoordinates
                     }
                 });
 
                 // 중간 지점 마커 업데이트
                 const midPoint = [
-                    (newCoordinates[0][0] + newCoordinates[1][0]) / 2,
-                    (newCoordinates[0][1] + newCoordinates[1][1]) / 2
+                    (V2VCoordinates[0][0] + V2VCoordinates[1][0]) / 2,
+                    (V2VCoordinates[0][1] + V2VCoordinates[1][1]) / 2
                 ];
+                if (marker) {
+                    marker.setLngLat(midPoint);
+                }
+            }
+        }
+
+        function updateV2IPath(pathId, marker) {
+            const MRsuCoordinate = [127.440227, 36.730164];
+            const V2ICoordinates = [
+                [vehicleLongitude0, vehicleLatitude0],  //실시간 차량 위치
+                MRsuCoordinate //고정 좌표 (mRSU)
+            ];
+
+            if (map.getSource(pathId)) {
+                map.getSource(pathId).setData({
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'LineString',
+                        'coordinates': V2ICoordinates
+                    }
+                });
+
+                const midPoint = [
+                    (V2ICoordinates[0][0] + MRsuCoordinate[0]) / 2,
+                    (V2ICoordinates[0][1] + MRsuCoordinate[1]) / 2
+                ];
+
+                // 마커 위치를 차량 위치에 맞게 업데이트
                 if (marker) {
                     marker.setLngLat(midPoint);
                 }
@@ -1714,26 +1742,29 @@ window.onload = function() {
 
                 if (isCD4) {
                     const CD4Coordinates = [
-                        [127.439703, 36.730085],
-                        [127.440227, 36.730164]
+                        [vehicleLongitude0, vehicleLatitude0],
+                        [127.440227, 36.730164] // mRSU
                     ];
 
-                    if (!map.getSource('CD4Path')) {
-                        map.addSource('CD4Path', {
+                    if (!map.getSource('CD4V2IPath')) {
+                        map.addSource('CD4V2IPath', {
                             'type': 'geojson',
                             'data': {
                                 'type': 'Feature',
                                 'geometry': {
                                     'type': 'LineString',
-                                    'coordinates': CD4Coordinates
+                                    'coordinates': [
+                                        [vehicleLongitude0, vehicleLatitude0],
+                                        [127.440227, 36.730164] // 고정된 mRSU 좌표
+                                    ]
                                 }
                             }
                         });
 
                         map.addLayer({
-                            'id': 'CD4Path',
+                            'id': 'CD4V2IPath',
                             'type': 'line',
-                            'source': 'CD4Path',
+                            'source': 'CD4V2IPath',
                             'layout': {
                                 'line-join': 'round',
                                 'line-cap': 'round',
@@ -1747,22 +1778,20 @@ window.onload = function() {
                             }
                         });
                     }
-                    const CD4midPoint = [
-                        (CD4Coordinates[0][0] + CD4Coordinates[1][0]) / 2,
-                        (CD4Coordinates[0][1] + CD4Coordinates[1][1]) / 2
-                    ];
+
+                    updateV2IPath('CD4V2IPath', CD4NegotiationMarker);
 
                     if (!CD4NegotiationMarker) {
                         CD4NegotiationMarker = new mapboxgl.Marker({element: createCustomLabelCD4()})
-                        .setLngLat(CD4midPoint)
+                        .setLngLat([vehicleLongitude0, vehicleLatitude0])
                         .addTo(map);
                     } else {
                         CD4NegotiationMarker.addTo(map);
                     }
                 } else {
-                    if (map.getLayer('CD4Path')) {
-                        map.removeLayer('CD4Path');
-                        map.removeSource('CD4Path');
+                    if (map.getLayer('CD4V2IPath')) {
+                        map.removeLayer('CD4V2IPath');
+                        map.removeSource('CD4V2IPath');
                     }
 
                     if (CD4NegotiationMarker) {
@@ -3429,22 +3458,26 @@ window.onload = function() {
 
             // CB3이 활성화된 경우 경로 업데이트
             if (isCB3) {
-                updateV2XPath('CB3V2XPath', CB3NegotiationMarker);
+                updateV2VPath('CB3V2XPath', CB3NegotiationMarker);
             }
 
             // CB4가 활성화된 경우 경로 업데이트
             if (isCB4) {
-                updateV2XPath('CB4V2XPath', CB4NegotiationMarker);
+                updateV2VPath('CB4V2XPath', CB4NegotiationMarker);
             }
 
             // CB6이 활성화된 경우 경로 업데이트
             if (isCB6) {
-                updateV2XPath('CB6V2XPath', CB6NegotiationMarker);
+                updateV2VPath('CB6V2XPath', CB6NegotiationMarker);
             }
 
             // CD2가 활성화된 경우 경로 업데이트
             if (isCD2) {
-                updateV2XPath('CD2V2XPath', CD2NegotiationMarker);
+                updateV2VPath('CD2V2XPath', CD2NegotiationMarker);
+            }
+
+            if (isCD4) {
+                updateV2IPath('CD4V2IPath', CD4NegotiationMarker);
             }
         }
 
