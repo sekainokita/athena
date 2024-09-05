@@ -36,10 +36,8 @@ window.onload = function() {
     document.getElementById('modal-background').style.display = 'block';
     document.getElementById('modal').style.display = 'block';
 
-    let vehMode;
-    let CVehId;
-    let AVehId;
-    // 기본값 설정
+    let vehMode, CVehId, AVehId, vehicle0ImageUrl, vehicle1ImageUrl;
+
     let defaultIpAddress = "10.252.110.58";
     let testMode;
     let isTxTest;
@@ -59,14 +57,20 @@ window.onload = function() {
             vehMode = "C-VEH";
             CVehId = 23120008;
             AVehId = 23120002;
+            vehicle0ImageUrl = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq5.png'; // 0번 차량은 C-Vehicle 이미지
+            vehicle1ImageUrl = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq-electric.png'; // 1번 차량은 A-Vehicle 이미지
         } else if (vehType === "av") {
             vehMode = "A-VEH";
             CVehId = 23120008;
             AVehId = 23120002;
+            vehicle0ImageUrl = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq-electric.png'; // 0번 차량은 A-Vehicle 이미지
+            vehicle1ImageUrl = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq5.png'; // 1번 차량은 C-Vehicle 이미지
         } else {
             vehMode = "C-VEH";
             CVehId = 23120008;
             AVehId = 23120002;
+            vehicle0ImageUrl = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq5.png'; // 기본 0번 차량은 C-Vehicle 이미지
+            vehicle1ImageUrl = 'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq-electric.png'; // 기본 1번 차량은 A-Vehicle 이미지
         }
 
         if (testType === "tx") {
@@ -3207,9 +3211,7 @@ window.onload = function() {
             /************************************************************/
             /* Vehicle 0 */
             /************************************************************/
-            map.loadImage(
-                'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq5.png',
-                (error, image) => {
+            map.loadImage(vehicle0ImageUrl, (error, image) => {
                     if (error) throw error;
 
                     map.addImage('vehicle', image);
@@ -3271,9 +3273,7 @@ window.onload = function() {
             /************************************************************/
             /* Vehicle 1 */
             /************************************************************/
-            map.loadImage(
-                'https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/ioniq-electric.png',
-                (error, image) => {
+            map.loadImage(vehicle1ImageUrl, (error, image) => {
                     if (error) throw error;
 
                     map.addImage('vehicle1', image);
