@@ -437,7 +437,7 @@ window.onload = function() {
             img.style.backgroundRepeat = 'no-repeat';
 
             const label = document.createElement('div');
-            label.textContent = "공사중";
+            label.innerHTML = "Under<br>Construction";
             label.style.color = 'white';
             label.style.textAlign = 'center';
             label.style.fontWeight = 'bold';
@@ -1256,12 +1256,11 @@ window.onload = function() {
 
             // 텍스트
             const text = document.createElement('div');
-            text.innerHTML = "Class B Completed<br>(A-Veh has exited the roundabout)";
+            text.innerHTML = "Class B Completed";
             text.style.color = 'white';
             text.style.fontWeight = 'bold';
             text.style.textAlign = 'center';
-            text.style.textShadow = '0 0 10px #4CAF50, 0 0 20px #4CAF50, 0 0 30px #4CAF50';
-            text.style.fontSize = '16px';
+            text.style.fontSize = '11px';
 
             background.appendChild(text);
             labelContainer.appendChild(background);
