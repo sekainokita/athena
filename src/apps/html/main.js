@@ -2538,11 +2538,10 @@ window.onload = function() {
 
             // 텍스트
             const text = document.createElement('div');
-            text.innerHTML = "Class D Completed<br>(C-Veh has exited the roundabout)";
+            text.innerHTML = "Class D Completed";
             text.style.color = 'white';
             text.style.fontWeight = 'bold';
             text.style.textAlign = 'center';
-            text.style.textShadow = '0 0 10px #4CAF50, 0 0 20px #4CAF50, 0 0 30px #4CAF50';
             text.style.fontSize = '11px';
 
             background.appendChild(text);
