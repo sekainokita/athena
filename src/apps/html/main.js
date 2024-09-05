@@ -431,8 +431,8 @@ window.onload = function() {
 
             const img = document.createElement('div');
             img.style.backgroundImage = `url(${imageUrl})`;
-            img.style.width = '80px';
-            img.style.height = '80px';
+            img.style.width = '50px';
+            img.style.height = '50px';
             img.style.backgroundSize = 'contain';
             img.style.backgroundRepeat = 'no-repeat';
 
@@ -442,14 +442,14 @@ window.onload = function() {
             label.style.textAlign = 'center';
             label.style.fontWeight = 'bold';
             label.style.backgroundColor = 'rgba(255, 0, 0, 0.97)';
-            label.style.padding = '5px 10px';
-            label.style.borderRadius = '10px';
+            label.style.padding = '2px 5px';
+            label.style.borderRadius = '5px';
             label.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
             label.style.textShadow = '0 0 10px #00ccff, 0 0 20px #00ccff, 0 0 30px #00ccff';
             label.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.3)';
             label.style.width = 'auto';
             label.style.display = 'inline-block';
-            label.style.fontSize = '18px';
+            label.style.fontSize = '13px';
 
             workzonecontainer.appendChild(img);
             workzonecontainer.appendChild(label);
