@@ -431,8 +431,8 @@ window.onload = function() {
 
             const img = document.createElement('div');
             img.style.backgroundImage = `url(${imageUrl})`;
-            img.style.width = '50px';
-            img.style.height = '50px';
+            img.style.width = '80px';
+            img.style.height = '80px';
             img.style.backgroundSize = 'contain';
             img.style.backgroundRepeat = 'no-repeat';
 
@@ -442,14 +442,14 @@ window.onload = function() {
             label.style.textAlign = 'center';
             label.style.fontWeight = 'bold';
             label.style.backgroundColor = 'rgba(255, 0, 0, 0.97)';
-            label.style.padding = '2px 5px';
-            label.style.borderRadius = '5px';
+            label.style.padding = '5px 10px';
+            label.style.borderRadius = '10px';
             label.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
             label.style.textShadow = '0 0 10px #00ccff, 0 0 20px #00ccff, 0 0 30px #00ccff';
             label.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.3)';
             label.style.width = 'auto';
             label.style.display = 'inline-block';
-            label.style.fontSize = '13px';
+            label.style.fontSize = '18px';
 
             workzonecontainer.appendChild(img);
             workzonecontainer.appendChild(label);
@@ -3629,13 +3629,11 @@ window.onload = function() {
             if (unPdr < 99.00 || unPdr > 100.00 || isNaN(unPdr)) {
                 refinedPdr = Math.random() * (100.00 - 99.00) + 99.00;
             }
-            refinedPdr = parseFloat(refinedPdr.toFixed(3));
 
             let refinedLatency = ulLatencyL1;
             if (ulLatencyL1 < 5 || ulLatencyL1 > 10 || isNaN(ulLatencyL1)) {
                 refinedLatency = Math.random() * (10 - 5) + 5;
             }
-            refinedLatency = parseFloat(refinedLatency.toFixed(3));
 
             if (!isNaN(refinedPdr) && !isNaN(ulTotalPacketCnt)) {
                 updateGraph1(ulTotalPacketCnt, refinedPdr);
