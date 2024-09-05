@@ -402,7 +402,7 @@ window.onload = function() {
 
         function toggleWorkZone()
         {
-            const WorkZoneCoordinate = [127.440116, 36.729776];
+            const WorkZoneCoordinate = [127.440128, 36.729698];
             if (isWorkZoneEnabled)
             {
                 if (workZoneMarker === null)
@@ -560,7 +560,7 @@ window.onload = function() {
                     }
 
                     // Work Zone Marker 추가
-                    const WorkZoneCoordinate = [127.440116, 36.729776];
+                    const WorkZoneCoordinate = [127.440128, 36.729698];
                     if (!workZoneMarker) {
                         workZoneMarker = new mapboxgl.Marker({element: createWorkZoneMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/work-zone.png')})
                         .setLngLat(WorkZoneCoordinate)
