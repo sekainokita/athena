@@ -3684,6 +3684,7 @@ window.onload = function() {
                             size: 10  // x축 숫자 글씨 크기 줄이기
                         }
                     },
+                    /*
                     annotations: [
                         {
                             x: totalPacketCount,
@@ -3706,6 +3707,7 @@ window.onload = function() {
                             opacity: 0.8
                         }
                     ]
+                    */
                 });
 
                 document.getElementById('pdr-value').innerText = `PDR(Packet Delivery Rate) ${unPdrValue[0]}%`;
