@@ -102,7 +102,7 @@
 
 #define MSG_MANAGER_DB_FILE_PATH                    "/tmp"
 
-#define MSG_MANAGER_WEBSERVER_FILE_SAMPLE_RX        "rx_pangyo_240819.csv"
+#define MSG_MANAGER_WEBSERVER_FILE_SAMPLE_RX        "rx_ctack_240904.csv"
 #define MSG_MANAGER_WEBSERVER_FILE_SAMPLE_TX        "tx_ctrack_240820.csv"
 
 #define MSG_MANAGER_WEBSERVER_FILE_TX               "/tmp/db_v2x_tx_temp_writing.csv"
