@@ -500,7 +500,7 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
 
     if(stDbV2xStatus.unLastContCnt != stDbV2xStatus.unCurrentContCnt)
     {
-        PrintError("ContCnt does not be matched! [+1 increased unLastContCnt:%d], [unCurrentContCnt:%d]", stDbV2xStatus.unLastContCnt, stDbV2xStatus.unCurrentContCnt);
+        PrintTrace("ContCnt does not be matched! [+1 increased unLastContCnt:%d], [unCurrentContCnt:%d]", stDbV2xStatus.unLastContCnt, stDbV2xStatus.unCurrentContCnt);
         stDbV2xStatus.unContCntLoss++;
         stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
         stDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
