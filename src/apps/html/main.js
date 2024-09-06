@@ -3336,9 +3336,20 @@ window.onload = function() {
         /************************************************************/
         /* Update Position */
         /************************************************************/
+        // 이전 좌표를 저장할 객체 (vehicleId에 따라 다르게 저장)
+        let previousCoordinatesMap = {};
+
         function updateVehiclePosition(vehicleId, coordinates, heading, deviceId) {
             let vehicleSource = map.getSource(`vehicle_src_${vehicleId}`);
             let snappedCoordinates = coordinates;  // 기본값을 실제 GPS 좌표로 설정
+            let maxAllowedShift = 2;  // 허용 가능한 최대 이동 거리 (미터 단위)
+
+            // 이전 좌표가 존재하지 않으면 현재 좌표를 이전 좌표로 설정
+            if (!previousCoordinatesMap[vehicleId]) {
+                previousCoordinatesMap[vehicleId] = coordinates; // 이전 좌표를 현재 좌표로 초기화
+            }
+
+            let previousCoordinates = previousCoordinatesMap[vehicleId];  // 현재 차량의 이전 좌표
 
             /* KD Tree Path: KD 트리를 사용할 때 스냅된 좌표로 업데이트 */
             if (tree && isPathPlan) {
@@ -3350,7 +3361,30 @@ window.onload = function() {
                 let nearest = tree.nearest([point.longitude, point.latitude], 1);
 
                 if (nearest.length > 0) {
-                    snappedCoordinates = nearest[0]; // 가장 가까운 점을 스냅된 좌표로 설정
+                    let nearestPoint = nearest[0];
+                    let distanceThreshold = 2;  // 허용 가능한 스냅 거리 (미터 단위)
+
+                    // Haversine 공식을 사용하여 현재 좌표와 KD 트리에서 선택된 좌표 사이의 거리 계산
+                    let distance = haversineDistance([point.longitude, point.latitude], nearestPoint);
+
+                    // 필터링: 거리가 임계값 이하일 경우에만 스냅된 좌표로 업데이트
+                    if (distance < distanceThreshold) {
+                        //console.log(`Distance: ${distance} meters, Distance Threshold: ${distanceThreshold} meters`);
+
+                        // Haversine 공식을 사용하여 이전 좌표와 KD 트리에서 선택된 좌표 간의 이동 거리 계산
+                        let shift = haversineDistance(previousCoordinates, nearestPoint);
+
+                        if (shift < maxAllowedShift) {
+                            snappedCoordinates = nearestPoint; // 조건을 충족하는 경우에만 스냅된 좌표 사용
+                            //console.log(`Snapped to nearest point: ${snappedCoordinates}`);
+                        } else {
+                            console.log(`Shift too large: ${shift} meters.`);
+                        }
+                    } else {
+                        // 거리가 임계값을 초과한 경우, 스냅된 좌표를 사용하지 않음
+                        console.warn(`Distance (${distance} meters) exceeds threshold (${distanceThreshold} meters), not snapping to nearest point.`);
+                    }
+
                     if (vehicleSource) {
                         vehicleSource.setData({
                             'type': 'FeatureCollection',
@@ -3416,6 +3450,9 @@ window.onload = function() {
                     vehicleLatitude1 = coordinates[1];
                 }
             }
+
+            // 이전 좌표 업데이트 (현재 좌표를 다음에 사용하기 위해 저장)
+            previousCoordinatesMap[vehicleId] = snappedCoordinates;
 
             // 연결된 선 업데이트 (isCvLineEnabled가 true일 때만)
             if (isCvLineEnabled && map.getSource('line')) {
