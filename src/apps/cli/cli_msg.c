@@ -557,6 +557,133 @@ int32_t P_CLI_MSG_TcpClientStart(char *pcIpAddr)
     return nRet;
 }
 
+int32_t P_CLI_MSG_TcpMultiServerStart(void)
+{
+    int32_t nRet = APP_ERROR;
+    int h_nListen, h_nConn;
+    pthread_t h_stRecvTid;
+    struct sockaddr_in stServerAddr, stClientAddr;
+    socklen_t stClientLen = sizeof(stClientAddr);
+    int nVal = 1;
+
+    if((h_nListen = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    {
+        PrintError("socket error.\n");
+        return nRet;
+    }
+
+    stServerAddr.sin_family = AF_INET;
+    stServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    stServerAddr.sin_port = htons(PORT);
+
+    if (setsockopt(h_nListen, SOL_SOCKET, SO_REUSEADDR, (char *) &nVal, sizeof nVal) < 0) {
+        PrintError("setsockopt");
+        close(h_nListen);
+        return -1;
+    }
+
+    if(bind(h_nListen, (struct sockaddr *)&stServerAddr, sizeof(stServerAddr)) < 0)
+    {
+        PrintError("bind error.");
+        return nRet;
+    }
+
+    if(listen(h_nListen, LISTENQ) < 0)
+    {
+        PrintError("listen error.");
+        return nRet;
+    }
+
+    while(1)
+    {
+        if((h_nConn = accept(h_nListen, (struct sockaddr *)&stClientAddr, &stClientLen)) < 0)
+        {
+            PrintError("accept error.");
+            return nRet;
+        }
+
+        PrintDebug("server: got connection from %s", inet_ntoa(stClientAddr.sin_addr));
+
+        if(pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpServerTask, &h_nConn) == -1)
+        {
+            PrintError("pthread create error.");
+            return nRet;
+        }
+    }
+
+    return nRet;
+}
+
+int32_t P_CLI_MSG_TcpMultiClientStart(char *pcIpAddr, char *pcId)
+{
+    int32_t nRet = APP_ERROR;
+    int h_nSocket;
+    pthread_t h_stRecvTid;
+    struct sockaddr_in stServerAddr;
+    char cMsgBuf[MAX_LINE];
+    memset(cMsgBuf, 0, MAX_LINE);
+
+    if(pcIpAddr == NULL || pcId == NULL)
+    {
+        PrintError("IP address or ID is NULL!");
+        return nRet;
+    }
+
+    PrintWarn("Connecting to server IP [%s] with ID [%s]", pcIpAddr, pcId);
+
+    if((h_nSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    {
+        PrintError("socket error");
+        return nRet;
+    }
+
+    stServerAddr.sin_family = AF_INET;
+    stServerAddr.sin_port = htons(PORT);
+
+    if(inet_pton(AF_INET, pcIpAddr, &stServerAddr.sin_addr) < 0)
+    {
+        PrintError("inet_pton error for %s", pcIpAddr);
+        return nRet;
+    }
+
+    if(connect(h_nSocket, (struct sockaddr *)&stServerAddr, sizeof(stServerAddr)) < 0)
+    {
+        PrintError("connect error");
+        return nRet;
+    }
+
+    // Send the client ID to the server upon connection
+    if(send(h_nSocket, pcId, strlen(pcId), 0) == -1)
+    {
+        PrintError("send ID error");
+        return nRet;
+    }
+
+    if(pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpClientTask, &h_nSocket) == -1)
+    {
+        PrintError("pthread create error");
+        return nRet;
+    }
+
+    while(fgets(cMsgBuf, MAX_LINE, stdin) != NULL)
+    {
+        if(strcmp(cMsgBuf, "exit\n") == 0)
+        {
+            PrintWarn("Exit");
+            close(h_nSocket);
+            break;
+        }
+
+        if(send(h_nSocket, cMsgBuf, strlen(cMsgBuf), 0) == -1)
+        {
+            PrintError("send error");
+            return nRet;
+        }
+    }
+
+    return nRet;
+}
+
 void P_CLI_MSG_ShowTxSettings(void)
 {
     PrintTrace("========================================================");
@@ -1373,6 +1500,31 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     {
                         PrintError("CMD_2 is NULL, see. msg help");
                     }
+                }
+                else if(IS_CMD(pcCmd, "multiserver"))
+                {
+                    nRet = P_CLI_MSG_TcpMultiServerStart();
+                    if (nRet != APP_OK)
+                    {
+                        PrintError("P_CLI_MSG_TcpMultiServerStart() is failed! [nRet:%d]", nRet);
+                    }
+                }
+                else if(IS_CMD(pcCmd, "multiclient"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    char *pcId = CLI_CMD_GetArg(pstCmd, CMD_3);
+                    if (pcCmd != NULL && pcId != NULL)
+                    {
+                        nRet = P_CLI_MSG_TcpMultiClientStart(pcCmd, pcId);
+                        if (nRet != APP_OK)
+                        {
+                            PrintError("P_CLI_MSG_TcpMultiClientStart() is failed! [nRet:%d]", nRet);
+                        }
+                    }
+                }
+                else
+                {
+                    PrintError("IP address or ID is missing, see msg help.");
                 }
             }
             else
