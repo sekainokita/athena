@@ -321,6 +321,6 @@ release:
 #
 clean: distclean
 
-distclean: lib-db-distclean lib-msg-distclean lib-time-distclean lib-di-distclean lib-platform-distclean lib-framework-distclean app-distclean plat-chem-obu-distclean
+distclean: lib-db-distclean lib-msg-distclean lib-time-distclean lib-di-distclean lib-platform-distclean lib-framework-distclean app-distclean
 	@$(RM) -f $(OUT_BIN_DIR)/* $(OUT_LIB_DIR)/*
 	@$(RM) -f *.txt *.csv *.db *.log
