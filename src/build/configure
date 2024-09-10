@@ -48,21 +48,23 @@ BUILD_TOP_DIR=$(pwd)
 CONFIGS_DIR=${BUILD_TOP_DIR}/configs
 CONFIGS_FILE=.config
 
-CONFIG_MODEM_UBUNTU=u-co1xg_defconfig
+CONFIG_MODEL_UI_CO1XG=ui-co1xg_defconfig
+CONFIG_MODEL_UI_DR2RG=ui-dr2rg_defconfig
 CONFIG_MODEL_NO_CO1XG=no-co1xg_defconfig
-CONFIG_MODEM_NO_CO2XG=no-co2xg_defconfig
-CONFIG_MODEM_NO_CO2XGR=no-co2xgr_defconfig
+CONFIG_MODEL_NO_CO2XG=no-co2xg_defconfig
+CONFIG_MODEL_NO_CO2XGR=no-co2xgr_defconfig
 CONFIG_MODEL_NO_CO2OG=no-co2og_defconfig
 CONFIG_MODEL_NN_CO1XG=nn-co1xg_defconfig
 CONFIG_MODEL_NN_CO2XG=nn-co2xg_defconfig
 CONFIG_MODEL_NN_CO2OG=nn-co2og_defconfig
 CONFIG_MODEL_XILINX=zb-co1xgc_defconfig
 
-echo 
+echo
 echo -e "$W"
 echo "========================================================================="
 echo "[Platform Configurations Options]"
-echo "    ./configure u-co1xg   : UBUNTU"
+echo "    ./configure ui-co1xg  : Ubuntu Intel OBU"
+echo "                ui-dr2rg  : Ubuntu Intel RSU"
 echo "                no-co1xg  : NVIDIA ORIN RxAnt.1 MODEM, XSENS GPS"
 echo "                no-co2xg  : NVIDIA ORIN RxAnt.2 MODEM, XSENS GPS"
 echo "                no-co2xgr : NVIDIA ORIN RxAnt.2 MODEM, XSENS GPS, ROS"
@@ -78,12 +80,18 @@ echo "========================================================================="
 echo "Start Configuration"
 echo -e "$W"
 
-if [ "u-co1xg" = "$1" ]; then
+if [ "ui-co1xg" = "$1" ]; then
     echo -e "$BL"
-	echo "UBUNTU"
+	echo "Ubuntu Intel OBU"
     echo "========================================================================="
     echo -e "$W"
-    cp ${CONFIGS_DIR}/${CONFIG_MODEM_UBUNTU} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+    cp ${CONFIGS_DIR}/${CONFIG_MODEL_UI_CO1XG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+elif [ "ui-dr2rg" = "$1" ]; then
+    echo -e "$BL"
+	echo "Ubuntu Intel RSU"
+    echo "========================================================================="
+    echo -e "$W"
+    cp ${CONFIGS_DIR}/${CONFIG_MODEL_UI_DR2RG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
 elif [ "no-co1xg" = "$1" ]; then
     echo -e "$BL"
 	echo "NVIDIA ORIN RxAnt.1 MODEM"
@@ -95,19 +103,19 @@ elif [ "no-co2xg" = "$1" ]; then
 	echo "NVIDIA ORIN RxAnt.2 MODEM"
     echo "========================================================================="
     echo -e "$W"
-    cp ${CONFIGS_DIR}/${CONFIG_MODEM_NO_CO2XG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+    cp ${CONFIGS_DIR}/${CONFIG_MODEL_NO_CO2XG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
 elif [ "no-co2xgr" = "$1" ]; then
     echo -e "$BL"
 	echo "NVIDIA ORIN RxAnt.2 MODEM, ROS"
     echo "========================================================================="
     echo -e "$W"
-    cp ${CONFIGS_DIR}/${CONFIG_MODEM_NO_CO2XGR} ${BUILD_TOP_DIR}/${CONFIGS_FILE}    
+    cp ${CONFIGS_DIR}/${CONFIG_MODEL_NO_CO2XGR} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
 elif [ "no-co2og" = "$1" ]; then
     echo -e "$BL"
 	echo "NVIDIA ORIN RxAnt.2 MODEM, OBU GPS"
     echo "========================================================================="
     echo -e "$W"
-    cp ${CONFIGS_DIR}/${CONFIG_MODEL_NO_CO2OG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}    
+    cp ${CONFIGS_DIR}/${CONFIG_MODEL_NO_CO2OG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
 elif [ "nn-co1xg" = "$1" ]; then
     echo -e "$BL"
 	echo "NVIDIA NANO RxAnt.1 MODEM"
@@ -131,7 +139,7 @@ elif [ "xz-co1xgc" = "$1" ]; then
     echo "XILINX"
     echo "========================================================================="
     echo -e "$W"
-    cp ${CONFIGS_DIR}/${CONFIG_MODEL_XILINX} ${BUILD_TOP_DIR}/${CONFIGS_FILE}    
+    cp ${CONFIGS_DIR}/${CONFIG_MODEL_XILINX} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
 else
     echo -e "$Y"
 	echo "CHECK THE PLATFORM"
