@@ -80,7 +80,6 @@
 #define SAMPLE_V2X_MSG_LEN                  (100)
 #define SAMPLE_V2X_PORT_ADDR                (47347)
 
-#if defined(CONFIG_EXT_DATA_FORMAT)
 #define MSG_MANAGER_EXT_MSG_HEADER_SIZE     (sizeof(MSG_MANAGER_EXT_MSG))
 #define MSG_MANAGER_EXT_MSG_TX_SIZE         (sizeof(MSG_MANAGER_EXT_MSG_TX))
 #define MSG_MANAGER_EXT_MSG_RX_SIZE         (sizeof(MSG_MANAGER_EXT_MSG_RX))
@@ -94,7 +93,6 @@
 
 #define MSG_MANAGER_MAX_TX_PKG_SIZE			(MSG_MANAGER_MAX_DATA_SIZE + MSG_MANAGER_EXT_MSG_HEADER_SIZE + MSG_MANAGER_EXT_MSG_TX_SIZE + MSG_MANAGER_CRC16_LEN)
 #define MSG_MANAGER_MAX_RX_PKG_SIZE			(MSG_MANAGER_MAX_DATA_SIZE + MSG_MANAGER_EXT_MSG_HEADER_SIZE + MSG_MANAGER_EXT_MSG_RX_SIZE + MSG_MANAGER_CRC16_LEN)
-#endif
 
 #define MSG_MGR_RSU_LISTENQ                 (1024)
 
@@ -214,13 +212,8 @@ static int32_t P_MSG_MANAGER_ConnectObu(MSG_MANAGER_T *pstMsgManager)
     struct sockaddr_in server_addr =
     {
         .sin_family = AF_INET,
-#if defined(CONFIG_EXT_DATA_FORMAT)
         .sin_addr.s_addr = inet_addr(pstMsgManager->pchIpAddr),
         .sin_port = htons(pstMsgManager->unPort)
-#else
-        .sin_addr.s_addr = inet_addr(SAMPLE_V2X_IP_ADDR),
-        .sin_port = htons(SAMPLE_V2X_PORT_ADDR)
-#endif
     };
 
     nRet = connect(nSocketHandle, (struct sockaddr *)&server_addr, sizeof(server_addr));

@@ -170,10 +170,8 @@ int32_t P_SVC_PLATOONING_SetDefaultSettings(SVC_PLATOONING_T *pstSvcPlatooning)
     pstSvcPlatooning->stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
     pstSvcPlatooning->stDbV2x.usSwVer = CLI_DB_V2X_DEFAULT_SW_VER;
 
-#if defined(CONFIG_EXT_DATA_FORMAT)
     pstSvcPlatooning->pchIpAddr = SVC_PLATOONING_DEFAULT_IP;
     pstSvcPlatooning->unPort = SVC_PLATOONING_DEFAULT_PORT;
-#endif
 
     pstSvcPlatooning->pchIfaceName = SVC_PLATOONING_DEFAULT_ETH_DEV;
     pstSvcPlatooning->unPsid = SVC_PLATOONING_V2V_PSID;

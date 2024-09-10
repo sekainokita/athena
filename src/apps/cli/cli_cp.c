@@ -620,7 +620,6 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                         }
                     }
                 }
-#if defined(CONFIG_EXT_DATA_FORMAT)
                 else if(IS_CMD(pcCmd, "ip"))
                 {
                     pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
@@ -645,7 +644,6 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                         }
                     }
                 }
-#endif
                 else
                 {
                     return CLI_CMD_Showusage(pstCmd);
