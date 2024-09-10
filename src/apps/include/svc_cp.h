@@ -53,7 +53,9 @@
 /***************************** Definition ************************************/
 #define SVC_CP_TASK_MSG_KEY                 (0x2319)
 #define SVC_CP_DEFAULT_ETH_DEV              "eth1"
+#define SVC_CP_DEFAULT_RSU_ETH_DEV          "eno8303"
 #define SVC_CP_V2V_PSID                     (58200)
+#define SVC_CP_I2V_PSID                     (58202)
 
 #define SVC_CP_GPS_OPEN_RETRY_CNT           (10)
 #define SVC_CP_GPS_OPEN_RETRY_DELAY         (1000)
@@ -74,10 +76,11 @@
 #define SVC_CP_DEV_UNKNOWN                  "UNKNOWN"
 #define SVC_CP_STOP_DELAY                   (1000*1000)
 
-#if defined(CONFIG_EXT_DATA_FORMAT)
 #define SVC_CP_DEFAULT_IP                   "192.168.1.11"
 #define SVC_CP_DEFAULT_PORT                 (47347)
-#endif
+
+#define SVC_CP_DEFAULT_RSU_IP               "127.0.0.1"
+#define SVC_CP_DEFAULT_RSU_PORT             (30531)
 /***************************** Enum and Structure ****************************/
 
 /**

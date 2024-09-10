@@ -65,9 +65,7 @@
 #include "db_manager.h"
 #include "time_manager.h"
 #include <sys/time.h>
-#if defined(CONFIG_EXT_DATA_FORMAT)
 #include "svc_cp.h"
-#endif
 
 #include "v2x_defs.h"
 #include "v2x_ext_type.h"
@@ -77,10 +75,10 @@
 #include "cli_util.h"
 
 /***************************** Definition ************************************/
-#define SAMPLE_V2X_API_VER 0x0001
-#define SAMPLE_V2X_IP_ADDR "192.168.1.11"
-#define SAMPLE_V2X_MSG_LEN 100
-#define SAMPLE_V2X_PORT_ADDR 47347
+#define SAMPLE_V2X_API_VER                  (0x0001)
+#define SAMPLE_V2X_IP_ADDR                  ("192.168.1.11")
+#define SAMPLE_V2X_MSG_LEN                  (100)
+#define SAMPLE_V2X_PORT_ADDR                (47347)
 
 #if defined(CONFIG_EXT_DATA_FORMAT)
 #define MSG_MANAGER_EXT_MSG_HEADER_SIZE     (sizeof(MSG_MANAGER_EXT_MSG))
@@ -97,6 +95,8 @@
 #define MSG_MANAGER_MAX_TX_PKG_SIZE			(MSG_MANAGER_MAX_DATA_SIZE + MSG_MANAGER_EXT_MSG_HEADER_SIZE + MSG_MANAGER_EXT_MSG_TX_SIZE + MSG_MANAGER_CRC16_LEN)
 #define MSG_MANAGER_MAX_RX_PKG_SIZE			(MSG_MANAGER_MAX_DATA_SIZE + MSG_MANAGER_EXT_MSG_HEADER_SIZE + MSG_MANAGER_EXT_MSG_RX_SIZE + MSG_MANAGER_CRC16_LEN)
 #endif
+
+#define MSG_MGR_RSU_LISTENQ                 (1024)
 
 //#define CONFIG_TEMP_OBU_TEST (1)
 //#define CONFIG_TEST_EXT_MSG_STATUS_PKG (1)
@@ -195,18 +195,14 @@ static int32_t P_MSG_MANAGER_ConnectObu(MSG_MANAGER_T *pstMsgManager)
 
     PrintDebug("pstMsgManager->pchIfaceName[%s]", pstMsgManager->pchIfaceName);
 
-#if defined(CONFIG_EXT_DATA_FORMAT)
     if (pstMsgManager->pchIpAddr == NULL)
     {
         PrintError("pstMsgManager->pchIpAddr is NULL!");
         return nRet;
     }
-#endif
 
-#if defined(CONFIG_EXT_DATA_FORMAT)
     PrintDebug("pchIpAddr[%s]", pstMsgManager->pchIpAddr);
     PrintDebug("unPort[%d]", pstMsgManager->unPort);
-#endif
 
     nRet = setsockopt(nSocketHandle, SOL_SOCKET, SO_BINDTODEVICE, pstMsgManager->pchIfaceName, strlen(pstMsgManager->pchIfaceName));
     if (nRet < 0)
@@ -263,7 +259,11 @@ static int32_t P_MSG_MANAGER_ConnectRsu(MSG_MANAGER_T *pstMsgManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
     int32_t nSocketHandle = -1;
-    int32_t nFlags = 0;
+    int32_t nClientSocket = -1;
+    int nVal = 1;
+
+    struct sockaddr_in stServerAddr, stClientAddr;
+    socklen_t stClientLen = sizeof(stClientAddr);
 
     if (pstMsgManager == NULL)
     {
@@ -271,80 +271,50 @@ static int32_t P_MSG_MANAGER_ConnectRsu(MSG_MANAGER_T *pstMsgManager)
         return nRet;
     }
 
-    nSocketHandle = socket(AF_INET, SOCK_STREAM, 0);
-    if (nSocketHandle < 0)
+    if((nSocketHandle = socket(AF_INET , SOCK_STREAM , 0)) == -1)
     {
-        PrintError("socket() is failed!!");
-        nRet = FRAMEWORK_ERROR;
+        PrintError("socket error.\n");
         return nRet;
     }
 
-    if (pstMsgManager->pchIfaceName == NULL)
-    {
-        PrintError("pstMsgManager->pchIfaceName is NULL!");
+    bzero(&stServerAddr, sizeof(stServerAddr));
+
+    stServerAddr.sin_family = AF_INET;
+    stServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    stServerAddr.sin_port = htons(pstMsgManager->unPort);
+
+    if (setsockopt(nSocketHandle, SOL_SOCKET, SO_REUSEADDR, (char *) &nVal, sizeof nVal) < 0) {
+        PrintError("setsockopt() is failed!");
+        close(nSocketHandle);
         return nRet;
     }
 
-    PrintDebug("pstMsgManager->pchIfaceName[%s]", pstMsgManager->pchIfaceName);
-
-#if defined(CONFIG_EXT_DATA_FORMAT)
-    if (pstMsgManager->pchIpAddr == NULL)
+    if(bind(nSocketHandle, (struct sockaddr *)&stServerAddr, sizeof(stServerAddr)) < 0)
     {
-        PrintError("pstMsgManager->pchIpAddr is NULL!");
-        return nRet;
-    }
-#endif
-
-#if defined(CONFIG_EXT_DATA_FORMAT)
-    PrintDebug("pchIpAddr[%s]", pstMsgManager->pchIpAddr);
-    PrintDebug("unPort[%d]", pstMsgManager->unPort);
-#endif
-
-    nRet = setsockopt(nSocketHandle, SOL_SOCKET, SO_BINDTODEVICE, pstMsgManager->pchIfaceName, strlen(pstMsgManager->pchIfaceName));
-    if (nRet < 0)
-    {
-        PrintError("setsockopt() is failed");
+        PrintError("bind() is failed!");
         return nRet;
     }
 
-    struct sockaddr_in server_addr =
+    if(listen(nSocketHandle, MSG_MGR_RSU_LISTENQ) < 0)
     {
-        .sin_family = AF_INET,
-#if defined(CONFIG_EXT_DATA_FORMAT)
-        .sin_addr.s_addr = inet_addr(pstMsgManager->pchIpAddr),
-        .sin_port = htons(pstMsgManager->unPort)
-#else
-        .sin_addr.s_addr = inet_addr(SAMPLE_V2X_IP_ADDR),
-        .sin_port = htons(SAMPLE_V2X_PORT_ADDR)
-#endif
-    };
-
-    nRet = connect(nSocketHandle, (struct sockaddr *)&server_addr, sizeof(server_addr));
-    if (nRet < 0)
-    {
-        PrintError("connect() is failed");
+        PrintError("listen() is failed!");
         return nRet;
     }
 
-    /* Change to NON-BLOCK socket */
-    nFlags = fcntl(nSocketHandle, F_GETFL, 0);
-    if (nFlags == -1)
+    PrintWarn("Listening to the client of RSU controller.");
+
+    if((nClientSocket = accept(nSocketHandle, (struct sockaddr *)&stClientAddr, &stClientLen)) < 0)
     {
-        PrintError("fcntl() is F_GETFL failed");
+        PrintError("accept() is failed!");
         return nRet;
     }
 
-    nFlags |= O_NONBLOCK;
-    nRet = fcntl(nSocketHandle, F_SETFL, nFlags);
-    if (nRet < 0)
-    {
-        PrintError("fcntl() is F_SETFL failed");
-        return nRet;
-    }
+    PrintTrace("server: got connection from [IP: %s, Port: %d]", inet_ntoa(stClientAddr.sin_addr), ntohs(stClientAddr.sin_port));
 
-    s_nSocketHandle = nSocketHandle;
 
-    PrintTrace("Connection of V2X Device is successed! [s_nSocketHandle:0x%x]", s_nSocketHandle);
+    s_nSocketHandle = nClientSocket;
+
+    PrintTrace("[s_nSocketHandle: 0x%x]", s_nSocketHandle);
 
     nRet = FRAMEWORK_OK;
 

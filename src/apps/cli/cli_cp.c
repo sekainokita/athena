@@ -55,9 +55,7 @@
 /***************************** Static Variable *******************************/
 static char s_chSetBufDevId[CLI_DB_V2X_DEFAULT_BUF_LEN];
 static char s_chSetEth[CLI_DB_V2X_DEFAULT_BUF_LEN];
-#if defined(CONFIG_EXT_DATA_FORMAT)
 static char s_chSetIp[CLI_DB_V2X_DEFAULT_BUF_LEN];
-#endif
 
 /***************************** Function Protype ******************************/
 void P_CLI_CP_WriteConfigToFile(FILE *h_fdModelConf, SVC_CP_T *pstSvcCp)
@@ -208,7 +206,6 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
         }
     }
-#if defined(CONFIG_EXT_DATA_FORMAT)
     else if(strcmp(pcCmd, "ip") == 0)
     {
         pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
@@ -248,7 +245,6 @@ static int P_CLI_CP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
         }
     }
-#endif
     else
     {
         PrintWarn("unknown set type");
@@ -787,10 +783,8 @@ int32_t CLI_CP_InitCmds(void)
                "       spd   [speed km/hrs]     set tx / rx vehicle speed\n"
                "       rg    [region id]        set region ID (1:SEOUL, 2:SEJONG, 3:BUSAN, 4:DAEGEON, 5:INCHEON\n"
                "                                               6:DAEGU, 7:DAEGU PG, 8:CHEONGJU, 9:SEONGNAM\n"
-#if defined(CONFIG_EXT_DATA_FORMAT)
                "       ip    [ip]               set Ip (default ip : 192.168.1.11)\n"
                "       port  [port]             set port (default port : 47347)\n",
-#endif
                "");
     if(nRet != APP_OK)
     {

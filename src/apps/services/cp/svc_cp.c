@@ -243,9 +243,21 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
 #if defined(CONFIG_OBU)
     pstSvcCp->stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
     PrintTrace("CONFIG_OBU is enabled, eDeviceType [%d]", pstSvcCp->stDbV2x.eDeviceType);
+
+    pstSvcCp->pchIpAddr = SVC_CP_DEFAULT_IP;
+    pstSvcCp->unPort = SVC_CP_DEFAULT_PORT;
+    pstSvcCp->pchIfaceName = SVC_CP_DEFAULT_ETH_DEV;
+    pstSvcCp->unPsid = SVC_CP_V2V_PSID;
+    pstSvcCp->pchDeviceName = DB_MGR_DEFAULT_COMM_DEV_ID;
 #elif defined(CONFIG_RSU)
     pstSvcCp->stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_RSU;
     PrintTrace("CONFIG_RSU is enabled, eDeviceType [%d]", pstSvcCp->stDbV2x.eDeviceType);
+
+    pstSvcCp->pchIpAddr = SVC_CP_DEFAULT_RSU_IP;
+    pstSvcCp->unPort = SVC_CP_DEFAULT_RSU_PORT;
+    pstSvcCp->pchIfaceName = SVC_CP_DEFAULT_RSU_ETH_DEV;
+    pstSvcCp->unPsid = SVC_CP_I2V_PSID;
+    pstSvcCp->pchDeviceName = DB_MGR_DEFAULT_COMM_RSU_DEV_ID;
 #else
     PrintError("check device type!!");
     return APP_ERROR;
@@ -262,13 +274,7 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
     pstSvcCp->stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
     pstSvcCp->stDbV2x.usSwVer = CLI_DB_V2X_DEFAULT_SW_VER;
 
-#if defined(CONFIG_EXT_DATA_FORMAT)
-    pstSvcCp->pchIpAddr = SVC_CP_DEFAULT_IP;
-    pstSvcCp->unPort = SVC_CP_DEFAULT_PORT;
-#endif
 
-    pstSvcCp->pchIfaceName = SVC_CP_DEFAULT_ETH_DEV;
-    pstSvcCp->unPsid = SVC_CP_V2V_PSID;
     pstSvcCp->stDbV2xStatusTx.stDbV2xDevL1.ulTimeStamp = 0;
     pstSvcCp->stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp = 0;
     pstSvcCp->stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp = 0;
@@ -289,7 +295,6 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
     pstSvcCp->stDbV2xStatusTx.unTxVehicleSpeed = DB_MGR_DEFAULT_VEHICLE_SPEED;
     pstSvcCp->stDbV2xStatusTx.unTxVehicleHeading = 0;
 
-    pstSvcCp->pchDeviceName = DB_MGR_DEFAULT_COMM_DEV_ID;
     pstSvcCp->ulDbStartTime = 0;
     pstSvcCp->ulDbEndTime = 0;
     pstSvcCp->unDbTotalWrittenTime = 0;
@@ -835,11 +840,8 @@ void SVC_CP_ShowSettings(SVC_CP_T *pstSvcCp)
     PrintWarn("Device Info>");
     PrintDebug("Ethernet Interface [%s]", pstSvcCp->pchIfaceName);
     PrintDebug("PSID [%d]", pstSvcCp->unPsid);
-#if defined(CONFIG_EXT_DATA_FORMAT)
     PrintDebug("pchIpAddr [%s]", pstSvcCp->pchIpAddr);
     PrintDebug("unPort [%d]", pstSvcCp->unPort);
-#endif
-
     PrintDebug("pchDeviceName [%s]", pstSvcCp->pchDeviceName);
     PrintDebug("ulDbStartTime [%ld]", pstSvcCp->ulDbStartTime);
     PrintDebug("ulDbEndTime [%ld]", pstSvcCp->ulDbEndTime);
@@ -968,10 +970,8 @@ int32_t SVC_CP_Open(SVC_CP_T *pstSvcCp)
     PrintDebug("eDeviceType[%d]", pstMsgManager->eDeviceType);
     pstMsgManager->pchIfaceName = pstSvcCp->pchIfaceName;
     pstMsgManager->stExtMsgWsr.unPsid = pstSvcCp->unPsid;
-#if defined(CONFIG_EXT_DATA_FORMAT)
     pstMsgManager->pchIpAddr = pstSvcCp->pchIpAddr;
     pstMsgManager->unPort = pstSvcCp->unPort;
-#endif
 
     nFrameWorkRet = MSG_MANAGER_Open(pstMsgManager);
     if(nFrameWorkRet != FRAMEWORK_OK)

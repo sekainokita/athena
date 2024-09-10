@@ -868,11 +868,8 @@ void SVC_PLATOONING_ShowSettings(SVC_PLATOONING_T *pstSvcPlatooning)
     PrintWarn("Device Info>");
     PrintDebug("Ethernet Interface [%s]", pstSvcPlatooning->pchIfaceName);
     PrintDebug("PSID [%d]", pstSvcPlatooning->unPsid);
-#if defined(CONFIG_EXT_DATA_FORMAT)
     PrintDebug("pchIpAddr [%s]", pstSvcPlatooning->pchIpAddr);
     PrintDebug("unPort [%d]", pstSvcPlatooning->unPort);
-#endif
-
     PrintDebug("pchDeviceName [%s]", pstSvcPlatooning->pchDeviceName);
     PrintDebug("ulDbStartTime [%ld]", pstSvcPlatooning->ulDbStartTime);
     PrintDebug("ulDbEndTime [%ld]", pstSvcPlatooning->ulDbEndTime);
@@ -1015,10 +1012,8 @@ int32_t SVC_PLATOONING_Open(SVC_PLATOONING_T *pstSvcPlatooning)
 
     pstMsgManager->pchIfaceName = pstSvcPlatooning->pchIfaceName;
     pstMsgManager->stExtMsgWsr.unPsid = pstSvcPlatooning->unPsid;
-#if defined(CONFIG_EXT_DATA_FORMAT)
     pstMsgManager->pchIpAddr = pstSvcPlatooning->pchIpAddr;
     pstMsgManager->unPort = pstSvcPlatooning->unPort;
-#endif
 
     nFrameWorkRet = MSG_MANAGER_Open(pstMsgManager);
     if (nFrameWorkRet != FRAMEWORK_OK)

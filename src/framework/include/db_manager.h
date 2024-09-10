@@ -69,6 +69,7 @@
 #define DB_MGR_DEFAULT_COMM_TYPE                  "Tx"
 #define DB_MGR_DEFAULT_DEV_TYPE                   "OBU"
 #define DB_MGR_DEFAULT_COMM_DEV_ID                "VEH-ID"
+#define DB_MGR_DEFAULT_COMM_RSU_DEV_ID            "D"
 #define DB_MGR_DEFAULT_START_TIME                 "2309010911"
 #define DB_MGR_DEFAULT_END_TIME                   "2309011011"
 #define DB_MGR_DEFAULT_TOTAL_TIME                 "1h"

@@ -68,7 +68,6 @@
 /***************************** Definition ************************************/
 //#define CONFIG_CLI_MSG_DEBUG        (1)
 const int MAX_LINE = 2048;
-const int PORT = 50531;
 const int BACKLOG = 10;
 const int LISTENQ = 6666;
 const int MAX_CONNECT = 20;
@@ -403,7 +402,7 @@ int32_t P_CLI_MSG_TcpServerStart(void)
 
     stServerAddr.sin_family = AF_INET;
     stServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    stServerAddr.sin_port = htons(PORT);
+    stServerAddr.sin_port = htons(SVC_CP_DEFAULT_RSU_PORT);
 
     if (setsockopt(h_nListen, SOL_SOCKET, SO_REUSEADDR, (char *) &nVal, sizeof nVal) < 0) {
         PrintError("setsockopt");
@@ -518,7 +517,7 @@ int32_t P_CLI_MSG_TcpClientStart(char *pcIpAddr)
     bzero(&stServerAddr , sizeof(stServerAddr));
 
     stServerAddr.sin_family = AF_INET;
-    stServerAddr.sin_port = htons(PORT);
+    stServerAddr.sin_port = htons(SVC_CP_DEFAULT_RSU_PORT);
 
     if(inet_pton(AF_INET, pcIpAddr, &stServerAddr.sin_addr) < 0)
     {
@@ -574,7 +573,7 @@ int32_t P_CLI_MSG_TcpMultiServerStart(void)
 
     stServerAddr.sin_family = AF_INET;
     stServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    stServerAddr.sin_port = htons(PORT);
+    stServerAddr.sin_port = htons(SVC_CP_DEFAULT_RSU_PORT);
 
     if (setsockopt(h_nListen, SOL_SOCKET, SO_REUSEADDR, (char *) &nVal, sizeof nVal) < 0) {
         PrintError("setsockopt");
@@ -638,7 +637,7 @@ int32_t P_CLI_MSG_TcpMultiClientStart(char *pcIpAddr, char *pcId)
     }
 
     stServerAddr.sin_family = AF_INET;
-    stServerAddr.sin_port = htons(PORT);
+    stServerAddr.sin_port = htons(SVC_CP_DEFAULT_RSU_PORT);
 
     if(inet_pton(AF_INET, pcIpAddr, &stServerAddr.sin_addr) < 0)
     {
