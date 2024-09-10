@@ -1227,7 +1227,7 @@ int32_t SVC_PLATOONING_Start(SVC_PLATOONING_T *pstSvcPlatooning)
     nRet = msgsnd(s_nSvcPlatooningTaskMsgId, &stEventMsg, sizeof(SVC_PLATOONING_EVENT_MSG_T), IPC_NOWAIT);
     if (nRet < 0)
     {
-        PrintError("msgsnd() is failed!!, [nRet:%d]", nRet);
+        PrintError("msgsnd() is failed! [nRet:%d]", nRet);
         return nRet;
     }
     else
@@ -1256,7 +1256,7 @@ int32_t SVC_PLATOONING_Stop(SVC_PLATOONING_T *pstSvcPlatooning)
     nRet = msgsnd(s_nSvcPlatooningTaskMsgId, &stEventMsg, sizeof(SVC_PLATOONING_EVENT_MSG_T), IPC_NOWAIT);
     if (nRet < 0)
     {
-        PrintError("msgsnd() is failed!!, [nRet:%d]", nRet);
+        PrintError("msgsnd() is failed! [nRet:%d]", nRet);
         return nRet;
     }
     else

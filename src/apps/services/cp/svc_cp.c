@@ -1190,7 +1190,7 @@ int32_t SVC_CP_Start(SVC_CP_T *pstSvcCp)
     nRet = msgsnd(s_nSvcCpTaskMsgId, &stEventMsg, sizeof(SVC_CP_EVENT_MSG_T), IPC_NOWAIT);
     if(nRet < 0)
     {
-        PrintError("msgsnd() is failed!!, [nRet:%d]", nRet);
+        PrintError("msgsnd() is failed! [nRet:%d]", nRet);
         return nRet;
     }
     else
@@ -1219,7 +1219,7 @@ int32_t SVC_CP_Stop(SVC_CP_T *pstSvcCp)
     nRet = msgsnd(s_nSvcCpTaskMsgId, &stEventMsg, sizeof(SVC_CP_EVENT_MSG_T), IPC_NOWAIT);
     if(nRet < 0)
     {
-        PrintError("msgsnd() is failed!!, [nRet:%d]", nRet);
+        PrintError("msgsnd() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 

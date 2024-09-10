@@ -464,7 +464,7 @@ int32_t DI_GPS_StartSocketServer(DI_GPS_T *pstDiGps)
     nRet = msgsnd(s_nDiGpsTaskMsgId, &stEventMsg, sizeof(DI_GPS_EVENT_MSG_T), IPC_NOWAIT);
     if(nRet < 0)
     {
-        PrintError("msgsnd() is failed!!, [nRet:%d]", nRet);
+        PrintError("msgsnd() is failed! [nRet:%d]", nRet);
         return nRet;
     }
     else
