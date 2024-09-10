@@ -1010,6 +1010,9 @@ int32_t SVC_PLATOONING_Open(SVC_PLATOONING_T *pstSvcPlatooning)
         return nRet;
     }
 
+    pstMsgManager->eDeviceType = pstSvcPlatooning->stDbV2x.eDeviceType;
+    PrintDebug("eDeviceType[%d]", pstMsgManager->eDeviceType);
+
     pstMsgManager->pchIfaceName = pstSvcPlatooning->pchIfaceName;
     pstMsgManager->stExtMsgWsr.unPsid = pstSvcPlatooning->unPsid;
 #if defined(CONFIG_EXT_DATA_FORMAT)

@@ -964,6 +964,8 @@ int32_t SVC_CP_Open(SVC_CP_T *pstSvcCp)
         return nRet;
     }
 
+    pstMsgManager->eDeviceType = pstSvcCp->stDbV2x.eDeviceType;
+    PrintDebug("eDeviceType[%d]", pstMsgManager->eDeviceType);
     pstMsgManager->pchIfaceName = pstSvcCp->pchIfaceName;
     pstMsgManager->stExtMsgWsr.unPsid = pstSvcCp->unPsid;
 #if defined(CONFIG_EXT_DATA_FORMAT)

@@ -443,6 +443,8 @@ static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
         pstMsgManager = FRAMEWORK_GetMsgManagerInstance();
         PrintDebug("pstMsgManager[0x%p]", pstMsgManager);
 
+        pstMsgManager->eDeviceType = pstSvcCp->stDbV2x.eDeviceType;
+
         pstMsgManager->pchIfaceName = pstSvcCp->pchIfaceName;
         pstMsgManager->stExtMsgWsr.unPsid = pstSvcCp->unPsid;
         pstMsgManager->pchIpAddr = pstSvcCp->pchIpAddr;
@@ -457,6 +459,7 @@ static int P_CLI_CP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
             PrintError("MSG_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
         }
     }
+
 
     pstSvcCp->stDbV2x.ulPayloadLength = sizeof(pstSvcCp->stDbV2xStatusTx);
 

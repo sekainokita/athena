@@ -167,7 +167,7 @@ static void P_MSG_NABAGER_PrintMsgInfo(int msqid)
     PrintDebug("=================================================");
 }
 
-static int32_t P_MSG_MANAGER_ConnectV2XDevice(MSG_MANAGER_T *pstMsgManager)
+static int32_t P_MSG_MANAGER_ConnectObu(MSG_MANAGER_T *pstMsgManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
     int32_t nSocketHandle = -1;
@@ -255,6 +255,143 @@ static int32_t P_MSG_MANAGER_ConnectV2XDevice(MSG_MANAGER_T *pstMsgManager)
     PrintTrace("Connection of V2X Device is successed! [s_nSocketHandle:0x%x]", s_nSocketHandle);
 
     nRet = FRAMEWORK_OK;
+
+    return nRet;
+}
+
+static int32_t P_MSG_MANAGER_ConnectRsu(MSG_MANAGER_T *pstMsgManager)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    int32_t nSocketHandle = -1;
+    int32_t nFlags = 0;
+
+    if (pstMsgManager == NULL)
+    {
+        PrintError("pstMsgManager is NULL!");
+        return nRet;
+    }
+
+    nSocketHandle = socket(AF_INET, SOCK_STREAM, 0);
+    if (nSocketHandle < 0)
+    {
+        PrintError("socket() is failed!!");
+        nRet = FRAMEWORK_ERROR;
+        return nRet;
+    }
+
+    if (pstMsgManager->pchIfaceName == NULL)
+    {
+        PrintError("pstMsgManager->pchIfaceName is NULL!");
+        return nRet;
+    }
+
+    PrintDebug("pstMsgManager->pchIfaceName[%s]", pstMsgManager->pchIfaceName);
+
+#if defined(CONFIG_EXT_DATA_FORMAT)
+    if (pstMsgManager->pchIpAddr == NULL)
+    {
+        PrintError("pstMsgManager->pchIpAddr is NULL!");
+        return nRet;
+    }
+#endif
+
+#if defined(CONFIG_EXT_DATA_FORMAT)
+    PrintDebug("pchIpAddr[%s]", pstMsgManager->pchIpAddr);
+    PrintDebug("unPort[%d]", pstMsgManager->unPort);
+#endif
+
+    nRet = setsockopt(nSocketHandle, SOL_SOCKET, SO_BINDTODEVICE, pstMsgManager->pchIfaceName, strlen(pstMsgManager->pchIfaceName));
+    if (nRet < 0)
+    {
+        PrintError("setsockopt() is failed");
+        return nRet;
+    }
+
+    struct sockaddr_in server_addr =
+    {
+        .sin_family = AF_INET,
+#if defined(CONFIG_EXT_DATA_FORMAT)
+        .sin_addr.s_addr = inet_addr(pstMsgManager->pchIpAddr),
+        .sin_port = htons(pstMsgManager->unPort)
+#else
+        .sin_addr.s_addr = inet_addr(SAMPLE_V2X_IP_ADDR),
+        .sin_port = htons(SAMPLE_V2X_PORT_ADDR)
+#endif
+    };
+
+    nRet = connect(nSocketHandle, (struct sockaddr *)&server_addr, sizeof(server_addr));
+    if (nRet < 0)
+    {
+        PrintError("connect() is failed");
+        return nRet;
+    }
+
+    /* Change to NON-BLOCK socket */
+    nFlags = fcntl(nSocketHandle, F_GETFL, 0);
+    if (nFlags == -1)
+    {
+        PrintError("fcntl() is F_GETFL failed");
+        return nRet;
+    }
+
+    nFlags |= O_NONBLOCK;
+    nRet = fcntl(nSocketHandle, F_SETFL, nFlags);
+    if (nRet < 0)
+    {
+        PrintError("fcntl() is F_SETFL failed");
+        return nRet;
+    }
+
+    s_nSocketHandle = nSocketHandle;
+
+    PrintTrace("Connection of V2X Device is successed! [s_nSocketHandle:0x%x]", s_nSocketHandle);
+
+    nRet = FRAMEWORK_OK;
+
+    return nRet;
+}
+
+static int32_t P_MSG_MANAGER_ConnectV2XDevice(MSG_MANAGER_T *pstMsgManager)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    if (pstMsgManager == NULL)
+    {
+        PrintError("pstMsgManager is NULL!");
+        return nRet;
+    }
+
+    switch(pstMsgManager->eDeviceType)
+    {
+        case DB_V2X_DEVICE_TYPE_OBU:
+        {
+            PrintTrace("DB_V2X_DEVICE_TYPE_OBU");
+            nRet = P_MSG_MANAGER_ConnectObu(pstMsgManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("P_MSG_MANAGER_ConnectObu() is failed![%d],", nRet);
+                return nRet;
+            }
+            break;
+        }
+
+        case DB_V2X_DEVICE_TYPE_RSU:
+        {
+            PrintTrace("DB_V2X_DEVICE_TYPE_RSU");
+            nRet = P_MSG_MANAGER_ConnectRsu(pstMsgManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("P_MSG_MANAGER_ConnectRsu() is failed![%d],", nRet);
+                return nRet;
+            }
+            break;
+        }
+
+        default:
+            PrintError("Error! unknown device type[%d]", pstMsgManager->eDeviceType);
+            break;
+
+    }
 
     return nRet;
 }
@@ -2949,7 +3086,7 @@ int32_t MSG_MANAGER_DeInit(MSG_MANAGER_T *pstMsgManager)
     nRet = P_MSG_MANAGER_DisconnectV2XDevice();
     if (nRet != FRAMEWORK_OK)
     {
-        PrintError("P_MSG_MANAGER_ConnectV2XDevice() is failed!!, nRet[%d]", nRet);
+        PrintError("P_MSG_MANAGER_DisconnectV2XDevice() is failed!!, nRet[%d]", nRet);
         return nRet;
     }
 

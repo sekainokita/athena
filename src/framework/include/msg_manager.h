@@ -605,6 +605,7 @@ typedef struct MSG_MANAGER_RX_EVENT_MSG_t {
 } MSG_MANAGER_RX_EVENT_MSG_T;
 
 typedef struct MSG_MANAGER_t {
+    DB_V2X_DEVICE_TYPE_E            eDeviceType;
     char                            *pchIfaceName;
     char                            *pchIpAddr;
     uint32_t                        unPort;

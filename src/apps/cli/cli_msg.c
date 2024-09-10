@@ -1034,6 +1034,18 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 pstMsgManager = FRAMEWORK_GetMsgManagerInstance();
                 PrintDebug("pstMsgManager[0x%p]", pstMsgManager);
 
+
+#if defined(CONFIG_OBU)
+                pstMsgManager->eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
+                PrintTrace("CONFIG_OBU is enabled, eDeviceType [%d]", pstMsgManager->eDeviceType);
+#elif defined(CONFIG_RSU)
+                pstMsgManager->eDeviceType = DB_V2X_DEVICE_TYPE_RSU;
+                PrintTrace("CONFIG_RSU is enabled, eDeviceType [%d]", pstMsgManager->eDeviceType);
+#else
+                PrintError("check device type!!");
+                return APP_ERROR;
+#endif
+
                 pstMsgManager->pchIfaceName = pcCmd;
                 pstMsgManager->stExtMsgWsr.unPsid = MSG_MANAGER_EXT_MSG_V2V_PSID;
 
@@ -1061,16 +1073,11 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 {
                     PrintError("set ip address, e.g. CLI> msg open eth1 ip port");
                 }
-                nFrameWorkRet = MSG_MANAGER_Open(pstMsgManager);
-                if(nFrameWorkRet != FRAMEWORK_OK)
-                {
-                   PrintError("MSG_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
-                }
 
                 nFrameWorkRet = MSG_MANAGER_Open(pstMsgManager);
                 if(nFrameWorkRet != FRAMEWORK_OK)
                 {
-                    PrintError("MSG_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
+                   PrintError("MSG_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
                 }
             }
             else
