@@ -240,7 +240,17 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
     pstSvcCp->stMsgManagerTx.unTransmitterProfileId = MSG_MANAGER_V2X_TX_PROFILE_ID;
     pstSvcCp->stMsgManagerTx.unPeerL2Id = MSG_MANAGER_V2X_TX_PEER_L2_ID;
 
+#if defined(CONFIG_OBU)
     pstSvcCp->stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
+    PrintTrace("CONFIG_OBU is enabled, eDeviceType [%d]", pstSvcCp->stDbV2x.eDeviceType);
+#elif defined(CONFIG_RSU)
+    pstSvcCp->stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_RSU;
+    PrintTrace("CONFIG_RSU is enabled, eDeviceType [%d]", pstSvcCp->stDbV2x.eDeviceType);
+#else
+    PrintError("check device type!!");
+    return APP_ERROR;
+#endif
+
     pstSvcCp->stDbV2x.eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5_BROADCAST;
     pstSvcCp->stDbV2x.unDeviceId = CLI_DB_V2X_DEFAULT_DEVICE_ID;
     pstSvcCp->stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
@@ -1064,11 +1074,14 @@ int32_t SVC_CP_Close(SVC_CP_T *pstSvcCp)
     pstDbManager->stDbFile.pchTxRxType = s_chStrBufTxRxType;
     if(s_stSvcCp.stDbV2x.eDeviceType == DB_V2X_DEVICE_TYPE_OBU)
     {
+
         sprintf(s_chStrBufDevType, "%s", SVC_CP_DEV_OBU);
+        PrintTrace("CONFIG_OBU is enabled, s_chStrBufDevType [%s]", s_chStrBufDevType);
     }
     else if(s_stSvcCp.stDbV2x.eDeviceType == DB_V2X_DEVICE_TYPE_RSU)
     {
         sprintf(s_chStrBufDevType, "%s", SVC_CP_DEV_RSU);
+        PrintTrace("CONFIG_RSU is enabled, s_chStrBufDevType [%s]", s_chStrBufDevType);
     }
     else
     {
