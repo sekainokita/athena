@@ -93,8 +93,8 @@ int32_t DI_Init(DI_T *pstDi)
         return nRet;
     }
 
-#if defined(CONFIG_GPS_OBU)
-    PrintWarn("Does not support GPS module on the b'd, use GPS values of OBUs");
+#if defined(CONFIG_GPS_OBU) || defined(CONFIG_GPS_RSU)
+    PrintWarn("Does not support GPS module on the b'd, use GPS values of OBUs, or RSUs");
     nRet = DI_GPS_SetNa(&pstDi->stDiGps, TRUE);
     if (nRet != DI_OK)
     {

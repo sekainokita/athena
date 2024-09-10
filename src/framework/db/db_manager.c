@@ -367,7 +367,7 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
     pstDbV2xStatusRx->ucRcpi = stDbV2xStatus.stV2xStatusRx.ucRcpi;
     pstDbV2xStatusRx->eRsvLevel = stDbV2xStatus.stV2xStatusRx.eRsvLevel;
 
-#if defined(CONFIG_GPS_OBU)
+#if defined(CONFIG_GPS_OBU) || defined(CONFIG_GPS_RSU)
     UNUSED(pstDi);
 
     dRxlat = (double)stDbV2xStatus.stV2xGpsInfoRx.nLatitudeNow / SVC_CP_GPS_VALUE_CONVERT_DOUBLE;

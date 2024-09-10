@@ -578,7 +578,7 @@ static void *P_SVC_PLATOONING_TaskTx(void *arg)
 
             s_usGpsSpeedCalCnt++;
 
-#if defined(CONFIG_GPS_OBU)
+#if defined(CONFIG_GPS_OBU) || defined(CONFIG_GPS_RSU)
 			s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLatitudeNow = s_stSvcPlatooning.stDbV2xStatusTx.stTxPosition.nTxLatitude;
             s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLongitudeNow = s_stSvcPlatooning.stDbV2xStatusTx.stTxPosition.nTxLongitude;
             s_stDbV2xStatus.stV2xGpsInfoHeadingTx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
