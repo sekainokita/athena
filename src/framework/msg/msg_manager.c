@@ -2879,12 +2879,50 @@ int32_t MSG_MANAGER_Open(MSG_MANAGER_T *pstMsgManager)
 #if defined(CONFIG_EXT_DATA_FORMAT)
     pstMsgManager->stExtMsgWsr.ucAction = eMSG_MANAGER_EXT_MSG_ACTION_ADD;
 
-	nRet = P_MSG_MANAGER_SetV2xWsrSetting(pstMsgManager);
-    if (nRet != FRAMEWORK_OK)
+    switch(pstMsgManager->eDeviceType)
     {
-        PrintError("P_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
-        return nRet;
+        case DB_V2X_DEVICE_TYPE_OBU:
+        {
+            PrintTrace("DB_V2X_DEVICE_TYPE_OBU");
+            nRet = P_MSG_MANAGER_SetV2xWsrSetting(pstMsgManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("P_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
+                return nRet;
+            }
+
+            /* Set I2V */
+            pstMsgManager->stExtMsgWsr.unPsid = SVC_CP_I2V_PSID;
+            nRet = P_MSG_MANAGER_SetV2xWsrSetting(pstMsgManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("P_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
+                return nRet;
+            }
+
+            /* Reset Value as V2V */
+            pstMsgManager->stExtMsgWsr.unPsid = SVC_CP_V2V_PSID;
+            break;
+        }
+
+        case DB_V2X_DEVICE_TYPE_RSU:
+        {
+            PrintTrace("DB_V2X_DEVICE_TYPE_RSU");
+            nRet = P_MSG_MANAGER_SetV2xWsrSetting(pstMsgManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("P_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
+                return nRet;
+            }
+            break;
+        }
+
+        default:
+            PrintError("Error! unknown device type[%d]", pstMsgManager->eDeviceType);
+            break;
+
     }
+
 #else
 	nRet = P_MSG_MANAGER_SetV2xWsrSetting();
     if (nRet != FRAMEWORK_OK)
