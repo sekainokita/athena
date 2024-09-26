@@ -42,7 +42,8 @@ SRCS += $(wildcard $(APP_SVC_CP_PATH)/*.c)
 
 OBJS = ${SRCS:.c=.o}
 
-OUT_BIN_DIR = ../build/output/bin
+OUT_BIN_DIR = $(PWD)/output/bin
+APP_DIR = $(PWD)/../apps
 
 %.o:%.c
 	@echo "Compiling..."
@@ -55,12 +56,13 @@ $(TARGET):$(OBJS)
 	@echo "Check SRCS:$(SRCS), OBJS:$(OBJS)"
 	$(CC) -o $@ $(APP_OBJS) $(CFLAGS) $(LDFLAGS) $(LFLAGS) -lm
 	mv $(TARGET) $(APP_BIN)
-	cp -f $(APP_BIN) $(OUT_BIN_DIR)/$(APP_BIN)
+	echo $(PWD)
+	cp -f $(APP_DIR)/$(APP_BIN) $(OUT_BIN_DIR)/$(APP_BIN)
 
 all: $(TARGET)
 
 clean:
-	@$(RM) -f $(OBJS) $(APP_BIN) $(OUT_BIN_DIR)/$(APP_BIN)
+	@$(RM) -f $(OBJS) $(APP_DIR)/$(APP_BIN) $(OUT_BIN_DIR)/$(APP_BIN)
 	@$(RM) -rf $(APP_OBJS_DIR)
 
 distclean: clean

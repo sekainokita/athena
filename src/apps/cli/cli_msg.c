@@ -1597,7 +1597,7 @@ int32_t CLI_MSG_InitCmds(void)
                "  server                        start TCP server (127.0.0.1)\n"
                "  client [IP Addr]              start TCP client with IP server IP address\n"
                "  multiserver                   start TCP multiserver (127.0.0.1)\n"
-               "  multiclient [IP Addr] [ID]    start TCP multiclient with IP server IP address ID\n"
+               "  multiclient [IP Addr] [ID]    start TCP multiclient with IP server IP address ID\n",
                "");
     if(nRet != APP_OK)
     {
