@@ -1,5 +1,7 @@
 /* PC1 side UDP Tx implementation */
 
+#define CONFIG_KETI (1)s
+
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -14,6 +16,9 @@
 #include <pthread.h>
 #include <poll.h>
 #include <errno.h>
+#if defined(CONFIG_KETI)
+#include <time.h>
+#endif
 
 #include "nr_v2x_interface.h"
 #include "crc16.h"
@@ -35,6 +40,38 @@ static bool state = true;
 static unsigned msgcnt = 0;
 
 static char *__bar ="---------------------------------------------------------------";
+
+#if defined(CONFIG_KETI)
+static FILE* sh_pfdFile;
+
+static time_t start_time;
+static time_t end_time;
+
+char* get_ip_suffix(const char* ip)
+{
+    char* last_dot = strrchr(ip, '.');
+    if (last_dot != NULL)
+    {
+        return last_dot + 1;
+    }
+
+    return NULL;
+}
+
+void create_filename(char* filename, const char* ip_suffix, time_t start, time_t end)
+{
+    struct tm* start_tm = localtime(&start);
+    struct tm* end_tm = localtime(&end);
+
+    char start_str[20], end_str[20];
+    strftime(start_str, sizeof(start_str), "%Y%m%d%H%M%S", start_tm);
+    strftime(end_str, sizeof(end_str), "%Y%m%d%H%M%S", end_tm);
+
+    double duration = difftime(end, start);
+
+    sprintf(filename, "OBU_CTOCG3A0_SN%s_%s_%s_%.0fs.log", ip_suffix, start_str, end_str, duration);
+}
+#endif
 
 const char* getDateTimeStr(void)
 {
@@ -74,7 +111,7 @@ void Test_Msg_Print(char* format, ...)
         va_list lpStart;
         va_start(lpStart, format);
         vsprintf(szBuf, format, lpStart);
-        va_end(lpStart);    
+        va_end(lpStart);
     }
 }
 
@@ -89,13 +126,13 @@ void Debug_Msg_Print(int msgLv, char* format, ...)
 
 		va_start(arg, format);
 		vprintf(format,arg);
-		va_end( arg);		
-		
+		va_end( arg);
+
 		printf("\n");
 
 		{
 			char szBuf[1024] = {0, };
-            
+
 			va_list lpStart;
 			va_start(lpStart, format);
 			vsprintf(szBuf, format, lpStart);
@@ -115,6 +152,11 @@ void Debug_Msg_Print_Data(int msgLv, unsigned char* data, int len)
 		printf("\n\t========================================================");
 		printf("\n\t Hex.   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
 		printf("\n\t--------------------------------------------------------\n");
+
+        fprintf(sh_pfdFile, "\n\t (Len : 0x%X(%d) bytes)", len, len);
+        fprintf(sh_pfdFile, "\n\t========================================================");
+        fprintf(sh_pfdFile, "\n\t Hex.   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
+        fprintf(sh_pfdFile, "\n\t--------------------------------------------------------\n");
 #if 0
 		for(rep = 0 ; rep < len ; rep++)
 		{
@@ -131,17 +173,22 @@ void Debug_Msg_Print_Data(int msgLv, unsigned char* data, int len)
 				else
 				{
 					printf("%s\n", buf);
+					fprintf(sh_pfdFile, "%s\n", buf);
+
 					sprintf(buf, "\t %03X- : ", rep/16);
 				}
 			}
-			
+
 			sprintf(hex_str, "%02X ", data[rep]);
 			strcat(buf, hex_str);
 		}
 		printf("%s\n", buf);
+		printf(sh_pfdFile, "%s\n", buf);
 #endif
 		printf("\t========================================================");
 		printf("\n\n");
+		printf(sh_pfdFile, "\t========================================================");
+		printf(sh_pfdFile, "\n\n");
     }
 }
 
@@ -306,7 +353,7 @@ bool Test_App_Main(int fd)
 	int re = 0, n, send_len, i, cnt = 1, period = 100;
 	char buf[MAX_TX_PACKET_TO_OBU];
 
-	memset(buf,0, sizeof(buf));	
+	memset(buf,0, sizeof(buf));
 	V2x_App_Hdr* hdr = (V2x_App_Hdr*)buf;
 	choiceNum = -1;
 
@@ -339,7 +386,7 @@ bool Test_App_Main(int fd)
 
  	int rand_m= 0;
 	int char_size = 0;
-	
+
 	switch (choiceNum)
 	{
 	  case 0:
@@ -351,7 +398,7 @@ bool Test_App_Main(int fd)
 		uint16_t *crc16;
 		uint16_t calc_crc16;
 		V2x_App_WSR_Add_Crc* wsr = (V2x_App_WSR_Add_Crc*)hdr->data;
-		
+
 		Debug_Msg_Print(DEBUG_MSG_LV_MID," >> WSR len: %d",(int) sizeof(SIZE_WSR_DATA));
 		memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
 		hdr->len = htons(SIZE_WSR_DATA-6);
@@ -395,7 +442,7 @@ bool Test_App_Main(int fd)
 			perror("Size or PSID Error\n");
 			return true;
 		}
-		
+
 		memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
 		hdr->len = htons(size + 10);		// seq 2byte, payload id 2byte, psid 4byte, crc16 2byte
 		hdr->seq = 0;
@@ -630,7 +677,7 @@ bool Test_App_Main(int fd)
 		}
 
 		AddExtStatusData(p_overall, eStatusTxRx_Tx);
-		
+
 		memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
 		send_len = 16 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package);	// 16 : header(10) + psid(4) + crc(2)
 		hdr->len = htons(10 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package));		// seq(2) + payload id(2) + crc(2) + psid(4)
@@ -705,7 +752,7 @@ bool Test_App_Main(int fd)
 		}
 
 		AddExtStatusData(p_overall, eStatusTxRx_Tx);
-		
+
 		memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
 		send_len = 16 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package);	// 16 : header(10) + psid(4) + crc(2)
 		hdr->len = htons(10 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package));		// seq(2) + payload id(2) + crc(2) + psid(4)
@@ -780,7 +827,7 @@ bool Test_App_Main(int fd)
 
 			// add status package
 			AddExtStatusData(p_overall, eStatusTxRx_Tx);
-			
+
 			memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
 			send_len = 16 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package);	// 16 : header(10) + psid(4) + crc(2)
 			hdr->len = htons(10 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package));		// seq(2) + payload id(2) + crc(2) + psid(4)
@@ -795,6 +842,8 @@ bool Test_App_Main(int fd)
 			*crc16 = htons(calc_crc16);
 
 			Debug_Msg_Print(DEBUG_MSG_LV_MID, "\tCount = %d / %d, Period = %d ms", i+1, cnt, period);
+            fprintf(sh_pfdFile, "\tCount = %d / %d, Period = %d ms\n", i+1, cnt, period);
+
 			Debug_Msg_Print_Data(DEBUG_MSG_LV_MID, buf, send_len);
 			n = send(fd, buf, send_len, 0);
 			if (n < 0)
@@ -877,7 +926,7 @@ bool Test_App_Main(int fd)
 
 			// add status package
 			AddExtStatusData(p_overall, eStatusTxRx_Tx);
-			
+
 			memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
 			send_len = 16 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package);	// 16 : header(10) + psid(4) + crc(2)
 			hdr->len = htons(10 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package));		// seq(2) + payload id(2) + crc(2) + psid(4)
@@ -920,7 +969,7 @@ bool Test_App_Main(int fd)
 		Debug_Msg_Print(DEBUG_MSG_LV_LOW, "\tIt was the wrong choice !");
 		break;
 	} /*End of switch*/
-	
+
 	Debug_Msg_Print(DEBUG_MSG_LV_MID, "\tCount = %d, Period = %d ms", cnt, period);
 	for (i=0; i<cnt; i++)
 	{
@@ -960,7 +1009,7 @@ bool Test_App_Main(int fd)
 void* Cmd_thread_func(void *data)
 {
 	int fd = *(int*)data;
-  
+
 	while (state)
 	{
 		/* Test Application call*/
@@ -990,7 +1039,7 @@ static void PrintExtStatusMsg(void *p)
 	uint8_t *dev_type = (uint8_t*)p + 6;	// T, L 뒤에 dev_type 존재
 	char buf[32];
 	uint16_t *crc, cal_crc;
-	
+
 	switch(*dev_type)
 	{
 	  case eStatusDevType_ObuModem:
@@ -1002,36 +1051,68 @@ static void PrintExtStatusMsg(void *p)
 		if (tx_rx == eStatusTxRx_Tx)
 		{
 			printf("\tObu Modem : Tx\n");
+			fprintf(sh_pfdFile, "\tObu Modem : Tx\n");
+
 			printf("\tDevice ID : %u\n", htonl(p_tx_modem->dev_id));
+            fprintf(sh_pfdFile, "\tDevice ID : %u\n", htonl(p_tx_modem->dev_id));
+
 			printf("\tVersion - HW : %d / SW : %d\n", htons(p_tx_modem->hw_ver), htons(p_tx_modem->sw_ver));
+			fprintf(sh_pfdFile, "\tVersion - HW : %d / SW : %d\n", htons(p_tx_modem->hw_ver), htons(p_tx_modem->sw_ver));
+
 			printf("\tTx Power - %d, Freq - %d, Bandwidth - %d, Mcs - %d, Scs - %d\n",
 					p_tx_modem->tx_power, htons(p_tx_modem->freq), p_tx_modem->bandwidth, p_tx_modem->mcs, p_tx_modem->scs);
+            fprintf(sh_pfdFile, "\tTx Power - %d, Freq - %d, Bandwidth - %d, Mcs - %d, Scs - %d\n",
+					p_tx_modem->tx_power, htons(p_tx_modem->freq), p_tx_modem->bandwidth, p_tx_modem->mcs, p_tx_modem->scs);
+
 			printf("\tLatitude - %d, Longitude - %d\n", htonl(p_tx_modem->latitude), htonl(p_tx_modem->longitude));
+			fprintf(sh_pfdFile, "\tLatitude - %d, Longitude - %d\n", htonl(p_tx_modem->latitude), htonl(p_tx_modem->longitude));
+
 			sprintf(buf, "%lu", be64toh(p_tx_modem->timestamp));
 			printf("\tTimestamp - %s\n", buf);
+            fprintf(sh_pfdFile, "\tTimestamp - %s\n", buf);
+
 			cal_crc = CalcCRC16((uint8_t*)p_tx_modem, htons(p_tx_modem->len) + 4);	// T, L, V 길이
 			if(cal_crc != ntohs(p_tx_modem->crc))
+            {
 				printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_tx_modem->crc), cal_crc);
-			}
+				fprintf(sh_pfdFile, "[Error] CRC Error : %04X / need : %04X\n", ntohs(p_tx_modem->crc), cal_crc);
+            }
+		}
 		else if (tx_rx == eStatusTxRx_Rx)
 		{
 			printf("\tObu Modem : Rx\n");
+			fprintf(sh_pfdFile, "\tObu Modem : Rx\n");
+
 			printf("\tDevice ID : %u\n", htonl(p_rx_modem->dev_id));
+			fprintf(sh_pfdFile, "\tDevice ID : %u\n", htonl(p_rx_modem->dev_id));
+
 			printf("\tVersion - HW : %d / SW : %d\n", htons(p_rx_modem->hw_ver), htons(p_rx_modem->sw_ver));
+			fprintf(sh_pfdFile, "\tVersion - HW : %d / SW : %d\n", htons(p_rx_modem->hw_ver), htons(p_rx_modem->sw_ver));
+
 			printf("\tRSSI - %d, RCPI - %d\n", p_rx_modem->rssi, p_rx_modem->rcpi);
+			fprintf(sh_pfdFile, "\tRSSI - %d, RCPI - %d\n", p_rx_modem->rssi, p_rx_modem->rcpi);
+
 			printf("\tLatitude - %d, Longitude - %d\n", htonl(p_rx_modem->latitude), htonl(p_rx_modem->longitude));
+			fprintf(sh_pfdFile, "\tLatitude - %d, Longitude - %d\n", htonl(p_rx_modem->latitude), htonl(p_rx_modem->longitude));
+
 			sprintf(buf, "%lu", be64toh(p_rx_modem->timestamp));
 			printf("\tTimestamp - %s\n", buf);
+			fprintf(sh_pfdFile, "\tTimestamp - %s\n", buf);
+
 			cal_crc = CalcCRC16((uint8_t*)p_rx_modem, htons(p_rx_modem->len) + 4);	// T, L, V 길이
 			if(cal_crc != ntohs(p_rx_modem->crc))
+            {
 				printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_rx_modem->crc), cal_crc);
-			}
+				fprintf(sh_pfdFile, "[Error] CRC Error : %04X / need : %04X\n", ntohs(p_rx_modem->crc), cal_crc);
+            }
+		}
 		else
 		{
 			printf("Tx_Rx Type Error - %d\n", tx_rx);
+			fprintf(sh_pfdFile, "Tx_Rx Type Error - %d\n", tx_rx);
 			return;
 		}
-		
+
 	  	break;
 	  }
 
@@ -1040,13 +1121,25 @@ static void PrintExtStatusMsg(void *p)
 	  	p_comm = (TLVC_STATUS_CommUnit*)p;
 
 		printf("\tOBU : %s\n", (p_comm->tx_rx==eStatusTxRx_Tx)?"Tx":"Rx");
+		fprintf("\tOBU : %s\n", (p_comm->tx_rx==eStatusTxRx_Tx)?"Tx":"Rx");
+
 		printf("\tDevice ID : %u\n", htonl(p_comm->dev_id));
+		fprintf("\tDevice ID : %u\n", htonl(p_comm->dev_id));
+
 		printf("\tVersion - HW : %d / SW : %d\n", htons(p_comm->hw_ver), htons(p_comm->sw_ver));
+		fprintf("\tVersion - HW : %d / SW : %d\n", htons(p_comm->hw_ver), htons(p_comm->sw_ver));
+
 		sprintf(buf, "%lu", be64toh(p_comm->timestamp));
+
 		printf("\tTimestamp - %s\n", buf);
+		fprintf("\tTimestamp - %s\n", buf);
+
 		cal_crc = CalcCRC16((uint8_t*)p_comm, htons(p_comm->len) + 4);	// T, L, V 길이
 		if(cal_crc != ntohs(p_comm->crc))
+        {
 			printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_comm->crc), cal_crc);
+            fprintf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_comm->crc), cal_crc);
+        }
 	  	break;
 	  }
 
@@ -1061,7 +1154,10 @@ static void PrintExtStatusMsg(void *p)
 		printf("\tTimestamp - %s\n", buf);
 		cal_crc = CalcCRC16((uint8_t*)p_comm, htons(p_comm->len) + 4);	// T, L, V 길이
 		if(cal_crc != ntohs(p_comm->crc))
-			printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_comm->crc), cal_crc);
+        {
+            printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_comm->crc), cal_crc);
+        }
+
 	  	break;
 	  }
 
@@ -1157,7 +1253,7 @@ static int AnalyzeMsg(uint8_t *msg, int len)
 		printf("[Error] Extensible Message Lenth : %d\n", len);
 		return -1;
 	}
-	
+
 	if(psid == EM_V2V_MSG)
 	{
 		printf("Get Extensible Message - V2V\n");
@@ -1209,14 +1305,14 @@ static int AnalyzeMsg(uint8_t *msg, int len)
 				printf("[ERROR] Remain Length - %d\n", tlvc_len);
 				break;
 			}
-				
+
 			if (tlvc_type == EM_PT_STATUS)
 			{
 				printf("Package : %d (Status Package)\n", i+1);
 				PrintExtStatusMsg(p);
 			}
 			else
-			{	
+			{
 				printf("Package : %d\n\tPSID : %d, TLV lenth : %d\n", i+1, tlvc_type, tlvc_len + 6);
 				Debug_Msg_Print_Data(DEBUG_MSG_LV_MID, (uint8_t*)p, tlvc_len + 6);   // 6: T, L 크기 추가
 			}
@@ -1231,7 +1327,7 @@ static int AnalyzeMsg(uint8_t *msg, int len)
 	}
 
 
-	
+
 
 	return 0;
 }
@@ -1261,7 +1357,7 @@ int main(int argc, char *argv[])
 	{
 		perror("cannot open socket");
 		return -1;
-	}else 
+	}else
 		Debug_Msg_Print(DEBUG_MSG_LV_MID, "open socket");
 
 	bzero(&servaddr,sizeof(servaddr));
@@ -1292,6 +1388,28 @@ int main(int argc, char *argv[])
 		perror("fcntl F_SETFL failed");
 		return -1;
 	}
+#endif
+
+#if defined(CONFIG_KETI)
+    start_time = time(NULL);
+
+    struct tm* start_tm = localtime(&start_time);
+    char start_str[20];
+    strftime(start_str, sizeof(start_str), "%Y%m%d%H%M%S", start_tm);
+
+    char* ip_suffix = get_ip_suffix(ip_addr);
+
+    char temp_filename[512];
+    sprintf(temp_filename, "tempfile_%s.log", ip_suffix);
+
+    sh_pfdFile = fopen(temp_filename, "a+");
+    if (sh_pfdFile == NULL)
+    {
+        printf("fopen() is failed!!\r\n");
+        return -1;
+    }
+
+    fprintf(sh_pfdFile, "start time [%s]\n", start_str);
 #endif
 
 	int len, n;
@@ -1351,9 +1469,36 @@ int main(int argc, char *argv[])
 		}
 		//n = read(fd, msg, BUF_SIZE);
     }
+
     //pthread_join(pCmdThread, (void **)&status);
 	pthread_cancel(pCmdThread);
     Debug_Msg_Print(DEBUG_MSG_LV_MID, "ByeBye");
+
+#if defined(CONFIG_KETI)
+    end_time = time(NULL);
+    struct tm* end_tm = localtime(&end_time);
+
+    char end_str[20];
+
+    strftime(end_str, sizeof(end_str), "%Y%m%d%H%M%S", end_tm);
+
+    fprintf(sh_pfdFile, "end time [%s]\n", end_str);
+
+    char final_filename[512];
+    create_filename(final_filename, ip_suffix, start_time, end_time);
+
+    fclose(sh_pfdFile);
+
+    if (rename(temp_filename, final_filename) == 0)
+    {
+        printf("DB file is created: %s\n", final_filename);
+    }
+    else
+    {
+        printf("Fail to create DB file.\n");
+    }
+#endif
+
 	close(fd);
     return 0;
 }
