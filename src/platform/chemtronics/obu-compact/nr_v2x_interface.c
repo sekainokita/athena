@@ -173,7 +173,7 @@ void Debug_Msg_Print_Data(int msgLv, unsigned char* data, int len)
 				else
 				{
 					printf("%s\n", buf);
-					fprintf(sh_pfdFile, "%s\n", buf);
+					//fprintf(sh_pfdFile, "%s\n", buf);
 
 					sprintf(buf, "\t %03X- : ", rep/16);
 				}
@@ -183,12 +183,12 @@ void Debug_Msg_Print_Data(int msgLv, unsigned char* data, int len)
 			strcat(buf, hex_str);
 		}
 		printf("%s\n", buf);
-		printf(sh_pfdFile, "%s\n", buf);
+		fprintf(sh_pfdFile, "%s\n", buf);
 #endif
 		printf("\t========================================================");
 		printf("\n\n");
-		printf(sh_pfdFile, "\t========================================================");
-		printf(sh_pfdFile, "\n\n");
+		fprintf(sh_pfdFile, "\t========================================================");
+		fprintf(sh_pfdFile, "\n\n");
     }
 }
 
@@ -1470,10 +1470,6 @@ int main(int argc, char *argv[])
 		//n = read(fd, msg, BUF_SIZE);
     }
 
-    //pthread_join(pCmdThread, (void **)&status);
-	pthread_cancel(pCmdThread);
-    Debug_Msg_Print(DEBUG_MSG_LV_MID, "ByeBye");
-
 #if defined(CONFIG_KETI)
     end_time = time(NULL);
     struct tm* end_tm = localtime(&end_time);
@@ -1498,6 +1494,10 @@ int main(int argc, char *argv[])
         printf("Fail to create DB file.\n");
     }
 #endif
+
+    //pthread_join(pCmdThread, (void **)&status);
+	pthread_cancel(pCmdThread);
+    Debug_Msg_Print(DEBUG_MSG_LV_MID, "ByeBye");
 
 	close(fd);
     return 0;
