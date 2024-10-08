@@ -29,7 +29,7 @@
 // length는 seq부터 crc까지의 길이 (전체 받는 길이에서 magic과 lenth크기만큼 제외)
 #define MAX_RX_LEN_FROM_DEV					(MAX_RX_PACKET_BY_DEVICE - SIZE_MAGIC_NUMBER_OF_HEADER - SIZE_LENTH_OF_HEADER)
 
-typedef enum 
+typedef enum
 {
 	CMD_WSM_SERVICE_REQ	= 1,
 	CMD_SEND_DATA,
@@ -39,6 +39,7 @@ typedef enum
 	CMD_SEND_TEST_EXTENSIBLE_V2I,
 	CMD_SEND_TEST_EXTENSIBLE_V2V_ADD_SEQUENCE,
 	CMD_SEND_TEST_EXTENSIBLE_V2I_ADD_SEQUENCE,
+	CMD_SEND_TEST_CREATE_DB,
 	CMD_MAX
 } eNrV2xCmd;
 

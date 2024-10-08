@@ -38,6 +38,10 @@ static bool testMenuPrintStatus = true;
 static int choiceNum = -1;
 static bool state = true;
 static unsigned msgcnt = 0;
+static char ip_addr[256];
+static char* ip_suffix = NULL;
+
+static char temp_filename[512];
 
 static char *__bar ="---------------------------------------------------------------";
 
@@ -371,7 +375,7 @@ bool Test_App_Main(int fd)
 		Test_Msg_Print("[%d] Send V2I Test Extensible MSG", CMD_SEND_TEST_EXTENSIBLE_V2I);
 		Test_Msg_Print("[%d] Send V2V Test Extensible MSG with SEQ", CMD_SEND_TEST_EXTENSIBLE_V2V_ADD_SEQUENCE);
 		Test_Msg_Print("[%d] Send V2I Test Extensible MSG with SEQ", CMD_SEND_TEST_EXTENSIBLE_V2I_ADD_SEQUENCE);
-
+		Test_Msg_Print("[%d] Create DB File", CMD_SEND_TEST_CREATE_DB);
 		Test_Msg_Print("< EXIT >-------------------------------");
 		Test_Msg_Print("[0] Exit");
 	}
@@ -965,6 +969,38 @@ bool Test_App_Main(int fd)
 		break;
 	  }
 
+      case CMD_SEND_TEST_CREATE_DB:
+      {
+#if defined(CONFIG_KETI)
+          end_time = time(NULL);
+          struct tm* end_tm = localtime(&end_time);
+
+          char end_str[20];
+
+          strftime(end_str, sizeof(end_str), "%Y%m%d%H%M%S", end_tm);
+
+          fprintf(sh_pfdFile, "end time [%s]\n", end_str);
+
+          char final_filename[512];
+          create_filename(final_filename, ip_suffix, start_time, end_time);
+
+          fclose(sh_pfdFile);
+
+          if (rename(temp_filename, final_filename) == 0)
+          {
+              printf("====================================================\r\n");
+              printf("====================================================\r\n");
+              printf("DB file is created: %s\n", final_filename);
+              printf("====================================================\r\n");
+              printf("====================================================\r\n");
+          }
+          else
+          {
+              printf("Fail to create DB file.\n");
+          }
+#endif
+          break;
+      }
 	  default:
 		Debug_Msg_Print(DEBUG_MSG_LV_LOW, "\tIt was the wrong choice !");
 		break;
@@ -1335,7 +1371,6 @@ static int AnalyzeMsg(uint8_t *msg, int len)
 int main(int argc, char *argv[])
 {
 	char msg[MAX_RX_PACKET_BY_OBU];
-	char ip_addr[256];
 	int fd, fd_cnt=0;
 	struct sockaddr_in servaddr;
 	struct pollfd polls[5];
@@ -1359,6 +1394,8 @@ int main(int argc, char *argv[])
 		return -1;
 	}else
 		Debug_Msg_Print(DEBUG_MSG_LV_MID, "open socket");
+
+    ip_suffix = get_ip_suffix(ip_addr);
 
 	bzero(&servaddr,sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
@@ -1397,9 +1434,6 @@ int main(int argc, char *argv[])
     char start_str[20];
     strftime(start_str, sizeof(start_str), "%Y%m%d%H%M%S", start_tm);
 
-    char* ip_suffix = get_ip_suffix(ip_addr);
-
-    char temp_filename[512];
     sprintf(temp_filename, "tempfile_%s.log", ip_suffix);
 
     sh_pfdFile = fopen(temp_filename, "a+");
@@ -1469,31 +1503,6 @@ int main(int argc, char *argv[])
 		}
 		//n = read(fd, msg, BUF_SIZE);
     }
-
-#if defined(CONFIG_KETI)
-    end_time = time(NULL);
-    struct tm* end_tm = localtime(&end_time);
-
-    char end_str[20];
-
-    strftime(end_str, sizeof(end_str), "%Y%m%d%H%M%S", end_tm);
-
-    fprintf(sh_pfdFile, "end time [%s]\n", end_str);
-
-    char final_filename[512];
-    create_filename(final_filename, ip_suffix, start_time, end_time);
-
-    fclose(sh_pfdFile);
-
-    if (rename(temp_filename, final_filename) == 0)
-    {
-        printf("DB file is created: %s\n", final_filename);
-    }
-    else
-    {
-        printf("Fail to create DB file.\n");
-    }
-#endif
 
     //pthread_join(pCmdThread, (void **)&status);
 	pthread_cancel(pCmdThread);
