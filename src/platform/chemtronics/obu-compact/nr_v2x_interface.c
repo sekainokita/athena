@@ -1,6 +1,6 @@
 /* PC1 side UDP Tx implementation */
 
-#define CONFIG_KETI (1)s
+#define CONFIG_KETI (1)
 
 #include <stdio.h>
 #include <sys/socket.h>
@@ -38,14 +38,15 @@ static bool testMenuPrintStatus = true;
 static int choiceNum = -1;
 static bool state = true;
 static unsigned msgcnt = 0;
+
+static char *__bar ="---------------------------------------------------------------";
+
+#if defined(CONFIG_KETI)
 static char ip_addr[256];
 static char* ip_suffix = NULL;
 
 static char temp_filename[512];
 
-static char *__bar ="---------------------------------------------------------------";
-
-#if defined(CONFIG_KETI)
 static FILE* sh_pfdFile;
 
 static time_t start_time;
@@ -156,11 +157,12 @@ void Debug_Msg_Print_Data(int msgLv, unsigned char* data, int len)
 		printf("\n\t========================================================");
 		printf("\n\t Hex.   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
 		printf("\n\t--------------------------------------------------------\n");
-
+#if defined(CONFIG_KETI)
         fprintf(sh_pfdFile, "\n\t (Len : 0x%X(%d) bytes)", len, len);
         fprintf(sh_pfdFile, "\n\t========================================================");
         fprintf(sh_pfdFile, "\n\t Hex.   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
         fprintf(sh_pfdFile, "\n\t--------------------------------------------------------\n");
+#endif
 #if 0
 		for(rep = 0 ; rep < len ; rep++)
 		{
@@ -187,12 +189,16 @@ void Debug_Msg_Print_Data(int msgLv, unsigned char* data, int len)
 			strcat(buf, hex_str);
 		}
 		printf("%s\n", buf);
+#if defined(CONFIG_KETI)
 		fprintf(sh_pfdFile, "%s\n", buf);
+#endif
 #endif
 		printf("\t========================================================");
 		printf("\n\n");
+#if defined(CONFIG_KETI)
 		fprintf(sh_pfdFile, "\t========================================================");
 		fprintf(sh_pfdFile, "\n\n");
+#endif
     }
 }
 
@@ -351,6 +357,53 @@ int AddExtStatusData(TLVC_Overall *p_overall, int tx_rx)
 	return 0;
 }
 
+/**
+  * @name   AddExtStatusV2Data
+  * @brief  Extensible 메시지에 Status Data 추가하는 함수
+  * @param  TLVC_Overall_V2 *p_overall : Overall 위치 포이터
+  * @return int : 성공 - 0, 실패 - 음수
+ **/
+int AddExtStatusV2Data(TLVC_Overall_V2 *p_overall, int tx_rx)
+{
+	TLVC_STATUS_CommUnit_V2 *p_status;
+	struct timeval now;
+	struct tm *tm;
+	uint64_t keti_time;
+	uint16_t package_len = ntohs(p_overall->len_package);
+
+	p_status  = (TLVC_STATUS_CommUnit_V2 *)((uint8_t*)p_overall + sizeof(TLVC_Overall_V2) + package_len);
+
+	p_overall->num_package++;
+	package_len += sizeof(TLVC_STATUS_CommUnit_V2);
+	p_overall->len_package = htons(package_len);
+	p_overall->crc = htons(CalcCRC16((uint8_t*)p_overall, sizeof(TLVC_Overall_V2) - 2));	// TLVC 중 CRC만 제외
+
+	p_status->type = htonl(EM_PT_STATUS);
+	p_status->len = htons(sizeof(TLVC_STATUS_CommUnit_V2) - 6);
+	p_status->dev_type = eStatusDevType_Obu;
+	p_status->tx_rx = tx_rx;
+	p_status->dev_id = htonl(1);
+	p_status->hw_ver = htons(2);
+	p_status->sw_ver = htons(3);
+	gettimeofday(&now, NULL);
+	now.tv_sec = now.tv_sec + (3600 * 9);			// UTC -> KST
+	tm = localtime(&now.tv_sec);
+	keti_time = (uint64_t)(tm->tm_year+1900) * 1000000000000000 +
+				(uint64_t)(tm->tm_mon+1)     * 10000000000000 +
+				(uint64_t)tm->tm_mday        * 100000000000 +
+				(uint64_t)tm->tm_hour        * 1000000000 +
+				(uint64_t)tm->tm_min         * 10000000 +
+				(uint64_t)tm->tm_sec         * 100000 +
+				(uint64_t)now.tv_usec        / 10;
+
+	p_status->timestamp = htobe64(keti_time);
+	p_status->cpu_temp = 50;
+	p_status->peri_temp = 50;
+	p_status->crc = htons(CalcCRC16((uint8_t*)p_status, sizeof(TLVC_STATUS_CommUnit_V2) - 2));	// TLVC 중 CRC만 제외
+
+	return 0;
+}
+
 bool Test_App_Main(int fd)
 {
 	bool rtnVal = true, flag_send_fin = false;
@@ -375,7 +428,13 @@ bool Test_App_Main(int fd)
 		Test_Msg_Print("[%d] Send V2I Test Extensible MSG", CMD_SEND_TEST_EXTENSIBLE_V2I);
 		Test_Msg_Print("[%d] Send V2V Test Extensible MSG with SEQ", CMD_SEND_TEST_EXTENSIBLE_V2V_ADD_SEQUENCE);
 		Test_Msg_Print("[%d] Send V2I Test Extensible MSG with SEQ", CMD_SEND_TEST_EXTENSIBLE_V2I_ADD_SEQUENCE);
+		Test_Msg_Print("[%d] Send V2V Test Extensible V2 MSG", CMD_SEND_TEST_EXTENSIBLE_V2_V2V);
+		Test_Msg_Print("[%d] Send V2I Test Extensible V2 MSG", CMD_SEND_TEST_EXTENSIBLE_V2_V2I);
+		Test_Msg_Print("[%d] Send V2V Test Extensible V2 MSG with SEQ", CMD_SEND_TEST_EXTENSIBLE_V2_V2V_ADD_SEQUENCE);
+		Test_Msg_Print("[%d] Send V2I Test Extensible V2 MSG with SEQ", CMD_SEND_TEST_EXTENSIBLE_V2_V2I_ADD_SEQUENCE);
+#if defined(CONFIG_KETI)
 		Test_Msg_Print("[%d] Create DB File", CMD_SEND_TEST_CREATE_DB);
+#endif
 		Test_Msg_Print("< EXIT >-------------------------------");
 		Test_Msg_Print("[0] Exit");
 	}
@@ -402,8 +461,8 @@ bool Test_App_Main(int fd)
 		uint16_t *crc16;
 		uint16_t calc_crc16;
 		V2x_App_WSR_Add_Crc* wsr = (V2x_App_WSR_Add_Crc*)hdr->data;
-
-		Debug_Msg_Print(DEBUG_MSG_LV_MID," >> WSR len: %d",(int) sizeof(SIZE_WSR_DATA));
+		
+		Debug_Msg_Print(DEBUG_MSG_LV_MID," >> WSR len: %d",(int) SIZE_WSR_DATA);
 		memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
 		hdr->len = htons(SIZE_WSR_DATA-6);
 		hdr->seq = 0;
@@ -448,7 +507,7 @@ bool Test_App_Main(int fd)
 		}
 
 		memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
-		hdr->len = htons(size + 10);		// seq 2byte, payload id 2byte, psid 4byte, crc16 2byte
+		hdr->len = htons(SIZE_HDR_LEN_EXCEPT_DATA + size);
 		hdr->seq = 0;
 		hdr->payload_id = htons(ePayloadId_TxMsg);
 		tx_msg->psid = htonl(psid);
@@ -456,10 +515,10 @@ bool Test_App_Main(int fd)
 		{
 			tx_msg->data[i] = rand()%255;
 		}
-		send_len = SIZE_V2X_APP_EXT_HEADER + size + SIZE_CRC16_OF_HEADER + 4;
+		send_len = SIZE_V2X_APP_EXT_HEADER + size + SIZE_CRC16_OF_TAIL + SIZE_LEN_PSID_OF_PAYLOAD;
 
 		crc16 = (uint16_t*)&buf[send_len-2];
-		calc_crc16 = CalcCRC16(buf + SIZE_MAGIC_NUMBER_OF_HEADER, size + 10);
+		calc_crc16 = CalcCRC16(buf + SIZE_MAGIC_NUMBER_OF_HEADER, size + SIZE_CRC_LEN_EXCEPT_DATA);
 		*crc16 = htons(calc_crc16);
 		break;
 	  }
@@ -506,13 +565,13 @@ bool Test_App_Main(int fd)
 		memcpy(tx_msg->data, test_bsm, size);
 
 		memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
-		hdr->len = htons(size + 10);		// seq 2byte, payload id 2byte, psid 4byte, crc16 2byte
+		hdr->len = htons(SIZE_HDR_LEN_EXCEPT_DATA + size);
 		hdr->seq = 0;
 		hdr->payload_id = htons(ePayloadId_TxMsg);
 		tx_msg->psid = htonl(psid);
-		send_len = SIZE_V2X_APP_EXT_HEADER + size + SIZE_CRC16_OF_HEADER + 4;
+		send_len = SIZE_V2X_APP_EXT_HEADER + size + SIZE_CRC16_OF_TAIL + SIZE_LEN_PSID_OF_PAYLOAD;
 		crc16 = (uint16_t*)&buf[send_len-2];
-		calc_crc16 = CalcCRC16(buf + SIZE_MAGIC_NUMBER_OF_HEADER, size + 10);
+		calc_crc16 = CalcCRC16(buf + SIZE_MAGIC_NUMBER_OF_HEADER, size + SIZE_CRC_LEN_EXCEPT_DATA);	
 		*crc16 = htons(calc_crc16);
 
 		Debug_Msg_Print(DEBUG_MSG_LV_LOW," >> Send Test BSM DATA");
@@ -610,13 +669,13 @@ bool Test_App_Main(int fd)
 		memcpy(tx_msg->data, test_pvd, size);
 
 		memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
-		hdr->len = htons(size + 6 + 4);		// header 6byte, psid 4byte
+		hdr->len = htons(SIZE_HDR_LEN_EXCEPT_DATA + size);
 		hdr->seq = 0;
 		hdr->payload_id = htons(ePayloadId_TxMsg);
 		tx_msg->psid = htonl(psid);
-		send_len = SIZE_V2X_APP_EXT_HEADER + 4 + size + SIZE_CRC16_OF_HEADER;
+		send_len = SIZE_V2X_APP_EXT_HEADER + SIZE_LEN_PSID_OF_PAYLOAD + size + SIZE_CRC16_OF_TAIL;
 		crc16 = (uint16_t*)&buf[send_len-2];
-		calc_crc16 = CalcCRC16(buf + SIZE_MAGIC_NUMBER_OF_HEADER, size + 10);
+		calc_crc16 = CalcCRC16(buf + SIZE_MAGIC_NUMBER_OF_HEADER, size + SIZE_CRC_LEN_EXCEPT_DATA);
 		*crc16 = htons(calc_crc16);
 
 		Debug_Msg_Print(DEBUG_MSG_LV_LOW," >> Send Test PVD DATA");
@@ -684,7 +743,7 @@ bool Test_App_Main(int fd)
 
 		memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
 		send_len = 16 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package);	// 16 : header(10) + psid(4) + crc(2)
-		hdr->len = htons(10 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package));		// seq(2) + payload id(2) + crc(2) + psid(4)
+		hdr->len = htons(SIZE_HDR_LEN_EXCEPT_DATA + sizeof(TLVC_Overall) + ntohs(p_overall->len_package));
 		hdr->seq = 0;
 		hdr->payload_id = htons(ePayloadId_TxMsg);
 		tx_msg->psid = htonl(EM_V2V_MSG);
@@ -759,7 +818,7 @@ bool Test_App_Main(int fd)
 
 		memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
 		send_len = 16 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package);	// 16 : header(10) + psid(4) + crc(2)
-		hdr->len = htons(10 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package));		// seq(2) + payload id(2) + crc(2) + psid(4)
+		hdr->len = htons(SIZE_HDR_LEN_EXCEPT_DATA + sizeof(TLVC_Overall) + ntohs(p_overall->len_package));
 		hdr->seq = 0;
 		hdr->payload_id = htons(ePayloadId_TxMsg);
 		tx_msg->psid = htonl(EM_V2I_MSG);
@@ -834,7 +893,7 @@ bool Test_App_Main(int fd)
 
 			memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
 			send_len = 16 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package);	// 16 : header(10) + psid(4) + crc(2)
-			hdr->len = htons(10 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package));		// seq(2) + payload id(2) + crc(2) + psid(4)
+			hdr->len = htons(SIZE_HDR_LEN_EXCEPT_DATA + sizeof(TLVC_Overall) + ntohs(p_overall->len_package));
 			hdr->seq = 0;
 			hdr->payload_id = htons(ePayloadId_TxMsg);
 			tx_msg->psid = htonl(EM_V2V_MSG);
@@ -846,8 +905,9 @@ bool Test_App_Main(int fd)
 			*crc16 = htons(calc_crc16);
 
 			Debug_Msg_Print(DEBUG_MSG_LV_MID, "\tCount = %d / %d, Period = %d ms", i+1, cnt, period);
-            fprintf(sh_pfdFile, "\tCount = %d / %d, Period = %d ms\n", i+1, cnt, period);
-
+#if defined(CONFIG_KETI)
+                        fprintf(sh_pfdFile, "\tCount = %d / %d, Period = %d ms\n", i+1, cnt, period);
+#endif
 			Debug_Msg_Print_Data(DEBUG_MSG_LV_MID, buf, send_len);
 			n = send(fd, buf, send_len, 0);
 			if (n < 0)
@@ -933,7 +993,7 @@ bool Test_App_Main(int fd)
 
 			memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
 			send_len = 16 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package);	// 16 : header(10) + psid(4) + crc(2)
-			hdr->len = htons(10 + sizeof(TLVC_Overall) + ntohs(p_overall->len_package));		// seq(2) + payload id(2) + crc(2) + psid(4)
+			hdr->len = htons(SIZE_HDR_LEN_EXCEPT_DATA + sizeof(TLVC_Overall) + ntohs(p_overall->len_package));
 			hdr->seq = 0;
 			hdr->payload_id = htons(ePayloadId_TxMsg);
 			tx_msg->psid = htonl(EM_V2I_MSG);
@@ -969,6 +1029,353 @@ bool Test_App_Main(int fd)
 		break;
 	  }
 
+	  case CMD_SEND_TEST_EXTENSIBLE_V2_V2V:
+	{
+		int size = -1, psid = -1, i;
+		uint16_t *crc16;
+		uint16_t calc_crc16;
+		V2x_App_TxMsg* tx_msg = (V2x_App_TxMsg*)hdr->data;
+		TLVC_Overall_V2 *p_overall;
+		V2x_App_Ext_TLVC *p_dummy;
+//		TLVC_STATUS_CommUnit_V2 *p_status;
+		struct timeval now;
+		struct tm *tm;
+		uint64_t keti_time;
+		uint16_t package_len;
+
+		Debug_Msg_Print(DEBUG_MSG_LV_LOW," >> Send ExtensibleV2(V2V) DATA");
+		Test_Msg_Print("Enter added Data Size(except header and crc) : \n");
+		re = scanf("%d", &size);
+		psid = EM_V2V_MSG;
+		if (size < 0 || size > (MAX_DATA_SIZE-1000) || psid < 0)
+		{
+			perror("Size Error\n");
+			return true;
+		}
+
+		p_overall = (TLVC_Overall_V2*)tx_msg->data;
+		p_overall->type = htonl(EM_PT_OVERALL);
+		p_overall->len = htons(sizeof(TLVC_Overall_V2) - 6);
+		p_overall->magic[0] = 'E';
+		p_overall->magic[1] = 'M';
+		p_overall->magic[2] = 'O';
+		p_overall->magic[3] = 'P';
+		p_overall->version = 2;
+		p_overall->num_package = 0;
+		p_overall->len_package = 0;
+		p_overall->bitwize = 0x77;
+
+		package_len = ntohs(p_overall->len_package);
+
+		if (size > 0)
+		{
+			p_dummy  = (V2x_App_Ext_TLVC *)((uint8_t*)p_overall + sizeof(TLVC_Overall_V2) + package_len);
+
+			p_overall->num_package++;
+			package_len = package_len + 8 + size;
+			p_overall->len_package = htons(package_len);
+			p_overall->crc = htons(CalcCRC16((uint8_t*)p_overall, sizeof(TLVC_Overall_V2) - 2));	// TLVC 중 CRC만 제외
+
+			p_dummy->type = htonl(EM_PT_RAW_DATA);
+			p_dummy->len = htons(size + 2);		// V=size, C=2
+			for(i=0; i < size; i++)
+			{
+				p_dummy->data[i] = i % 255;
+			}
+
+			crc16 = (uint16_t*)((uint8_t*)p_dummy + 6 + size);
+			*crc16 = htons(CalcCRC16((uint8_t*)p_dummy, size+6));	// TLVC 중 CRC만 제외
+		}
+
+		AddExtStatusV2Data(p_overall, eStatusTxRx_Tx);
+		
+		memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
+		send_len = 16 + sizeof(TLVC_Overall_V2) + ntohs(p_overall->len_package);	// 16 : header(10) + psid(4) + crc(2)
+		hdr->len = htons(SIZE_HDR_LEN_EXCEPT_DATA + sizeof(TLVC_Overall_V2) + ntohs(p_overall->len_package));
+		hdr->seq = 0;
+		hdr->payload_id = htons(ePayloadId_TxMsg);
+		tx_msg->psid = htonl(EM_V2V_MSG);
+
+		send_len = ntohs(hdr->len) + 6;		// magic 4byte, lenth 2byte
+
+		crc16 = (uint16_t*)&buf[send_len-2];
+		calc_crc16 = CalcCRC16(buf + SIZE_MAGIC_NUMBER_OF_HEADER, send_len - 6);		// magic(4), crc(2)
+		*crc16 = htons(calc_crc16);
+
+		break;
+	}
+
+	case CMD_SEND_TEST_EXTENSIBLE_V2_V2I:
+	{
+		int size = -1, psid = -1, i;
+		uint16_t *crc16;
+		uint16_t calc_crc16;
+		V2x_App_TxMsg* tx_msg = (V2x_App_TxMsg*)hdr->data;
+		TLVC_Overall_V2 *p_overall;
+		V2x_App_Ext_TLVC *p_dummy;
+//		TLVC_STATUS_CommUnit_V2 *p_status;
+		struct timeval now;
+		struct tm *tm;
+		uint64_t keti_time;
+		uint16_t package_len;
+
+		Debug_Msg_Print(DEBUG_MSG_LV_LOW," >> Send ExtensibleV2(V2I) DATA");
+		Test_Msg_Print("Enter added Data Size(except header and crc) : \n");
+		re = scanf("%d", &size);
+		psid = EM_V2I_MSG;
+		if (size < 0 || size > (MAX_DATA_SIZE-1000) || psid < 0)
+		{
+			perror("Size Error\n");
+			return true;
+		}
+
+		p_overall = (TLVC_Overall_V2*)tx_msg->data;
+		p_overall->type = htonl(EM_PT_OVERALL);
+		p_overall->len = htons(sizeof(TLVC_Overall_V2) - 6);
+		p_overall->magic[0] = 'E';
+		p_overall->magic[1] = 'M';
+		p_overall->magic[2] = 'O';
+		p_overall->magic[3] = 'P';
+		p_overall->version = 2;
+		p_overall->num_package = 0;
+		p_overall->len_package = 0;
+		p_overall->bitwize = 0x77;
+
+		package_len = ntohs(p_overall->len_package);
+
+		if (size > 0)
+		{
+			p_dummy  = (V2x_App_Ext_TLVC *)((uint8_t*)p_overall + sizeof(TLVC_Overall_V2) + package_len);
+
+			p_overall->num_package++;
+			package_len = package_len + 8 + size;
+			p_overall->len_package = htons(package_len);
+			p_overall->crc = htons(CalcCRC16((uint8_t*)p_overall, sizeof(TLVC_Overall_V2) - 2));	// TLVC 중 CRC만 제외
+
+			p_dummy->type = htonl(EM_PT_RAW_DATA);
+			p_dummy->len = htons(size + 2);		// V=size, C=2
+			for(i=0; i < size; i++)
+			{
+				p_dummy->data[i] = i % 255;
+			}
+
+			crc16 = (uint16_t*)((uint8_t*)p_dummy + 6 + size);
+			*crc16 = htons(CalcCRC16((uint8_t*)p_dummy, size+6));	// TLVC 중 CRC만 제외
+		}
+
+		AddExtStatusV2Data(p_overall, eStatusTxRx_Tx);
+		
+		memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
+		send_len = 16 + sizeof(TLVC_Overall_V2) + ntohs(p_overall->len_package);	// 16 : header(10) + psid(4) + crc(2)
+		hdr->len = htons(SIZE_HDR_LEN_EXCEPT_DATA + sizeof(TLVC_Overall_V2) + ntohs(p_overall->len_package));
+		hdr->seq = 0;
+		hdr->payload_id = htons(ePayloadId_TxMsg);
+		tx_msg->psid = htonl(EM_V2I_MSG);
+
+		send_len = ntohs(hdr->len) + 6;		// magic 4byte, lenth 2byte
+
+		crc16 = (uint16_t*)&buf[send_len-2];
+		calc_crc16 = CalcCRC16(buf + SIZE_MAGIC_NUMBER_OF_HEADER, send_len - 6);		// magic(4), crc(2)
+		*crc16 = htons(calc_crc16);
+
+		break;
+	}
+
+	  case CMD_SEND_TEST_EXTENSIBLE_V2_V2V_ADD_SEQUENCE:
+	  {
+		int size = -1, psid = -1, i;
+		uint32_t *p_seq;
+		uint16_t *crc16;
+		uint16_t calc_crc16;
+		V2x_App_TxMsg* tx_msg = (V2x_App_TxMsg*)hdr->data;
+		TLVC_Overall_V2 *p_overall;
+		V2x_App_Ext_TLVC *p_dummy;
+//		TLVC_STATUS_CommUnit_V2 *p_status;
+		struct timeval now;
+		struct tm *tm;
+		uint64_t keti_time;
+		uint16_t package_len;
+
+		Debug_Msg_Print(DEBUG_MSG_LV_LOW," >> Send ExtensibleV2(V2V) DATA");
+		Test_Msg_Print("Enter count : \n");
+		re = scanf("%d", &cnt);
+		if (cnt > 1)
+		{
+			Test_Msg_Print("Enter Period(ms) : \n");
+			re = scanf("%d", &period);
+		}
+		else
+			cnt = 1;
+
+		for (i=0; i<cnt; i++)
+		{
+			psid = EM_V2V_MSG;
+			p_overall = (TLVC_Overall_V2*)tx_msg->data;
+			p_overall->type = htonl(EM_PT_OVERALL);
+			p_overall->len = htons(sizeof(TLVC_Overall_V2) - 6);
+			p_overall->magic[0] = 'E';
+			p_overall->magic[1] = 'M';
+			p_overall->magic[2] = 'O';
+			p_overall->magic[3] = 'P';
+			p_overall->version = 2;
+			p_overall->num_package = 0;
+			p_overall->len_package = 0;
+			p_overall->bitwize = 0x77;
+
+			package_len = ntohs(p_overall->len_package);
+
+			// add raw package for sequence number
+			size = 4;	// raw package size
+			p_dummy  = (V2x_App_Ext_TLVC *)((uint8_t*)p_overall + sizeof(TLVC_Overall_V2) + package_len);
+			p_overall->num_package++;
+			package_len = package_len + 8 + size;
+			p_overall->len_package = htons(package_len);
+			p_overall->crc = htons(CalcCRC16((uint8_t*)p_overall, sizeof(TLVC_Overall_V2) - 2));	// TLVC 중 CRC만 제외
+			p_dummy->type = htonl(EM_PT_RAW_DATA);
+			p_dummy->len = htons(size + 2);		// V=size, C=2
+			p_seq = (uint32_t*)p_dummy->data;
+			*p_seq = htonl(i+1);
+			crc16 = (uint16_t*)((uint8_t*)p_dummy + 6 + size);
+			*crc16 = htons(CalcCRC16((uint8_t*)p_dummy, size+6));	// TLVC 중 CRC만 제외
+
+			// add status package
+			AddExtStatusV2Data(p_overall, eStatusTxRx_Tx);
+			
+			memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
+			send_len = 16 + sizeof(TLVC_Overall_V2) + ntohs(p_overall->len_package);	// 16 : header(10) + psid(4) + crc(2)
+			hdr->len = htons(SIZE_HDR_LEN_EXCEPT_DATA + sizeof(TLVC_Overall_V2) + ntohs(p_overall->len_package));
+			hdr->seq = 0;
+			hdr->payload_id = htons(ePayloadId_TxMsg);
+			tx_msg->psid = htonl(EM_V2V_MSG);
+
+			send_len = ntohs(hdr->len) + 6;		// magic 4byte, lenth 2byte
+
+			crc16 = (uint16_t*)&buf[send_len-2];
+			calc_crc16 = CalcCRC16(buf + SIZE_MAGIC_NUMBER_OF_HEADER, send_len - 6);		// magic(4), crc(2)
+			*crc16 = htons(calc_crc16);
+
+			Debug_Msg_Print(DEBUG_MSG_LV_MID, "\tCount = %d / %d, Period = %d ms", i+1, cnt, period);
+			Debug_Msg_Print_Data(DEBUG_MSG_LV_MID, buf, send_len);
+			n = send(fd, buf, send_len, 0);
+			if (n < 0)
+			{
+				perror("send() failed");
+			}
+			else if (n != send_len)
+			{
+				fprintf(stderr, "send() sent a different number of bytes than expected\n");
+			}
+			else if (n == 0)
+			{
+				perror("closed socket");
+				close(fd);
+				return false;
+			}
+			usleep(period * 1000);
+		}
+
+		flag_send_fin = true;
+
+		break;
+	  }
+
+	  case CMD_SEND_TEST_EXTENSIBLE_V2_V2I_ADD_SEQUENCE:
+	  {
+		int size = -1, psid = -1, i;
+		uint32_t *p_seq;
+		uint16_t *crc16;
+		uint16_t calc_crc16;
+		V2x_App_TxMsg* tx_msg = (V2x_App_TxMsg*)hdr->data;
+		TLVC_Overall_V2 *p_overall;
+		V2x_App_Ext_TLVC *p_dummy;
+//		TLVC_STATUS_CommUnit_V2 *p_status;
+		struct timeval now;
+		struct tm *tm;
+		uint64_t keti_time;
+		uint16_t package_len;
+
+		Debug_Msg_Print(DEBUG_MSG_LV_LOW," >> Send ExtensibleV2(V2I) DATA");
+		Test_Msg_Print("Enter count : \n");
+		re = scanf("%d", &cnt);
+		if (cnt > 1)
+		{
+			Test_Msg_Print("Enter Period(ms) : \n");
+			re = scanf("%d", &period);
+		}
+		else
+			cnt = 1;
+
+		for (i=0; i<cnt; i++)
+		{
+			psid = EM_V2I_MSG;
+			p_overall = (TLVC_Overall_V2*)tx_msg->data;
+			p_overall->type = htonl(EM_PT_OVERALL);
+			p_overall->len = htons(sizeof(TLVC_Overall_V2) - 6);
+			p_overall->magic[0] = 'E';
+			p_overall->magic[1] = 'M';
+			p_overall->magic[2] = 'O';
+			p_overall->magic[3] = 'P';
+			p_overall->version = 2;
+			p_overall->num_package = 0;
+			p_overall->len_package = 0;
+			p_overall->bitwize = 0x77;
+
+			package_len = ntohs(p_overall->len_package);
+
+			// add raw package for sequence number
+			size = 4;	// raw package size
+			p_dummy  = (V2x_App_Ext_TLVC *)((uint8_t*)p_overall + sizeof(TLVC_Overall_V2) + package_len);
+			p_overall->num_package++;
+			package_len = package_len + 8 + size;
+			p_overall->len_package = htons(package_len);
+			p_overall->crc = htons(CalcCRC16((uint8_t*)p_overall, sizeof(TLVC_Overall_V2) - 2));	// TLVC 중 CRC만 제외
+			p_dummy->type = htonl(EM_PT_RAW_DATA);
+			p_dummy->len = htons(size + 2);		// V=size, C=2
+			p_seq = (uint32_t*)p_dummy->data;
+			*p_seq = htonl(i+1);
+			crc16 = (uint16_t*)((uint8_t*)p_dummy + 6 + size);
+			*crc16 = htons(CalcCRC16((uint8_t*)p_dummy, size+6));	// TLVC 중 CRC만 제외
+
+			// add status package
+			AddExtStatusV2Data(p_overall, eStatusTxRx_Tx);
+			
+			memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
+			send_len = 16 + sizeof(TLVC_Overall_V2) + ntohs(p_overall->len_package);	// 16 : header(10) + psid(4) + crc(2)
+			hdr->len = htons(SIZE_HDR_LEN_EXCEPT_DATA + sizeof(TLVC_Overall_V2) + ntohs(p_overall->len_package));
+			hdr->seq = 0;
+			hdr->payload_id = htons(ePayloadId_TxMsg);
+			tx_msg->psid = htonl(EM_V2I_MSG);
+
+			send_len = ntohs(hdr->len) + 6;		// magic 4byte, lenth 2byte
+
+			crc16 = (uint16_t*)&buf[send_len-2];
+			calc_crc16 = CalcCRC16(buf + SIZE_MAGIC_NUMBER_OF_HEADER, send_len - 6);		// magic(4), crc(2)
+			*crc16 = htons(calc_crc16);
+
+			Debug_Msg_Print(DEBUG_MSG_LV_MID, "\tCount = %d / %d, Period = %d ms", i+1, cnt, period);
+			Debug_Msg_Print_Data(DEBUG_MSG_LV_MID, buf, send_len);
+			n = send(fd, buf, send_len, 0);
+			if (n < 0)
+			{
+				perror("send() failed");
+			}
+			else if (n != send_len)
+			{
+				fprintf(stderr, "send() sent a different number of bytes than expected\n");
+			}
+			else if (n == 0)
+			{
+				perror("closed socket");
+				close(fd);
+				return false;
+			}
+			usleep(period * 1000);
+		}
+
+		flag_send_fin = true;
+
+		break;
+	  }
       case CMD_SEND_TEST_CREATE_DB:
       {
 #if defined(CONFIG_KETI)
@@ -1061,12 +1468,12 @@ void* Cmd_thread_func(void *data)
 }
 
 /**
-  * @name   AnalyzeExtMsg
+  * @name   PrintExtStatusV1Msg
   * @brief  Extensible Message 로그 출력, 기본적으로 tab으로 띈 후에 출력
   * @param  void *p : TLVC 포인터
   * @return int : 성공 - 0, 실패 - 음수
  **/
-static void PrintExtStatusMsg(void *p)
+static void PrintExtStatusV1Msg(void *p)
 {
 	TLVC_STATUS_Tx_ModemUnit *p_tx_modem;
 	TLVC_STATUS_Rx_ModemUnit *p_rx_modem;
@@ -1075,7 +1482,7 @@ static void PrintExtStatusMsg(void *p)
 	uint8_t *dev_type = (uint8_t*)p + 6;	// T, L 뒤에 dev_type 존재
 	char buf[32];
 	uint16_t *crc, cal_crc;
-
+	
 	switch(*dev_type)
 	{
 	  case eStatusDevType_ObuModem:
@@ -1087,68 +1494,36 @@ static void PrintExtStatusMsg(void *p)
 		if (tx_rx == eStatusTxRx_Tx)
 		{
 			printf("\tObu Modem : Tx\n");
-			fprintf(sh_pfdFile, "\tObu Modem : Tx\n");
-
 			printf("\tDevice ID : %u\n", htonl(p_tx_modem->dev_id));
-            fprintf(sh_pfdFile, "\tDevice ID : %u\n", htonl(p_tx_modem->dev_id));
-
 			printf("\tVersion - HW : %d / SW : %d\n", htons(p_tx_modem->hw_ver), htons(p_tx_modem->sw_ver));
-			fprintf(sh_pfdFile, "\tVersion - HW : %d / SW : %d\n", htons(p_tx_modem->hw_ver), htons(p_tx_modem->sw_ver));
-
 			printf("\tTx Power - %d, Freq - %d, Bandwidth - %d, Mcs - %d, Scs - %d\n",
 					p_tx_modem->tx_power, htons(p_tx_modem->freq), p_tx_modem->bandwidth, p_tx_modem->mcs, p_tx_modem->scs);
-            fprintf(sh_pfdFile, "\tTx Power - %d, Freq - %d, Bandwidth - %d, Mcs - %d, Scs - %d\n",
-					p_tx_modem->tx_power, htons(p_tx_modem->freq), p_tx_modem->bandwidth, p_tx_modem->mcs, p_tx_modem->scs);
-
 			printf("\tLatitude - %d, Longitude - %d\n", htonl(p_tx_modem->latitude), htonl(p_tx_modem->longitude));
-			fprintf(sh_pfdFile, "\tLatitude - %d, Longitude - %d\n", htonl(p_tx_modem->latitude), htonl(p_tx_modem->longitude));
-
 			sprintf(buf, "%lu", be64toh(p_tx_modem->timestamp));
 			printf("\tTimestamp - %s\n", buf);
-            fprintf(sh_pfdFile, "\tTimestamp - %s\n", buf);
-
 			cal_crc = CalcCRC16((uint8_t*)p_tx_modem, htons(p_tx_modem->len) + 4);	// T, L, V 길이
 			if(cal_crc != ntohs(p_tx_modem->crc))
-            {
 				printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_tx_modem->crc), cal_crc);
-				fprintf(sh_pfdFile, "[Error] CRC Error : %04X / need : %04X\n", ntohs(p_tx_modem->crc), cal_crc);
-            }
-		}
+			}
 		else if (tx_rx == eStatusTxRx_Rx)
 		{
 			printf("\tObu Modem : Rx\n");
-			fprintf(sh_pfdFile, "\tObu Modem : Rx\n");
-
 			printf("\tDevice ID : %u\n", htonl(p_rx_modem->dev_id));
-			fprintf(sh_pfdFile, "\tDevice ID : %u\n", htonl(p_rx_modem->dev_id));
-
 			printf("\tVersion - HW : %d / SW : %d\n", htons(p_rx_modem->hw_ver), htons(p_rx_modem->sw_ver));
-			fprintf(sh_pfdFile, "\tVersion - HW : %d / SW : %d\n", htons(p_rx_modem->hw_ver), htons(p_rx_modem->sw_ver));
-
 			printf("\tRSSI - %d, RCPI - %d\n", p_rx_modem->rssi, p_rx_modem->rcpi);
-			fprintf(sh_pfdFile, "\tRSSI - %d, RCPI - %d\n", p_rx_modem->rssi, p_rx_modem->rcpi);
-
 			printf("\tLatitude - %d, Longitude - %d\n", htonl(p_rx_modem->latitude), htonl(p_rx_modem->longitude));
-			fprintf(sh_pfdFile, "\tLatitude - %d, Longitude - %d\n", htonl(p_rx_modem->latitude), htonl(p_rx_modem->longitude));
-
 			sprintf(buf, "%lu", be64toh(p_rx_modem->timestamp));
 			printf("\tTimestamp - %s\n", buf);
-			fprintf(sh_pfdFile, "\tTimestamp - %s\n", buf);
-
 			cal_crc = CalcCRC16((uint8_t*)p_rx_modem, htons(p_rx_modem->len) + 4);	// T, L, V 길이
 			if(cal_crc != ntohs(p_rx_modem->crc))
-            {
 				printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_rx_modem->crc), cal_crc);
-				fprintf(sh_pfdFile, "[Error] CRC Error : %04X / need : %04X\n", ntohs(p_rx_modem->crc), cal_crc);
-            }
-		}
+			}
 		else
 		{
 			printf("Tx_Rx Type Error - %d\n", tx_rx);
-			fprintf(sh_pfdFile, "Tx_Rx Type Error - %d\n", tx_rx);
 			return;
 		}
-
+		
 	  	break;
 	  }
 
@@ -1157,25 +1532,13 @@ static void PrintExtStatusMsg(void *p)
 	  	p_comm = (TLVC_STATUS_CommUnit*)p;
 
 		printf("\tOBU : %s\n", (p_comm->tx_rx==eStatusTxRx_Tx)?"Tx":"Rx");
-		fprintf("\tOBU : %s\n", (p_comm->tx_rx==eStatusTxRx_Tx)?"Tx":"Rx");
-
 		printf("\tDevice ID : %u\n", htonl(p_comm->dev_id));
-		fprintf("\tDevice ID : %u\n", htonl(p_comm->dev_id));
-
 		printf("\tVersion - HW : %d / SW : %d\n", htons(p_comm->hw_ver), htons(p_comm->sw_ver));
-		fprintf("\tVersion - HW : %d / SW : %d\n", htons(p_comm->hw_ver), htons(p_comm->sw_ver));
-
 		sprintf(buf, "%lu", be64toh(p_comm->timestamp));
-
 		printf("\tTimestamp - %s\n", buf);
-		fprintf("\tTimestamp - %s\n", buf);
-
 		cal_crc = CalcCRC16((uint8_t*)p_comm, htons(p_comm->len) + 4);	// T, L, V 길이
 		if(cal_crc != ntohs(p_comm->crc))
-        {
 			printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_comm->crc), cal_crc);
-            fprintf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_comm->crc), cal_crc);
-        }
 	  	break;
 	  }
 
@@ -1190,10 +1553,7 @@ static void PrintExtStatusMsg(void *p)
 		printf("\tTimestamp - %s\n", buf);
 		cal_crc = CalcCRC16((uint8_t*)p_comm, htons(p_comm->len) + 4);	// T, L, V 길이
 		if(cal_crc != ntohs(p_comm->crc))
-        {
-            printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_comm->crc), cal_crc);
-        }
-
+			printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_comm->crc), cal_crc);
 	  	break;
 	  }
 
@@ -1263,6 +1623,195 @@ static void PrintExtStatusMsg(void *p)
 }
 
 /**
+  * @name   PrintExtStatusV2Msg
+  * @brief  Extensible Message 로그 출력, 기본적으로 tab으로 띈 후에 출력
+  * @param  void *p : TLVC 포인터
+  * @return int : 성공 - 0, 실패 - 음수
+ **/
+static void PrintExtStatusV2Msg(void *p)
+{
+	TLVC_STATUS_Tx_ModemUnit_V2 *p_tx_modem;
+	TLVC_STATUS_Rx_ModemUnit_V2 *p_rx_modem;
+	TLVC_STATUS_CommUnit_V2 *p_comm;
+	TLVC_STATUS_ControlUnit_V2 *p_control;
+	uint8_t *dev_type = (uint8_t*)p + 6;	// T, L 뒤에 dev_type 존재
+	char buf[32];
+	uint16_t *crc, cal_crc;
+	
+	switch(*dev_type)
+	{
+	  case eStatusDevType_ObuModem:
+	  {
+	  	p_tx_modem = (TLVC_STATUS_Tx_ModemUnit_V2*)p;
+		p_rx_modem = (TLVC_STATUS_Rx_ModemUnit_V2*)p;
+		int tx_rx = p_tx_modem->tx_rx;
+
+		if (tx_rx == eStatusTxRx_Tx)
+		{
+			printf("\tObu Modem : Tx\n");
+			printf("\tDevice ID : %u\n", htonl(p_tx_modem->dev_id));
+			printf("\tVersion - HW : %d / SW : %d\n", htons(p_tx_modem->hw_ver), htons(p_tx_modem->sw_ver));
+			printf("\tTx Power - %d, Freq - %d, Bandwidth - %d, Mcs - %d, Scs - %d\n",
+					p_tx_modem->tx_power, htons(p_tx_modem->freq), p_tx_modem->bandwidth, p_tx_modem->mcs, p_tx_modem->scs);
+			printf("\tLatitude - %d, Longitude - %d\n", htonl(p_tx_modem->latitude), htonl(p_tx_modem->longitude));
+			sprintf(buf, "%lu", be64toh(p_tx_modem->timestamp));
+			printf("\tTimestamp - %s\n", buf);
+			printf("\tTemperature - In : %d, Out : %d\n", p_tx_modem->cpu_temp, p_tx_modem->peri_temp);
+			cal_crc = CalcCRC16((uint8_t*)p_tx_modem, htons(p_tx_modem->len) + 4);	// T, L, V 길이
+			if(cal_crc != ntohs(p_tx_modem->crc))
+				printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_tx_modem->crc), cal_crc);
+			}
+		else if (tx_rx == eStatusTxRx_Rx)
+		{
+			printf("\tObu Modem : Rx\n");
+			printf("\tDevice ID : %u\n", htonl(p_rx_modem->dev_id));
+			printf("\tVersion - HW : %d / SW : %d\n", htons(p_rx_modem->hw_ver), htons(p_rx_modem->sw_ver));
+			printf("\tRSSI - %d, RCPI - %d\n", p_rx_modem->rssi, p_rx_modem->rcpi);
+			printf("\tLatitude - %d, Longitude - %d\n", htonl(p_rx_modem->latitude), htonl(p_rx_modem->longitude));
+			sprintf(buf, "%lu", be64toh(p_rx_modem->timestamp));
+			printf("\tTimestamp - %s\n", buf);
+			printf("\tTemperature - In : %d, Out : %d\n", p_rx_modem->cpu_temp, p_rx_modem->peri_temp);
+			cal_crc = CalcCRC16((uint8_t*)p_rx_modem, htons(p_rx_modem->len) + 4);	// T, L, V 길이
+			if(cal_crc != ntohs(p_rx_modem->crc))
+				printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_rx_modem->crc), cal_crc);
+			}
+		else
+		{
+			printf("Tx_Rx Type Error - %d\n", tx_rx);
+			return;
+		}
+		
+	  	break;
+	  }
+
+	  case eStatusDevType_Obu:
+	  {
+	  	p_comm = (TLVC_STATUS_CommUnit_V2*)p;
+
+		printf("\tOBU : %s\n", (p_comm->tx_rx==eStatusTxRx_Tx)?"Tx":"Rx");
+		printf("\tDevice ID : %u\n", htonl(p_comm->dev_id));
+		printf("\tVersion - HW : %d / SW : %d\n", htons(p_comm->hw_ver), htons(p_comm->sw_ver));
+		sprintf(buf, "%lu", be64toh(p_comm->timestamp));
+		printf("\tTimestamp - %s\n", buf);
+		printf("\tTemperature - In : %d, Out : %d\n", p_comm->cpu_temp, p_comm->peri_temp);
+		cal_crc = CalcCRC16((uint8_t*)p_comm, htons(p_comm->len) + 4);	// T, L, V 길이
+		if(cal_crc != ntohs(p_comm->crc))
+			printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_comm->crc), cal_crc);
+	  	break;
+	  }
+
+	  case eStatusDevType_Rsu:
+	  {
+	  	p_comm = (TLVC_STATUS_CommUnit_V2*)p;
+
+		printf("\tRSU : %s\n", (p_comm->tx_rx==eStatusTxRx_Tx)?"Tx":"Rx");
+		printf("\tDevice ID : %u\n", htonl(p_comm->dev_id));
+		printf("\tVersion - HW : %d / SW : %d\n", htons(p_comm->hw_ver), htons(p_comm->sw_ver));
+		sprintf(buf, "%lu", be64toh(p_comm->timestamp));
+		printf("\tTimestamp - %s\n", buf);
+		printf("\tTemperature - In : %d, Out : %d\n", p_comm->cpu_temp, p_comm->peri_temp);
+		cal_crc = CalcCRC16((uint8_t*)p_comm, htons(p_comm->len) + 4);	// T, L, V 길이
+		if(cal_crc != ntohs(p_comm->crc))
+			printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_comm->crc), cal_crc);
+	  	break;
+	  }
+
+	  case eStatusDevType_RsuModem:
+	  {
+	  	p_tx_modem = (TLVC_STATUS_Tx_ModemUnit_V2*)p;
+		p_rx_modem = (TLVC_STATUS_Rx_ModemUnit_V2*)p;
+		int tx_rx = p_tx_modem->tx_rx;
+
+		if (tx_rx == eStatusTxRx_Tx)
+		{
+			printf("\tRsu Modem : Tx\n");
+			printf("\tDevice ID : %u\n", htonl(p_tx_modem->dev_id));
+			printf("\tVersion - HW : %d / SW : %d\n", htons(p_tx_modem->hw_ver), htons(p_tx_modem->sw_ver));
+			printf("\tTx Power - %d, Freq - %d, Bandwidth - %d, Mcs - %d, Scs - %d\n",
+					p_tx_modem->tx_power, htons(p_tx_modem->freq), p_tx_modem->bandwidth, p_tx_modem->mcs, p_tx_modem->scs);
+			printf("\tLatitude - %d, Longitude - %d\n", htonl(p_tx_modem->latitude), htonl(p_tx_modem->longitude));
+			sprintf(buf, "%lu", be64toh(p_tx_modem->timestamp));
+			printf("\tTimestamp - %s\n", buf);
+			printf("\tTemperature - In : %d, Out : %d\n", p_tx_modem->cpu_temp, p_tx_modem->peri_temp);
+			cal_crc = CalcCRC16((uint8_t*)p_tx_modem, htons(p_tx_modem->len) + 4);	// T, L, V 길이
+			if(cal_crc != ntohs(p_tx_modem->crc))
+				printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_tx_modem->crc), cal_crc);
+			}
+		else if (tx_rx == eStatusTxRx_Rx)
+		{
+			printf("\tRsu Modem : Rx\n");
+			printf("\tDevice ID : %u\n", htonl(p_rx_modem->dev_id));
+			printf("\tVersion - HW : %d / SW : %d\n", htons(p_rx_modem->hw_ver), htons(p_rx_modem->sw_ver));
+			printf("\tRSSI - %d, RCPI - %d\n", p_rx_modem->rssi, p_rx_modem->rcpi);
+			printf("\tLatitude - %d, Longitude - %d\n", htonl(p_rx_modem->latitude), htonl(p_rx_modem->longitude));
+			sprintf(buf, "%lu", be64toh(p_rx_modem->timestamp));
+			printf("\tTimestamp - %s\n", buf);
+			printf("\tTemperature - In : %d, Out : %d\n", p_rx_modem->cpu_temp, p_rx_modem->peri_temp);
+			cal_crc = CalcCRC16((uint8_t*)p_rx_modem, htons(p_rx_modem->len) + 4);	// T, L, V 길이
+			if(cal_crc != ntohs(p_rx_modem->crc))
+				printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_rx_modem->crc), cal_crc);
+			}
+		else
+		{
+			printf("Tx_Rx Type Error - %d\n", tx_rx);
+			return;
+		}
+
+		break;
+	  }
+
+	  case eStatusDevType_RsuControl:
+	  {
+	  	p_control = (TLVC_STATUS_ControlUnit_V2*)p;
+
+		printf("\tRsu Control : %s\n", (p_control->tx_rx==eStatusTxRx_Tx)?"Tx":"Rx");
+		printf("\tDevice ID : %u\n", htonl(p_control->dev_id));
+		printf("\tVersion - HW : %d / SW : %d\n", htons(p_control->hw_ver), htons(p_control->sw_ver));
+		sprintf(buf, "%lu", be64toh(p_control->timestamp));
+		printf("\tTimestamp - %s\n", buf);
+		cal_crc = CalcCRC16((uint8_t*)p_control, htons(p_control->len) + 4);	// T, L, V 길이
+		if(cal_crc != ntohs(p_control->crc))
+			printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_control->crc), cal_crc);
+	  	break;
+	  }
+
+	  default:
+	  {
+	  	printf("[Error] Unknown Dev Type - %d\n", *dev_type);
+	  	break;
+	  }
+	}
+}
+
+/**
+  * @name   PrintExtStatusMsg
+  * @brief  Extensible Message 로그 출력, 기본적으로 tab으로 띈 후에 출력
+  * @param  void *p : TLVC 포인터
+  * @return int : 성공 - 0, 실패 - 음수
+ **/
+static void PrintExtStatusMsg(void *p, uint8_t version)
+{
+	switch(version)
+		{
+	  case 1:
+		{
+		PrintExtStatusV1Msg(p);
+		break;
+	  }
+	  case 2:
+	  {
+		PrintExtStatusV2Msg(p);
+	  	break;
+	  }
+	  default:
+	  {
+		printf("Unknown Extensible Msg version : %d\n", version);
+	  	break;
+	  }
+	}
+}
+
+/**
   * @name   AnalyzeMsg
   * @brief  Extensible Message 로그 출력
   * @param  uint8_t *msg : 수신한 데이터
@@ -1275,6 +1824,7 @@ static int AnalyzeMsg(uint8_t *msg, int len)
 	uint16_t *crc, cal_crc;
 	void *p;
 	TLVC_Overall *p_overall = NULL;
+	TLVC_Overall_V2 *p_overall_v2 = NULL;
 	V2x_App_Hdr *hdr = (V2x_App_Hdr *)msg;
 	V2x_App_RxMsg *rx_msg = (V2x_App_RxMsg *)hdr->data;
 	int psid = ntohl(rx_msg->psid);
@@ -1283,6 +1833,7 @@ static int AnalyzeMsg(uint8_t *msg, int len)
 	if (len > 0)
 	{
 		p_overall = (TLVC_Overall *)rx_msg->data;
+		p_overall_v2 = (TLVC_Overall_V2 *)rx_msg->data;
 	}
 	else
 	{
@@ -1327,9 +1878,15 @@ static int AnalyzeMsg(uint8_t *msg, int len)
 		if(cal_crc != ntohs(p_overall->crc))
 			printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_overall->crc), cal_crc);
 
-
 		//AddExtStatusData(p_overall, eStatusTxRx_Rx);
+		if (p_overall->version == 1)
 		p = (uint8_t*)p_overall + sizeof(TLVC_Overall);	// next TLVC
+		else if (p_overall->version == 2)
+			p = (uint8_t*)p_overall_v2 + sizeof(TLVC_Overall_V2);	// next TLVC
+		else
+		{
+			printf("[Error] Unknown Version = %d\n", p_overall->version);
+		}
 		for (i=0; i<p_overall->num_package; i++)
 		{
 			V2x_App_Ext_TLVC *tlvc = (V2x_App_Ext_TLVC *)p;
@@ -1341,14 +1898,14 @@ static int AnalyzeMsg(uint8_t *msg, int len)
 				printf("[ERROR] Remain Length - %d\n", tlvc_len);
 				break;
 			}
-
+				
 			if (tlvc_type == EM_PT_STATUS)
 			{
 				printf("Package : %d (Status Package)\n", i+1);
-				PrintExtStatusMsg(p);
+				PrintExtStatusMsg(p, p_overall->version);
 			}
 			else
-			{
+			{	
 				printf("Package : %d\n\tPSID : %d, TLV lenth : %d\n", i+1, tlvc_type, tlvc_len + 6);
 				Debug_Msg_Print_Data(DEBUG_MSG_LV_MID, (uint8_t*)p, tlvc_len + 6);   // 6: T, L 크기 추가
 			}
@@ -1371,6 +1928,7 @@ static int AnalyzeMsg(uint8_t *msg, int len)
 int main(int argc, char *argv[])
 {
 	char msg[MAX_RX_PACKET_BY_OBU];
+	char ip_addr[256];
 	int fd, fd_cnt=0;
 	struct sockaddr_in servaddr;
 	struct pollfd polls[5];
@@ -1392,10 +1950,8 @@ int main(int argc, char *argv[])
 	{
 		perror("cannot open socket");
 		return -1;
-	}else
+	}else 
 		Debug_Msg_Print(DEBUG_MSG_LV_MID, "open socket");
-
-    ip_suffix = get_ip_suffix(ip_addr);
 
 	bzero(&servaddr,sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
@@ -1503,11 +2059,9 @@ int main(int argc, char *argv[])
 		}
 		//n = read(fd, msg, BUF_SIZE);
     }
-
     //pthread_join(pCmdThread, (void **)&status);
 	pthread_cancel(pCmdThread);
     Debug_Msg_Print(DEBUG_MSG_LV_MID, "ByeBye");
-
 	close(fd);
     return 0;
 }

@@ -14,8 +14,8 @@
 // Update History
 // [11/06/2022 jongsik.kim] create
 //=============================================================================
-#ifndef SIB_V2X_APP_EXT_H_
-#define SIB_V2X_APP_EXT_H_
+#ifndef _5GNR_V2X_APP_EXT_H_
+#define _5GNR_V2X_APP_EXT_H_
 
 #include <stdint.h>
 
@@ -23,16 +23,29 @@
 
 
 // 확장 메시지용
-#define EM_V2V_MSG									58200
-#define EM_V2I_MSG									58201
-#define EM_I2V_MSG									58202
+#define EM_V2V_MSG										(58200)
+#define EM_V2I_MSG										(58201)
+#define EM_I2V_MSG										(58202)
 
-#define EM_PT_OVERALL								58220 // overall package
-#define EM_PT_RAW_DATA								58221 // raw data package
-#define EM_PT_SSOV									58222 // SSOV package 또는 SSOV PSID
+#define EM_PT_OVERALL									(58220) // overall package
+#define EM_PT_RAW_DATA									(58221) // raw data package
+#define EM_PT_SSOV										(58222) // SSOV package 또는 SSOV PSID
 													// cf) SSOV의 응용 서비스는 SSOV format 내부 Service ID로 구분
-#define EM_PT_STATUS								58223 // status package
+#define EM_PT_STATUS									(58223) // status package
 
+#define EM_FTP_REQ										(58240)
+#define EM_FTP_RESP										(58241)
+
+#define TEMPERATURE_NO_MEASURE							(-128)
+#define TEMPERATURE_LIMIT_OVER							(127)
+#define TEMPERATURE_LIMIT_BELOW							(-127)
+
+#define UNIT_ID_OBU_MODEM								(0x1)
+#define UNIT_ID_OBU_COMMUNICATION						(0x2)
+//#define UNIT_ID_OBU_CONTROL							(0x4)
+#define UNIT_ID_RSU_MODEM								(0x10)
+#define UNIT_ID_RSU_COMMUNICATION						(0x20)
+#define UNIT_ID_RSU_CONTROL								(0x40)
 
 typedef enum
 {
@@ -165,6 +178,18 @@ typedef struct _TLVC_Overall
 	uint16_t	crc;			// C : network byte order
 }__attribute__((__packed__)) TLVC_Overall;
 
+typedef struct _TLVC_Overall_V2
+{
+	uint32_t	type;			// T : network byte oder - 58220
+	uint16_t	len;			// L : network byte oder
+	char		magic[4];		// V : EMOP
+	uint8_t		version;		// V
+	uint8_t		num_package;	// V
+	uint16_t	len_package;	// V : network byte order
+	uint8_t		bitwize;
+	uint16_t	crc;			// C : network byte order
+}__attribute__((__packed__)) TLVC_Overall_V2;
+
 typedef struct _TLVC_STATUS_Tx_ModemUnit
 {
 	uint32_t	type;			// T : network byte oder - 58223
@@ -185,6 +210,28 @@ typedef struct _TLVC_STATUS_Tx_ModemUnit
 	uint16_t	crc;			// C : network byte order
 }__attribute__((__packed__)) TLVC_STATUS_Tx_ModemUnit;
 
+typedef struct _TLVC_STATUS_Tx_ModemUnit_V2
+{
+	uint32_t	type;			// T : network byte oder - 58223
+	uint16_t	len;			// L : network byte oder
+	uint8_t		dev_type;		// obu_modem:10, obu:11, rsu_modem:20, rsu:21, rsu_control:22
+	uint8_t		tx_rx;			// tx:0, rx:1
+	uint32_t	dev_id;
+	uint16_t	hw_ver;
+	uint16_t	sw_ver;
+	uint64_t	timestamp;
+	uint8_t		tx_power;
+	uint16_t	freq;
+	uint8_t		bandwidth;
+	uint8_t		scs;			// Subcarrier spacing
+	uint8_t		mcs;
+	int32_t		latitude;
+	int32_t		longitude;
+	char		cpu_temp;
+	char		peri_temp;
+	uint16_t	crc;			// C : network byte order
+}__attribute__((__packed__)) TLVC_STATUS_Tx_ModemUnit_V2;
+
 typedef struct _TLVC_STATUS_Rx_ModemUnit
 {
 	uint32_t	type;			// T : network byte oder - 58223
@@ -202,6 +249,25 @@ typedef struct _TLVC_STATUS_Rx_ModemUnit
 	uint16_t	crc;			// C : network byte order
 }__attribute__((__packed__)) TLVC_STATUS_Rx_ModemUnit;
 
+typedef struct _TLVC_STATUS_Rx_ModemUnit_V2
+{
+	uint32_t	type;			// T : network byte oder - 58223
+	uint16_t	len;			// L : network byte oder
+	uint8_t		dev_type;		// obu_modem:10, obu:11, rsu_modem:20, rsu:21, rsu_control:22
+	uint8_t		tx_rx;			// tx:0, rx:1
+	uint32_t	dev_id;
+	uint16_t	hw_ver;
+	uint16_t	sw_ver;
+	uint64_t	timestamp;
+	int8_t		rssi;
+	uint8_t		rcpi;
+	int32_t		latitude;
+	int32_t		longitude;
+	char		cpu_temp;
+	char		peri_temp;
+	uint16_t	crc;			// C : network byte order
+}__attribute__((__packed__)) TLVC_STATUS_Rx_ModemUnit_V2;
+
 typedef struct _TLVC_STATUS_CommUnit
 {
 	uint32_t	type;			// T : network byte oder - 58223
@@ -214,6 +280,21 @@ typedef struct _TLVC_STATUS_CommUnit
 	uint64_t	timestamp;
 	uint16_t	crc;			// C : network byte order
 }__attribute__((__packed__)) TLVC_STATUS_CommUnit;
+
+typedef struct _TLVC_STATUS_CommUnit_V2
+{
+	uint32_t	type;			// T : network byte oder - 58223
+	uint16_t	len;			// L : network byte oder
+	uint8_t		dev_type;		// obu_modem:10, obu:11, rsu_modem:20, rsu:21, rsu_control:22
+	uint8_t		tx_rx;			// tx:0, rx:1
+	uint32_t	dev_id;
+	uint16_t	hw_ver;
+	uint16_t	sw_ver;
+	uint64_t	timestamp;
+	char		cpu_temp;
+	char		peri_temp;
+	uint16_t	crc;			// C : network byte order
+}__attribute__((__packed__)) TLVC_STATUS_CommUnit_V2;
 
 typedef struct _TLVC_STATUS_ControlUnit
 {
@@ -228,5 +309,39 @@ typedef struct _TLVC_STATUS_ControlUnit
 	uint16_t	crc;			// C : network byte order
 }__attribute__((__packed__)) TLVC_STATUS_ControlUnit;
 
-#endif		// SIB_V2X_APP_EXT_H_
+typedef struct _TLVC_STATUS_ControlUnit_V2
+{
+	uint32_t	type;			// T : network byte oder - 58223
+	uint16_t	len;			// L : network byte oder
+	uint8_t		dev_type;		// obu_modem:10, obu:11, rsu_modem:20, rsu:21, rsu_control:22
+	uint8_t		tx_rx;			// tx:0, rx:1
+	uint32_t	dev_id;
+	uint16_t	hw_ver;
+	uint16_t	sw_ver;
+	uint64_t	timestamp;
+	char		cpu_temp;
+	char		peri_temp;
+	uint16_t	crc;			// C : network byte order
+}__attribute__((__packed__)) TLVC_STATUS_ControlUnit_V2;
+
+typedef struct _FtpConnInfoReq
+{
+	uint32_t	psid;
+	uint8_t		unit_id;
+	uint32_t	link_id;
+	uint16_t	crc;
+}__attribute__((__packed__)) FtpConnInfoReq;
+
+typedef struct _FtpConnInfoResp
+{
+	uint32_t	psid;
+	uint8_t		unit_id;
+	uint32_t	link_id;
+	uint32_t	ip_addr;
+	uint16_t	port;
+	char		data[];		// ID, Password string 사이 NULL 데이터
+	//uint16_t	crc;		// 마지막에 추가 필요
+}__attribute__((__packed__)) FtpConnInfoResp;
+
+#endif		// _5GNR_V2X_APP_EXT_H_
 
