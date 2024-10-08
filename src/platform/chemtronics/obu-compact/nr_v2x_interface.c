@@ -442,6 +442,91 @@ static int32_t P_NR_V2X_CreateDb(void)
 
     return nRet;
 }
+
+static int32_t P_NR_V2X_SetWsr(int fd)
+{
+    int32_t nRet = PLATFORM_ERROR;
+    bool rtnVal = true, flag_send_fin = false;
+    int re = 0, n, send_len, i, cnt = 1, period = 100;
+    char buf[MAX_TX_PACKET_TO_OBU];
+
+    int psid = -1, action = -1;
+    uint16_t *crc16;
+    uint16_t calc_crc16;
+    memset(buf, 0, sizeof(buf));
+
+    V2x_App_Hdr *hdr = (V2x_App_Hdr *)buf;
+
+    V2x_App_WSR_Add_Crc *wsr = (V2x_App_WSR_Add_Crc *)hdr->data;
+
+    Debug_Msg_Print(DEBUG_MSG_LV_MID, " >> WSR len: %d", (int)SIZE_WSR_DATA);
+    memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
+    hdr->len = htons(SIZE_WSR_DATA - 6);
+    hdr->seq = 0;
+    hdr->payload_id = htons(ePayloadId_WsmServiceReq);
+
+    action = 0;
+    psid = EM_V2V_MSG;
+
+    PrintDebug("ADD[%d] PSID [%d]", action, psid);
+
+    if (action < 0 || action > 1 || psid < 0)
+    {
+        perror("Action or PSID Error\n");
+        return true;
+    }
+
+    wsr->action = action;
+    wsr->psid = htonl(psid);
+    send_len = SIZE_WSR_DATA;
+
+    crc16 = (uint16_t *)&buf[send_len - 2];
+    calc_crc16 = CalcCRC16(buf + SIZE_MAGIC_NUMBER_OF_HEADER, send_len - 4 - 2); // magic 4byte, crc 2byte
+    *crc16 = htons(calc_crc16);
+
+    printf("action = %s, psid = %u\n", (action == 0) ? "ADD" : "DEL", psid);
+
+    Debug_Msg_Print(DEBUG_MSG_LV_MID, "\tCount = %d, Period = %d ms", cnt, period);
+    for (i = 0; i < cnt; i++)
+    {
+        if (flag_send_fin == true)
+        {
+            break;
+        }
+        else
+        {
+            Debug_Msg_Print(DEBUG_MSG_LV_MID, "\tCount = %d / %d, Period = %d ms", i + 1, cnt, period);
+            Debug_Msg_Print_Data(DEBUG_MSG_LV_MID, buf, send_len);
+            n = send(fd, buf, send_len, 0);
+            if (n < 0)
+            {
+                perror("send() failed");
+                PrintError("send() is failed! [%d]", n);
+            }
+            else if (n != send_len)
+            {
+                fprintf(stderr, "send() sent a different number of bytes than expected\n");
+                PrintError("send() is failed! [%d]", n);
+
+            }
+            else if (n == 0)
+            {
+                perror("closed socket");
+                close(fd);
+                return false;
+            }
+            usleep(period * 1000);
+        }
+    }
+    cnt = 1;
+    period = 100;
+    flag_send_fin = false;
+
+    nRet = PLATFORM_OK;
+
+    return nRet;
+}
+
 #endif
 
 bool Test_App_Main(int fd)
@@ -1466,6 +1551,7 @@ bool Test_App_Main(int fd)
 
 
 #if defined(CONFIG_KETI)
+    /* Unused Code */
 #else
     Debug_Msg_Print(DEBUG_MSG_LV_MID, "\tCount = %d, Period = %d ms", cnt, period);
     for (i = 0; i < cnt; i++)
@@ -1514,6 +1600,15 @@ bool Test_App_Main(int fd)
 void *Cmd_thread_func(void *data)
 {
     int fd = *(int *)data;
+
+#if defined(CONFIG_KETI)
+    int32_t nRet = PLATFORM_ERROR;
+    nRet = P_NR_V2X_SetWsr(fd);
+    if (nRet != PLATFORM_OK)
+    {
+        PrintError("P_NR_V2X_SetWsr() is failed![nRet:%d]", nRet);
+    }
+#endif
 
     while (state)
     {
