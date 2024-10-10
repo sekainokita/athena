@@ -17,8 +17,9 @@
 #include <poll.h>
 #include <errno.h>
 #if defined(CONFIG_KETI)
-#include "type.h"
 #include <time.h>
+#include <sys/select.h>
+#include "type.h"
 #endif
 
 #include "nr_v2x_interface.h"
@@ -527,6 +528,22 @@ static int32_t P_NR_V2X_SetWsr(int fd)
     return nRet;
 }
 
+int P_NR_V2X_CheckInput()
+{
+    struct timeval tv;
+    fd_set fds;
+
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds); // STDIN 입력 감지
+
+    select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
+
+    return FD_ISSET(STDIN_FILENO, &fds); // 입력이 있으면 1, 없으면 0
+}
+
 #endif
 
 bool Test_App_Main(int fd)
@@ -555,7 +572,7 @@ bool Test_App_Main(int fd)
         Test_Msg_Print("[%d] Send Test PVD", CMD_SEND_TEST_PVD);
         Test_Msg_Print("[%d] Send V2V Test Extensible MSG", CMD_SEND_TEST_EXTENSIBLE_V2V);
         Test_Msg_Print("[%d] Send V2I Test Extensible MSG", CMD_SEND_TEST_EXTENSIBLE_V2I);
-        Test_Msg_Print("[%d] Send V2V Test Extensible MSG with SEQ", CMD_SEND_TEST_EXTENSIBLE_V2V_ADD_SEQUENCE);
+        Test_Msg_Print("[%d] Send V2V Test Extensible MSG with SEQ [Stop Loop:Enter 0]", CMD_SEND_TEST_EXTENSIBLE_V2V_ADD_SEQUENCE);
         Test_Msg_Print("[%d] Send V2I Test Extensible MSG with SEQ", CMD_SEND_TEST_EXTENSIBLE_V2I_ADD_SEQUENCE);
         Test_Msg_Print("[%d] Send V2V Test Extensible V2 MSG", CMD_SEND_TEST_EXTENSIBLE_V2_V2V);
         Test_Msg_Print("[%d] Send V2I Test Extensible V2 MSG", CMD_SEND_TEST_EXTENSIBLE_V2_V2I);
@@ -565,7 +582,7 @@ bool Test_App_Main(int fd)
         Test_Msg_Print("[%d] Create DB File", CMD_SEND_TEST_CREATE_DB);
 #endif
         Test_Msg_Print("< EXIT >-------------------------------");
-        Test_Msg_Print("[0] Exit");
+        Test_Msg_Print("[0] Exit and Create DB File");
     }
     Test_Msg_Print("Enter your choice : \n");
 
@@ -583,6 +600,7 @@ bool Test_App_Main(int fd)
     {
     case 0:
         rtnVal = false;
+        PrintDebug("choiceNum[%d], Exit and Create DB File", choiceNum);
         break;
     case CMD_WSM_SERVICE_REQ:
     {
@@ -1059,6 +1077,19 @@ bool Test_App_Main(int fd)
                 close(fd);
                 return false;
             }
+
+            if (P_NR_V2X_CheckInput())
+            {
+                int input;
+                scanf("%d", &input);
+
+                if (input == 0)
+                {
+                    PrintTrace("Loop terminated by user input!");
+                    break;
+                }
+            }
+
             usleep(period * 1000);
         }
 
@@ -1617,6 +1648,12 @@ void *Cmd_thread_func(void *data)
         {
             state = false;
 #if defined(CONFIG_KETI)
+            nRet = P_NR_V2X_CreateDb();
+            if (nRet != PLATFORM_OK)
+            {
+                PrintError("P_NR_V2X_CreateDb() is failed![nRet:%d", nRet);
+            }
+
             PrintTrace("Exit Process of DB Program");
             exit(0);
 #else
