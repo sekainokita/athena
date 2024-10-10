@@ -133,8 +133,8 @@ window.onload = function() {
         const cKetiPangyolongitude = 127.1021;
 
         // RSU Location
-        const cPangyoRsuLatitude16 = 37.409141;
-        const cPangyoRsuLongitude16 = 127.099980;
+        const cPangyoRsuLatitude16 = 37.408940;
+        const cPangyoRsuLongitude16 = 127.099630;
 
         const cPangyoRsuLatitude17 = 37.406510;
         const cPangyoRsuLongitude17 = 127.100833;
