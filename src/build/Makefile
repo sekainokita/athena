@@ -41,6 +41,7 @@ LIB_PLATFORM = platform
 LIB_DI = di
 
 APP_BIN_NAME = athena
+PLAT_APP_BIN_NAME = plat-chem-obu-compact-app
 
 ifeq ($(CONFIG_MODEL_NNCO1XG),y)
 APP_MODEL_NAME = nnco1xg
@@ -314,6 +315,7 @@ release:
 	mkdir -p $(RELEASE_DIR)/$(CONFIG_SW_VERSION)
 	mkdir -p $(RELEASE_DIR)/$(CONFIG_SW_VERSION)/bin
 	cp -af $(OUT_BIN_DIR)/$(APP_BIN_NAME) $(RELEASE_DIR)/$(CONFIG_SW_VERSION)/bin/$(APP_MODEL_BIN_NAME)
+	cp -af $(OUT_BIN_DIR)/$(PLAT_APP_BIN_NAME) $(RELEASE_DIR)/$(CONFIG_SW_VERSION)/bin/$(PLAT_APP_BIN_NAME)
 	cp -a $(OUT_LIB_DIR) $(RELEASE_DIR)/$(CONFIG_SW_VERSION)/lib
 
 #
