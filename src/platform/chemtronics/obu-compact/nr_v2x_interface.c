@@ -45,15 +45,20 @@ static unsigned msgcnt = 0;
 static char *__bar = "---------------------------------------------------------------";
 
 #if defined(CONFIG_KETI)
+static FILE *sh_pfdFile;
 static char ip_addr[256];
 static char *ip_suffix = NULL;
-
 static char temp_filename[512];
-
-static FILE *sh_pfdFile;
-
 static time_t start_time;
 static time_t end_time;
+
+#define PrintDb(fmt, ...) \
+                do { \
+                    if (sh_pfdFile != NULL) { \
+                        fprintf(sh_pfdFile, "[%s][%s] " fmt, __DATE__, __TIME__, ##__VA_ARGS__); \
+                    } \
+                } while (0)
+
 
 char *get_ip_suffix(const char *ip)
 {
@@ -131,6 +136,9 @@ void Debug_Msg_Print(int msgLv, char *format, ...)
     if (msgLv <= DEBUG_LV)
     {
         printf("$ [DT=%s] - DEBUG[%d]: ", getDateTimeStr(), msgLv);
+#if defined(CONFIG_KETI)
+        PrintDb("$ [DT=%s] - DEBUG[%d]: \r\n", getDateTimeStr(), msgLv);
+#endif
 
         va_start(arg, format);
         vprintf(format, arg);
@@ -163,10 +171,10 @@ void Debug_Msg_Print_Data(int msgLv, unsigned char *data, int len)
         printf("\n\t Hex.   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
         printf("\n\t--------------------------------------------------------\n");
 #if defined(CONFIG_KETI)
-        fprintf(sh_pfdFile, "\n\t (Len : 0x%X(%d) bytes)", len, len);
-        fprintf(sh_pfdFile, "\n\t========================================================");
-        fprintf(sh_pfdFile, "\n\t Hex.   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
-        fprintf(sh_pfdFile, "\n\t--------------------------------------------------------\n");
+        PrintDb("\n\t (Len : 0x%X(%d) bytes)", len, len);
+        PrintDb("\n\t========================================================");
+        PrintDb("\n\t Hex.   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
+        PrintDb("\n\t--------------------------------------------------------\n");
 #endif
 #if 0
         for(rep = 0 ; rep < len ; rep++)
@@ -184,8 +192,9 @@ void Debug_Msg_Print_Data(int msgLv, unsigned char *data, int len)
                 else
                 {
                     printf("%s\n", buf);
-                    // fprintf(sh_pfdFile, "%s\n", buf);
-
+#if defined(CONFIG_KETI)
+                    PrintDb("%s\n", buf);
+#endif
                     sprintf(buf, "\t %03X- : ", rep / 16);
                 }
             }
@@ -195,14 +204,14 @@ void Debug_Msg_Print_Data(int msgLv, unsigned char *data, int len)
         }
         printf("%s\n", buf);
 #if defined(CONFIG_KETI)
-        fprintf(sh_pfdFile, "%s\n", buf);
+        PrintDb("%s\n", buf);
 #endif
 #endif
         printf("\t========================================================");
         printf("\n\n");
 #if defined(CONFIG_KETI)
-        fprintf(sh_pfdFile, "\t========================================================");
-        fprintf(sh_pfdFile, "\n\n");
+        PrintDb("\t========================================================");
+        PrintDb("\n\n");
 #endif
     }
 }
@@ -1703,6 +1712,19 @@ static void PrintExtStatusV1Msg(void *p)
             cal_crc = CalcCRC16((uint8_t *)p_tx_modem, htons(p_tx_modem->len) + 4); // T, L, V 길이
             if (cal_crc != ntohs(p_tx_modem->crc))
                 printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_tx_modem->crc), cal_crc);
+
+#if defined(CONFIG_KETI)
+            PrintDb("\tObu Modem : Tx\n");
+            PrintDb("\tDevice ID : %u\n", htonl(p_tx_modem->dev_id));
+            PrintDb("\tVersion - HW : %d / SW : %d\n", htons(p_tx_modem->hw_ver), htons(p_tx_modem->sw_ver));
+            PrintDb("\tTx Power - %d, Freq - %d, Bandwidth - %d, Mcs - %d, Scs - %d\n",
+                   p_tx_modem->tx_power, htons(p_tx_modem->freq), p_tx_modem->bandwidth, p_tx_modem->mcs, p_tx_modem->scs);
+            PrintDb("\tLatitude - %d, Longitude - %d\n", htonl(p_tx_modem->latitude), htonl(p_tx_modem->longitude));
+            PrintDb("\tTimestamp - %s\n", buf);
+            cal_crc = CalcCRC16((uint8_t *)p_tx_modem, htons(p_tx_modem->len) + 4); // T, L, V 길이
+            if (cal_crc != ntohs(p_tx_modem->crc))
+                PrintDb("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_tx_modem->crc), cal_crc);
+#endif
         }
         else if (tx_rx == eStatusTxRx_Rx)
         {
@@ -1716,6 +1738,17 @@ static void PrintExtStatusV1Msg(void *p)
             cal_crc = CalcCRC16((uint8_t *)p_rx_modem, htons(p_rx_modem->len) + 4); // T, L, V 길이
             if (cal_crc != ntohs(p_rx_modem->crc))
                 printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_rx_modem->crc), cal_crc);
+#if defined(CONFIG_KETI)
+            PrintDb("\tObu Modem : Rx\n");
+            PrintDb("\tDevice ID : %u\n", htonl(p_rx_modem->dev_id));
+            PrintDb("\tVersion - HW : %d / SW : %d\n", htons(p_rx_modem->hw_ver), htons(p_rx_modem->sw_ver));
+            PrintDb("\tRSSI - %d, RCPI - %d\n", p_rx_modem->rssi, p_rx_modem->rcpi);
+            PrintDb("\tLatitude - %d, Longitude - %d\n", htonl(p_rx_modem->latitude), htonl(p_rx_modem->longitude));
+            PrintDb("\tTimestamp - %s\n", buf);
+            cal_crc = CalcCRC16((uint8_t *)p_rx_modem, htons(p_rx_modem->len) + 4); // T, L, V 길이
+            if (cal_crc != ntohs(p_rx_modem->crc))
+                PrintDb("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_rx_modem->crc), cal_crc);
+#endif
         }
         else
         {
@@ -1738,6 +1771,16 @@ static void PrintExtStatusV1Msg(void *p)
         cal_crc = CalcCRC16((uint8_t *)p_comm, htons(p_comm->len) + 4); // T, L, V 길이
         if (cal_crc != ntohs(p_comm->crc))
             printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_comm->crc), cal_crc);
+
+#if defined(CONFIG_KETI)
+        PrintDb("\tOBU : %s\n", (p_comm->tx_rx == eStatusTxRx_Tx) ? "Tx" : "Rx");
+        PrintDb("\tDevice ID : %u\n", htonl(p_comm->dev_id));
+        PrintDb("\tVersion - HW : %d / SW : %d\n", htons(p_comm->hw_ver), htons(p_comm->sw_ver));
+        PrintDb("\tTimestamp - %s\n", buf);
+        cal_crc = CalcCRC16((uint8_t *)p_comm, htons(p_comm->len) + 4); // T, L, V 길이
+        if (cal_crc != ntohs(p_comm->crc))
+            PrintDb("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_comm->crc), cal_crc);
+#endif
         break;
     }
 
@@ -2043,6 +2086,9 @@ static int AnalyzeMsg(uint8_t *msg, int len)
     if (psid == EM_V2V_MSG)
     {
         printf("Get Extensible Message - V2V\n");
+#if defined(CONFIG_KETI)
+        PrintDb("Get Extensible Message - V2V\n");
+#endif
         flag_extensible_msg = 1;
     }
     else if (psid == EM_V2I_MSG)
@@ -2073,6 +2119,12 @@ static int AnalyzeMsg(uint8_t *msg, int len)
         printf("Overall Package - Version : %d / Length : %d\n", p_overall->version, overall_len);
         printf("Number of Packages = %d / All Length of Package= %d\n", p_overall->num_package,
                ntohs(package_len));
+
+#if defined(CONFIG_KETI)
+        PrintDb("Overall Package - Version : %d / Length : %d\n", p_overall->version, overall_len);
+        PrintDb("Number of Packages = %d / All Length of Package= %d\n", p_overall->num_package, ntohs(package_len));
+#endif
+
         cal_crc = CalcCRC16((uint8_t *)p_overall, overall_len + 4); // T, L, V 길이
         if (cal_crc != ntohs(p_overall->crc))
             printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_overall->crc), cal_crc);
@@ -2101,11 +2153,17 @@ static int AnalyzeMsg(uint8_t *msg, int len)
             if (tlvc_type == EM_PT_STATUS)
             {
                 printf("Package : %d (Status Package)\n", i + 1);
+#if defined(CONFIG_KETI)
+                PrintDb("Package : %d (Status Package)\n", i + 1);
+#endif
                 PrintExtStatusMsg(p, p_overall->version);
             }
             else
             {
                 printf("Package : %d\n\tPSID : %d, TLV lenth : %d\n", i + 1, tlvc_type, tlvc_len + 6);
+#if defined(CONFIG_KETI)
+                PrintDb("Package : %d\n\tPSID : %d, TLV lenth : %d\n", i + 1, tlvc_type, tlvc_len + 6);
+#endif
                 Debug_Msg_Print_Data(DEBUG_MSG_LV_MID, (uint8_t *)p, tlvc_len + 6); // 6: T, L 크기 추가
             }
 
