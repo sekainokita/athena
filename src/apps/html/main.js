@@ -133,17 +133,17 @@ window.onload = function() {
         const cKetiPangyolongitude = 127.1021;
 
         // RSU Location
-        const cPangyoRsuLatitude16 = 37.409221;
-        const cPangyoRsuLongitude16 = 127.099505;
+        const cPangyoRsuLatitude16 = 37.409141;
+        const cPangyoRsuLongitude16 = 127.099980;
 
-        const cPangyoRsuLatitude17 = 37.406536;
-        const cPangyoRsuLongitude17 = 127.100765;
+        const cPangyoRsuLatitude17 = 37.406510;
+        const cPangyoRsuLongitude17 = 127.100833;
 
-        const cPangyoRsuLatitude18 = 37.405254;
-        const cPangyoRsuLongitude18 = 127.103609;
+        const cPangyoRsuLatitude18 = 37.405160;
+        const cPangyoRsuLongitude18 = 127.103842;
 
-        const cPangyoRsuLatitude5 = 37.410922;
-        const cPangyoRsuLongitude5 = 127.094732;
+        const cPangyoRsuLatitude5 = 37.410938;
+        const cPangyoRsuLongitude5 = 127.094749;
 
         const cPangyoRsuLatitude31 = 37.411751;
         const cPangyoRsuLongitude31 = 127.095019;
@@ -3090,7 +3090,7 @@ window.onload = function() {
                         'source': 'rsu-src-18',
                         'layout': {
                             'icon-image': 'rsu',
-                            'icon-size': 0.5,
+                            'icon-size': 0.4,
                             'icon-allow-overlap': true
                         }
                     });
@@ -3117,7 +3117,7 @@ window.onload = function() {
                         'source': 'rsu-src-16',
                         'layout': {
                             'icon-image': 'rsu',
-                            'icon-size': 0.5,
+                            'icon-size': 0.4,
                             'icon-allow-overlap': true
                         }
                     });
@@ -3144,7 +3144,7 @@ window.onload = function() {
                         'source': 'rsu-src-17',
                         'layout': {
                             'icon-image': 'rsu',
-                            'icon-size': 0.5,
+                            'icon-size': 0.4,
                             'icon-allow-overlap': true
                         }
                     });
@@ -3174,7 +3174,7 @@ window.onload = function() {
                 'source': 'rsu-src-31',
                 'layout': {
                     'icon-image': 'rsu',
-                    'icon-size': 0.5,
+                    'icon-size': 0.4,
                     'icon-allow-overlap': true
                 }
             });
@@ -3201,7 +3201,7 @@ window.onload = function() {
                 'source': 'rsu-src-5',
                 'layout': {
                     'icon-image': 'rsu',
-                    'icon-size': 0.5,
+                    'icon-size': 0.4,
                     'icon-allow-overlap': true
                 }
             });
