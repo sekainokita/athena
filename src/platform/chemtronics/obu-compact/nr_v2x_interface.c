@@ -449,7 +449,7 @@ static int32_t P_NR_V2X_CreateDb(void)
 
     strftime(end_str, sizeof(end_str), "%Y%m%d%H%M%S", end_tm);
 
-    fprintf(sh_pfdFile, "end time [%s]\n", end_str);
+    fprintf(sh_pfdFile, "End Time [%s]\n", end_str);
 
     char final_filename[512];
     create_filename(final_filename, ip_suffix, start_time, end_time);
@@ -2290,7 +2290,25 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    fprintf(sh_pfdFile, "start time [%s]\n", s_chStartTimeStr);
+    printf(COLOR_YELLOW "=======================================================\r\n");
+    printf(COLOR_YELLOW "\r\n");
+    printf(COLOR_YELLOW "Copyright (C) 2024 - 2028 KETI, All rights reserved.\r\n");
+    printf(COLOR_YELLOW "Korea Electronics Technology Institute\r\n");
+    printf(COLOR_YELLOW "\r\n");
+    printf(COLOR_YELLOW "DB SW (VERSION : %.1f)\r\n", CONFIG_SW_VERSION);
+    printf(COLOR_YELLOW "\r\n");
+    printf(COLOR_YELLOW "=======================================================\r\n");
+
+    PrintDb(COLOR_YELLOW "=======================================================\r\n");
+    PrintDb(COLOR_YELLOW "\r\n");
+    PrintDb(COLOR_YELLOW "Copyright (C) 2024 - 2028 KETI, All rights reserved.\r\n");
+    PrintDb(COLOR_YELLOW "Korea Electronics Technology Institute\r\n");
+    PrintDb(COLOR_YELLOW "\r\n");
+    PrintDb(COLOR_YELLOW "DB SW (VERSION : %.1f)\r\n", CONFIG_SW_VERSION);
+    PrintDb(COLOR_YELLOW "\r\n");
+    PrintDb(COLOR_YELLOW "=======================================================\r\n");
+
+    fprintf(sh_pfdFile, "Start Time [%s]\n", s_chStartTimeStr);
 #endif
 
     int len, n;
