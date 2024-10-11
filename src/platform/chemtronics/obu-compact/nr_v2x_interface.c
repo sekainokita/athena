@@ -18,6 +18,7 @@
 #include <errno.h>
 #if defined(CONFIG_KETI)
 #include <time.h>
+#include <sys/time.h>
 #include <sys/select.h>
 #include "type.h"
 #endif
@@ -51,6 +52,7 @@ static char *ip_suffix = NULL;
 static char temp_filename[512];
 static time_t start_time;
 static time_t end_time;
+static char s_chStartTimeStr[20];
 
 #define PrintDb(fmt, ...) \
                 do { \
@@ -73,16 +75,19 @@ char *get_ip_suffix(const char *ip)
 
 void create_filename(char *filename, const char *ip_suffix, time_t start, time_t end)
 {
-    struct tm *start_tm = localtime(&start);
     struct tm *end_tm = localtime(&end);
 
-    char start_str[20], end_str[20];
-    strftime(start_str, sizeof(start_str), "%Y%m%d%H%M%S", start_tm);
+    char end_str[20];
     strftime(end_str, sizeof(end_str), "%Y%m%d%H%M%S", end_tm);
+
+    PrintDebug("s_chStartTimeStr[%s]", s_chStartTimeStr);
+    PrintDebug("end_str[%s]", end_str);
 
     double duration = difftime(end, start);
 
-    sprintf(filename, "OBU_CTOCG3A0_SN%s_%s_%s_%.0fs.log", ip_suffix, start_str, end_str, duration);
+    PrintDebug("duration[%.0f]", duration);
+
+    sprintf(filename, "OBU_CTOCG3A0_SN%s_%s_%s_%.0fs.log", ip_suffix, s_chStartTimeStr, end_str, duration);
 }
 
 const char* GetCurrentTime() {
@@ -2271,8 +2276,9 @@ int main(int argc, char *argv[])
     start_time = time(NULL);
 
     struct tm *start_tm = localtime(&start_time);
-    char start_str[20];
-    strftime(start_str, sizeof(start_str), "%Y%m%d%H%M%S", start_tm);
+
+    strftime(s_chStartTimeStr, sizeof(s_chStartTimeStr), "%Y%m%d%H%M%S", start_tm);
+
     ip_suffix = get_ip_suffix(ip_addr);
 
     sprintf(temp_filename, "tempfile_%s.log", ip_suffix);
@@ -2284,7 +2290,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    fprintf(sh_pfdFile, "start time [%s]\n", start_str);
+    fprintf(sh_pfdFile, "start time [%s]\n", s_chStartTimeStr);
 #endif
 
     int len, n;
