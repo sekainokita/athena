@@ -556,6 +556,86 @@ int32_t P_CLI_MSG_TcpClientStart(char *pcIpAddr)
     return nRet;
 }
 
+void *P_CLI_MSG_TcpMultiServerSendTask(void *fd)
+{
+    int h_nSocket = *(int *)fd;
+    char cMsgBuf[MAX_LINE];
+
+    while (1)
+    {
+        printf("Enter message to send to client: ");
+        if (fgets(cMsgBuf, MAX_LINE, stdin) == NULL)
+        {
+            PrintError("Error reading input.");
+            break;
+        }
+
+        if (strcmp(cMsgBuf, "exit\n") == 0)
+        {
+            printf("Server exiting...\n");
+            close(h_nSocket);
+            break;
+        }
+
+        if (send(h_nSocket, cMsgBuf, strlen(cMsgBuf), 0) == -1)
+        {
+            PrintError("send error.");
+            break;
+        }
+
+        PrintTrace("Sent message to client: %s", cMsgBuf);
+    }
+
+    return NULL;
+}
+
+void *P_CLI_MSG_TcpMultiServerTask(void *fd)
+{
+    int h_nSocket = *(int *)fd;
+    char cMsgBuf[MAX_LINE];
+    int nRevLen;
+    pthread_t sendThread;
+
+    if (pthread_create(&sendThread, NULL, P_CLI_MSG_TcpMultiServerSendTask, fd) != 0)
+    {
+        PrintError("pthread create error for send task.");
+        return NULL;
+    }
+
+    while(1)
+    {
+        memset(cMsgBuf , 0 , MAX_LINE);
+        if((nRevLen = recv(h_nSocket , cMsgBuf , MAX_LINE , 0)) == -1)
+        {
+            PrintError("recv error.\n");
+            break;
+        }
+
+        if (nRevLen == 0)
+        {
+            PrintDebug("Client closed.\n");
+            close(h_nSocket);
+            break;
+        }
+
+        cMsgBuf[nRevLen] = '\0';
+        PrintTrace("Received message from client: %s", cMsgBuf);
+
+        if (send(h_nSocket, cMsgBuf, strlen(cMsgBuf), 0) == -1) {
+            PrintError("send error.\n");
+            break;
+        }
+
+        //PrintTrace("Sent message to client: %s", cMsgBuf);
+    }
+
+    pthread_cancel(sendThread);
+    pthread_join(sendThread, NULL);
+    free(fd);
+
+    return NULL;
+}
+
 int32_t P_CLI_MSG_TcpMultiServerStart(void)
 {
     int32_t nRet = APP_ERROR;
@@ -601,17 +681,55 @@ int32_t P_CLI_MSG_TcpMultiServerStart(void)
             return nRet;
         }
 
+        int *client_sock = malloc(sizeof(int));
+        *client_sock = h_nConn;
+
         PrintDebug("server: got connection from %s", inet_ntoa(stClientAddr.sin_addr));
 
-        if(pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpServerTask, &h_nConn) == -1)
+        if(pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpMultiServerTask, (void*)client_sock) == -1)
         {
             PrintError("pthread create error.");
+            free(client_sock);
             return nRet;
         }
+
+        pthread_detach(h_stRecvTid);
     }
 
     return nRet;
 }
+
+void *P_CLI_MSG_TcpMultiClientTask(void *fd)
+{
+    int h_nSocket = *(int *)fd;
+    char cMsgBuf[MAX_LINE];
+    int nRevLen;
+
+    while (1)
+    {
+        memset(cMsgBuf, 0, MAX_LINE);
+        nRevLen = recv(h_nSocket, cMsgBuf, MAX_LINE, 0);
+
+        if (nRevLen < 0)
+        {
+            PrintError("recv error.");
+            break;
+        }
+        else if (nRevLen == 0)
+        {
+            PrintDebug("Server closed connection.");
+            close(h_nSocket);
+            break;
+        }
+
+        cMsgBuf[nRevLen] = '\0';
+        PrintTrace("Sent message to server: %s", cMsgBuf);
+    }
+
+    return NULL;
+}
+
+
 
 int32_t P_CLI_MSG_TcpMultiClientStart(char *pcIpAddr, char *pcId)
 {
@@ -658,7 +776,7 @@ int32_t P_CLI_MSG_TcpMultiClientStart(char *pcIpAddr, char *pcId)
         return nRet;
     }
 
-    if(pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpClientTask, &h_nSocket) == -1)
+    if(pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpMultiClientTask, &h_nSocket) == -1)
     {
         PrintError("pthread create error");
         return nRet;
