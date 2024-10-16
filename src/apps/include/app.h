@@ -51,6 +51,7 @@
 #include "di.h"
 #include "svc_platooning.h"
 #include "svc_cp.h"
+#include "svc_mcp.h"
 
 /***************************** Definition ************************************/
 #define APP_VER     0x1
@@ -66,6 +67,7 @@ FRAMEWORK_T* APP_GetFrameworkInstance(void);
 APP_T* APP_GetAppInstance(void);
 DI_T* APP_GetDiInstance(void);
 SVC_CP_T* APP_GetSvcCpInstance(void);
+SVC_MCP_T* APP_GetSvcMCpInstance(void);
 SVC_PLATOONING_T* APP_GetSvcPlatooningInstance(void);
 
 int32_t APP_Init(APP_T *pstApp);

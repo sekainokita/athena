@@ -58,25 +58,25 @@ static char s_chSetEth[CLI_DB_V2X_DEFAULT_BUF_LEN];
 static char s_chSetIp[CLI_DB_V2X_DEFAULT_BUF_LEN];
 
 /***************************** Function Protype ******************************/
-void P_CLI_MCP_WriteConfigToFile(FILE *h_fdModelConf, SVC_CP_T *pstSvcCp)
+void P_CLI_MCP_WriteConfigToFile(FILE *h_fdModelConf, SVC_MCP_T *pstSvcMCp)
 {
     fprintf(h_fdModelConf, "model=%s\n", CONFIG_MODEL_NAME);
-    fprintf(h_fdModelConf, "pchDeviceName=%s\n", pstSvcCp->pchDeviceName);
-    fprintf(h_fdModelConf, "unDeviceId=%u\n", pstSvcCp->stDbV2x.unDeviceId);
-    fprintf(h_fdModelConf, "pchIfaceName=%s\n", pstSvcCp->pchIfaceName);
-    fprintf(h_fdModelConf, "pchIpAddr=%s\n", pstSvcCp->pchIpAddr);
-    fprintf(h_fdModelConf, "unPort=%d\n", pstSvcCp->unPort);
+    fprintf(h_fdModelConf, "pchDeviceName=%s\n", pstSvcMCp->pchDeviceName);
+    fprintf(h_fdModelConf, "unDeviceId=%u\n", pstSvcMCp->stDbV2x.unDeviceId);
+    fprintf(h_fdModelConf, "pchIfaceName=%s\n", pstSvcMCp->pchIfaceName);
+    fprintf(h_fdModelConf, "pchIpAddr=%s\n", pstSvcMCp->pchIpAddr);
+    fprintf(h_fdModelConf, "unPort=%d\n", pstSvcMCp->unPort);
 }
 
 static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
 {
     int32_t nRet = APP_OK;
-    SVC_CP_T *pstSvcCp;
+    SVC_MCP_T *pstSvcMCp;
     char *pcCmd;
     char chModelNameFile[MAX_MODEL_NAME_LEN] = {0};
     FILE *h_fdModelConf;
 
-    pstSvcCp = APP_GetSvcCpInstance();
+    pstSvcMCp = APP_GetSvcMCpInstance();
 
     if(pstCmd == NULL)
     {
@@ -84,10 +84,10 @@ static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
         return CLI_CMD_Showusage(pstCmd);
     }
 
-    nRet = SVC_CP_GetSettings(pstSvcCp);
+    nRet = SVC_MCP_GetSettings(pstSvcMCp);
     if(nRet != APP_OK)
     {
-        PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        PrintError("SVC_MCP_SetSettings() is failed! [nRet:%d]", nRet);
     }
 
     pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
@@ -105,25 +105,25 @@ static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             return CLI_CMD_Showusage(pstCmd);
         }
 
-        pstSvcCp->stDbV2x.unDeviceId = (uint32_t)atoi(pcCmd);
+        pstSvcMCp->stDbV2x.unDeviceId = (uint32_t)atoi(pcCmd);
         sprintf(s_chSetBufDevId, "%s", pcCmd);
-        pstSvcCp->pchDeviceName = s_chSetBufDevId;
+        pstSvcMCp->pchDeviceName = s_chSetBufDevId;
 
-        if(strcmp(pstSvcCp->pchDeviceName, DB_MGR_DEFAULT_COMM_DEV_ID) == 0)
+        if(strcmp(pstSvcMCp->pchDeviceName, DB_MGR_DEFAULT_COMM_DEV_ID) == 0)
         {
             PrintWarn("INSERT DEVICE ID is failed!");
             nRet = APP_ERROR;
         }
         else
         {
-            PrintDebug("SET:unDeviceId[%d]", pstSvcCp->stDbV2x.unDeviceId);
-            PrintDebug("SET:pchDeviceName[%s]", pstSvcCp->pchDeviceName);
+            PrintDebug("SET:unDeviceId[%d]", pstSvcMCp->stDbV2x.unDeviceId);
+            PrintDebug("SET:pchDeviceName[%s]", pstSvcMCp->pchDeviceName);
         }
 
-        nRet = SVC_CP_SetSettings(pstSvcCp);
+        nRet = SVC_MCP_SetSettings(pstSvcMCp);
         if(nRet != APP_OK)
         {
-            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+            PrintError("SVC_MCP_SetSettings() is failed! [nRet:%d]", nRet);
         }
     }
     else if(strcmp(pcCmd, "eth") == 0)
@@ -136,14 +136,14 @@ static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
         }
 
         sprintf(s_chSetEth, "%s", pcCmd);
-        pstSvcCp->pchIfaceName = s_chSetEth;
+        pstSvcMCp->pchIfaceName = s_chSetEth;
 
-        PrintDebug("SET:pchIfaceName[%s]", pstSvcCp->pchIfaceName);
+        PrintDebug("SET:pchIfaceName[%s]", pstSvcMCp->pchIfaceName);
 
-        nRet = SVC_CP_SetSettings(pstSvcCp);
+        nRet = SVC_MCP_SetSettings(pstSvcMCp);
         if(nRet != APP_OK)
         {
-            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+            PrintError("SVC_MCP_SetSettings() is failed! [nRet:%d]", nRet);
         }
 
     }
@@ -156,16 +156,16 @@ static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             return CLI_CMD_Showusage(pstCmd);
         }
 
-        pstSvcCp->stMsgManagerTx.unTxDelay = (uint16_t)atoi(pcCmd);
-        pstSvcCp->stDbV2xStatusTx.usTxRatio = (uint16_t)atoi(pcCmd);
+        pstSvcMCp->stMsgManagerTx.unTxDelay = (uint16_t)atoi(pcCmd);
+        pstSvcMCp->stDbV2xStatusTx.usTxRatio = (uint16_t)atoi(pcCmd);
 
-        PrintDebug("SET:unTxDelay[%d]", pstSvcCp->stMsgManagerTx.unTxDelay);
-        PrintDebug("SET:usTxRatio[%d]", pstSvcCp->stDbV2xStatusTx.usTxRatio);
+        PrintDebug("SET:unTxDelay[%d]", pstSvcMCp->stMsgManagerTx.unTxDelay);
+        PrintDebug("SET:usTxRatio[%d]", pstSvcMCp->stDbV2xStatusTx.usTxRatio);
 
-        nRet = SVC_CP_SetSettings(pstSvcCp);
+        nRet = SVC_MCP_SetSettings(pstSvcMCp);
         if(nRet != APP_OK)
         {
-            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+            PrintError("SVC_MCP_SetSettings() is failed! [nRet:%d]", nRet);
         }
     }
     else if(strcmp(pcCmd, "spd") == 0)
@@ -177,14 +177,14 @@ static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             return CLI_CMD_Showusage(pstCmd);
         }
 
-        pstSvcCp->stDbV2xStatusTx.unTxVehicleSpeed = (uint32_t)atoi(pcCmd);
+        pstSvcMCp->stDbV2xStatusTx.unTxVehicleSpeed = (uint32_t)atoi(pcCmd);
 
-        PrintDebug("SET:unTxVehicleSpeed[%d]", pstSvcCp->stDbV2xStatusTx.unTxVehicleSpeed);
+        PrintDebug("SET:unTxVehicleSpeed[%d]", pstSvcMCp->stDbV2xStatusTx.unTxVehicleSpeed);
 
-        nRet = SVC_CP_SetSettings(pstSvcCp);
+        nRet = SVC_MCP_SetSettings(pstSvcMCp);
         if(nRet != APP_OK)
         {
-            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+            PrintError("SVC_MCP_SetSettings() is failed! [nRet:%d]", nRet);
         }
     }
     else if(strcmp(pcCmd, "rg") == 0)
@@ -196,14 +196,14 @@ static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             return CLI_CMD_Showusage(pstCmd);
         }
 
-        pstSvcCp->stDbV2x.eRegionId = (uint32_t)atoi(pcCmd);
+        pstSvcMCp->stDbV2x.eRegionId = (uint32_t)atoi(pcCmd);
 
-        PrintDebug("SET:eRegionId[0x%x]", pstSvcCp->stDbV2x.eRegionId);
+        PrintDebug("SET:eRegionId[0x%x]", pstSvcMCp->stDbV2x.eRegionId);
 
-        nRet = SVC_CP_SetSettings(pstSvcCp);
+        nRet = SVC_MCP_SetSettings(pstSvcMCp);
         if(nRet != APP_OK)
         {
-            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+            PrintError("SVC_MCP_SetSettings() is failed! [nRet:%d]", nRet);
         }
     }
     else if(strcmp(pcCmd, "ip") == 0)
@@ -216,14 +216,14 @@ static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
         }
 
         sprintf(s_chSetIp, "%s", pcCmd);
-        pstSvcCp->pchIpAddr = s_chSetIp;
+        pstSvcMCp->pchIpAddr = s_chSetIp;
 
-        PrintDebug("Set:IP[%s]", pstSvcCp->pchIpAddr);
+        PrintDebug("Set:IP[%s]", pstSvcMCp->pchIpAddr);
 
-        nRet = SVC_CP_SetSettings(pstSvcCp);
+        nRet = SVC_MCP_SetSettings(pstSvcMCp);
         if(nRet != APP_OK)
         {
-            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+            PrintError("SVC_MCP_SetSettings() is failed! [nRet:%d]", nRet);
         }
     }
     else if(strcmp(pcCmd, "port") == 0)
@@ -235,14 +235,14 @@ static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             return CLI_CMD_Showusage(pstCmd);
         }
 
-        pstSvcCp->unPort = (uint32_t)atoi(pcCmd);
+        pstSvcMCp->unPort = (uint32_t)atoi(pcCmd);
 
-        PrintDebug("SET:port[%d]", pstSvcCp->unPort);
+        PrintDebug("SET:port[%d]", pstSvcMCp->unPort);
 
-        nRet = SVC_CP_SetSettings(pstSvcCp);
+        nRet = SVC_MCP_SetSettings(pstSvcMCp);
         if(nRet != APP_OK)
         {
-            PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+            PrintError("SVC_MCP_SetSettings() is failed! [nRet:%d]", nRet);
         }
     }
     else
@@ -262,7 +262,7 @@ static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             PrintError("Failed to open or create file: %s", chModelNameFile);
             return APP_ERROR;
         }
-        P_CLI_MCP_WriteConfigToFile(h_fdModelConf, pstSvcCp);
+        P_CLI_MCP_WriteConfigToFile(h_fdModelConf, pstSvcMCp);
     }
     else
     {
@@ -277,7 +277,7 @@ static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
                     PrintError("Failed to reopen file: %s", chModelNameFile);
                     return APP_ERROR;
                 }
-                P_CLI_MCP_WriteConfigToFile(h_fdModelConf, pstSvcCp);
+                P_CLI_MCP_WriteConfigToFile(h_fdModelConf, pstSvcMCp);
             }
         }
         else
@@ -289,7 +289,7 @@ static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
                 PrintError("Failed to reopen file: %s", chModelNameFile);
                 return APP_ERROR;
             }
-            P_CLI_MCP_WriteConfigToFile(h_fdModelConf, pstSvcCp);
+            P_CLI_MCP_WriteConfigToFile(h_fdModelConf, pstSvcMCp);
         }
     }
 
@@ -308,16 +308,16 @@ static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
 static int P_CLI_MCP_CheckV2xStatusScenario(void)
 {
     int32_t nRet = APP_OK;
-    SVC_CP_T *pstSvcCp;
-    pstSvcCp = APP_GetSvcCpInstance();
+    SVC_MCP_T *pstSvcMCp;
+    pstSvcMCp = APP_GetSvcMCpInstance();
 
-    nRet = SVC_CP_GetSettings(pstSvcCp);
+    nRet = SVC_MCP_GetSettings(pstSvcMCp);
     if(nRet != APP_OK)
     {
-        PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        PrintError("SVC_MCP_SetSettings() is failed! [nRet:%d]", nRet);
     }
 
-    (void)SVC_CP_ShowSettings(pstSvcCp);
+    (void)SVC_MCP_ShowSettings(pstSvcMCp);
 
     return nRet;
 }
@@ -325,42 +325,42 @@ static int P_CLI_MCP_CheckV2xStatusScenario(void)
 static int P_CLI_MCP_ReadyV2xStatusScenario(void)
 {
     int32_t nRet = APP_OK;
-    SVC_CP_T *pstSvcCp;
+    SVC_MCP_T *pstSvcMCp;
 
-    pstSvcCp = APP_GetSvcCpInstance();
+    pstSvcMCp = APP_GetSvcMCpInstance();
 
-    if (pstSvcCp == NULL)
+    if (pstSvcMCp == NULL)
     {
         PrintError("Failed to get service control point instance.");
         return APP_ERROR;
     }
 
-    (void)SVC_CP_ShowSettings(pstSvcCp);
+    (void)SVC_MCP_ShowSettings(pstSvcMCp);
 
-    nRet = SVC_CP_GetSettings(pstSvcCp);
+    nRet = SVC_MCP_GetSettings(pstSvcMCp);
     if (nRet != APP_OK)
     {
-        PrintError("SVC_CP_GetSettings() is failed! [nRet:%d]", nRet);
+        PrintError("SVC_MCP_GetSettings() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
-    nRet = SVC_CP_UpdateSettings(pstSvcCp);
+    nRet = SVC_MCP_UpdateSettings(pstSvcMCp);
     if (nRet != APP_OK)
     {
-        PrintError("SVC_CP_UpdateSettings() is failed! [nRet:%d]", nRet);
+        PrintError("SVC_MCP_UpdateSettings() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
-    nRet = SVC_CP_SetSettings(pstSvcCp);
+    nRet = SVC_MCP_SetSettings(pstSvcMCp);
     if (nRet != APP_OK)
     {
-        PrintError("SVC_CP_SetSettings() is failed! [nRet:%d]", nRet);
+        PrintError("SVC_MCP_SetSettings() is failed! [nRet:%d]", nRet);
     }
 
-    nRet = SVC_CP_Open(pstSvcCp);
+    nRet = SVC_MCP_Open(pstSvcMCp);
     if (nRet != APP_OK)
     {
-        PrintError("SVC_CP_Open() is failed! [nRet:%d]", nRet);
+        PrintError("SVC_MCP_Open() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
@@ -371,13 +371,13 @@ static int P_CLI_MCP_ReadyV2xStatusScenario(void)
 static int P_CLI_MCP_StartV2xStatusScenario(void)
 {
     int32_t nRet = APP_OK;
-    SVC_CP_T *pstSvcCp;
-    pstSvcCp = APP_GetSvcCpInstance();
+    SVC_MCP_T *pstSvcMCp;
+    pstSvcMCp = APP_GetSvcMCpInstance();
 
-    nRet = SVC_CP_Start(pstSvcCp);
+    nRet = SVC_MCP_Start(pstSvcMCp);
     if(nRet != APP_OK)
     {
-        PrintError("SVC_CP_Start() is failed! [nRet:%d]", nRet);
+        PrintError("SVC_MCP_Start() is failed! [nRet:%d]", nRet);
     }
 
     return nRet;
@@ -386,21 +386,21 @@ static int P_CLI_MCP_StartV2xStatusScenario(void)
 static int P_CLI_MCP_StopV2xStatusScenario(void)
 {
     int32_t nRet = APP_OK;
-    SVC_CP_T *pstSvcCp;
-    pstSvcCp = APP_GetSvcCpInstance();
+    SVC_MCP_T *pstSvcMCp;
+    pstSvcMCp = APP_GetSvcMCpInstance();
 
-    nRet = SVC_CP_Stop(pstSvcCp);
+    nRet = SVC_MCP_Stop(pstSvcMCp);
     if(nRet != APP_OK)
     {
-        PrintError("SVC_CP_Start() is failed! [nRet:%d]", nRet);
+        PrintError("SVC_MCP_Start() is failed! [nRet:%d]", nRet);
     }
 
-    usleep(SVC_CP_STOP_DELAY);
+    usleep(SVC_MCP_STOP_DELAY);
 
-    nRet = SVC_CP_Close(pstSvcCp);
+    nRet = SVC_MCP_Close(pstSvcMCp);
     if(nRet != APP_OK)
     {
-        PrintError("SVC_CP_Close() is failed! [nRet:%d]", nRet);
+        PrintError("SVC_MCP_Close() is failed! [nRet:%d]", nRet);
     }
 
     return nRet;
@@ -413,10 +413,10 @@ static int P_CLI_MCP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
     TIME_MANAGER_T *pstTimeManager;
     DB_MANAGER_T *pstDbManager;
     MSG_MANAGER_T *pstMsgManager;
-    SVC_CP_T *pstSvcCp;
+    SVC_MCP_T *pstSvcMCp;
     char *pchPayload = NULL;
 
-    pstSvcCp = APP_GetSvcCpInstance();
+    pstSvcMCp = APP_GetSvcMCpInstance();
 
     pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
 
@@ -439,12 +439,12 @@ static int P_CLI_MCP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
         pstMsgManager = FRAMEWORK_GetMsgManagerInstance();
         PrintDebug("pstMsgManager[0x%p]", pstMsgManager);
 
-        pstMsgManager->eDeviceType = pstSvcCp->stDbV2x.eDeviceType;
+        pstMsgManager->eDeviceType = pstSvcMCp->stDbV2x.eDeviceType;
 
-        pstMsgManager->pchIfaceName = pstSvcCp->pchIfaceName;
-        pstMsgManager->stExtMsgWsr.unPsid = pstSvcCp->unPsid;
-        pstMsgManager->pchIpAddr = pstSvcCp->pchIpAddr;
-        pstMsgManager->unPort = pstSvcCp->unPort;
+        pstMsgManager->pchIfaceName = pstSvcMCp->pchIfaceName;
+        pstMsgManager->stExtMsgWsr.unPsid = pstSvcMCp->unPsid;
+        pstMsgManager->pchIpAddr = pstSvcMCp->pchIpAddr;
+        pstMsgManager->unPort = pstSvcMCp->unPort;
 
         PrintTrace("pchIfaceName[%s], pchIpAddr[%s], unPort[%d]", pstMsgManager->pchIfaceName, pstMsgManager->pchIpAddr, pstMsgManager->unPort);
         PrintTrace("pchIfaceName[%s], unPsid[%d]", pstMsgManager->pchIfaceName, pstMsgManager->stExtMsgWsr.unPsid);
@@ -457,16 +457,16 @@ static int P_CLI_MCP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
     }
 
 
-    pstSvcCp->stDbV2x.ulPayloadLength = sizeof(pstSvcCp->stDbV2xStatusTx);
+    pstSvcMCp->stDbV2x.ulPayloadLength = sizeof(pstSvcMCp->stDbV2xStatusTx);
 
-    pchPayload = (char*)malloc(sizeof(char)*pstSvcCp->stDbV2x.ulPayloadLength);
+    pchPayload = (char*)malloc(sizeof(char)*pstSvcMCp->stDbV2x.ulPayloadLength);
     if(pchPayload == NULL)
     {
         PrintError("malloc() is failed! [NULL]");
         return nRet;
     }
 
-    (void*)memset(pchPayload, 0x00, sizeof(sizeof(char)*pstSvcCp->stDbV2x.ulPayloadLength));
+    (void*)memset(pchPayload, 0x00, sizeof(sizeof(char)*pstSvcMCp->stDbV2x.ulPayloadLength));
 
     nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
     if(nFrameWorkRet != FRAMEWORK_OK)
@@ -475,43 +475,43 @@ static int P_CLI_MCP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
     }
     else
     {
-        pstSvcCp->stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
+        pstSvcMCp->stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
 
-        pstSvcCp->stDbV2xStatusTx.stDbV2xDevL1.ulTimeStamp = 19840919;
-        pstSvcCp->stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp = 19850501;
-        pstSvcCp->stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp = pstTimeManager->ulTimeStamp;
+        pstSvcMCp->stDbV2xStatusTx.stDbV2xDevL1.ulTimeStamp = 19840919;
+        pstSvcMCp->stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp = 19850501;
+        pstSvcMCp->stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp = pstTimeManager->ulTimeStamp;
     }
 
-    memcpy(pchPayload, (char*)&pstSvcCp->stDbV2xStatusTx, sizeof(char)*pstSvcCp->stDbV2x.ulPayloadLength);
+    memcpy(pchPayload, (char*)&pstSvcMCp->stDbV2xStatusTx, sizeof(char)*pstSvcMCp->stDbV2x.ulPayloadLength);
 
-    pstSvcCp->stDbV2x.ulReserved = 0;
+    pstSvcMCp->stDbV2x.ulReserved = 0;
 
     if (bLogOnOff == TRUE)
     {
-        (void)SVC_CP_ShowSettings(pstSvcCp);
+        (void)SVC_MCP_ShowSettings(pstSvcMCp);
 
         PrintTrace("========================================================");
-        PrintDebug("ulTimeStamp[%ld]", pstSvcCp->stDbV2x.ulTimeStamp);
-        PrintDebug("ulPayloadLength[%d]", pstSvcCp->stDbV2x.ulPayloadLength);
-        PrintDebug("ulReserved[0x%x]", pstSvcCp->stDbV2x.ulReserved);
+        PrintDebug("ulTimeStamp[%ld]", pstSvcMCp->stDbV2x.ulTimeStamp);
+        PrintDebug("ulPayloadLength[%d]", pstSvcMCp->stDbV2x.ulPayloadLength);
+        PrintDebug("ulReserved[0x%x]", pstSvcMCp->stDbV2x.ulReserved);
         PrintTrace("========================================================");
     }
 
     if(bMsgTx == TRUE)
     {
-        nFrameWorkRet = MSG_MANAGER_Transmit(&pstSvcCp->stMsgManagerTx, &pstSvcCp->stDbV2x, (char*)pchPayload);
+        nFrameWorkRet = MSG_MANAGER_Transmit(&pstSvcMCp->stMsgManagerTx, &pstSvcMCp->stDbV2x, (char*)pchPayload);
         if(nFrameWorkRet != FRAMEWORK_OK)
         {
             PrintError("MSG_MANAGER_Transmit() is failed! [nRet:%d]", nFrameWorkRet);
         }
         else
         {
-            PrintDebug("Tx Success, Counts[%u], Delay[%d ms]", pstSvcCp->stMsgManagerTx.unTxCount, pstSvcCp->stMsgManagerTx.unTxDelay);
+            PrintDebug("Tx Success, Counts[%u], Delay[%d ms]", pstSvcMCp->stMsgManagerTx.unTxCount, pstSvcMCp->stMsgManagerTx.unTxDelay);
         }
     }
     else
     {
-        nFrameWorkRet = DB_MANAGER_Write(&pstSvcCp->stDbManagerWrite, &pstSvcCp->stDbV2x, (char*)pchPayload);
+        nFrameWorkRet = DB_MANAGER_Write(&pstSvcMCp->stDbManagerWrite, &pstSvcMCp->stDbV2x, (char*)pchPayload);
         if(nFrameWorkRet != FRAMEWORK_OK)
         {
             PrintError("DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
