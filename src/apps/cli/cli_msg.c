@@ -594,9 +594,9 @@ void *P_CLI_MSG_TcpMultiServerTask(void *fd)
     int h_nSocket = *(int *)fd;
     char cMsgBuf[MAX_LINE];
     int nRevLen;
-    pthread_t sendThread;
+    pthread_t h_stRecvTid;
 
-    if (pthread_create(&sendThread, NULL, P_CLI_MSG_TcpMultiServerSendTask, fd) != 0)
+    if (pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpMultiServerSendTask, fd) != 0)
     {
         PrintError("pthread create error for send task.");
         return NULL;
@@ -626,11 +626,10 @@ void *P_CLI_MSG_TcpMultiServerTask(void *fd)
             break;
         }
 
-        //PrintTrace("Sent message to client: %s", cMsgBuf);
     }
 
-    pthread_cancel(sendThread);
-    pthread_join(sendThread, NULL);
+    pthread_cancel(h_stRecvTid);
+    pthread_join(h_stRecvTid, NULL);
     free(fd);
 
     return NULL;
