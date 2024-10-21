@@ -1348,8 +1348,8 @@ window.onload = function() {
 
         map.on('style.load', function() {
             document.getElementById('CC2').addEventListener('click', function() {
-                isCC1 = !isCC1;
-                if (isCC1) {
+                isCC2 = !isCC2;
+                if (isCC2) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
                 } else {
@@ -1370,8 +1370,8 @@ window.onload = function() {
 
         map.on('style.load', function() {
             document.getElementById('CC3').addEventListener('click', function() {
-                isCC1 = !isCC1;
-                if (isCC1) {
+                isCC3 = !isCC3;
+                if (isCC3) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
                 } else {
@@ -1392,8 +1392,8 @@ window.onload = function() {
 
         map.on('style.load', function() {
             document.getElementById('CC4').addEventListener('click', function() {
-                isCC1 = !isCC1;
-                if (isCC1) {
+                isCC4 = !isCC4;
+                if (isCC4) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
                 } else {
@@ -1414,8 +1414,8 @@ window.onload = function() {
 
         map.on('style.load', function() {
             document.getElementById('CC5').addEventListener('click', function() {
-                isCC1 = !isCC1;
-                if (isCC1) {
+                isCC5 = !isCC5;
+                if (isCC5) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
                 } else {
@@ -1436,8 +1436,8 @@ window.onload = function() {
 
         map.on('style.load', function() {
             document.getElementById('CC6').addEventListener('click', function() {
-                isCC1 = !isCC1;
-                if (isCC1) {
+                isCC6 = !isCC6;
+                if (isCC6) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
                 } else {
