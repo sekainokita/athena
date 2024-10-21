@@ -1330,15 +1330,25 @@ window.onload = function() {
                 if (isCC1) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
+
+                    // MRsu Marker 추가
+                    const MRsuCoordinate = [127.440227, 36.730164];
+                    if (!mrsuMarker) {
+                        mrsuMarker = new mapboxgl.Marker({element: createMrsuMarker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/m-rsu-front.png')})
+                        .setLngLat(MRsuCoordinate)
+                        .addTo(map);
+                    } else if (!mrsuMarker.map) {
+                        mrsuMarker.setLngLat(MRsuCoordinate).addTo(map);
+                    }
                 } else {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
                 }
 
                 if (vehMode === "C-VEH") {
-                    trafficLight = 'red';
+                    trafficLight = 'yellow';
                 } else if (vehMode === "A-VEH") {
-                    trafficLight = 'green';
+                    trafficLight = 'yellow';
                 } else {
                     trafficLight = 'red';
                 }
