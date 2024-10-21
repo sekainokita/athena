@@ -115,6 +115,12 @@ window.onload = function() {
         document.getElementById('CB4').style.display = 'block';
         document.getElementById('CB5').style.display = 'block';
         document.getElementById('CB6').style.display = 'block';
+        document.getElementById('CC1').style.display = 'block';
+        document.getElementById('CC2').style.display = 'block';
+        document.getElementById('CC3').style.display = 'block';
+        document.getElementById('CC4').style.display = 'block';
+        document.getElementById('CC5').style.display = 'block';
+        document.getElementById('CC6').style.display = 'block';
         document.getElementById('CD1').style.display = 'block';
         document.getElementById('CD2').style.display = 'block';
         document.getElementById('CD3').style.display = 'block';
@@ -224,6 +230,12 @@ window.onload = function() {
         let isCB4 = false;
         let isCB5 = false;
         let isCB6 = false;
+        let isCC1 = false;
+        let isCC2 = false;
+        let isCC3 = false;
+        let isCC4 = false;
+        let isCC5 = false;
+        let isCC6 = false;
         let isCD1 = false;
         let isCD2 = false;
         let isCD3 = false;
@@ -1311,6 +1323,138 @@ window.onload = function() {
 
             return ioniqcontainer;
         }
+
+        map.on('style.load', function() {
+            document.getElementById('CC1').addEventListener('click', function() {
+                isCC1 = !isCC1;
+                if (isCC1) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'green';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
+            });
+        });
+
+        map.on('style.load', function() {
+            document.getElementById('CC2').addEventListener('click', function() {
+                isCC1 = !isCC1;
+                if (isCC1) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'green';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
+            });
+        });
+
+        map.on('style.load', function() {
+            document.getElementById('CC3').addEventListener('click', function() {
+                isCC1 = !isCC1;
+                if (isCC1) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'green';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
+            });
+        });
+
+        map.on('style.load', function() {
+            document.getElementById('CC4').addEventListener('click', function() {
+                isCC1 = !isCC1;
+                if (isCC1) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'green';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
+            });
+        });
+
+        map.on('style.load', function() {
+            document.getElementById('CC5').addEventListener('click', function() {
+                isCC1 = !isCC1;
+                if (isCC1) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'green';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
+            });
+        });
+
+        map.on('style.load', function() {
+            document.getElementById('CC6').addEventListener('click', function() {
+                isCC1 = !isCC1;
+                if (isCC1) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+                }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'red';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'green';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
+            });
+        });
 
         map.on('style.load', function() {
             document.getElementById('CD1').addEventListener('click', function() {
