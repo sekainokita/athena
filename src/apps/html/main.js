@@ -954,12 +954,12 @@ window.onload = function() {
 
                     // 텍스트
                     const text = document.createElement('div');
-                    text.textContent = "V2X (Route Sharing)";
-                    text.style.color = 'white';
+                    text.innerHTML = "V2V-SSOV MSG<br>주행 의도 공유<br>(A-VEH → C-VEH)";
+                    text.style.color = 'black';
                     text.style.fontWeight = 'bold';
                     text.style.textAlign = 'center';
                     text.style.textShadow = '0 0 10px #00ccff, 0 0 20px #00ccff, 0 0 30px #00ccff';
-                    text.style.fontSize = '16px';
+                    text.style.fontSize = '18px';
 
                     background.appendChild(text);
                     labelContainer.appendChild(background);
@@ -1076,12 +1076,12 @@ window.onload = function() {
 
                 // 텍스트
                 const text = document.createElement('div');
-                text.textContent = "V2X (Negotiation Completed)";
-                text.style.color = 'white';
+                text.innerHTML = "V2V-SSOV MSG<br>주행 의도 공유 완료";
+                text.style.color = 'black';
                 text.style.fontWeight = 'bold';
                 text.style.textAlign = 'center';
                 text.style.textShadow = '0 0 10px #00ccff, 0 0 20px #00ccff, 0 0 30px #00ccff';
-                text.style.fontSize = '16px';
+                text.style.fontSize = '18px';
 
                 background.appendChild(text);
                 labelContainer.appendChild(background);
@@ -1268,11 +1268,11 @@ window.onload = function() {
 
             // 텍스트
             const text = document.createElement('div');
-            text.innerHTML = "Class B Completed";
-            text.style.color = 'white';
+            text.innerHTML = "V2X-SSOV MSG<br>Class B 완료";
+            text.style.color = 'black';
             text.style.fontWeight = 'bold';
             text.style.textAlign = 'center';
-            text.style.fontSize = '11px';
+            text.style.fontSize = '18px';
 
             background.appendChild(text);
             labelContainer.appendChild(background);
@@ -1612,12 +1612,12 @@ window.onload = function() {
 
                 // 텍스트
                 const text = document.createElement('div');
-                text.innerHTML = "Driving Negotiation<br>(Emergency Vehicle Priority Negotiation)";
-                text.style.color = 'white';
+                text.innerHTML = "V2V-SSOV MSG<br>긴급차 우선 이동 요청";
+                text.style.color = 'black';
                 text.style.fontWeight = 'bold';
                 text.style.textAlign = 'center';
                 text.style.textShadow = '0 0 10px #ffcccc, 0 0 20px #ffcccc, 0 0 30px #ffcccc';
-                text.style.fontSize = '16px';
+                text.style.fontSize = '18px';
 
                 background.appendChild(text);
                 CD2labelContainer.appendChild(background);
@@ -1975,12 +1975,12 @@ window.onload = function() {
 
                 // 텍스트
                 const text = document.createElement('div');
-                text.innerHTML = "Driving Negotiation<br>(Emergency Vehicle Priority Negotiation Information Sharing)";
-                text.style.color = 'white';
+                text.innerHTML = "V2I-SSOV MSG<br>긴급차→A-VEH 주행 계획 공유<br>A-VEH 양보를 위한 경로 반영";
+                text.style.color = 'black';
                 text.style.fontWeight = 'bold';
                 text.style.textAlign = 'center';
                 text.style.textShadow = '0 0 5px #00ccff, 0 0 10px #00ccff, 0 0 15px #00ccff';
-                text.style.fontSize = '11px';
+                text.style.fontSize = '16px';
 
                 background.appendChild(text);
                 CD4labelContainer.appendChild(background);
@@ -2134,12 +2134,12 @@ window.onload = function() {
 
                 // 텍스트
                 const text = document.createElement('div');
-                text.innerHTML = "Road Condition Update";
-                text.style.color = 'white';
+                text.innerHTML = "I2V-SSOV MSG<br>도로 상황 공유";
+                text.style.color = 'black';
                 text.style.fontWeight = 'bold';
                 text.style.textAlign = 'center';
                 text.style.textShadow = '0 0 5px #00ccff, 0 0 10px #00ccff, 0 0 15px #00ccff';
-                text.style.fontSize = '11px';
+                text.style.fontSize = '18px';
 
                 background.appendChild(text);
                 CD5labelContainer.appendChild(background);
@@ -2691,11 +2691,11 @@ window.onload = function() {
 
             // 텍스트
             const text = document.createElement('div');
-            text.innerHTML = "Class D Completed";
-            text.style.color = 'white';
+            text.innerHTML = "V2X-SSOV MSG<br>Class D 완료";
+            text.style.color = 'black';
             text.style.fontWeight = 'bold';
             text.style.textAlign = 'center';
-            text.style.fontSize = '11px';
+            text.style.fontSize = '18px';
 
             background.appendChild(text);
             CD8labelContainer.appendChild(background);
