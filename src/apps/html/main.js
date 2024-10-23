@@ -252,6 +252,7 @@ window.onload = function() {
         let CB4NegotiationMarker = null;
         let CB6NegotiationMarker = null;
         let CC3NegotiationMarker = null;
+        let CC6NegotiationMarker = null;
         let CD2NegotiationMarker = null;
         let CD4NegotiationMarker = null;
         let CD5CNegotiationMarker = null;
@@ -1634,7 +1635,7 @@ window.onload = function() {
                 if (vehMode === "C-VEH") {
                     trafficLight = 'red';
                 } else if (vehMode === "A-VEH") {
-                    trafficLight = 'green';
+                    trafficLight = 'red';
                 } else {
                     trafficLight = 'red';
                 }
@@ -1852,13 +1853,23 @@ window.onload = function() {
                 if (isCC6) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
+                    updateCC6PathAndMarker();
                 } else {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
+
+                    if (map.getLayer('CC6V2XPath')) {
+                        map.removeLayer('CC6V2XPath');
+                        map.removeSource('CC6V2XPath');
+                    }
+
+                    if (CC6NegotiationMarker) {
+                        CC6NegotiationMarker.remove();
+                    }
                 }
 
                 if (vehMode === "C-VEH") {
-                    trafficLight = 'red';
+                    trafficLight = 'green';
                 } else if (vehMode === "A-VEH") {
                     trafficLight = 'green';
                 } else {
@@ -1866,6 +1877,95 @@ window.onload = function() {
                 }
                 updateTrafficLight(trafficLight);
             });
+
+            function updateCC6PathAndMarker() {
+                let CC6Coordinates = [
+                    [vehicleLongitude0, vehicleLatitude0],
+                    [vehicleLongitude1, vehicleLatitude1]
+                ];
+
+                if (!map.getSource('CC6V2XPath')) {
+                    map.addSource('CC6V2XPath', {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'LineString',
+                                'coordinates': CC6Coordinates
+                            }
+                        }
+                    });
+
+                    map.addLayer({
+                        'id': 'CC6V2XPath',
+                        'type': 'line',
+                        'source': 'CC6V2XPath',
+                        'layout': {
+                            'line-join': 'round',
+                            'line-cap': 'round',
+                            'visibility': 'visible'
+                        },
+                        'paint': {
+                            'line-color': '#4CAF50',
+                            'line-width': 4,
+                            'line-oopacity': 0.8,
+                            'line-dasharray': [0.5, 1.5]
+                        }
+                    });
+                } else {
+                    map.getSource('CC6V2XPath').setData({
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': CC6Coordinates
+                        }
+                    });
+                }
+
+                const midPoint = [
+                    (CC6Coordinates[0][0] + CC6Coordinates[1][0]) / 2,
+                    (CC6Coordinates[0][1] + CC6Coordinates[1][1]) / 2
+                ];
+
+                if (!CC6NegotiationMarker) {
+                    CC6NegotiationMarker = new mapboxgl.Marker({element: createCustomLabelCC6()})
+                    .setLngLat(midPoint)
+                    .addTo(map);
+                } else {
+                    CC6NegotiationMarker.setLngLat(midPoint);
+                    CC6NegotiationMarker.addTo(map);
+                }
+            }
+
+            function createCustomLabelCC6() {
+                const labelContainer = document.createElement('div');
+                labelContainer.style.display = 'flex';
+                labelContainer.style.flexDirection = 'column';
+                labelContainer.style.alignItems = 'center';
+                labelContainer.style.width = 'auto';
+
+                // 직사각형 배경
+                const background = document.createElement('div');
+                background.style.width = 'auto';
+                background.style.height = 'auto';
+                background.style.padding = '5px 10px';
+                background.style.backgroundColor = '#81C784';
+                background.style.borderRadius = '10px';
+                background.style.boxShadow = '0 0 15px #4CAF50, 0 0 30px #4CAF50, 0 0 45px #4CAF50';
+
+                // 텍스트
+                const text = document.createElement('div');
+                text.innerHTML = "V2X-SSOV MSG<br>Class C 완료";
+                text.style.color = 'black';
+                text.style.fontWeight = 'bold';
+                text.style.textAlign = 'center';
+                text.style.fontSize = '18px';
+
+                background.appendChild(text);
+                labelContainer.appendChild(background);
+
+                return labelContainer;
+            }
         });
 
         map.on('style.load', function() {
