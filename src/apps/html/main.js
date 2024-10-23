@@ -1732,19 +1732,42 @@ window.onload = function() {
             }
         });
 
-        map.on('style.load', function() {
+        let CC4StopMarker = new mapboxgl.Marker({
+            element: createCC4Marker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/stop3.png')
+            }).setLngLat([127.439772, 36.730093]);
+
+        let CC4GoMarker = new mapboxgl.Marker({
+            element: createCC4Marker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/go-straight.png')
+            }).setLngLat([127.440172, 36.729915]);
+
+        map.on('style.load', () => {
             document.getElementById('CC4').addEventListener('click', function() {
                 isCC4 = !isCC4;
                 if (isCC4) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
+
+                    if (!CC4StopMarker._map) {
+                        CC4StopMarker.addTo(map);
+                    }
+                    if (!CC4GoMarker._map) {
+                        CC4GoMarker.addTo(map);
+                    }
+
                 } else {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
+
+                    if (CC4StopMarker._map) {
+                        CC4StopMarker.remove();
+                    }
+                    if (CC4GoMarker._map) {
+                        CC4GoMarker.remove();
+                    }
                 }
 
                 if (vehMode === "C-VEH") {
-                    trafficLight = 'red';
+                    trafficLight = 'green';
                 } else if (vehMode === "A-VEH") {
                     trafficLight = 'green';
                 } else {
@@ -1753,6 +1776,23 @@ window.onload = function() {
                 updateTrafficLight(trafficLight);
             });
         });
+
+        function createCC4Marker(imageUrl) {
+            const CC4Container = document.createElement('div');
+            CC4Container.style.display = 'flex';
+            CC4Container.style.flexDirection = 'column';
+            CC4Container.style.alignItems = 'center';
+
+            const img = document.createElement('div');
+            img.style.backgroundImage = `url(${imageUrl})`;
+            img.style.width = '50px';
+            img.style.height = '50px';
+            img.style.backgroundSize = 'contain';
+            img.style.backgroundRepeat = 'no-repeat';
+
+            CC4Container.appendChild(img);
+            return CC4Container;
+        }
 
         map.on('style.load', function() {
             document.getElementById('CC5').addEventListener('click', function() {
