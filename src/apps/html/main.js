@@ -1769,7 +1769,7 @@ window.onload = function() {
                 if (vehMode === "C-VEH") {
                     trafficLight = 'green';
                 } else if (vehMode === "A-VEH") {
-                    trafficLight = 'green';
+                    trafficLight = 'red';
                 } else {
                     trafficLight = 'red';
                 }
@@ -1794,19 +1794,31 @@ window.onload = function() {
             return CC4Container;
         }
 
-        map.on('style.load', function() {
+        let CC5GoMarker = new mapboxgl.Marker({
+            element: createCC5Marker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/go-straight.png')
+            }).setLngLat([127.439772, 36.730093]);
+
+        map.on('style.load', () => {
             document.getElementById('CC5').addEventListener('click', function() {
                 isCC5 = !isCC5;
                 if (isCC5) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
+
+                    if (!CC5GoMarker._map) {
+                        CC5GoMarker.addTo(map);
+                    }
                 } else {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
+
+                    if (CC5GoMarker._map) {
+                        CC5GoMarker.remove();
+                    }
                 }
 
                 if (vehMode === "C-VEH") {
-                    trafficLight = 'red';
+                    trafficLight = 'green';
                 } else if (vehMode === "A-VEH") {
                     trafficLight = 'green';
                 } else {
@@ -1815,6 +1827,24 @@ window.onload = function() {
                 updateTrafficLight(trafficLight);
             });
         });
+
+        function createCC5Marker(imageUrl) {
+            const CC4Container = document.createElement('div');
+            CC4Container.style.display = 'flex';
+            CC4Container.style.flexDirection = 'column';
+            CC4Container.style.alignItems = 'center';
+
+            const img = document.createElement('div');
+            img.style.backgroundImage = `url(${imageUrl})`;
+            img.style.width = '50px';
+            img.style.height = '50px';
+            img.style.backgroundSize = 'contain';
+            img.style.backgroundRepeat = 'no-repeat';
+            img.style.transform = 'rotate(85deg)';
+
+            CC4Container.appendChild(img);
+            return CC4Container;
+        }
 
         map.on('style.load', function() {
             document.getElementById('CC6').addEventListener('click', function() {
