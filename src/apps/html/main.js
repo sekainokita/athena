@@ -121,6 +121,7 @@ window.onload = function() {
         document.getElementById('CC4').style.display = 'block';
         document.getElementById('CC5').style.display = 'block';
         document.getElementById('CC6').style.display = 'block';
+        document.getElementById('CC7').style.display = 'block';
         document.getElementById('CD1').style.display = 'block';
         document.getElementById('CD2').style.display = 'block';
         document.getElementById('CD3').style.display = 'block';
@@ -236,6 +237,7 @@ window.onload = function() {
         let isCC4 = false;
         let isCC5 = false;
         let isCC6 = false;
+        let isCC7 = false;
         let isCD1 = false;
         let isCD2 = false;
         let isCD3 = false;
@@ -252,7 +254,9 @@ window.onload = function() {
         let CB4NegotiationMarker = null;
         let CB6NegotiationMarker = null;
         let CC3NegotiationMarker = null;
-        let CC6NegotiationMarker = null;
+        let CC4NegotiationMarker = null;
+        let CC5NegotiationMarker = null;
+        let CC7NegotiationMarker = null;
         let CD2NegotiationMarker = null;
         let CD4NegotiationMarker = null;
         let CD5CNegotiationMarker = null;
@@ -1610,7 +1614,6 @@ window.onload = function() {
             }
         });
 
-
         map.on('style.load', function() {
             document.getElementById('CC3').addEventListener('click', function() {
                 isCC3 = !isCC3;
@@ -1670,7 +1673,7 @@ window.onload = function() {
                             'visibility': 'visible'
                         },
                         'paint': {
-                            'line-color': '#007AFF',
+                            'line-color': 'rgba(0, 204, 255, 0.8)',
                             'line-width': 4,
                             'line-opacity': 0.8,
                             'line-dasharray': [0.5, 1.5]
@@ -1713,13 +1716,13 @@ window.onload = function() {
                 background.style.width = 'auto';
                 background.style.height = 'auto';
                 background.style.padding = '5px 10px';
-                background.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                background.style.backgroundColor = 'rgba(0, 204, 255, 0.8)';
                 background.style.borderRadius = '10px';
-                background.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
+                //background.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
 
                 // 텍스트
                 const text = document.createElement('div');
-                text.innerHTML = "V2V-SSOV MSG<br>주행 경로 협상";
+                text.innerHTML = "V2V-SSOV MSG<br>주행 협상 요청";
                 text.style.color = 'black';
                 text.style.fontWeight = 'bold';
                 text.style.textAlign = 'center';
@@ -1733,42 +1736,29 @@ window.onload = function() {
             }
         });
 
-        let CC4StopMarker = new mapboxgl.Marker({
-            element: createCC4Marker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/stop3.png')
-            }).setLngLat([127.439772, 36.730093]);
-
-        let CC4GoMarker = new mapboxgl.Marker({
-            element: createCC4Marker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/go-straight.png')
-            }).setLngLat([127.440172, 36.729915]);
-
-        map.on('style.load', () => {
+        map.on('style.load', function() {
             document.getElementById('CC4').addEventListener('click', function() {
                 isCC4 = !isCC4;
                 if (isCC4) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
-
-                    if (!CC4StopMarker._map) {
-                        CC4StopMarker.addTo(map);
-                    }
-                    if (!CC4GoMarker._map) {
-                        CC4GoMarker.addTo(map);
-                    }
-
+                    updateCC4PathAndMarker();
                 } else {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
 
-                    if (CC4StopMarker._map) {
-                        CC4StopMarker.remove();
+                    if (map.getLayer('CC4V2XPath')) {
+                        map.removeLayer('CC4V2XPath');
+                        map.removeSource('CC4V2XPath');
                     }
-                    if (CC4GoMarker._map) {
-                        CC4GoMarker.remove();
+
+                    if (CC4NegotiationMarker) {
+                        CC4NegotiationMarker.remove();
                     }
                 }
 
                 if (vehMode === "C-VEH") {
-                    trafficLight = 'green';
+                    trafficLight = 'red';
                 } else if (vehMode === "A-VEH") {
                     trafficLight = 'red';
                 } else {
@@ -1776,28 +1766,105 @@ window.onload = function() {
                 }
                 updateTrafficLight(trafficLight);
             });
+
+            function updateCC4PathAndMarker() {
+                let CC4Coordinates = [
+                    [vehicleLongitude0, vehicleLatitude0],
+                    [vehicleLongitude1, vehicleLatitude1]
+                ];
+
+                if (!map.getSource('CC4V2XPath')) {
+                    map.addSource('CC4V2XPath', {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'LineString',
+                                'coordinates': CC4Coordinates
+                            }
+                        }
+                    });
+
+                    map.addLayer({
+                        'id': 'CC4V2XPath',
+                        'type': 'line',
+                        'source': 'CC4V2XPath',
+                        'layout': {
+                            'line-join': 'round',
+                            'line-cap': 'round',
+                            'visibility': 'visible'
+                        },
+                        'paint': {
+                            'line-color': '#007AFF',
+                            'line-width': 4,
+                            'line-opacity': 0.8,
+                            'line-dasharray': [0.5, 1.5]
+                        }
+                    });
+                } else {
+                    map.getSource('CC4V2XPath').setData({
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': CC4Coordinates
+                        }
+                    });
+                }
+
+                const midPoint = [
+                    (CC4Coordinates[0][0] + CC4Coordinates[1][0]) / 2,
+                    (CC4Coordinates[0][1] + CC4Coordinates[1][1]) / 2
+                ];
+
+                if (!CC4NegotiationMarker) {
+                    CC4NegotiationMarker = new mapboxgl.Marker({element: createCustomLabelCC4()})
+                    .setLngLat(midPoint)
+                    .addTo(map);
+                } else {
+                    CC4NegotiationMarker.setLngLat(midPoint);
+                    CC4NegotiationMarker.addTo(map);
+                }
+            }
+
+            function createCustomLabelCC4() {
+                const labelContainer = document.createElement('div');
+                labelContainer.style.display = 'flex';
+                labelContainer.style.flexDirection = 'column';
+                labelContainer.style.alignItems = 'center';
+                labelContainer.style.width = 'auto';
+
+                // 직사각형 배경
+                const background = document.createElement('div');
+                background.style.width = 'auto';
+                background.style.height = 'auto';
+                background.style.padding = '5px 10px';
+                background.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                background.style.borderRadius = '10px';
+                background.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
+
+                // 텍스트
+                const text = document.createElement('div');
+                text.innerHTML = "V2V-SSOV MSG<br>주행 협상 승인";
+                text.style.color = 'black';
+                text.style.fontWeight = 'bold';
+                text.style.textAlign = 'center';
+                text.style.textShadow = '0 0 10px #00ccff, 0 0 20px #00ccff, 0 0 30px #00ccff';
+                text.style.fontSize = '18px';
+
+                background.appendChild(text);
+                labelContainer.appendChild(background);
+
+                return labelContainer;
+            }
         });
 
-        function createCC4Marker(imageUrl) {
-            const CC4Container = document.createElement('div');
-            CC4Container.style.display = 'flex';
-            CC4Container.style.flexDirection = 'column';
-            CC4Container.style.alignItems = 'center';
-
-            const img = document.createElement('div');
-            img.style.backgroundImage = `url(${imageUrl})`;
-            img.style.width = '50px';
-            img.style.height = '50px';
-            img.style.backgroundSize = 'contain';
-            img.style.backgroundRepeat = 'no-repeat';
-
-            CC4Container.appendChild(img);
-            return CC4Container;
-        }
+        let CC5StopMarker = new mapboxgl.Marker({
+            element: createCC5Marker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/stop3.png')
+            }).setLngLat([127.439772, 36.730093]);
 
         let CC5GoMarker = new mapboxgl.Marker({
             element: createCC5Marker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/go-straight.png')
-            }).setLngLat([127.439772, 36.730093]);
+            }).setLngLat([127.440172, 36.729915]);
 
         map.on('style.load', () => {
             document.getElementById('CC5').addEventListener('click', function() {
@@ -1806,15 +1873,73 @@ window.onload = function() {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
 
+                    if (!CC5StopMarker._map) {
+                        CC5StopMarker.addTo(map);
+                    }
                     if (!CC5GoMarker._map) {
                         CC5GoMarker.addTo(map);
+                    }
+
+                } else {
+                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    this.style.color = 'white';
+
+                    if (CC5StopMarker._map) {
+                        CC5StopMarker.remove();
+                    }
+                    if (CC5GoMarker._map) {
+                        CC5GoMarker.remove();
+                    }
+                }
+
+                if (vehMode === "C-VEH") {
+                    trafficLight = 'green';
+                } else if (vehMode === "A-VEH") {
+                    trafficLight = 'red';
+                } else {
+                    trafficLight = 'red';
+                }
+                updateTrafficLight(trafficLight);
+            });
+        });
+
+        function createCC5Marker(imageUrl) {
+            const CC5Container = document.createElement('div');
+            CC5Container.style.display = 'flex';
+            CC5Container.style.flexDirection = 'column';
+            CC5Container.style.alignItems = 'center';
+
+            const img = document.createElement('div');
+            img.style.backgroundImage = `url(${imageUrl})`;
+            img.style.width = '50px';
+            img.style.height = '50px';
+            img.style.backgroundSize = 'contain';
+            img.style.backgroundRepeat = 'no-repeat';
+
+            CC5Container.appendChild(img);
+            return CC5Container;
+        }
+
+        let CC6GoMarker = new mapboxgl.Marker({
+            element: createCC6Marker('https://raw.githubusercontent.com/KETI-A/athena/main/src/apps/html/images/go-straight.png')
+            }).setLngLat([127.439772, 36.730093]);
+
+        map.on('style.load', () => {
+            document.getElementById('CC6').addEventListener('click', function() {
+                isCC6 = !isCC6;
+                if (isCC6) {
+                    this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                    this.style.color = 'white';
+
+                    if (!CC6GoMarker._map) {
+                        CC6GoMarker.addTo(map);
                     }
                 } else {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
 
-                    if (CC5GoMarker._map) {
-                        CC5GoMarker.remove();
+                    if (CC6GoMarker._map) {
+                        CC6GoMarker.remove();
                     }
                 }
 
@@ -1829,11 +1954,11 @@ window.onload = function() {
             });
         });
 
-        function createCC5Marker(imageUrl) {
-            const CC4Container = document.createElement('div');
-            CC4Container.style.display = 'flex';
-            CC4Container.style.flexDirection = 'column';
-            CC4Container.style.alignItems = 'center';
+        function createCC6Marker(imageUrl) {
+            const CC6Container = document.createElement('div');
+            CC6Container.style.display = 'flex';
+            CC6Container.style.flexDirection = 'column';
+            CC6Container.style.alignItems = 'center';
 
             const img = document.createElement('div');
             img.style.backgroundImage = `url(${imageUrl})`;
@@ -1843,28 +1968,28 @@ window.onload = function() {
             img.style.backgroundRepeat = 'no-repeat';
             img.style.transform = 'rotate(85deg)';
 
-            CC4Container.appendChild(img);
-            return CC4Container;
+            CC6Container.appendChild(img);
+            return CC6Container;
         }
 
         map.on('style.load', function() {
-            document.getElementById('CC6').addEventListener('click', function() {
-                isCC6 = !isCC6;
-                if (isCC6) {
+            document.getElementById('CC7').addEventListener('click', function() {
+                isCC7 = !isCC7;
+                if (isCC7) {
                     this.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                     this.style.color = 'white';
-                    updateCC6PathAndMarker();
+                    updateCC7PathAndMarker();
                 } else {
                     this.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                     this.style.color = 'white';
 
-                    if (map.getLayer('CC6V2XPath')) {
-                        map.removeLayer('CC6V2XPath');
-                        map.removeSource('CC6V2XPath');
+                    if (map.getLayer('CC7V2XPath')) {
+                        map.removeLayer('CC7V2XPath');
+                        map.removeSource('CC7V2XPath');
                     }
 
-                    if (CC6NegotiationMarker) {
-                        CC6NegotiationMarker.remove();
+                    if (CC7NegotiationMarker) {
+                        CC7NegotiationMarker.remove();
                     }
                 }
 
@@ -1878,28 +2003,28 @@ window.onload = function() {
                 updateTrafficLight(trafficLight);
             });
 
-            function updateCC6PathAndMarker() {
-                let CC6Coordinates = [
+            function updateCC7PathAndMarker() {
+                let CC7Coordinates = [
                     [vehicleLongitude0, vehicleLatitude0],
                     [vehicleLongitude1, vehicleLatitude1]
                 ];
 
-                if (!map.getSource('CC6V2XPath')) {
-                    map.addSource('CC6V2XPath', {
+                if (!map.getSource('CC7V2XPath')) {
+                    map.addSource('CC7V2XPath', {
                         'type': 'geojson',
                         'data': {
                             'type': 'Feature',
                             'geometry': {
                                 'type': 'LineString',
-                                'coordinates': CC6Coordinates
+                                'coordinates': CC7Coordinates
                             }
                         }
                     });
 
                     map.addLayer({
-                        'id': 'CC6V2XPath',
+                        'id': 'CC7V2XPath',
                         'type': 'line',
-                        'source': 'CC6V2XPath',
+                        'source': 'CC7V2XPath',
                         'layout': {
                             'line-join': 'round',
                             'line-cap': 'round',
@@ -1913,31 +2038,31 @@ window.onload = function() {
                         }
                     });
                 } else {
-                    map.getSource('CC6V2XPath').setData({
+                    map.getSource('CC7V2XPath').setData({
                         'type': 'Feature',
                         'geometry': {
                             'type': 'LineString',
-                            'coordinates': CC6Coordinates
+                            'coordinates': CC7Coordinates
                         }
                     });
                 }
 
                 const midPoint = [
-                    (CC6Coordinates[0][0] + CC6Coordinates[1][0]) / 2,
-                    (CC6Coordinates[0][1] + CC6Coordinates[1][1]) / 2
+                    (CC7Coordinates[0][0] + CC7Coordinates[1][0]) / 2,
+                    (CC7Coordinates[0][1] + CC7Coordinates[1][1]) / 2
                 ];
 
-                if (!CC6NegotiationMarker) {
-                    CC6NegotiationMarker = new mapboxgl.Marker({element: createCustomLabelCC6()})
+                if (!CC7NegotiationMarker) {
+                    CC7NegotiationMarker = new mapboxgl.Marker({element: createCustomLabelCC7()})
                     .setLngLat(midPoint)
                     .addTo(map);
                 } else {
-                    CC6NegotiationMarker.setLngLat(midPoint);
-                    CC6NegotiationMarker.addTo(map);
+                    CC7NegotiationMarker.setLngLat(midPoint);
+                    CC7NegotiationMarker.addTo(map);
                 }
             }
 
-            function createCustomLabelCC6() {
+            function createCustomLabelCC7() {
                 const labelContainer = document.createElement('div');
                 labelContainer.style.display = 'flex';
                 labelContainer.style.flexDirection = 'column';
@@ -4147,6 +4272,16 @@ window.onload = function() {
             // CC3이 활성화된 경우 경로 업데이트
             if (isCC3) {
                 updateV2VPath('CC3V2XPath', CC3NegotiationMarker);
+            }
+
+            // CC4이 활성화된 경우 경로 업데이트
+            if (isCC4) {
+                updateV2VPath('CC4V2XPath', CC4NegotiationMarker);
+            }
+
+            // CC7이 활성화된 경우 경로 업데이트
+            if (isCC7) {
+                updateV2VPath('CC7V2XPath', CC7NegotiationMarker);
             }
 
             // CD2가 활성화된 경우 경로 업데이트

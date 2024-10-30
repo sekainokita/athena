@@ -189,7 +189,7 @@
     left: 393.75px;
 }
 
-#workZoneButton, #mrsuButton, #CB1, #CB2, #CB3, #CB4, #CB5, #CB6, #CC1, #CC2, #CC3, #CC4, #CC5, #CC6 ,#CD1, #CD2, #CD3, #CD4, #CD5, #CD6, #CD7, #CD8 {
+#workZoneButton, #mrsuButton, #CB1, #CB2, #CB3, #CB4, #CB5, #CB6, #CC1, #CC2, #CC3, #CC4, #CC5, #CC6, #CC7, #CD1, #CD2, #CD3, #CD4, #CD5, #CD6, #CD7, #CD8 {
     position: absolute;
     padding: 3.75px 15px;
     background-color: rgba(0, 0, 0, 0.7);
@@ -272,49 +272,54 @@
     left: 656.25px;
 }
 
-#CD1 {
+#CC7 {
     bottom: 37.5px;
     left: 720px;
+}
+
+#CD1 {
+    bottom: 37.5px;
+    left: 783.75px;
 }
 
 #CD2 {
     bottom: 11.25px;
-    left: 720px;
+    left: 783.75px;
 }
 
 #CD3 {
     bottom: 37.5px;
-    left: 783.75px;
+    left: 847.5px;
 }
 
 #CD4 {
     bottom: 11.25px;
-    left: 783.75px;
+    left: 847.5px;
 }
 
 #CD5 {
     bottom: 37.5px;
-    left: 847.5px;
+    left: 911.25px;
 }
 
 #CD6 {
     bottom: 11.25px;
-    left: 847.5px;
+    left: 911.25px;
 }
 
 #CD7 {
     bottom: 37.5px;
-    left: 911.25px;
+    left: 975px;
 }
 
 #CD8 {
     bottom: 11.25px;
-    left: 911.25px;
+    left: 975px;
 }
 
 #autoTrackButton:hover, #projectionButton:hover, #connectedStatusButton:hover, #workZoneButton:hover, #mrsuButton:hover, #visiblePathButton:hover,
 #CB1:hover, #CB2:hover, #CB3:hover, #CB4:hover, #CB5:hover, #CB6:hover,
-#CC1:hover, #CC2:hover, #CC3:hover, #CC4:hover, #CC5:hover, #CC6:hover,
+#CC1:hover, #CC2:hover, #CC3:hover, #CC4:hover, #CC5:hover, #CC6:hover, #CC7:hover,
 #CD1:hover, #CD2:hover, #CD3:hover, #CD4:hover, #CD5:hover, #CD6:hover, #CD7:hover, #CD8:hover {
     background-color: rgba(0, 0, 0, 0.8);
 }
