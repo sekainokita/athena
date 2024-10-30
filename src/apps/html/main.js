@@ -455,16 +455,14 @@ window.onload = function() {
             img.style.backgroundRepeat = 'no-repeat';
 
             const label = document.createElement('div');
-            label.innerHTML = "Under<br>Construction";
-            label.style.color = 'white';
+            label.innerHTML = "공사중";
+            label.style.color = 'black';
             label.style.textAlign = 'center';
             label.style.fontWeight = 'bold';
             label.style.backgroundColor = 'rgba(255, 0, 0, 0.97)';
             label.style.padding = '2px 5px';
             label.style.borderRadius = '5px';
-            label.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
             label.style.textShadow = '0 0 10px #00ccff, 0 0 20px #00ccff, 0 0 30px #00ccff';
-            label.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.3)';
             label.style.width = 'auto';
             label.style.display = 'inline-block';
             label.style.fontSize = '13px';
@@ -540,15 +538,13 @@ window.onload = function() {
 
             const label = document.createElement('div');
             label.textContent = "RSU";
-            label.style.color = 'white';
+            label.style.color = 'black';
             label.style.textAlign = 'center';
             label.style.fontWeight = 'bold';
             label.style.backgroundColor = 'rgba(0, 204, 255, 0.8)';
             label.style.padding = '5px 10px';
             label.style.borderRadius = '10px';
-            label.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
             label.style.textShadow = '0 0 10px #00ccff, 0 0 20px #00ccff, 0 0 30px #00ccff';
-            label.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.3)';
             label.style.width = 'auto';
             label.style.display = 'inline-block';
             label.style.fontSize = '18px';
@@ -956,7 +952,6 @@ window.onload = function() {
                     background.style.padding = '5px 10px';
                     background.style.backgroundColor = 'rgba(0, 204, 255, 0.8)';
                     background.style.borderRadius = '10px';
-                    background.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
 
                     // 텍스트
                     const text = document.createElement('div');
@@ -1078,7 +1073,6 @@ window.onload = function() {
                 background.style.padding = '5px 10px';
                 background.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                 background.style.borderRadius = '10px';
-                background.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
 
                 // 텍스트
                 const text = document.createElement('div');
@@ -1270,7 +1264,6 @@ window.onload = function() {
             background.style.padding = '5px 10px';
             background.style.backgroundColor = '#81C784';
             background.style.borderRadius = '10px';
-            background.style.boxShadow = '0 0 15px #4CAF50, 0 0 30px #4CAF50, 0 0 45px #4CAF50';
 
             // 텍스트
             const text = document.createElement('div');
@@ -1718,7 +1711,6 @@ window.onload = function() {
                 background.style.padding = '5px 10px';
                 background.style.backgroundColor = 'rgba(0, 204, 255, 0.8)';
                 background.style.borderRadius = '10px';
-                //background.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
 
                 // 텍스트
                 const text = document.createElement('div');
@@ -1840,7 +1832,6 @@ window.onload = function() {
                 background.style.padding = '5px 10px';
                 background.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                 background.style.borderRadius = '10px';
-                background.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
 
                 // 텍스트
                 const text = document.createElement('div');
@@ -2076,7 +2067,6 @@ window.onload = function() {
                 background.style.padding = '5px 10px';
                 background.style.backgroundColor = '#81C784';
                 background.style.borderRadius = '10px';
-                background.style.boxShadow = '0 0 15px #4CAF50, 0 0 30px #4CAF50, 0 0 45px #4CAF50';
 
                 // 텍스트
                 const text = document.createElement('div');
@@ -2235,7 +2225,6 @@ window.onload = function() {
                 background.style.padding = '5px 10px';
                 background.style.backgroundColor = 'rgba(255, 0, 0, 0.9)';
                 background.style.borderRadius = '10px';
-                background.style.boxShadow = '0 0 15px #ff6666, 0 0 30px #ff6666, 0 0 45px #ff6666';
 
                 // 텍스트
                 const text = document.createElement('div');
@@ -2598,7 +2587,6 @@ window.onload = function() {
                 background.style.padding = '3px 7px';
                 background.style.backgroundColor = 'rgba(0, 204, 255, 0.8)';
                 background.style.borderRadius = '8px';
-                background.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
 
                 // 텍스트
                 const text = document.createElement('div');
@@ -2757,7 +2745,6 @@ window.onload = function() {
                 background.style.padding = '3px 7px';
                 background.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                 background.style.borderRadius = '8px';
-                background.style.boxShadow = '0 0 15px #00ccff, 0 0 30px #00ccff, 0 0 45px #00ccff';
 
                 // 텍스트
                 const text = document.createElement('div');
@@ -3314,7 +3301,6 @@ window.onload = function() {
             background.style.padding = '5px 10px';
             background.style.backgroundColor = '#81C784';
             background.style.borderRadius = '10px';
-            background.style.boxShadow = '0 0 15px #4CAF50, 0 0 30px #4CAF50, 0 0 45px #4CAF50';
 
             // 텍스트
             const text = document.createElement('div');
