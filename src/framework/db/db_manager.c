@@ -336,7 +336,7 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
 
     pstDbV2xStatusRx->stDbV2xDevL1.unDevId = stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.unDevId;
     pstDbV2xStatusRx->stDbV2xDevL2.unDevId = stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.unDevId;
-    pstDbV2xStatusRx->stDbV2xDevL3.unDevId = stDbV2xStatus.stV2xStatusRx.stDbV2xDevL3.unDevId;
+    pstDbV2xStatusRx->stDbV2xDevL3.unDevId = stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.unDevId;
 
     pstDbV2xStatusRx->stDbV2xDevL1.usSwVer = stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.usSwVer;
     pstDbV2xStatusRx->stDbV2xDevL2.usSwVer = stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.usSwVer;
@@ -348,7 +348,7 @@ static int32_t P_DB_MANAGER_UpdateStatus(DB_MANAGER_EVENT_MSG_T *pstEventMsg, DB
 
     pstDbV2xStatusTx->stDbV2xDevL1.unDevId = stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.unDevId;
     pstDbV2xStatusTx->stDbV2xDevL2.unDevId = stDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.unDevId;
-    pstDbV2xStatusTx->stDbV2xDevL3.unDevId = stDbV2xStatus.stV2xStatusTx.stDbV2xDevL3.unDevId;
+    pstDbV2xStatusTx->stDbV2xDevL3.unDevId = stDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.unDevId;
 
     pstDbV2xStatusTx->stDbV2xDevL1.usSwVer = stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.usSwVer;
     pstDbV2xStatusTx->stDbV2xDevL2.usSwVer = stDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.usSwVer;
