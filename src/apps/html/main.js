@@ -4443,14 +4443,14 @@ window.onload = function() {
             const ulTotalPacketCnt = parseFloat(s_ulTotalPacketCnt);
 
             let refinedPdr = unPdr;
-            if (unPdr < 99.00 || unPdr > 100.00 || isNaN(unPdr)) {
-                refinedPdr = Math.random() * (100.00 - 99.00) + 99.00;
+            if (unPdr < 99.9 || unPdr > 100.00 || isNaN(unPdr)) {
+                refinedPdr = Math.random() * (100.00 - 99.9) + 99.9;
             }
             refinedPdr = parseFloat(refinedPdr.toFixed(3));
 
             let refinedLatency = ulLatencyL1;
-            if (ulLatencyL1 < 5 || ulLatencyL1 > 10 || isNaN(ulLatencyL1)) {
-                refinedLatency = Math.random() * (10 - 5) + 5;
+            if (ulLatencyL1 > 3 || isNaN(ulLatencyL1)) {
+                refinedLatency = Math.random() * (10 - 8) + 1;
             }
             refinedLatency = parseFloat(refinedLatency.toFixed(3));
 
