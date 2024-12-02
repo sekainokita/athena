@@ -4486,11 +4486,11 @@ window.onload = function() {
 
                 // TotalPacketCount 텍스트 추가
                 let totalPacketCount = xValue[0];
-                let middleYValue = (80 + 100) / 2;
+                let middleYValue = (95 + 100) / 2;
 
                 Plotly.relayout('graph1', {
                     yaxis: {
-                        range: [80, 100],
+                        range: [95, 100],
                         title: 'PDR (Packet Delivery Rate) (%)',
                         dtick: 1,
                         tickfont: {
@@ -4557,7 +4557,7 @@ window.onload = function() {
 
                 Plotly.relayout('graph2', {
                     yaxis: {
-                        range: [0, 15],
+                        range: [0, 5],
                         title: 'Latency (ms)',
                         dtick: 1,
                         tickfont: {
@@ -4622,7 +4622,7 @@ window.onload = function() {
             marker: { color: 'green', size: 6 }
         }], {
             margin: { t: 60, b: 40, l: 50, r: 30 }, // 타이틀 높이에 맞게 top margin 증가
-            yaxis: { range: [80, 100], title: 'PDR (%)', showgrid: true, zeroline: true, dtick: 1 },
+            yaxis: { range: [95, 100], title: 'PDR (%)', showgrid: true, zeroline: true, dtick: 1 },
             xaxis: { title: 'ulTotalPacketCnt', showgrid: true },
             title: {
                 text: 'Real-time PDR Monitoring',
@@ -4656,7 +4656,7 @@ window.onload = function() {
             marker: { color: 'blue', size: 6 }
         }], {
             margin: { t: 60, b: 40, l: 50, r: 30 }, // 타이틀 높이에 맞게 top margin 증가
-            yaxis: { range: [0, 15], title: 'Latency (ms)', showgrid: true, zeroline: true, dtick: 1 },
+            yaxis: { range: [0, 5], title: 'Latency (ms)', showgrid: true, zeroline: true, dtick: 1 },
             xaxis: { title: 'ulTotalPacketCnt', showgrid: true },
             title: {
                 text: 'Real-time Latency Monitoring',
