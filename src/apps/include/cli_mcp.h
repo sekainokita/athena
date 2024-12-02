@@ -1,5 +1,5 @@
-#ifndef	_CLI_MCP_H_
-#define	_CLI_MCP_H_
+#ifndef _CLI_MCP_H_
+#define _CLI_MCP_H_
 
 /******************************************************************************
 *
@@ -57,5 +57,5 @@
 /***************************** Function Protype ******************************/
 int32_t CLI_MCP_InitCmds(void);
 
-#endif	/* _CLI_MCP_H_ */
+#endif  /* _CLI_MCP_H_ */
 

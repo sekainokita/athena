@@ -1,5 +1,5 @@
-#ifndef	_TYPE_H_
-#define	_TYPE_H_
+#ifndef _TYPE_H_
+#define _TYPE_H_
 
 /******************************************************************************
 *
@@ -98,7 +98,7 @@
 #define OFF                 false
 
 #define MODEL_PREFIX            "model="
-#define DEVICE_NAME_PREFIX       "pchDeviceName="
+#define DEVICE_NAME_PREFIX      "pchDeviceName="
 #define DEVICE_ID_PREFIX        "unDeviceId="
 #define IFACE_NAME_PREFIX       "pchIfaceName="
 #define IP_ADDR_PREFIX          "pchIpAddr="

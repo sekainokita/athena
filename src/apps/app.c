@@ -62,7 +62,9 @@ static APP_T s_stApp;
 static DI_T s_stDi;
 static SVC_PLATOONING_T s_stSvcPlatooning;
 static SVC_CP_T s_stSvcCp;
+#if defined(CONFIG_MULTI_DEV)
 static SVC_MCP_T s_stSvcMCp;
+#endif
 
 /***************************** Function  *************************************/
 
@@ -91,13 +93,14 @@ int32_t APP_Init(APP_T *pstApp)
         PrintError("SVC_CP_Init() is failed! [unRet:%d]", nRet);
         return nRet;
     }
-
+#if defined(CONFIG_MULTI_DEV)
     nRet = SVC_MCP_Init(&s_stSvcMCp);
     if (nRet != APP_OK)
     {
         PrintError("SVC_MCP_Init() is failed! [unRet:%d]", nRet);
         return nRet;
     }
+#endif
 
     printf(COLOR_YELLOW "=======================================================\r\n");
     printf(COLOR_YELLOW "\r\n");
@@ -139,10 +142,12 @@ SVC_CP_T* APP_GetSvcCpInstance(void)
     return &s_stSvcCp;
 }
 
+#if defined(CONFIG_MULTI_DEV)
 SVC_MCP_T* APP_GetSvcMCpInstance(void)
 {
     return &s_stSvcMCp;
 }
+#endif
 
 SVC_PLATOONING_T* APP_GetSvcPlatooningInstance(void)
 {
@@ -167,7 +172,9 @@ int main(int argc, char *argv[])
     (void*)memset(&s_stApp, 0x00, sizeof(APP_T));
     (void*)memset(&s_stSvcPlatooning, 0x00, sizeof(SVC_PLATOONING_T));
     (void*)memset(&s_stSvcCp, 0x00, sizeof(SVC_CP_T));
+#if defined(CONFIG_MULTI_DEV)
     (void*)memset(&s_stSvcMCp, 0x00, sizeof(SVC_MCP_T));
+#endif
 
     PrintDebug("pstFramework [0x%p]", &s_stFramework);
     PrintDebug("s_stApp [0x%p]", &s_stApp);

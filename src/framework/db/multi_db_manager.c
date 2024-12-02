@@ -49,44 +49,49 @@
 ******************************************************************************/
 
 /***************************** Include ***************************************/
+/*#if defined(CONFIG_MULTI_DEV)*/
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
-#if defined(CONFIG_SQLITE)
+/*#if defined(CONFIG_SQLITE)*/
 #include <sqlite3.h>
-#endif
+/*#endif*/
 #include "db_v2x_status.h"
 #include "framework.h"
 #include "multi_db_manager.h"
 #include "di.h"
 #include "app.h"
 #include "svc_mcp.h"
+/*#endif*/
 
 /***************************** Definition ************************************/
 
-#define MULTI_DB_MANAGER_DB_TEMP_PATH         "/tmp/"
+#if defined(CONFIG_MULTI_DEV)
+#define MULTI_DB_MANAGER_DB_TEMP_PATH                "/tmp/"
 
-#define MULTI_DB_MANAGER_TXT_TX_FILE          MULTI_DB_MANAGER_DB_TEMP_PATH"db_v2x_tx_temp_writing.txt"
-#define MULTI_DB_MANAGER_TXT_RX_FILE          MULTI_DB_MANAGER_DB_TEMP_PATH"db_v2x_rx_temp_writing.txt"
+#define MULTI_DB_MANAGER_TXT_TX_FILE                 MULTI_DB_MANAGER_DB_TEMP_PATH"db_v2x_tx_temp_writing.txt"
+#define MULTI_DB_MANAGER_TXT_RX_FILE                 MULTI_DB_MANAGER_DB_TEMP_PATH"db_v2x_rx_temp_writing.txt"
 
-#define MULTI_DB_MANAGER_CSV_TX_FILE          MULTI_DB_MANAGER_DB_TEMP_PATH"db_v2x_tx_temp_writing.csv"
-#define MULTI_DB_MANAGER_CSV_RX_FILE          MULTI_DB_MANAGER_DB_TEMP_PATH"db_v2x_rx_temp_writing.csv"
+#define MULTI_DB_MANAGER_CSV_TX_FILE                 MULTI_DB_MANAGER_DB_TEMP_PATH"db_v2x_tx_temp_writing.csv"
+#define MULTI_DB_MANAGER_CSV_RX_FILE                 MULTI_DB_MANAGER_DB_TEMP_PATH"db_v2x_rx_temp_writing.csv"
 
 #if defined(CONFIG_SQLITE)
-#define MULTI_DB_MANAGER_SQL_TX_FILE          MULTI_DB_MANAGER_DB_TEMP_PATH"db_v2x_tx_temp_writing.db"
-#define MULTI_DB_MANAGER_SQL_RX_FILE          MULTI_DB_MANAGER_DB_TEMP_PATH"db_v2x_rx_temp_writing.db"
+#define MULTI_DB_MANAGER_SQL_TX_FILE                 MULTI_DB_MANAGER_DB_TEMP_PATH"db_v2x_tx_temp_writing.db"
+#define MULTI_DB_MANAGER_SQL_RX_FILE                 MULTI_DB_MANAGER_DB_TEMP_PATH"db_v2x_rx_temp_writing.db"
 #endif
 
-#define MSG_MGR_PDR_PER_CONVERT_RATE          (100000)
-#define MSG_MGR_MAX_CONT_CNT                  (100)
-//#define DB_MGR_TEST                         (1)
+#define MULTI_MSG_MGR_PDR_PER_CONVERT_RATE           (100000)
+#define MULTI_MSG_MGR_MAX_CONT_CNT                   (100)
+//#define DB_MGR_TEST                                (1)
 
-#define SVC_MCP_GPS_SPEED_CAL_CNT_MAX          (10)
-#define MULTI_DB_MGR_TIME_US_TO_MS            (1000)
+#define MULTI_SVC_MCP_GPS_SPEED_CAL_CNT_MAX          (10)
+#define MULTI_DB_MGR_TIME_US_TO_MS                   (1000)
+#endif
 
 /***************************** Enum and Structure ****************************/
 
 /***************************** Static Variable *******************************/
+#if defined(CONFIG_MULTI_DEV)
 FILE* sh_pMultiDbMgrTxMsg;
 FILE* sh_pMultiDbMgrRxMsg;
 #if defined(CONFIG_SQLITE)
@@ -94,10 +99,10 @@ sqlite3* sh_pMultiDbMgrTxSqlMsg;
 sqlite3* sh_pMultiDbMgrRxSqlMsg;
 #endif
 
-static int s_nDbTaskMsgId, s_nMsgTxTaskMsgId, s_nMsgRxTaskMsgId;
-static key_t s_dbTaskMsgKey = FRAMEWORK_DB_TASK_MSG_KEY;
-static key_t s_MsgTxTaskMsgKey = FRAMEWORK_MSG_TX_TASK_MSG_KEY;
-static key_t s_MsgRxTaskMsgKey = FRAMEWORK_MSG_RX_TASK_MSG_KEY;
+static int s_nMultiDbTaskMsgId, s_nMultiMsgTxTaskMsgId, s_nMultiMsgRxTaskMsgId;
+static key_t s_MultidbTaskMsgKey = FRAMEWORK_DB_TASK_MSG_KEY;
+static key_t s_MultiMsgTxTaskMsgKey = FRAMEWORK_MSG_TX_TASK_MSG_KEY;
+static key_t s_MultiMsgRxTaskMsgKey = FRAMEWORK_MSG_RX_TASK_MSG_KEY;
 
 static pthread_t sh_MultiDbMgrTask;
 
@@ -108,12 +113,14 @@ static MULTI_DB_MANAGER_V2X_STATUS_T s_stMultiDbV2xStatusRx;
 static int32_t P_MULTI_DB_MANAGER_SetV2xStatus(MULTI_DB_MANAGER_V2X_STATUS_T *pstMultiDbV2xStatus);
 static int32_t P_MULTI_DB_MANAGER_GetV2xStatus(MULTI_DB_MANAGER_V2X_STATUS_T *pstMultiDbV2xStatus);
 
-static uint16_t s_usGpsSpeedCalCnt = 0;
-static uint32_t s_usLastSpeedTx;
-static uint32_t s_usLastSpeedRx;
+static uint16_t s_usMultiGpsSpeedCalCnt = 0;
+static uint32_t s_usMultiLastSpeedTx;
+static uint32_t s_usMultiLastSpeedRx;
+#endif
 
 /***************************** Function  *************************************/
 
+#if defined(CONFIG_MULTI_DEV)
 static int32_t P_MULTI_DB_MANAGER_PrintStatus(DB_V2X_STATUS_TX_T *pstDbV2xStatusTx, DB_V2X_STATUS_RX_T *pstDbV2xStatusRx)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -139,7 +146,7 @@ static int32_t P_MULTI_DB_MANAGER_PrintStatus(DB_V2X_STATUS_TX_T *pstDbV2xStatus
     else
     {
         nRet = FRAMEWORK_OK;
-        if(stMultiDbV2xStatus.unCurrentContCnt == MSG_MGR_MAX_CONT_CNT)
+        if(stMultiDbV2xStatus.unCurrentContCnt == MULTI_MSG_MGR_MAX_CONT_CNT)
         {
             PrintDebug("(Tx)unSeqNum[%d], (Rx)ulTotalPacketCnt[%ld], unPdr[%.3f], unPer[%.3f], ulTotalErrCnt[%ld]", pstDbV2xStatusTx->unSeqNum, pstDbV2xStatusRx->ulTotalPacketCnt, (float)(pstDbV2xStatusRx->unPdr/1000.0f), (float)(pstDbV2xStatusRx->unPer/1000.0f), pstDbV2xStatusRx->ulTotalErrCnt);
             PrintDebug("(Tx)unTxVehicleSpeed[%d], unTxVehicleHeading[%d], (Rx)unRxVehicleSpeed[%d], unRxVehicleHeading[%d]", pstDbV2xStatusTx->unTxVehicleSpeed, pstDbV2xStatusTx->unTxVehicleHeading, pstDbV2xStatusRx->unRxVehicleSpeed, pstDbV2xStatusRx->unRxVehicleHeading);
@@ -167,7 +174,7 @@ static int32_t P_MULTI_DB_MANAGER_PrintStatusPt(DB_V2X_PLATOONING_T *pstDbV2xPt)
     else
     {
         nRet = FRAMEWORK_OK;
-        if(stMultiDbV2xStatus.unCurrentContCnt == MSG_MGR_MAX_CONT_CNT)
+        if(stMultiDbV2xStatus.unCurrentContCnt == MULTI_MSG_MGR_MAX_CONT_CNT)
         {
             PrintDebug("eDbV2XPtType[%d], usV2xGroupId[%d]", pstDbV2xPt->eDbV2XPtType, pstDbV2xPt->usV2xGroupId);
         }
@@ -194,7 +201,7 @@ static int32_t P_MULTI_DB_MANAGER_PrintStatusPtLv(DB_V2X_PLATOONING_LV_T *pstDbV
     else
     {
         nRet = FRAMEWORK_OK;
-        if(stMultiDbV2xStatus.unCurrentContCnt == MSG_MGR_MAX_CONT_CNT)
+        if(stMultiDbV2xStatus.unCurrentContCnt == MULTI_MSG_MGR_MAX_CONT_CNT)
         {
             PrintDebug("eLvServiceId[%d], eLvMethodId[%d], unLvLength[%d], usLvClientId[%d], usLvSessionId[%d], ucLvProtocolVer[%d]", pstDbV2XPtLv->eLvServiceId, pstDbV2XPtLv->eLvMethodId, pstDbV2XPtLv->unLvLength, pstDbV2XPtLv->usLvClientId, pstDbV2XPtLv->usLvSessionId, pstDbV2XPtLv->ucLvProtocolVer);
             PrintDebug("ucLvInterfaceVer[%d], eLvMsgType[%d], ucLvReturnCode[%d], eLvVehicleType[%d]", pstDbV2XPtLv->ucLvInterfaceVer, pstDbV2XPtLv->eLvMsgType, pstDbV2XPtLv->ucLvReturnCode, pstDbV2XPtLv->eLvVehicleType);
@@ -236,7 +243,7 @@ static int32_t P_MULTI_DB_MANAGER_PrintStatusPtFv(DB_V2X_PLATOONING_FV_T *pstDbV
     else
     {
         nRet = FRAMEWORK_OK;
-        if(stMultiDbV2xStatus.unCurrentContCnt == MSG_MGR_MAX_CONT_CNT)
+        if(stMultiDbV2xStatus.unCurrentContCnt == MULTI_MSG_MGR_MAX_CONT_CNT)
         {
             PrintDebug("eFvServiceId[%d], eFvMethodId[%d], unFvLength[%d], usFvClientId[%d], usFvSessionId[%d], ucFvProtocolVer[%d]", pstDbV2XPtFv->eFvServiceId, pstDbV2XPtFv->eFvMethodId, pstDbV2XPtFv->unFvLength, pstDbV2XPtFv->usFvClientId, pstDbV2XPtFv->usFvSessionId, pstDbV2XPtFv->ucFvProtocolVer);
             PrintDebug("ucFvInterfaceVer[%d], eFvMsgType[%d], ucFvReturnCode[%d], eFvVehicleType[%d]", pstDbV2XPtFv->ucFvInterfaceVer, pstDbV2XPtFv->eFvMsgType, pstDbV2XPtFv->ucFvReturnCode, pstDbV2XPtFv->eFvVehicleType);
@@ -448,7 +455,7 @@ static int32_t P_MULTI_DB_MANAGER_UpdateStatus(MULTI_DB_MANAGER_EVENT_MSG_T *pst
     }
     else
     {
-        if(s_usGpsSpeedCalCnt == SVC_MCP_GPS_SPEED_CAL_CNT_MAX)
+        if(s_usMultiGpsSpeedCalCnt == MULTI_SVC_MCP_GPS_SPEED_CAL_CNT_MAX)
         {
             stMultiDbV2xStatus.stV2xGpsInfoTx.nLatitudeNow = pstDbV2xStatusTx->stTxPosition.nTxLatitude;
             stMultiDbV2xStatus.stV2xGpsInfoTx.nLongitudeNow = pstDbV2xStatusTx->stTxPosition.nTxLongitude;
@@ -461,18 +468,18 @@ static int32_t P_MULTI_DB_MANAGER_UpdateStatus(MULTI_DB_MANAGER_EVENT_MSG_T *pst
             nCurrSpeedRx = DI_GPS_CalculateSpeed(&stMultiDbV2xStatus.stV2xGpsInfoRx);
             if(nCurrSpeedTx == 0 && nCurrSpeedRx == 0)
             {
-                stMultiDbV2xStatus.stV2xStatusTx.unTxVehicleSpeed = s_usLastSpeedTx;
-                stMultiDbV2xStatus.stV2xStatusRx.unRxVehicleSpeed = s_usLastSpeedRx;
+                stMultiDbV2xStatus.stV2xStatusTx.unTxVehicleSpeed = s_usMultiLastSpeedTx;
+                stMultiDbV2xStatus.stV2xStatusRx.unRxVehicleSpeed = s_usMultiLastSpeedRx;
             }
             else if(nCurrSpeedTx == 0)
             {
-                stMultiDbV2xStatus.stV2xStatusTx.unTxVehicleSpeed = s_usLastSpeedTx;
+                stMultiDbV2xStatus.stV2xStatusTx.unTxVehicleSpeed = s_usMultiLastSpeedTx;
                 stMultiDbV2xStatus.stV2xStatusRx.unRxVehicleSpeed = nCurrSpeedRx;
             }
             else if(nCurrSpeedRx == 0)
             {
                 stMultiDbV2xStatus.stV2xStatusTx.unTxVehicleSpeed = nCurrSpeedTx;
-                stMultiDbV2xStatus.stV2xStatusRx.unRxVehicleSpeed = s_usLastSpeedRx;
+                stMultiDbV2xStatus.stV2xStatusRx.unRxVehicleSpeed = s_usMultiLastSpeedRx;
             }
             else
             {
@@ -480,10 +487,10 @@ static int32_t P_MULTI_DB_MANAGER_UpdateStatus(MULTI_DB_MANAGER_EVENT_MSG_T *pst
                 stMultiDbV2xStatus.stV2xStatusRx.unRxVehicleSpeed = nCurrSpeedRx;
             }
 
-            s_usLastSpeedTx = nCurrSpeedTx;
-            s_usLastSpeedRx = nCurrSpeedRx;
+            s_usMultiLastSpeedTx = nCurrSpeedTx;
+            s_usMultiLastSpeedRx = nCurrSpeedRx;
 
-            s_usGpsSpeedCalCnt = 0;
+            s_usMultiGpsSpeedCalCnt = 0;
         }
     }
 
@@ -528,10 +535,10 @@ static int32_t P_MULTI_DB_MANAGER_UpdateStatus(MULTI_DB_MANAGER_EVENT_MSG_T *pst
 
     pstDbV2xStatusRx->ulTotalErrCnt = stMultiDbV2xStatus.stV2xStatusRx.ulTotalErrCnt;
     fTemp = (float)pstDbV2xStatusRx->ulTotalPacketCnt/(float)pstDbV2xStatusTx->unSeqNum;
-    pstDbV2xStatusRx->unPdr = (uint32_t)(fTemp*MSG_MGR_PDR_PER_CONVERT_RATE);
-    pstDbV2xStatusRx->unPer = MSG_MGR_PDR_PER_CONVERT_RATE - pstDbV2xStatusRx->unPdr;
+    pstDbV2xStatusRx->unPdr = (uint32_t)(fTemp*MULTI_MSG_MGR_PDR_PER_CONVERT_RATE);
+    pstDbV2xStatusRx->unPer = MULTI_MSG_MGR_PDR_PER_CONVERT_RATE - pstDbV2xStatusRx->unPdr;
 
-    if(s_usGpsSpeedCalCnt == 0)
+    if(s_usMultiGpsSpeedCalCnt == 0)
     {
         stMultiDbV2xStatus.stV2xGpsInfoTx.nLatitudeLast = pstDbV2xStatusTx->stTxPosition.nTxLatitude;
         stMultiDbV2xStatus.stV2xGpsInfoTx.nLongitudeLast = pstDbV2xStatusTx->stTxPosition.nTxLongitude;
@@ -541,7 +548,7 @@ static int32_t P_MULTI_DB_MANAGER_UpdateStatus(MULTI_DB_MANAGER_EVENT_MSG_T *pst
         stMultiDbV2xStatus.stV2xGpsInfoRx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
     }
 
-    s_usGpsSpeedCalCnt++;
+    s_usMultiGpsSpeedCalCnt++;
 
     nRet = P_MULTI_DB_MANAGER_SetV2xStatus(&stMultiDbV2xStatus);
     if(nRet != FRAMEWORK_OK)
@@ -2646,7 +2653,7 @@ static void *P_MULTI_DB_MANAGER_Task(void *arg)
 
     while (1)
     {
-        if(msgrcv(s_nDbTaskMsgId, &stMultiEventMsg, sizeof(MULTI_DB_MANAGER_EVENT_MSG_T), 0, MSG_NOERROR) == FRAMEWORK_MSG_ERR)
+        if(msgrcv(s_nMultiDbTaskMsgId, &stMultiEventMsg, sizeof(MULTI_DB_MANAGER_EVENT_MSG_T), 0, MSG_NOERROR) == FRAMEWORK_MSG_ERR)
         {
             PrintError("msgrcv() is failed!");
         }
@@ -2793,34 +2800,34 @@ static int32_t P_MULTI_DB_MANAGER_Init(MULTI_DB_MANAGER_T *pstMultiDbManager)
         return nRet;
     }
 
-    if((s_nDbTaskMsgId = msgget(s_dbTaskMsgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
+    if((s_nMultiDbTaskMsgId = msgget(s_MultidbTaskMsgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
     {
         PrintError("msgget() is failed!");
         return nRet;
     }
     else
     {
-        P_MULTI_DB_MANAGER_PrintMsgInfo(s_nDbTaskMsgId);
+        P_MULTI_DB_MANAGER_PrintMsgInfo(s_nMultiDbTaskMsgId);
     }
 
-    if((s_nMsgTxTaskMsgId = msgget(s_MsgTxTaskMsgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
+    if((s_nMultiMsgTxTaskMsgId = msgget(s_MultiMsgTxTaskMsgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
     {
         PrintError("msgget() is failed!");
         return nRet;
     }
     else
     {
-        P_MULTI_DB_MANAGER_PrintMsgInfo(s_nMsgTxTaskMsgId);
+        P_MULTI_DB_MANAGER_PrintMsgInfo(s_nMultiMsgTxTaskMsgId);
     }
 
-    if((s_nMsgRxTaskMsgId = msgget(s_MsgRxTaskMsgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
+    if((s_nMultiMsgRxTaskMsgId = msgget(s_MultiMsgRxTaskMsgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
     {
         PrintError("msgget() is failed!");
         return nRet;
     }
     else
     {
-        P_MULTI_DB_MANAGER_PrintMsgInfo(s_nMsgRxTaskMsgId);
+        P_MULTI_DB_MANAGER_PrintMsgInfo(s_nMultiMsgRxTaskMsgId);
     }
 
     nRet = P_MULTI_DB_MANAGER_CreateTask();
@@ -3002,7 +3009,7 @@ int32_t MULTI_DB_MANAGER_Write(MULTI_DB_MANAGER_WRITE_T *pstMultiDbManagerWrite,
     stMultiEventMsg.pstDbV2x = pstDbV2x;
     stMultiEventMsg.pPayload = pPayload;
 
-    if(msgsnd(s_nDbTaskMsgId, &stMultiEventMsg, sizeof(MULTI_DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
+    if(msgsnd(s_nMultiDbTaskMsgId, &stMultiEventMsg, sizeof(MULTI_DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
     {
         PrintError("msgsnd() is failed!!");
         return nRet;
@@ -3712,4 +3719,5 @@ int32_t MULTI_DB_MANAGER_DeInit(MULTI_DB_MANAGER_T *pstMultiDbManager)
 
     return nRet;
 }
+#endif
 

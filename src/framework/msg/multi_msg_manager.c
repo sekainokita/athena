@@ -49,6 +49,7 @@
 ******************************************************************************/
 
 /***************************** Include ***************************************/
+/*#if defined(CONFIG_MULTI_DEV)*/
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -65,7 +66,7 @@
 #include "multi_db_manager.h"
 #include "time_manager.h"
 #include <sys/time.h>
-#include "svc_cp.h"
+#include "svc_mcp.h"
 
 #include "v2x_defs.h"
 #include "v2x_ext_type.h"
@@ -73,28 +74,30 @@
 #include "nr_v2x_interface.h"
 
 #include "cli_util.h"
+/*#endif*/
 
 /***************************** Definition ************************************/
-#define SAMPLE_V2X_API_VER                  (0x0001)
-#define SAMPLE_V2X_IP_ADDR                  ("192.168.1.11")
-#define SAMPLE_V2X_MSG_LEN                  (100)
-#define SAMPLE_V2X_PORT_ADDR                (47347)
+#if defined(CONFIG_MULTI_DEV)
+#define MULTI_SAMPLE_V2X_API_VER                          (0x0001)
+#define MULTI_SAMPLE_V2X_IP_ADDR                          ("192.168.1.11")
+#define MULTI_SAMPLE_V2X_MSG_LEN                          (100)
+#define MULTI_SAMPLE_V2X_PORT_ADDR                        (47347)
 
-#define MULTI_MSG_MANAGER_EXT_MSG_HEADER_SIZE     (sizeof(MULTI_MSG_MANAGER_EXT_MSG))
-#define MULTI_MSG_MANAGER_EXT_MSG_TX_SIZE         (sizeof(MULTI_MSG_MANAGER_EXT_MSG_TX))
-#define MULTI_MSG_MANAGER_EXT_MSG_RX_SIZE         (sizeof(MULTI_MSG_MANAGER_EXT_MSG_RX))
-#define MULTI_MSG_MANAGER_EXT_TLVC_SIZE           (sizeof(MULTI_MSG_MANAGER_EXT_MSG_TLVC))
-#define MULTI_MSG_MANAGER_EXT_WSC_SIZE            (sizeof(MULTI_MSG_MANAGER_EXT_MSG_WSC) + MULTI_MSG_MANAGER_EXT_MSG_HEADER_SIZE)
-#define MULTI_MSG_MANAGER_EXT_WSR_SIZE            (sizeof(MULTI_MSG_MANAGER_EXT_MSG_WSR) + MULTI_MSG_MANAGER_EXT_MSG_HEADER_SIZE)
+#define MULTI_MSG_MANAGER_EXT_MSG_HEADER_SIZE             (sizeof(MULTI_MSG_MANAGER_EXT_MSG))
+#define MULTI_MSG_MANAGER_EXT_MSG_TX_SIZE                 (sizeof(MULTI_MSG_MANAGER_EXT_MSG_TX))
+#define MULTI_MSG_MANAGER_EXT_MSG_RX_SIZE                 (sizeof(MULTI_MSG_MANAGER_EXT_MSG_RX))
+#define MULTI_MSG_MANAGER_EXT_TLVC_SIZE                   (sizeof(MULTI_MSG_MANAGER_EXT_MSG_TLVC))
+#define MULTI_MSG_MANAGER_EXT_WSC_SIZE                    (sizeof(MULTI_MSG_MANAGER_EXT_MSG_WSC) + MULTI_MSG_MANAGER_EXT_MSG_HEADER_SIZE)
+#define MULTI_MSG_MANAGER_EXT_WSR_SIZE                    (sizeof(MULTI_MSG_MANAGER_EXT_MSG_WSR) + MULTI_MSG_MANAGER_EXT_MSG_HEADER_SIZE)
 
-#define MULTI_MSG_MANAGER_MAX_DATA_SIZE             (8999) /* RAW Message Size */
-#define MULTI_MSG_MANAGER_MAX_TX_PAYLOAD            (MULTI_MSG_MANAGER_MAX_DATA_SIZE)
-#define MULTI_MSG_MANAGER_MAX_RX_PAYLOAD            (MULTI_MSG_MANAGER_MAX_RX_PAYLOAD)
+#define MULTI_MSG_MANAGER_MAX_DATA_SIZE                   (8999) /* RAW Message Size */
+#define MULTI_MSG_MANAGER_MAX_TX_PAYLOAD                  (MULTI_MSG_MANAGER_MAX_DATA_SIZE)
+#define MULTI_MSG_MANAGER_MAX_RX_PAYLOAD                  (MULTI_MSG_MANAGER_MAX_RX_PAYLOAD)
 
-#define MULTI_MSG_MANAGER_MAX_TX_PKG_SIZE           (MULTI_MSG_MANAGER_MAX_DATA_SIZE + MULTI_MSG_MANAGER_EXT_MSG_HEADER_SIZE + MULTI_MSG_MANAGER_EXT_MSG_TX_SIZE + MULTI_MSG_MANAGER_CRC16_LEN)
-#define MULTI_MSG_MANAGER_MAX_RX_PKG_SIZE           (MULTI_MSG_MANAGER_MAX_DATA_SIZE + MULTI_MSG_MANAGER_EXT_MSG_HEADER_SIZE + MULTI_MSG_MANAGER_EXT_MSG_RX_SIZE + MULTI_MSG_MANAGER_CRC16_LEN)
+#define MULTI_MSG_MANAGER_MAX_TX_PKG_SIZE                 (MULTI_MSG_MANAGER_MAX_DATA_SIZE + MULTI_MSG_MANAGER_EXT_MSG_HEADER_SIZE + MULTI_MSG_MANAGER_EXT_MSG_TX_SIZE + MULTI_MSG_MANAGER_CRC16_LEN)
+#define MULTI_MSG_MANAGER_MAX_RX_PKG_SIZE                 (MULTI_MSG_MANAGER_MAX_DATA_SIZE + MULTI_MSG_MANAGER_EXT_MSG_HEADER_SIZE + MULTI_MSG_MANAGER_EXT_MSG_RX_SIZE + MULTI_MSG_MANAGER_CRC16_LEN)
 
-#define MULTI_MSG_MGR_RSU_LISTENQ                 (1024)
+#define MULTI_MSG_MGR_RSU_LISTENQ                         (1024)
 
 //#define CONFIG_TEMP_OBU_TEST (1)
 //#define CONFIG_TEST_EXT_MSG_STATUS_PKG (1)
@@ -106,11 +109,13 @@
 #define htonll(x)   ((((uint64_t)htonl(x)) << 32) + htonl(x >> 32))
 #define ntohll(x)   ((((uint64_t)ntohl(x)) << 32) + ntohl(x >> 32))
 #endif
+#endif
 
 /***************************** Static Variable *******************************/
-static int32_t s_nSocketHandle = -1;
-static int s_nDbTaskMultiMsgId, s_nMultiMsgTxTaskMsgId, s_nMultiMsgRxTaskMsgId;
-static key_t s_dbTaskMultiMsgKey = FRAMEWORK_DB_TASK_MSG_KEY;
+#if defined(CONFIG_MULTI_DEV)
+static int32_t s_nMultiSocketHandle = -1;
+static int s_nMultiDbTaskMsgId, s_nMultiMsgTxTaskMsgId, s_nMultiMsgRxTaskMsgId;
+static key_t s_MultidbTaskMsgKey = FRAMEWORK_DB_TASK_MSG_KEY;
 static key_t s_MultiMsgTxTaskMsgKey = FRAMEWORK_MSG_TX_TASK_MSG_KEY;
 static key_t s_MultiMsgRxTaskMsgKey = FRAMEWORK_MSG_RX_TASK_MSG_KEY;
 
@@ -118,14 +123,16 @@ static pthread_t sh_MultimsgMgrTxTask;
 static pthread_t sh_MultimsgMgrRxTask;
 
 static bool s_bMultiMsgMgrLog = OFF;
-static bool s_bFirstPacket = TRUE;
+static bool s_bMultiFirstPacket = TRUE;
 
-static uint32_t s_unV2xMultiMsgTxLen = 0, s_unV2xMultiMsgRxLen = 0;
+static uint32_t s_unMultiV2xMsgTxLen = 0, s_unMultiV2xMsgRxLen = 0;
+#endif
 
 /***************************** Function  *************************************/
 
 /////////////////////////////////////////////////////////////////////////////////////////
 /* Global Variable Value */
+#if defined(CONFIG_MULTI_DEV)
 V2xAction_t e_action_g = eV2xAction_ADD;
 V2xPayloadType_t e_payload_type_g = eRaw;
 V2xPsid_t psid_g = 5271;
@@ -239,9 +246,9 @@ static int32_t P_MULTI_MSG_MANAGER_ConnectObu(MULTI_MSG_MANAGER_T *pstMultiMsgMa
         return nRet;
     }
 
-    s_nSocketHandle = nSocketHandle;
+    s_nMultiSocketHandle = nSocketHandle;
 
-    PrintTrace("Connection of V2X Device is successed! [s_nSocketHandle:0x%x]", s_nSocketHandle);
+    PrintTrace("Connection of V2X Device is successed! [s_nMultiSocketHandle:0x%x]", s_nMultiSocketHandle);
 
     nRet = FRAMEWORK_OK;
 
@@ -305,9 +312,9 @@ static int32_t P_MULTI_MSG_MANAGER_ConnectRsu(MULTI_MSG_MANAGER_T *pstMultiMsgMa
     PrintTrace("server: got connection from [IP: %s, Port: %d]", inet_ntoa(stClientAddr.sin_addr), ntohs(stClientAddr.sin_port));
 
 
-    s_nSocketHandle = nClientSocket;
+    s_nMultiSocketHandle = nClientSocket;
 
-    PrintTrace("[s_nSocketHandle: 0x%x]", s_nSocketHandle);
+    PrintTrace("[s_nMultiSocketHandle: 0x%x]", s_nMultiSocketHandle);
 
     nRet = FRAMEWORK_OK;
 
@@ -363,16 +370,16 @@ static int32_t P_MULTI_MSG_MANAGER_DisconnectV2XDevice(void)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
-	if (s_nSocketHandle >= 0)
-	{
-		close(s_nSocketHandle);
-        s_nSocketHandle = -1;
-        PrintTrace("s_nSocketHandle is closed, s_nSocketHandle[%d]", s_nSocketHandle);
+    if (s_nMultiSocketHandle >= 0)
+    {
+        close(s_nMultiSocketHandle);
+        s_nMultiSocketHandle = -1;
+        PrintTrace("s_nMultiSocketHandle is closed, s_nMultiSocketHandle[%d]", s_nMultiSocketHandle);
         nRet = FRAMEWORK_OK;
-	}
+    }
     else
     {
-        PrintError("s_nSocketHandle is not available!!");
+        PrintError("s_nMultiSocketHandle is not available!!");
     }
 
     return nRet;
@@ -469,7 +476,7 @@ int32_t P_MULTI_MSG_MANAGER_SetV2xWsrSetting(MULTI_MSG_MANAGER_T *pstMultiMsgMan
 
     P_MULTI_MSG_MANAGER_PrintMsgData(
         ucTxMultiMsgBuf, nTxLen);
-    nRxLen = send(s_nSocketHandle, ucTxMultiMsgBuf, nTxLen, 0);
+    nRxLen = send(s_nMultiSocketHandle, ucTxMultiMsgBuf, nTxLen, 0);
     if ((nRxLen < 0) || (nRxLen == 0))
     {
         PrintError("send() is failed!!");
@@ -488,7 +495,7 @@ int32_t P_MULTI_MSG_MANAGER_SetV2xWsrSetting(MULTI_MSG_MANAGER_T *pstMultiMsgMan
 
     while (nRxLen <= 0)
     {
-        nRxLen = recv(s_nSocketHandle, &ucRxMultiMsgBuf, sizeof(ucRxMultiMsgBuf), 0);
+        nRxLen = recv(s_nMultiSocketHandle, &ucRxMultiMsgBuf, sizeof(ucRxMultiMsgBuf), 0);
         if (nRxLen < 0)
         {
             if ((errno != EAGAIN) && (errno != EWOULDBLOCK))
@@ -552,7 +559,7 @@ int32_t P_MULTI_MSG_MANAGER_SetV2xWsrSetting(void)
     Ext_WSReq_t ws_req;
     memset(&ws_req, 0, sizeof(ws_req));
     ws_req.magic_num = htons(MAGIC_WSREQ);
-    ws_req.ver = htons(SAMPLE_V2X_API_VER);
+    ws_req.ver = htons(MULTI_SAMPLE_V2X_API_VER);
     ws_req.e_action = eV2xAction_ADD;
     ws_req.e_payload_type = e_payload_type_g;
     ws_req.psid = htonl(psid_g);
@@ -570,7 +577,7 @@ int32_t P_MULTI_MSG_MANAGER_SetV2xWsrSetting(void)
            ntohl(ws_req.psid));
 
     // Send the request
-    ssize_t n = send(s_nSocketHandle, &ws_req, sizeof(ws_req), 0);
+    ssize_t n = send(s_nMultiSocketHandle, &ws_req, sizeof(ws_req), 0);
     if (n < 0)
     {
         PrintError("send() is failed!!");
@@ -589,7 +596,7 @@ int32_t P_MULTI_MSG_MANAGER_SetV2xWsrSetting(void)
 
     while (n <= 0)
     {
-        n = recv(s_nSocketHandle, &ws_resp, sizeof(ws_resp), 0);
+        n = recv(s_nMultiSocketHandle, &ws_resp, sizeof(ws_resp), 0);
         if (n < 0)
         {
             if (errno != EAGAIN && errno != EWOULDBLOCK)
@@ -634,38 +641,38 @@ int32_t P_MULTI_MSG_MANAGER_SetV2xWsrSetting(void)
 static int32_t P_MULTI_MSG_MANAGER_SendTxMsgToDbMgr(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *pstEventMultiMsg, uint32_t unCrc32)
 {
     int32_t nRet = FRAMEWORK_ERROR;
-    DB_MANAGER_WRITE_T stDbManagerWrite;
-    DB_MANAGER_EVENT_MSG_T stEventMsg;
-    DB_MANAGER_T *pstDbManager;
+    MULTI_DB_MANAGER_WRITE_T stMultiDbManagerWrite;
+    MULTI_DB_MANAGER_EVENT_MSG_T stMultiEventMsg;
+    MULTI_DB_MANAGER_T *pstMultiDbManager;
 
-    (void*)memset(&stDbManagerWrite, 0x00, sizeof(DB_MANAGER_WRITE_T));
+    (void*)memset(&stMultiDbManagerWrite, 0x00, sizeof(MULTI_DB_MANAGER_WRITE_T));
 
-    pstDbManager = FRAMEWORK_GetDbManagerInstance();
-    if(pstDbManager == NULL)
+    pstMultiDbManager = FRAMEWORK_GetMultiDbManagerInstance();
+    if(pstMultiDbManager == NULL)
     {
-        PrintError("FRAMEWORK_GetDbManagerInstance() is failed!! pstDbManager is NULL");
+        PrintError("FRAMEWORK_GetMultiDbManagerInstance() is failed!! pstMultiDbManager is NULL");
         return nRet;
     }
 
-    stDbManagerWrite.eFileType = pstDbManager->eFileType;
-    stDbManagerWrite.eCommMsgType = DB_MANAGER_COMM_MSG_TYPE_TX;
-    stDbManagerWrite.eProc = DB_MANAGER_PROC_WRITE;
-    stDbManagerWrite.unCrc32 = unCrc32;
+    stMultiDbManagerWrite.eMultiFileType = pstMultiDbManager->eMultiFileType;
+    stMultiDbManagerWrite.eMultiCommMsgType = MULTI_DB_MANAGER_COMM_MSG_TYPE_TX;
+    stMultiDbManagerWrite.eMultiProc = MULTI_DB_MANAGER_PROC_WRITE;
+    stMultiDbManagerWrite.unCrc32 = unCrc32;
 
-    stEventMsg.pstDbManagerWrite = &stDbManagerWrite;
-    stEventMsg.pstDbV2x = pstEventMultiMsg->pstDbV2x;
+    stMultiEventMsg.pstMultiDbManagerWrite = &stMultiDbManagerWrite;
+    stMultiEventMsg.pstDbV2x = pstEventMultiMsg->pstDbV2x;
 
     /* free at P_DB_MANAGER_WriteXXX() */
-    stEventMsg.pPayload = malloc(pstEventMultiMsg->pstDbV2x->ulPayloadLength);
-    if(stEventMsg.pPayload == NULL)
+    stMultiEventMsg.pPayload = malloc(pstEventMultiMsg->pstDbV2x->ulPayloadLength);
+    if(stMultiEventMsg.pPayload == NULL)
     {
         PrintError("malloc() is failed! [NULL]");
         return nRet;
     }
 
-    memcpy(stEventMsg.pPayload, pstEventMultiMsg->pPayload, pstEventMultiMsg->pstDbV2x->ulPayloadLength);
+    memcpy(stMultiEventMsg.pPayload, pstEventMultiMsg->pPayload, pstEventMultiMsg->pstDbV2x->ulPayloadLength);
 
-    if(msgsnd(s_nDbTaskMultiMsgId, &stEventMsg, sizeof(DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
+    if(msgsnd(s_nMultiDbTaskMsgId, &stMultiEventMsg, sizeof(MULTI_DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
     {
         PrintError("msgsnd() is failed!!");
         return nRet;
@@ -675,7 +682,7 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsgToDbMgr(MULTI_MSG_MANAGER_TX_EVENT_M
         nRet = FRAMEWORK_OK;
     }
 
-	return nRet;
+    return nRet;
 }
 
 #if defined(CONFIG_EXT_DATA_FORMAT)
@@ -758,11 +765,11 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
     MULTI_MSG_MANAGER_EXT_MSG_SSOV *pstTxSsovPkg;
     uint16_t unExtMultiMsgPkgLen;
 
-    s_unV2xMultiMsgTxLen = unDbV2xPacketLength;
+    s_unMultiV2xMsgTxLen = unDbV2xPacketLength;
 
     if(s_bMultiMsgMgrLog == ON)
     {
-        PrintWarn("s_unV2xMsgTxLen[%d]", s_unV2xMultiMsgTxLen);
+        PrintWarn("s_unMultiV2xMsgTxLen[%d]", s_unMultiV2xMsgTxLen);
         PrintDebug("unDbV2xPacketLength[%d] = sizeof(DB_V2X_T)[%ld]+ulPayloadLength[%d]+sizeof(ulReserved)[%ld]", unDbV2xPacketLength, sizeof(DB_V2X_T), pstEventMultiMsg->pstDbV2x->ulPayloadLength, sizeof(pstEventMultiMsg->pstDbV2x->ulReserved));
     }
 
@@ -935,7 +942,7 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
         }
     }
 
-    nRetSendSize = send(s_nSocketHandle, ucMultiMsgBuf, unTxMultiMsgLen, 0);
+    nRetSendSize = send(s_nMultiSocketHandle, ucMultiMsgBuf, unTxMultiMsgLen, 0);
     if (nRetSendSize < 0)
     {
         PrintError("send() is failed! [nRetSendSize:%ld]", nRetSendSize);
@@ -996,7 +1003,7 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
 
     memset(pstV2xTxPdu, 0, sizeof(Ext_V2X_TxPDU_t));
 
-    pstV2xTxPdu->ver = htons(SAMPLE_V2X_API_VER);
+    pstV2xTxPdu->ver = htons(MULTI_SAMPLE_V2X_API_VER);
     pstV2xTxPdu->e_payload_type = e_payload_type_g;
     pstV2xTxPdu->psid = htonl(psid_g);
     pstV2xTxPdu->tx_power = tx_power_g;
@@ -1019,7 +1026,7 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
     }
 
     pstV2xTxPdu->v2x_msg.length = htons(unDbV2xPacketLength);
-    s_unV2xMultiMsgTxLen = unDbV2xPacketLength;
+    s_unMultiV2xMsgTxLen = unDbV2xPacketLength;
 
     pstDbV2x = malloc(unDbV2xPacketLength);
     if(pstDbV2x == NULL)
@@ -1126,7 +1133,7 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
         }
     }
 
-    nRetSendSize = send(s_nSocketHandle, pstV2xTxPdu, unV2xTxPduLength, 0);
+    nRetSendSize = send(s_nMultiSocketHandle, pstV2xTxPdu, unV2xTxPduLength, 0);
     if (nRetSendSize < 0)
     {
         PrintError("send() is failed!!");
@@ -1176,38 +1183,38 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
 static int32_t P_MULTI_MSG_MANAGER_SendRxMsgToDbMgr(MULTI_MSG_MANAGER_RX_EVENT_MSG_T *pstEventMultiMsg, uint32_t unCrc32)
 {
     int32_t nRet = FRAMEWORK_ERROR;
-    DB_MANAGER_WRITE_T stDbManagerWrite;
-    DB_MANAGER_EVENT_MSG_T stEventMsg;
-    DB_MANAGER_T *pstDbManager;
+    MULTI_DB_MANAGER_WRITE_T stMultiDbManagerWrite;
+    MULTI_DB_MANAGER_EVENT_MSG_T stMultiEventMsg;
+    MULTI_DB_MANAGER_T *pstMultiDbManager;
 
-    (void*)memset(&stDbManagerWrite, 0x00, sizeof(DB_MANAGER_WRITE_T));
+    (void*)memset(&stMultiDbManagerWrite, 0x00, sizeof(MULTI_DB_MANAGER_WRITE_T));
 
-    pstDbManager = FRAMEWORK_GetDbManagerInstance();
-    if(pstDbManager == NULL)
+    pstMultiDbManager = FRAMEWORK_GetMultiDbManagerInstance();
+    if(pstMultiDbManager == NULL)
     {
-        PrintError("FRAMEWORK_GetDbManagerInstance() is failed!! pstDbManager is NULL");
+        PrintError("FRAMEWORK_GetMultiDbManagerInstance() is failed!! pstMultiDbManager is NULL");
         return nRet;
     }
 
-    stDbManagerWrite.eFileType = pstDbManager->eFileType;
-    stDbManagerWrite.eCommMsgType = DB_MANAGER_COMM_MSG_TYPE_RX;
-    stDbManagerWrite.eProc = DB_MANAGER_PROC_WRITE;
-    stDbManagerWrite.unCrc32 = unCrc32;
+    stMultiDbManagerWrite.eMultiFileType = pstMultiDbManager->eMultiFileType;
+    stMultiDbManagerWrite.eMultiCommMsgType = MULTI_DB_MANAGER_COMM_MSG_TYPE_RX;
+    stMultiDbManagerWrite.eMultiProc = MULTI_DB_MANAGER_PROC_WRITE;
+    stMultiDbManagerWrite.unCrc32 = unCrc32;
 
-    stEventMsg.pstDbManagerWrite = &stDbManagerWrite;
-    stEventMsg.pstDbV2x = pstEventMultiMsg->pstDbV2x;
+    stMultiEventMsg.pstMultiDbManagerWrite = &stMultiDbManagerWrite;
+    stMultiEventMsg.pstDbV2x = pstEventMultiMsg->pstDbV2x;
 
     /* free at P_DB_MANAGER_WriteXXX() */
-    stEventMsg.pPayload = malloc(pstEventMultiMsg->pstDbV2x->ulPayloadLength);
-    if(stEventMsg.pPayload == NULL)
+    stMultiEventMsg.pPayload = malloc(pstEventMultiMsg->pstDbV2x->ulPayloadLength);
+    if(stMultiEventMsg.pPayload == NULL)
     {
         PrintError("malloc() is failed! [NULL]");
         return nRet;
     }
 
-    memcpy(stEventMsg.pPayload, pstEventMultiMsg->pPayload, pstEventMultiMsg->pstDbV2x->ulPayloadLength);
+    memcpy(stMultiEventMsg.pPayload, pstEventMultiMsg->pPayload, pstEventMultiMsg->pstDbV2x->ulPayloadLength);
 
-    if(msgsnd(s_nDbTaskMultiMsgId, &stEventMsg, sizeof(DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
+    if(msgsnd(s_nMultiDbTaskMsgId, &stMultiEventMsg, sizeof(MULTI_DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
     {
         PrintError("msgsnd() is failed!!");
         return nRet;
@@ -1232,7 +1239,7 @@ static int32_t P_MULTI_MSG_MANAGER_ProcessExtMsgPkg(MULTI_MSG_MANAGER_RX_EVENT_M
     uint8_t *pucDeviceType = (uint8_t*)pvExtMultiMsgPkg + 6;	// T, L 뒤에 dev_type 존재
     uint16_t usCalcCrc16;
     uint8_t ucStatus;
-    DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
+    MULTI_DB_MANAGER_V2X_STATUS_T stMultiDbV2xStatus;
 
     if(pstEventMultiMsg == NULL)
     {
@@ -1268,29 +1275,29 @@ static int32_t P_MULTI_MSG_MANAGER_ProcessExtMsgPkg(MULTI_MSG_MANAGER_RX_EVENT_M
                     PrintError("[Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMultiMsgModemTx->usCrc16), usCalcCrc16);
                 }
 
-                nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                nRet = MULTI_DB_MANAGER_GetV2xStatus(&stMultiDbV2xStatus);
                 if(nRet != FRAMEWORK_OK)
                 {
-                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                    PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                 }
 
-                stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.ulTimeStamp = ntohll(pstExtMultiMsgModemTx->ulTimeStamp);
-                stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.unDevId = htonl(pstExtMultiMsgModemTx->unDevId);
-                stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.usHwVer = htons(pstExtMultiMsgModemTx->usHwVer);
-                stDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.usSwVer = htons(pstExtMultiMsgModemTx->usSwVer);
-                stDbV2xStatus.stV2xStatusTx.ucTxPwr = pstExtMultiMsgModemTx->ucTxPwr;
-                stDbV2xStatus.stV2xStatusTx.usTxFreq = htons(pstExtMultiMsgModemTx->usTxFreq);
-                stDbV2xStatus.stV2xStatusTx.ucTxBw = pstExtMultiMsgModemTx->ucTxBw;
+                stMultiDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.ulTimeStamp = ntohll(pstExtMultiMsgModemTx->ulTimeStamp);
+                stMultiDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.unDevId = htonl(pstExtMultiMsgModemTx->unDevId);
+                stMultiDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.usHwVer = htons(pstExtMultiMsgModemTx->usHwVer);
+                stMultiDbV2xStatus.stV2xStatusTx.stDbV2xDevL1.usSwVer = htons(pstExtMultiMsgModemTx->usSwVer);
+                stMultiDbV2xStatus.stV2xStatusTx.ucTxPwr = pstExtMultiMsgModemTx->ucTxPwr;
+                stMultiDbV2xStatus.stV2xStatusTx.usTxFreq = htons(pstExtMultiMsgModemTx->usTxFreq);
+                stMultiDbV2xStatus.stV2xStatusTx.ucTxBw = pstExtMultiMsgModemTx->ucTxBw;
 
-                stDbV2xStatus.stV2xStatusTx.ucScs = pstExtMultiMsgModemTx->ucScs;
-                stDbV2xStatus.stV2xStatusTx.ucMcs = pstExtMultiMsgModemTx->ucMcs;
-                stDbV2xStatus.stV2xGpsInfoTx.nLatitudeNow = htonl(pstExtMultiMsgModemTx->nLatitude);
-                stDbV2xStatus.stV2xGpsInfoTx.nLongitudeNow = htonl(pstExtMultiMsgModemTx->nLongitude);
+                stMultiDbV2xStatus.stV2xStatusTx.ucScs = pstExtMultiMsgModemTx->ucScs;
+                stMultiDbV2xStatus.stV2xStatusTx.ucMcs = pstExtMultiMsgModemTx->ucMcs;
+                stMultiDbV2xStatus.stV2xGpsInfoTx.nLatitudeNow = htonl(pstExtMultiMsgModemTx->nLatitude);
+                stMultiDbV2xStatus.stV2xGpsInfoTx.nLongitudeNow = htonl(pstExtMultiMsgModemTx->nLongitude);
 
-                nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                nRet = MULTI_DB_MANAGER_SetV2xStatus(&stMultiDbV2xStatus);
                 if(nRet != FRAMEWORK_OK)
                 {
-                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                    PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                 }
             }
             else if (ucStatus == eMULTI_MSG_MANAGER_EXT_MSG_STATUS_RX)
@@ -1301,26 +1308,26 @@ static int32_t P_MULTI_MSG_MANAGER_ProcessExtMsgPkg(MULTI_MSG_MANAGER_RX_EVENT_M
                     PrintError("[Error! crc16 error[0x%04x] != [0x%04x]", ntohs(pstExtMultiMsgModemRx->usCrc16), usCalcCrc16);
                 }
 
-                nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                nRet = MULTI_DB_MANAGER_GetV2xStatus(&stMultiDbV2xStatus);
                 if(nRet != FRAMEWORK_OK)
                 {
-                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                    PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                 }
 
-                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.ulTimeStamp = ntohll(pstExtMultiMsgModemRx->ulTimeStamp);
-                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.unDevId = htonl(pstExtMultiMsgModemRx->unDevId);
-                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.usHwVer = htons(pstExtMultiMsgModemRx->usHwVer);
-                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.usSwVer = htons(pstExtMultiMsgModemRx->usSwVer);
-                stDbV2xStatus.stV2xStatusRx.nRssi = pstExtMultiMsgModemRx->nRssi;
-                stDbV2xStatus.stV2xStatusRx.ucRcpi = pstExtMultiMsgModemRx->ucRcpi;
+                stMultiDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.ulTimeStamp = ntohll(pstExtMultiMsgModemRx->ulTimeStamp);
+                stMultiDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.unDevId = htonl(pstExtMultiMsgModemRx->unDevId);
+                stMultiDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.usHwVer = htons(pstExtMultiMsgModemRx->usHwVer);
+                stMultiDbV2xStatus.stV2xStatusRx.stDbV2xDevL1.usSwVer = htons(pstExtMultiMsgModemRx->usSwVer);
+                stMultiDbV2xStatus.stV2xStatusRx.nRssi = pstExtMultiMsgModemRx->nRssi;
+                stMultiDbV2xStatus.stV2xStatusRx.ucRcpi = pstExtMultiMsgModemRx->ucRcpi;
 
-                stDbV2xStatus.stV2xGpsInfoRx.nLatitudeNow = htonl(pstExtMultiMsgModemRx->nLatitude);
-                stDbV2xStatus.stV2xGpsInfoRx.nLongitudeNow = htonl(pstExtMultiMsgModemRx->nLongitude);
+                stMultiDbV2xStatus.stV2xGpsInfoRx.nLatitudeNow = htonl(pstExtMultiMsgModemRx->nLatitude);
+                stMultiDbV2xStatus.stV2xGpsInfoRx.nLongitudeNow = htonl(pstExtMultiMsgModemRx->nLongitude);
 
-                nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                nRet = MULTI_DB_MANAGER_SetV2xStatus(&stMultiDbV2xStatus);
                 if(nRet != FRAMEWORK_OK)
                 {
-                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                    PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                 }
             }
             else
@@ -1336,31 +1343,31 @@ static int32_t P_MULTI_MSG_MANAGER_ProcessExtMsgPkg(MULTI_MSG_MANAGER_RX_EVENT_M
         {
             pstExtMultiMsgComm = (MULTI_MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT*)pvExtMultiMsgPkg;
 
-            nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+            nRet = MULTI_DB_MANAGER_GetV2xStatus(&stMultiDbV2xStatus);
             if(nRet != FRAMEWORK_OK)
             {
-                PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
             }
 
             if(pstExtMultiMsgComm->ucStatus == eMULTI_MSG_MANAGER_EXT_MSG_STATUS_TX)
             {
-                stDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.ulTimeStamp = ntohll(pstExtMultiMsgComm->ulTimeStamp);
-                stDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.unDevId = htonl(pstExtMultiMsgComm->unDevId);
-                stDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.usHwVer = htons(pstExtMultiMsgComm->usHwVer);
-                stDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.usSwVer = htons(pstExtMultiMsgComm->usSwVer);
+                stMultiDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.ulTimeStamp = ntohll(pstExtMultiMsgComm->ulTimeStamp);
+                stMultiDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.unDevId = htonl(pstExtMultiMsgComm->unDevId);
+                stMultiDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.usHwVer = htons(pstExtMultiMsgComm->usHwVer);
+                stMultiDbV2xStatus.stV2xStatusTx.stDbV2xDevL2.usSwVer = htons(pstExtMultiMsgComm->usSwVer);
             }
             else
             {
-                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.ulTimeStamp = ntohll(pstExtMultiMsgComm->ulTimeStamp);
-                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.unDevId = htonl(pstExtMultiMsgComm->unDevId);
-                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.usHwVer = htons(pstExtMultiMsgComm->usHwVer);
-                stDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.usSwVer = htons(pstExtMultiMsgComm->usSwVer);
+                stMultiDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.ulTimeStamp = ntohll(pstExtMultiMsgComm->ulTimeStamp);
+                stMultiDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.unDevId = htonl(pstExtMultiMsgComm->unDevId);
+                stMultiDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.usHwVer = htons(pstExtMultiMsgComm->usHwVer);
+                stMultiDbV2xStatus.stV2xStatusRx.stDbV2xDevL2.usSwVer = htons(pstExtMultiMsgComm->usSwVer);
             }
 
-            nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+            nRet = MULTI_DB_MANAGER_SetV2xStatus(&stMultiDbV2xStatus);
             if(nRet != FRAMEWORK_OK)
             {
-                PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
             }
 
             usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMultiMsgComm, htons(pstExtMultiMsgComm->usLenth) + 4);	// T, L, V 길이
@@ -1768,7 +1775,7 @@ static int32_t P_MULTI_MSG_MANAGER_ProcessSsovPkg(MULTI_MSG_MANAGER_RX_EVENT_MSG
 
     DB_V2X_T *pstDbV2x = NULL;
     uint32_t ulDbV2xTotalPacketCrc32 = 0, ulCompDbV2xTotalPacketCrc32 = 0, ulTempDbV2xTotalPacketCrc32 = 0;
-    DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
+    MULTI_DB_MANAGER_V2X_STATUS_T stMultiDbV2xStatus;
     uint32_t ulRxPayloadLength = 0;
     uint32_t ulExtMultiMsgSsovCrcBuf = 0;
     uint16_t usExtMultiMsgSsovCrc16 = 0, usCalcCrc16 = 0, usTempExtMultiMsgSsovCrc16 = 0;
@@ -1806,31 +1813,31 @@ static int32_t P_MULTI_MSG_MANAGER_ProcessSsovPkg(MULTI_MSG_MANAGER_RX_EVENT_MSG
         PrintError("Error! crc16 usCalcCrc16[0x%04x] != usExtMultiMsgSsovCrc16[0x%04x]", usCalcCrc16, usExtMultiMsgSsovCrc16);
     }
 
-    if(s_unV2xMultiMsgTxLen != 0)
+    if(s_unMultiV2xMsgTxLen != 0)
     {
-        if(s_bFirstPacket == TRUE)
+        if(s_bMultiFirstPacket == TRUE)
         {
-            s_unV2xMultiMsgRxLen = s_unV2xMultiMsgTxLen;
-            PrintTrace("Update s_unV2xMultiMsgTxLen[%d] => s_unV2xMultiMsgRxLen[%d]", s_unV2xMultiMsgTxLen, s_unV2xMultiMsgRxLen);
+            s_unMultiV2xMsgRxLen = s_unMultiV2xMsgTxLen;
+            PrintTrace("Update s_unMultiV2xMsgTxLen[%d] => s_unMultiV2xMsgRxLen[%d]", s_unMultiV2xMsgTxLen, s_unMultiV2xMsgRxLen);
         }
 
-        if(s_unV2xMultiMsgRxLen != (uint32_t)(usExtMultiMsgSsovLength - MULTI_MSG_MANAGER_CRC16_LEN))
+        if(s_unMultiV2xMsgRxLen != (uint32_t)(usExtMultiMsgSsovLength - MULTI_MSG_MANAGER_CRC16_LEN))
         {
-            PrintError("Tx and Rx size does not matched!! check s_unV2xMultiMsgRxLen[%d] != ntohs(pstExtMultiMsgSsov->usLength)[%d]", s_unV2xMultiMsgRxLen, usExtMultiMsgSsovLength);
-            nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+            PrintError("Tx and Rx size does not matched!! check s_unMultiV2xMsgRxLen[%d] != ntohs(pstExtMultiMsgSsov->usLength)[%d]", s_unMultiV2xMsgRxLen, usExtMultiMsgSsovLength);
+            nRet = MULTI_DB_MANAGER_GetV2xStatus(&stMultiDbV2xStatus);
             if(nRet != FRAMEWORK_OK)
             {
-                PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
             }
 
-            stDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
-            stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
-            PrintWarn("increase ulTotalErrCnt [from %ld to %ld]", (stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
+            stMultiDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
+            stMultiDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
+            PrintWarn("increase ulTotalErrCnt [from %ld to %ld]", (stMultiDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stMultiDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
 
-            nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+            nRet = MULTI_DB_MANAGER_SetV2xStatus(&stMultiDbV2xStatus);
             if(nRet != FRAMEWORK_OK)
             {
-                PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
             }
         }
         else
@@ -1854,44 +1861,44 @@ static int32_t P_MULTI_MSG_MANAGER_ProcessSsovPkg(MULTI_MSG_MANAGER_RX_EVENT_MSG
                 if(ulDbV2xTotalPacketCrc32 != ulCompDbV2xTotalPacketCrc32)
                 {
                     PrintError("CRC32 does not matched!! check Get:ulDbV2xTotalPacketCrc32[0x%x] != Calculate:ulCompDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32, ulCompDbV2xTotalPacketCrc32);
-                    nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                    nRet = MULTI_DB_MANAGER_GetV2xStatus(&stMultiDbV2xStatus);
                     if(nRet != FRAMEWORK_OK)
                     {
-                        PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                        PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                     }
 
-                    stDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
-                    stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
-                    PrintWarn("increase ulTotalErrCnt [from %ld to %ld]", (stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
+                    stMultiDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
+                    stMultiDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
+                    PrintWarn("increase ulTotalErrCnt [from %ld to %ld]", (stMultiDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stMultiDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
 
-                    nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                    nRet = MULTI_DB_MANAGER_SetV2xStatus(&stMultiDbV2xStatus);
                     if(nRet != FRAMEWORK_OK)
                     {
-                        PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                        PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                     }
                 }
                 else
                 {
-                    nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                    nRet = MULTI_DB_MANAGER_GetV2xStatus(&stMultiDbV2xStatus);
                     if(nRet != FRAMEWORK_OK)
                     {
-                        PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                        PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                     }
 
-                    stDbV2xStatus.stV2xStatusRx.ulTotalPacketCnt++;
+                    stMultiDbV2xStatus.stV2xStatusRx.ulTotalPacketCnt++;
 
-                    if(s_bFirstPacket == TRUE)
+                    if(s_bMultiFirstPacket == TRUE)
                     {
-                        s_bFirstPacket = FALSE;
-                        stDbV2xStatus.bFirstPacket = TRUE;
-                        PrintTrace("Received the first packets, stDbV2xStatus.bFirstPacket [%d]", stDbV2xStatus.bFirstPacket);
-                        /* The first packet number is updated at db manager, P_DB_MANAGER_UpdateStatus() */
+                        s_bMultiFirstPacket = FALSE;
+                        stMultiDbV2xStatus.bFirstPacket = TRUE;
+                        PrintTrace("Received the first packets, stMultiDbV2xStatus.bFirstPacket [%d]", stMultiDbV2xStatus.bFirstPacket);
+                        /* The first packet number is updated at db manager, P_MULTI_DB_MANAGER_UpdateStatus() */
                     }
 
-                    nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                    nRet = MULTI_DB_MANAGER_SetV2xStatus(&stMultiDbV2xStatus);
                     if(nRet != FRAMEWORK_OK)
                     {
-                        PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                        PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                     }
 
                     pstEventMultiMsg->pPayload = malloc(ulRxPayloadLength);
@@ -1944,18 +1951,18 @@ static int32_t P_MULTI_MSG_MANAGER_ProcessSsovPkg(MULTI_MSG_MANAGER_RX_EVENT_MSG
                         pstEventMultiMsg->pstDbV2x->ulPayloadLength = ulRxPayloadLength;
                         pstEventMultiMsg->pstDbV2x->ulReserved = ntohl(pstDbV2x->ulReserved);
 
-                        nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                        nRet = MULTI_DB_MANAGER_GetV2xStatus(&stMultiDbV2xStatus);
                         if(nRet != FRAMEWORK_OK)
                         {
-                            PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                            PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                         }
 
-                        stDbV2xStatus.ulTxTimeStamp = pstEventMultiMsg->pstDbV2x->ulTimeStamp;
+                        stMultiDbV2xStatus.ulTxTimeStamp = pstEventMultiMsg->pstDbV2x->ulTimeStamp;
 
-                        nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                        nRet = MULTI_DB_MANAGER_SetV2xStatus(&stMultiDbV2xStatus);
                         if(nRet != FRAMEWORK_OK)
                         {
-                            PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                            PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                         }
 
                         nRet = P_MULTI_MSG_MANAGER_SendRxMsgToDbMgr(pstEventMultiMsg, ulDbV2xTotalPacketCrc32);
@@ -2135,7 +2142,7 @@ static int32_t P_MULTI_MSG_MANAGER_ReceiveRxMsg(MULTI_MSG_MANAGER_RX_EVENT_MSG_T
 
     while (1)
     {
-        nRecvLen = recv(s_nSocketHandle, ucMsgBuf, sizeof(ucMsgBuf), 0);
+        nRecvLen = recv(s_nMultiSocketHandle, ucMsgBuf, sizeof(ucMsgBuf), 0);
         if (nRecvLen < 0)
         {
             if ((errno != EAGAIN) && (errno != EWOULDBLOCK))
@@ -2189,7 +2196,7 @@ static int32_t P_MULTI_MSG_MANAGER_ReceiveRxMsg(MULTI_MSG_MANAGER_RX_EVENT_MSG_T
     Ext_V2X_RxPDU_t *pstV2xRxPdu = NULL;
     DB_V2X_T *pstDbV2x = NULL;
     uint32_t ulDbV2xTotalPacketCrc32 = 0, ulCompDbV2xTotalPacketCrc32 = 0, ulTempDbV2xTotalPacketCrc32 = 0;
-    DB_MANAGER_V2X_STATUS_T stDbV2xStatus;
+    MULTI_DB_MANAGER_V2X_STATUS_T stMultiDbV2xStatus;
     uint32_t ulRxPayloadLength = 0;
 
     if(pstEventMultiMsg == NULL)
@@ -2200,7 +2207,7 @@ static int32_t P_MULTI_MSG_MANAGER_ReceiveRxMsg(MULTI_MSG_MANAGER_RX_EVENT_MSG_T
 
     while (1)
     {
-        nRecvLen = recv(s_nSocketHandle, buf, sizeof(buf), 0);
+        nRecvLen = recv(s_nMultiSocketHandle, buf, sizeof(buf), 0);
         if (nRecvLen < 0)
         {
             if ((errno != EAGAIN) && (errno != EWOULDBLOCK))
@@ -2240,31 +2247,31 @@ static int32_t P_MULTI_MSG_MANAGER_ReceiveRxMsg(MULTI_MSG_MANAGER_RX_EVENT_MSG_T
                 memset(pstV2xRxPdu, 0, nRecvLen);
                 memcpy(pstV2xRxPdu, buf, nRecvLen);
 
-                if(s_unV2xMultiMsgTxLen != 0)
+                if(s_unMultiV2xMsgTxLen != 0)
                 {
-                    if(s_bFirstPacket == TRUE)
+                    if(s_bMultiFirstPacket == TRUE)
                     {
-                        s_unV2xMultiMsgRxLen = s_unV2xMultiMsgTxLen;
-                        PrintTrace("Update s_unV2xMultiMsgTxLen[%d] => s_unV2xMultiMsgRxLen[%d]", s_unV2xMultiMsgTxLen, s_unV2xMultiMsgRxLen);
+                        s_unMultiV2xMsgRxLen = s_unMultiV2xMsgTxLen;
+                        PrintTrace("Update s_unMultiV2xMsgTxLen[%d] => s_unMultiV2xMsgRxLen[%d]", s_unMultiV2xMsgTxLen, s_unMultiV2xMsgRxLen);
                     }
 
-                    if(s_unV2xMultiMsgRxLen != ntohs(pstV2xRxPdu->v2x_msg.length))
+                    if(s_unMultiV2xMsgRxLen != ntohs(pstV2xRxPdu->v2x_msg.length))
                     {
-                        PrintError("Tx and Rx size does not matched!! check s_unV2xMultiMsgRxLen[%d] != pstV2xRxPdu->v2x_msg.length[%d]", s_unV2xMultiMsgRxLen, ntohs(pstV2xRxPdu->v2x_msg.length));
-                        nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                        PrintError("Tx and Rx size does not matched!! check s_unMultiV2xMsgRxLen[%d] != pstV2xRxPdu->v2x_msg.length[%d]", s_unMultiV2xMsgRxLen, ntohs(pstV2xRxPdu->v2x_msg.length));
+                        nRet = MULTI_DB_MANAGER_GetV2xStatus(&stMultiDbV2xStatus);
                         if(nRet != FRAMEWORK_OK)
                         {
-                            PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                            PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                         }
 
-                        stDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
-                        stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
-                        PrintWarn("increase ulTotalErrCnt [from %ld to %ld]", (stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
+                        stMultiDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
+                        stMultiDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
+                        PrintWarn("increase ulTotalErrCnt [from %ld to %ld]", (stMultiDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stMultiDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
 
-                        nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                        nRet = MULTI_DB_MANAGER_SetV2xStatus(&stMultiDbV2xStatus);
                         if(nRet != FRAMEWORK_OK)
                         {
-                            PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                            PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                         }
                     }
                     else
@@ -2289,44 +2296,44 @@ static int32_t P_MULTI_MSG_MANAGER_ReceiveRxMsg(MULTI_MSG_MANAGER_RX_EVENT_MSG_T
                             {
                                 PrintError("CRC32 does not matched!! check Get:ulDbV2xTotalPacketCrc32[0x%x] != Calculate:ulCompDbV2xTotalPacketCrc32[0x%x]", ulDbV2xTotalPacketCrc32, ulCompDbV2xTotalPacketCrc32);
                                 PrintError("Check nRecvLen[%d], sizeof(Ext_V2X_RxPDU_t)[%ld]+pstV2xRxPdu->v2x_msg.length[%d]", nRecvLen, sizeof(Ext_V2X_RxPDU_t), ntohs(pstV2xRxPdu->v2x_msg.length));
-                                nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                                nRet = MULTI_DB_MANAGER_GetV2xStatus(&stMultiDbV2xStatus);
                                 if(nRet != FRAMEWORK_OK)
                                 {
-                                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                    PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                                 }
 
-                                stDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
-                                stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
-                                PrintWarn("increase ulTotalErrCnt [from %ld to %ld]", (stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
+                                stMultiDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
+                                stMultiDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
+                                PrintWarn("increase ulTotalErrCnt [from %ld to %ld]", (stMultiDbV2xStatus.stV2xStatusRx.ulTotalErrCnt-1), stMultiDbV2xStatus.stV2xStatusRx.ulTotalErrCnt);
 
-                                nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                                nRet = MULTI_DB_MANAGER_SetV2xStatus(&stMultiDbV2xStatus);
                                 if(nRet != FRAMEWORK_OK)
                                 {
-                                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                    PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                                 }
                             }
                             else
                             {
-                                nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                                nRet = MULTI_DB_MANAGER_GetV2xStatus(&stMultiDbV2xStatus);
                                 if(nRet != FRAMEWORK_OK)
                                 {
-                                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                    PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                                 }
 
-                                stDbV2xStatus.stV2xStatusRx.ulTotalPacketCnt++;
+                                stMultiDbV2xStatus.stV2xStatusRx.ulTotalPacketCnt++;
 
-                                if(s_bFirstPacket == TRUE)
+                                if(s_bMultiFirstPacket == TRUE)
                                 {
-                                    s_bFirstPacket = FALSE;
-                                    stDbV2xStatus.bFirstPacket = TRUE;
-                                    PrintTrace("Received the first packets, stDbV2xStatus.bFirstPacket [%d]", stDbV2xStatus.bFirstPacket);
+                                    s_bMultiFirstPacket = FALSE;
+                                    stMultiDbV2xStatus.bFirstPacket = TRUE;
+                                    PrintTrace("Received the first packets, stMultiDbV2xStatus.bFirstPacket [%d]", stMultiDbV2xStatus.bFirstPacket);
                                     /* The first packet number is updated at db manager, P_DB_MANAGER_UpdateStatus() */
                                 }
 
-                                nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                                nRet = MULTI_DB_MANAGER_SetV2xStatus(&stMultiDbV2xStatus);
                                 if(nRet != FRAMEWORK_OK)
                                 {
-                                    PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                    PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                                 }
 
                                 pstEventMultiMsg->pPayload = malloc(ulRxPayloadLength);
@@ -2403,18 +2410,18 @@ static int32_t P_MULTI_MSG_MANAGER_ReceiveRxMsg(MULTI_MSG_MANAGER_RX_EVENT_MSG_T
                                     pstEventMultiMsg->pstDbV2x->ulPayloadLength = ulRxPayloadLength;
                                     pstEventMultiMsg->pstDbV2x->ulReserved = ntohl(pstDbV2x->ulReserved);
 
-                                    nRet = DB_MANAGER_GetV2xStatus(&stDbV2xStatus);
+                                    nRet = MULTI_DB_MANAGER_GetV2xStatus(&stMultiDbV2xStatus);
                                     if(nRet != FRAMEWORK_OK)
                                     {
-                                        PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                        PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                                     }
 
-                                    stDbV2xStatus.ulTxTimeStamp = pstEventMultiMsg->pstDbV2x->ulTimeStamp;
+                                    stMultiDbV2xStatus.ulTxTimeStamp = pstEventMultiMsg->pstDbV2x->ulTimeStamp;
 
-                                    nRet = DB_MANAGER_SetV2xStatus(&stDbV2xStatus);
+                                    nRet = MULTI_DB_MANAGER_SetV2xStatus(&stMultiDbV2xStatus);
                                     if(nRet != FRAMEWORK_OK)
                                     {
-                                        PrintError("DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
+                                        PrintError("MULTI_DB_MANAGER_GetV2xStatus() is failed! [nRet:%d]", nRet);
                                     }
 
                                     nRet = P_MULTI_MSG_MANAGER_SendRxMsgToDbMgr(pstEventMultiMsg, ulDbV2xTotalPacketCrc32);
@@ -2517,7 +2524,7 @@ void *MULTI_MSG_MANAGER_TxTask(void *arg)
     (void)arg;
 
     // Prepare the Ext_WSReq_t structure
-    int db_v2x_tmp_size = sizeof(DB_V2X_T) + SAMPLE_V2X_MSG_LEN;
+    int db_v2x_tmp_size = sizeof(DB_V2X_T) + MULTI_SAMPLE_V2X_MSG_LEN;
     int v2x_tx_pdu_size = sizeof(Ext_V2X_TxPDU_t) + db_v2x_tmp_size;
 
     Ext_V2X_TxPDU_t *v2x_tx_pdu_p = NULL;
@@ -2534,7 +2541,7 @@ void *MULTI_MSG_MANAGER_TxTask(void *arg)
     memset(&stEventMultiMsg, 0, sizeof(MULTI_MSG_MANAGER_TX_T));
     memset(v2x_tx_pdu_p, 0, sizeof(Ext_V2X_TxPDU_t));
 
-    v2x_tx_pdu_p->ver = htons(SAMPLE_V2X_API_VER);
+    v2x_tx_pdu_p->ver = htons(MULTI_SAMPLE_V2X_API_VER);
     v2x_tx_pdu_p->e_payload_type = e_payload_type_g;
     v2x_tx_pdu_p->psid = htonl(psid_g);
     v2x_tx_pdu_p->tx_power = tx_power_g;
@@ -2580,7 +2587,7 @@ void *MULTI_MSG_MANAGER_TxTask(void *arg)
     db_v2x_tmp_p->usDbVer = 0;
     db_v2x_tmp_p->usHwVer = 0;
     db_v2x_tmp_p->usSwVer = 0;
-    db_v2x_tmp_p->ulPayloadLength = SAMPLE_V2X_MSG_LEN;
+    db_v2x_tmp_p->ulPayloadLength = MULTI_SAMPLE_V2X_MSG_LEN;
     db_v2x_tmp_p->ulReserved = 0;
 
     memcpy(v2x_tx_pdu_p->v2x_msg.data, db_v2x_tmp_p, db_v2x_tmp_size);
@@ -2625,7 +2632,7 @@ void *MULTI_MSG_MANAGER_TxTask(void *arg)
 
     for (i = 0; i < tx_cnt_g; i++)
     {
-        n = send(s_nSocketHandle, v2x_tx_pdu_p, v2x_tx_pdu_size, 0);
+        n = send(s_nMultiSocketHandle, v2x_tx_pdu_p, v2x_tx_pdu_size, 0);
         if (n < 0)
         {
             PrintError("send() is failed!!");
@@ -2668,7 +2675,7 @@ void *MULTI_MSG_MANAGER_RxTask(void *arg)
             break;
         }
 
-        nRecvLen = recv(s_nSocketHandle, buf, sizeof(buf), 0);
+        nRecvLen = recv(s_nMultiSocketHandle, buf, sizeof(buf), 0);
         if (nRecvLen < 0)
         {
             if ((errno != EAGAIN) && (errno != EWOULDBLOCK)
@@ -2802,7 +2809,7 @@ int32_t MULTI_MSG_MANAGER_Transmit(MULTI_MSG_MANAGER_TX_T *pstMultiMsgMgrTx, DB_
     stEventMultiMsg.pstDbV2x = pstDbV2x;
     stEventMultiMsg.pPayload = pPayload;
 
-    if(msgsnd(s_nMultiMsgTxTaskMsgId, &stEventMultiMsg, sizeof(DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
+    if(msgsnd(s_nMultiMsgTxTaskMsgId, &stEventMultiMsg, sizeof(MULTI_DB_MANAGER_EVENT_MSG_T), IPC_NOWAIT) == FRAMEWORK_MSG_ERR)
     {
         PrintError("msgsnd() is failed!!");
         return nRet;
@@ -2893,7 +2900,7 @@ int32_t MULTI_MSG_MANAGER_Open(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
             }
 
             /* Set I2V */
-            pstMultiMsgManager->stExtMultiMsgWsr.unPsid = SVC_CP_I2V_PSID;
+            pstMultiMsgManager->stExtMultiMsgWsr.unPsid = SVC_MCP_I2V_PSID;
             nRet = P_MULTI_MSG_MANAGER_SetV2xWsrSetting(pstMultiMsgManager);
             if (nRet != FRAMEWORK_OK)
             {
@@ -2902,7 +2909,7 @@ int32_t MULTI_MSG_MANAGER_Open(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
             }
 
             /* Reset Value as V2V */
-            pstMultiMsgManager->stExtMultiMsgWsr.unPsid = SVC_CP_V2V_PSID;
+            pstMultiMsgManager->stExtMultiMsgWsr.unPsid = SVC_MCP_V2V_PSID;
             break;
         }
 
@@ -2942,7 +2949,7 @@ int32_t MULTI_MSG_MANAGER_Open(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
     }
 #endif
 
-    s_bFirstPacket = TRUE;
+    s_bMultiFirstPacket = TRUE;
 
     return nRet;
 }
@@ -2957,19 +2964,19 @@ int32_t MULTI_MSG_MANAGER_Close(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
         return nRet;
     }
 
-    if(s_nSocketHandle != 0)
+    if(s_nMultiSocketHandle != 0)
     {
-        close(s_nSocketHandle);
-        s_nSocketHandle = 0;
-        PrintTrace("Close Connection of V2X Device is successed! [s_nSocketHandle:0x%x]", s_nSocketHandle);
+        close(s_nMultiSocketHandle);
+        s_nMultiSocketHandle = 0;
+        PrintTrace("Close Connection of V2X Device is successed! [s_nMultiSocketHandle:0x%x]", s_nMultiSocketHandle);
         nRet = FRAMEWORK_OK;
     }
     else
     {
-        PrintError("Disconnected [s_nSocketHandle:0x%x]", s_nSocketHandle);
+        PrintError("Disconnected [s_nMultiSocketHandle:0x%x]", s_nMultiSocketHandle);
     }
 
-    s_bFirstPacket = TRUE;
+    s_bMultiFirstPacket = TRUE;
 
     return nRet;
 }
@@ -3029,14 +3036,14 @@ int32_t MULTI_MSG_MANAGER_Init(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
         return nRet;
     }
 
-    if((s_nDbTaskMultiMsgId = msgget(s_dbTaskMultiMsgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
+    if((s_nMultiDbTaskMsgId = msgget(s_MultidbTaskMsgKey, IPC_CREAT|0666)) == FRAMEWORK_MSG_ERR)
     {
         PrintError("msgget() is failed!");
         return nRet;
     }
     else
     {
-        P_MULTI_MSG_NABAGER_PrintMsgInfo(s_nDbTaskMultiMsgId);
+        P_MULTI_MSG_NABAGER_PrintMsgInfo(s_nMultiDbTaskMsgId);
         nRet = FRAMEWORK_OK;
     }
 
@@ -3094,4 +3101,4 @@ int32_t MULTI_MSG_MANAGER_DeInit(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
 
     return nRet;
 }
-
+#endif

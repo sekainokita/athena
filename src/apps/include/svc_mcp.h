@@ -1,5 +1,5 @@
-#ifndef	_SVC_MCP_H_
-#define	_SVC_MCP_H_
+#ifndef _SVC_MCP_H_
+#define _SVC_MCP_H_
 
 /******************************************************************************
 *
@@ -49,6 +49,8 @@
 #include "type.h"
 #include "db_v2x.h"
 #include "db_v2x_status.h"
+#include "multi_db_manager.h"
+#include "multi_msg_manager.h"
 
 /***************************** Definition ************************************/
 #define SVC_MCP_TASK_MSG_KEY                 (0x2319)
@@ -123,23 +125,23 @@ typedef struct SVC_MCP_EVENT_MSG_t {
 * @param unReserved
 */
 typedef struct SVC_MCP_t {
-    bool                    bLogLevel;
-    SVC_MCP_STATUS_E        eSvcMCpStatus;
-    DB_MANAGER_WRITE_T      stDbManagerWrite;
-    MSG_MANAGER_TX_T        stMsgManagerTx;
-    MSG_MANAGER_RX_T        stMsgManagerRx;
-    DB_V2X_T                stDbV2x;
-    DB_V2X_STATUS_TX_T      stDbV2xStatusTx;
-    DB_V2X_STATUS_RX_T      stDbV2xStatusRx;
-    char                    *pchIfaceName;
-    uint32_t                unPsid;
-    char                    *pchDeviceName;
-    uint64_t                ulDbStartTime;
-    uint64_t                ulDbEndTime;
-    uint32_t                unDbTotalWrittenTime;
-    uint32_t                unReserved;
-    char                    *pchIpAddr;
-    uint32_t                unPort;
+    bool                          bLogLevel;
+    SVC_MCP_STATUS_E              eSvcMCpStatus;
+    MULTI_DB_MANAGER_WRITE_T      stMultiDbManagerWrite;
+    MULTI_MSG_MANAGER_TX_T        stMultiMsgManagerTx;
+    MULTI_MSG_MANAGER_RX_T        stMultiMsgManagerRx;
+    DB_V2X_T                      stDbV2x;
+    DB_V2X_STATUS_TX_T            stDbV2xStatusTx;
+    DB_V2X_STATUS_RX_T            stDbV2xStatusRx;
+    char                          *pchIfaceName;
+    uint32_t                      unPsid;
+    char                          *pchDeviceName;
+    uint64_t                      ulDbStartTime;
+    uint64_t                      ulDbEndTime;
+    uint32_t                      unDbTotalWrittenTime;
+    uint32_t                      unReserved;
+    char                          *pchIpAddr;
+    uint32_t                      unPort;
 } SVC_MCP_T;
 
 /***************************** Function Protype ******************************/

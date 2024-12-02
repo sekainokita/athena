@@ -43,21 +43,26 @@
 
 
 /***************************** Include ***************************************/
+/* #if defined(CONFIG_MULTI_DEV) */
 #include "cli.h"
 #include "app.h"
 #include "db_v2x.h"
 #include "db_v2x_status.h"
-#include "db_manager.h"
+#include "multi_db_manager.h"
 #include "framework.h"
+/* #endif */
 
 /***************************** Definition ************************************/
 
 /***************************** Static Variable *******************************/
-static char s_chSetBufDevId[CLI_DB_V2X_DEFAULT_BUF_LEN];
-static char s_chSetEth[CLI_DB_V2X_DEFAULT_BUF_LEN];
-static char s_chSetIp[CLI_DB_V2X_DEFAULT_BUF_LEN];
+#if defined(CONFIG_MULTI_DEV)
+static char s_chMultiSetBufDevId[CLI_MULTI_DB_V2X_DEFAULT_BUF_LEN];
+static char s_chMultiSetEth[CLI_MULTI_DB_V2X_DEFAULT_BUF_LEN];
+static char s_chMultiSetIp[CLI_MULTI_DB_V2X_DEFAULT_BUF_LEN];
+#endif
 
 /***************************** Function Protype ******************************/
+#if defined(CONFIG_MULTI_DEV)
 void P_CLI_MCP_WriteConfigToFile(FILE *h_fdModelConf, SVC_MCP_T *pstSvcMCp)
 {
     fprintf(h_fdModelConf, "model=%s\n", CONFIG_MODEL_NAME);
@@ -106,10 +111,10 @@ static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
         }
 
         pstSvcMCp->stDbV2x.unDeviceId = (uint32_t)atoi(pcCmd);
-        sprintf(s_chSetBufDevId, "%s", pcCmd);
-        pstSvcMCp->pchDeviceName = s_chSetBufDevId;
+        sprintf(s_chMultiSetBufDevId, "%s", pcCmd);
+        pstSvcMCp->pchDeviceName = s_chMultiSetBufDevId;
 
-        if(strcmp(pstSvcMCp->pchDeviceName, DB_MGR_DEFAULT_COMM_DEV_ID) == 0)
+        if(strcmp(pstSvcMCp->pchDeviceName, MULTI_DB_MGR_DEFAULT_COMM_DEV_ID) == 0)
         {
             PrintWarn("INSERT DEVICE ID is failed!");
             nRet = APP_ERROR;
@@ -135,8 +140,8 @@ static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             return CLI_CMD_Showusage(pstCmd);
         }
 
-        sprintf(s_chSetEth, "%s", pcCmd);
-        pstSvcMCp->pchIfaceName = s_chSetEth;
+        sprintf(s_chMultiSetEth, "%s", pcCmd);
+        pstSvcMCp->pchIfaceName = s_chMultiSetEth;
 
         PrintDebug("SET:pchIfaceName[%s]", pstSvcMCp->pchIfaceName);
 
@@ -156,10 +161,10 @@ static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             return CLI_CMD_Showusage(pstCmd);
         }
 
-        pstSvcMCp->stMsgManagerTx.unTxDelay = (uint16_t)atoi(pcCmd);
+        pstSvcMCp->stMultiMsgManagerTx.unTxDelay = (uint16_t)atoi(pcCmd);
         pstSvcMCp->stDbV2xStatusTx.usTxRatio = (uint16_t)atoi(pcCmd);
 
-        PrintDebug("SET:unTxDelay[%d]", pstSvcMCp->stMsgManagerTx.unTxDelay);
+        PrintDebug("SET:unTxDelay[%d]", pstSvcMCp->stMultiMsgManagerTx.unTxDelay);
         PrintDebug("SET:usTxRatio[%d]", pstSvcMCp->stDbV2xStatusTx.usTxRatio);
 
         nRet = SVC_MCP_SetSettings(pstSvcMCp);
@@ -215,8 +220,8 @@ static int P_CLI_MCP_SetV2xStatusScenario(CLI_CMDLINE_T *pstCmd)
             return CLI_CMD_Showusage(pstCmd);
         }
 
-        sprintf(s_chSetIp, "%s", pcCmd);
-        pstSvcMCp->pchIpAddr = s_chSetIp;
+        sprintf(s_chMultiSetIp, "%s", pcCmd);
+        pstSvcMCp->pchIpAddr = s_chMultiSetIp;
 
         PrintDebug("Set:IP[%s]", pstSvcMCp->pchIpAddr);
 
@@ -411,8 +416,8 @@ static int P_CLI_MCP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
     int32_t nRet = APP_OK;
     int nFrameWorkRet = FRAMEWORK_ERROR;
     TIME_MANAGER_T *pstTimeManager;
-    DB_MANAGER_T *pstDbManager;
-    MSG_MANAGER_T *pstMsgManager;
+    MULTI_DB_MANAGER_T *pstMultiDbManager;
+    MULTI_MSG_MANAGER_T *pstMultiMsgManager;
     SVC_MCP_T *pstSvcMCp;
     char *pchPayload = NULL;
 
@@ -422,37 +427,37 @@ static int P_CLI_MCP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
 
     (void)TIME_MANAGER_CheckLatencyBegin(pstTimeManager);
 
-    pstDbManager = FRAMEWORK_GetDbManagerInstance();
-    PrintDebug("pstDbManager[0x%p]", pstDbManager);
+    pstMultiDbManager = FRAMEWORK_GetMultiDbManagerInstance();
+    PrintDebug("pstMultiDbManager[0x%p]", pstMultiDbManager);
 
-    pstDbManager->eFileType = DB_MANAGER_FILE_TYPE_CSV;
-    pstDbManager->eSvcType = DB_MANAGER_SVC_TYPE_V2X_STATUS;
+    pstMultiDbManager->eMultiFileType = MULTI_DB_MANAGER_FILE_TYPE_CSV;
+    pstMultiDbManager->eMultiSvcType = MULTI_DB_MANAGER_SVC_TYPE_V2X_STATUS;
 
-    nFrameWorkRet = DB_MANAGER_Open(pstDbManager);
+    nFrameWorkRet = MULTI_DB_MANAGER_Open(pstMultiDbManager);
     if(nFrameWorkRet != FRAMEWORK_OK)
     {
-        PrintError("DB_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
+        PrintError("MULTI_DB_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
     }
 
     if(bMsgTx == TRUE)
     {
-        pstMsgManager = FRAMEWORK_GetMsgManagerInstance();
-        PrintDebug("pstMsgManager[0x%p]", pstMsgManager);
+        pstMultiMsgManager = FRAMEWORK_GetMultiMsgManagerInstance();
+        PrintDebug("pstMultiMsgManager[0x%p]", pstMultiMsgManager);
 
-        pstMsgManager->eDeviceType = pstSvcMCp->stDbV2x.eDeviceType;
+        pstMultiMsgManager->eDeviceType = pstSvcMCp->stDbV2x.eDeviceType;
 
-        pstMsgManager->pchIfaceName = pstSvcMCp->pchIfaceName;
-        pstMsgManager->stExtMsgWsr.unPsid = pstSvcMCp->unPsid;
-        pstMsgManager->pchIpAddr = pstSvcMCp->pchIpAddr;
-        pstMsgManager->unPort = pstSvcMCp->unPort;
+        pstMultiMsgManager->pchIfaceName = pstSvcMCp->pchIfaceName;
+        pstMultiMsgManager->stExtMultiMsgWsr.unPsid = pstSvcMCp->unPsid;
+        pstMultiMsgManager->pchIpAddr = pstSvcMCp->pchIpAddr;
+        pstMultiMsgManager->unPort = pstSvcMCp->unPort;
 
-        PrintTrace("pchIfaceName[%s], pchIpAddr[%s], unPort[%d]", pstMsgManager->pchIfaceName, pstMsgManager->pchIpAddr, pstMsgManager->unPort);
-        PrintTrace("pchIfaceName[%s], unPsid[%d]", pstMsgManager->pchIfaceName, pstMsgManager->stExtMsgWsr.unPsid);
+        PrintTrace("pchIfaceName[%s], pchIpAddr[%s], unPort[%d]", pstMultiMsgManager->pchIfaceName, pstMultiMsgManager->pchIpAddr, pstMultiMsgManager->unPort);
+        PrintTrace("pchIfaceName[%s], unPsid[%d]", pstMultiMsgManager->pchIfaceName, pstMultiMsgManager->stExtMultiMsgWsr.unPsid);
 
-        nFrameWorkRet = MSG_MANAGER_Open(pstMsgManager);
+        nFrameWorkRet = MULTI_MSG_MANAGER_Open(pstMultiMsgManager);
         if(nFrameWorkRet != FRAMEWORK_OK)
         {
-            PrintError("MSG_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
+            PrintError("MULTI_MSG_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
         }
     }
 
@@ -499,22 +504,22 @@ static int P_CLI_MCP_StartV2xStatus(bool bMsgTx, bool bLogOnOff)
 
     if(bMsgTx == TRUE)
     {
-        nFrameWorkRet = MSG_MANAGER_Transmit(&pstSvcMCp->stMsgManagerTx, &pstSvcMCp->stDbV2x, (char*)pchPayload);
+        nFrameWorkRet = MULTI_MSG_MANAGER_Transmit(&pstSvcMCp->stMultiMsgManagerTx, &pstSvcMCp->stDbV2x, (char*)pchPayload);
         if(nFrameWorkRet != FRAMEWORK_OK)
         {
-            PrintError("MSG_MANAGER_Transmit() is failed! [nRet:%d]", nFrameWorkRet);
+            PrintError("MULTI_MSG_MANAGER_Transmit() is failed! [nRet:%d]", nFrameWorkRet);
         }
         else
         {
-            PrintDebug("Tx Success, Counts[%u], Delay[%d ms]", pstSvcMCp->stMsgManagerTx.unTxCount, pstSvcMCp->stMsgManagerTx.unTxDelay);
+            PrintDebug("Tx Success, Counts[%u], Delay[%d ms]", pstSvcMCp->stMultiMsgManagerTx.unTxCount, pstSvcMCp->stMultiMsgManagerTx.unTxDelay);
         }
     }
     else
     {
-        nFrameWorkRet = DB_MANAGER_Write(&pstSvcMCp->stDbManagerWrite, &pstSvcMCp->stDbV2x, (char*)pchPayload);
+        nFrameWorkRet = MULTI_DB_MANAGER_Write(&pstSvcMCp->stMultiDbManagerWrite, &pstSvcMCp->stDbV2x, (char*)pchPayload);
         if(nFrameWorkRet != FRAMEWORK_OK)
         {
-            PrintError("DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
+            PrintError("MULTI_DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
         }
     }
 
@@ -748,7 +753,7 @@ static int P_CLI_MCP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         }
     }
 
-	return nRet;
+    return nRet;
 }
 
 int32_t CLI_MCP_InitCmds(void)
@@ -791,4 +796,5 @@ int32_t CLI_MCP_InitCmds(void)
 
     return nRet;
 }
+#endif
 

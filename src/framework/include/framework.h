@@ -50,6 +50,8 @@
 #include "msg_manager.h"
 #include "db_manager.h"
 #include "time_manager.h"
+#include "multi_msg_manager.h"
+#include "multi_db_manager.h"
 
 /***************************** Definition ************************************/
 #define FRAMEWORK_DB_TASK_MSG_KEY               (0x840919)
@@ -84,6 +86,10 @@ int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework);
 MSG_MANAGER_T* FRAMEWORK_GetMsgManagerInstance(void);
 DB_MANAGER_T* FRAMEWORK_GetDbManagerInstance(void);
 TIME_MANAGER_T* FRAMEWORK_GetTimeManagerInstance(void);
+#if defined(CONFIG_MULTI_DEV)
+MULTI_MSG_MANAGER_T* FRAMEWORK_GetMultiMsgManagerInstance(void);
+MULTI_DB_MANAGER_T* FRAMEWORK_GetMultiDbManagerInstance(void);
+#endif
 
 #endif	/* _FRAMEWORK_H_ */
 

@@ -49,6 +49,7 @@
 ******************************************************************************/
 
 /***************************** Include ***************************************/
+/* #if defined(CONFIG_MULTI_DEV) */
 #include "framework.h"
 #include "db_manager.h"
 #include "svc_mcp.h"
@@ -57,14 +58,18 @@
 #include <sys/msg.h>
 #include "app.h"
 #include "di.h"
+/* #endif */
 
 /***************************** Definition ************************************/
+#if defined(CONFIG_MULTI_DEV)
 #define SVC_MCP_GPS_SPEED_CAL_CNT_MAX    (10)
 #define SVC_MCP_SET_BUF_SIZE             (256)
+#endif
 
 /***************************** Enum and Structure ****************************/
 
 /***************************** Static Variable *******************************/
+#if defined(CONFIG_MULTI_DEV)
 FILE* sh_pSvcMCpTxMsg;
 FILE* sh_pSvcMCpRxMsg;
 
@@ -76,25 +81,27 @@ static pthread_t sh_SvcMCpTask;
 static pthread_t sh_SvcMCpTaskTx;
 
 static SVC_MCP_T s_stSvcMCp;
-static DB_MANAGER_V2X_STATUS_T s_stDbV2xStatus;
+static MULTI_DB_MANAGER_V2X_STATUS_T s_stMultiDbV2xStatus;
 static bool s_bFirstMsg = TRUE;
 
-static uint16_t s_usGpsSpeedCalCnt = 0;
-static uint32_t s_usLastSpeedTx;
+static uint16_t s_usMultiGpsSpeedCalCnt = 0;
+static uint32_t s_usMultiLastSpeedTx;
 
-static char s_chStrBufTxRxType[SVC_MCP_STR_BUF_LEN];
-static char s_chStrBufDevType[SVC_MCP_STR_BUF_LEN];
-static char s_chStrBufDevId[SVC_MCP_STR_BUF_LEN];
-static char s_chStrBufStartTime[SVC_MCP_STR_BUF_LEN];
-static char s_chStrBufEndTime[SVC_MCP_STR_BUF_LEN];
-static char s_chStrBufTotalTime[SVC_MCP_STR_BUF_LEN];
+static char s_chMultiStrBufTxRxType[SVC_MCP_STR_BUF_LEN];
+static char s_chMultiStrBufDevType[SVC_MCP_STR_BUF_LEN];
+static char s_chMultiStrBufDevId[SVC_MCP_STR_BUF_LEN];
+static char s_chMultiStrBufStartTime[SVC_MCP_STR_BUF_LEN];
+static char s_chMultiStrBufEndTime[SVC_MCP_STR_BUF_LEN];
+static char s_chMultiStrBufTotalTime[SVC_MCP_STR_BUF_LEN];
 
-static char s_chDeviceName[SVC_MCP_SET_BUF_SIZE] = DB_MGR_DEFAULT_COMM_DEV_ID;
-static char s_chIfaceName[SVC_MCP_SET_BUF_SIZE] = SVC_MCP_DEFAULT_ETH_DEV;
-static char s_chIpAddr[SVC_MCP_SET_BUF_SIZE] = SVC_MCP_DEFAULT_IP;
+static char s_chMultiDeviceName[SVC_MCP_SET_BUF_SIZE] = MULTI_DB_MGR_DEFAULT_COMM_DEV_ID;
+static char s_chMultiIfaceName[SVC_MCP_SET_BUF_SIZE] = SVC_MCP_DEFAULT_ETH_DEV;
+static char s_chMultiIpAddr[SVC_MCP_SET_BUF_SIZE] = SVC_MCP_DEFAULT_IP;
+#endif
 
 /***************************** Function  *************************************/
 
+#if defined(CONFIG_MULTI_DEV)
 int32_t P_SVC_MCP_SetSettings(SVC_MCP_T *pstSvcMCp)
 {
     int32_t nRet = APP_ERROR;
@@ -159,8 +166,8 @@ int32_t SVC_MCP_UpdateSettings(SVC_MCP_T *pstSvcMCp)
             else if (strncmp(chLine, DEVICE_NAME_PREFIX, DEVICE_NAME_PREFIX_LEN) == 0)
             {
                 strncpy(chBuf, chLine + DEVICE_NAME_PREFIX_LEN, sizeof(chBuf) - 1);
-                strncpy(s_chDeviceName, chBuf, SVC_MCP_SET_BUF_SIZE); // Static buffer 사용
-                pstSvcMCp->pchDeviceName = s_chDeviceName;
+                strncpy(s_chMultiDeviceName, chBuf, SVC_MCP_SET_BUF_SIZE); // Static buffer 사용
+                pstSvcMCp->pchDeviceName = s_chMultiDeviceName;
                 PrintTrace("Updated Device Name: %s", pstSvcMCp->pchDeviceName);
             }
             else if (strncmp(chLine, DEVICE_ID_PREFIX, DEVICE_ID_PREFIX_LEN) == 0)
@@ -172,15 +179,15 @@ int32_t SVC_MCP_UpdateSettings(SVC_MCP_T *pstSvcMCp)
             else if (strncmp(chLine, IFACE_NAME_PREFIX, IFACE_NAME_PREFIX_LEN) == 0)
             {
                 strncpy(chBuf, chLine + IFACE_NAME_PREFIX_LEN, sizeof(chBuf) - 1);
-                strncpy(s_chIfaceName, chBuf, SVC_MCP_SET_BUF_SIZE); // Static buffer 사용
-                pstSvcMCp->pchIfaceName = s_chIfaceName;
+                strncpy(s_chMultiIfaceName, chBuf, SVC_MCP_SET_BUF_SIZE); // Static buffer 사용
+                pstSvcMCp->pchIfaceName = s_chMultiIfaceName;
                 PrintTrace("Updated Interface Name: %s", pstSvcMCp->pchIfaceName);
             }
             else if (strncmp(chLine, IP_ADDR_PREFIX, IP_ADDR_PREFIX_LEN) == 0)
             {
                 strncpy(chBuf, chLine + IP_ADDR_PREFIX_LEN, sizeof(chBuf) - 1);
-                strncpy(s_chIpAddr, chBuf, SVC_MCP_SET_BUF_SIZE); // Static buffer 사용
-                pstSvcMCp->pchIpAddr = s_chIpAddr;
+                strncpy(s_chMultiIpAddr, chBuf, SVC_MCP_SET_BUF_SIZE); // Static buffer 사용
+                pstSvcMCp->pchIpAddr = s_chMultiIpAddr;
                 PrintTrace("Updated IP Address: %s", pstSvcMCp->pchIpAddr);
             }
             else if (strncmp(chLine, PORT_PREFIX, PORT_PREFIX_LEN) == 0)
@@ -216,29 +223,29 @@ int32_t P_SVC_MCP_SetDefaultSettings(SVC_MCP_T *pstSvcMCp)
         return nRet;
     }
 
-    pstSvcMCp->stDbManagerWrite.eFileType = DB_MANAGER_FILE_TYPE_CSV;
-    pstSvcMCp->stDbManagerWrite.eCommMsgType = DB_MANAGER_COMM_MSG_TYPE_TX;
-    pstSvcMCp->stDbManagerWrite.eProc = DB_MANAGER_PROC_WRITE;
+    pstSvcMCp->stMultiDbManagerWrite.eMultiFileType = MULTI_DB_MANAGER_FILE_TYPE_CSV;
+    pstSvcMCp->stMultiDbManagerWrite.eMultiCommMsgType = MULTI_DB_MANAGER_COMM_MSG_TYPE_TX;
+    pstSvcMCp->stMultiDbManagerWrite.eMultiProc = MULTI_DB_MANAGER_PROC_WRITE;
 
-    pstSvcMCp->stMsgManagerTx.ePayloadType = eMSG_MANAGER_PAYLOAD_TYPE_RAW;
-    pstSvcMCp->stMsgManagerTx.eCommType = eMSG_MANAGER_COMM_TYPE_5GNRV2X;
-    pstSvcMCp->stMsgManagerTx.eSignId = eMSG_MANAGER_SIGN_ID_UNSECURED;
-    pstSvcMCp->stMsgManagerTx.eV2xFreq = eMSG_MANAGER_V2X_FREQ_5900;
-    pstSvcMCp->stMsgManagerTx.ePriority = eMSG_MANAGER_PRIORITY_CV2X_PPPP_0;
-    pstSvcMCp->stMsgManagerTx.eV2xDataRate = eMSG_MANAGER_V2X_DATA_RATE_6MBPS;
-    pstSvcMCp->stMsgManagerTx.eV2xTimeSlot = eMSG_MANAGER_V2X_TIME_SLOT_CONTINUOUS;
-    pstSvcMCp->stMsgManagerTx.unPsid = DB_V2X_PSID;
-    pstSvcMCp->stMsgManagerTx.nTxPower = MSG_MANAGER_V2X_TX_POWER;
-    pstSvcMCp->stMsgManagerTx.unTxCount = MSG_MANAGER_V2X_TX_COUNT;
-    pstSvcMCp->stMsgManagerTx.unTxDelay = MSG_MANAGER_V2X_TX_DELAY;
+    pstSvcMCp->stMultiMsgManagerTx.ePayloadType = eMSG_MANAGER_PAYLOAD_TYPE_RAW;
+    pstSvcMCp->stMultiMsgManagerTx.eCommType = eMSG_MANAGER_COMM_TYPE_5GNRV2X;
+    pstSvcMCp->stMultiMsgManagerTx.eSignId = eMSG_MANAGER_SIGN_ID_UNSECURED;
+    pstSvcMCp->stMultiMsgManagerTx.eV2xFreq = eMSG_MANAGER_V2X_FREQ_5900;
+    pstSvcMCp->stMultiMsgManagerTx.ePriority = eMSG_MANAGER_PRIORITY_CV2X_PPPP_0;
+    pstSvcMCp->stMultiMsgManagerTx.eV2xDataRate = eMSG_MANAGER_V2X_DATA_RATE_6MBPS;
+    pstSvcMCp->stMultiMsgManagerTx.eV2xTimeSlot = eMSG_MANAGER_V2X_TIME_SLOT_CONTINUOUS;
+    pstSvcMCp->stMultiMsgManagerTx.unPsid = DB_V2X_PSID;
+    pstSvcMCp->stMultiMsgManagerTx.nTxPower = MULTI_MSG_MANAGER_V2X_TX_POWER;
+    pstSvcMCp->stMultiMsgManagerTx.unTxCount = MULTI_MSG_MANAGER_V2X_TX_COUNT;
+    pstSvcMCp->stMultiMsgManagerTx.unTxDelay = MULTI_MSG_MANAGER_V2X_TX_DELAY;
 
-    for(int i = 0; i < MSG_MANAGER_MAC_LENGTH; i++)
+    for(int i = 0; i < MULTI_MSG_MANAGER_MAC_LENGTH; i++)
     {
-        pstSvcMCp->stMsgManagerTx.uchPeerMacAddr[i] = 0xFF;
+        pstSvcMCp->stMultiMsgManagerTx.uchPeerMacAddr[i] = 0xFF;
     }
 
-    pstSvcMCp->stMsgManagerTx.unTransmitterProfileId = MSG_MANAGER_V2X_TX_PROFILE_ID;
-    pstSvcMCp->stMsgManagerTx.unPeerL2Id = MSG_MANAGER_V2X_TX_PEER_L2_ID;
+    pstSvcMCp->stMultiMsgManagerTx.unTransmitterProfileId = MULTI_MSG_MANAGER_V2X_TX_PROFILE_ID;
+    pstSvcMCp->stMultiMsgManagerTx.unPeerL2Id = MULTI_MSG_MANAGER_V2X_TX_PEER_L2_ID;
 
 #if defined(CONFIG_OBU)
     pstSvcMCp->stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_OBU;
@@ -248,7 +255,7 @@ int32_t P_SVC_MCP_SetDefaultSettings(SVC_MCP_T *pstSvcMCp)
     pstSvcMCp->unPort = SVC_MCP_DEFAULT_PORT;
     pstSvcMCp->pchIfaceName = SVC_MCP_DEFAULT_ETH_DEV;
     pstSvcMCp->unPsid = SVC_MCP_V2V_PSID;
-    pstSvcMCp->pchDeviceName = DB_MGR_DEFAULT_COMM_DEV_ID;
+    pstSvcMCp->pchDeviceName = MULTI_DB_MGR_DEFAULT_COMM_DEV_ID;
 #elif defined(CONFIG_RSU)
     pstSvcMCp->stDbV2x.eDeviceType = DB_V2X_DEVICE_TYPE_RSU;
     PrintTrace("CONFIG_RSU is enabled, eDeviceType [%d]", pstSvcMCp->stDbV2x.eDeviceType);
@@ -257,42 +264,42 @@ int32_t P_SVC_MCP_SetDefaultSettings(SVC_MCP_T *pstSvcMCp)
     pstSvcMCp->unPort = SVC_MCP_DEFAULT_RSU_PORT;
     pstSvcMCp->pchIfaceName = SVC_MCP_DEFAULT_RSU_ETH_DEV;
     pstSvcMCp->unPsid = SVC_MCP_I2V_PSID;
-    pstSvcMCp->pchDeviceName = DB_MGR_DEFAULT_COMM_RSU_DEV_ID;
+    pstSvcMCp->pchDeviceName = MULTI_DB_MGR_DEFAULT_COMM_RSU_DEV_ID;
 #else
     PrintError("check device type!!");
     return APP_ERROR;
 #endif
 
     pstSvcMCp->stDbV2x.eTeleCommType = DB_V2X_TELECOMM_TYPE_5G_PC5_BROADCAST;
-    pstSvcMCp->stDbV2x.unDeviceId = CLI_DB_V2X_DEFAULT_DEVICE_ID;
+    pstSvcMCp->stDbV2x.unDeviceId = CLI_MULTI_DB_V2X_DEFAULT_DEVICE_ID;
     pstSvcMCp->stDbV2x.eServiceId = DB_V2X_SERVICE_ID_PLATOONING;
     pstSvcMCp->stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
     pstSvcMCp->stDbV2x.eRegionId = DB_V2X_REGION_ID_SEONGNAM;
     pstSvcMCp->stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_V2X_STATUS;
     pstSvcMCp->stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
     pstSvcMCp->stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
-    pstSvcMCp->stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
-    pstSvcMCp->stDbV2x.usSwVer = CLI_DB_V2X_DEFAULT_SW_VER;
+    pstSvcMCp->stDbV2x.usHwVer = CLI_MULTI_DB_V2X_DEFAULT_HW_VER;
+    pstSvcMCp->stDbV2x.usSwVer = CLI_MULTI_DB_V2X_DEFAULT_SW_VER;
 
 
     pstSvcMCp->stDbV2xStatusTx.stDbV2xDevL1.ulTimeStamp = 0;
     pstSvcMCp->stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp = 0;
     pstSvcMCp->stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp = 0;
     pstSvcMCp->stDbV2xStatusTx.unRxTargetDeviceId = 0;
-    pstSvcMCp->stDbV2xStatusTx.usTxFreq = MSG_MANAGER_V2X_TX_FREQ;
-    pstSvcMCp->stDbV2xStatusTx.ucTxPwr = MSG_MANAGER_V2X_TX_POWER;
-    pstSvcMCp->stDbV2xStatusTx.ucTxBw = MSG_MANAGER_V2X_TX_BW;
+    pstSvcMCp->stDbV2xStatusTx.usTxFreq = MULTI_MSG_MANAGER_V2X_TX_FREQ;
+    pstSvcMCp->stDbV2xStatusTx.ucTxPwr = MULTI_MSG_MANAGER_V2X_TX_POWER;
+    pstSvcMCp->stDbV2xStatusTx.ucTxBw = MULTI_MSG_MANAGER_V2X_TX_BW;
     pstSvcMCp->stDbV2xStatusTx.ucScs = 0;
     pstSvcMCp->stDbV2xStatusTx.ucMcs = 0;
 
-    pstSvcMCp->stDbV2xStatusTx.usTxRatio = pstSvcMCp->stMsgManagerTx.unTxDelay;
+    pstSvcMCp->stDbV2xStatusTx.usTxRatio = pstSvcMCp->stMultiMsgManagerTx.unTxDelay;
     pstSvcMCp->stDbV2xStatusTx.stTxPosition.nTxLatitude = 0;
     pstSvcMCp->stDbV2xStatusTx.stTxPosition.nTxLongitude = 0;
     pstSvcMCp->stDbV2xStatusTx.stTxPosition.nTxAttitude = 0;
 
     pstSvcMCp->stDbV2xStatusTx.unSeqNum = 1;
     pstSvcMCp->stDbV2xStatusTx.unContCnt = 1;
-    pstSvcMCp->stDbV2xStatusTx.unTxVehicleSpeed = DB_MGR_DEFAULT_VEHICLE_SPEED;
+    pstSvcMCp->stDbV2xStatusTx.unTxVehicleSpeed = MULTI_DB_MGR_DEFAULT_VEHICLE_SPEED;
     pstSvcMCp->stDbV2xStatusTx.unTxVehicleHeading = 0;
 
     pstSvcMCp->ulDbStartTime = 0;
@@ -408,32 +415,32 @@ static int32_t P_SVC_MCP_Stop(SVC_MCP_EVENT_MSG_T *stEventMsg)
 int32_t P_SVC_MCP_RestartDb(void)
 {
     int32_t nRet = APP_ERROR;
-    DB_MANAGER_T *pstDbManager;
+    MULTI_DB_MANAGER_T *pstMultiDbManager;
 
     PrintWarn("Finish to write DB Files, start time[%ld], end time[%ld], total written time[%d]", s_stSvcMCp.ulDbStartTime, s_stSvcMCp.ulDbEndTime, s_stSvcMCp.unDbTotalWrittenTime);
 
-    pstDbManager = FRAMEWORK_GetDbManagerInstance();
-    if(pstDbManager == NULL)
+    pstMultiDbManager = FRAMEWORK_GetMultiDbManagerInstance();
+    if(pstMultiDbManager == NULL)
     {
-        PrintError("pstDbManager is NULL!");
+        PrintError("pstMultiDbManager is NULL!");
     }
 
     PrintDebug("Close the default temp DB file");
-    nRet = DB_MANAGER_Close(pstDbManager);
+    nRet = MULTI_DB_MANAGER_Close(pstMultiDbManager);
     if(nRet != FRAMEWORK_OK)
     {
-        PrintError("DB_MANAGER_Close() is failed! [nRet:%d]", nRet);
+        PrintError("MULTI_DB_MANAGER_Close() is failed! [nRet:%d]", nRet);
     }
 
 //    PrintWarn("Copy the default DB file as [%s]", );
 
     PrintDebug("Reopen the default temp DB file");
-    pstDbManager->eFileType = s_stSvcMCp.stDbManagerWrite.eFileType;
-    pstDbManager->eSvcType = DB_MANAGER_SVC_TYPE_V2X_STATUS;
-    nRet = DB_MANAGER_Open(pstDbManager);
+    pstMultiDbManager->eMultiFileType = s_stSvcMCp.stMultiDbManagerWrite.eMultiFileType;
+    pstMultiDbManager->eMultiSvcType = MULTI_DB_MANAGER_SVC_TYPE_V2X_STATUS;
+    nRet = MULTI_DB_MANAGER_Open(pstMultiDbManager);
     if(nRet != FRAMEWORK_OK)
     {
-        PrintError("DB_MANAGER_Open() is failed! [nRet:%d]", nRet);
+        PrintError("MULTI_DB_MANAGER_Open() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
@@ -513,49 +520,49 @@ static void *P_SVC_MCP_TaskTx(void *arg)
 
             if(s_bFirstMsg == TRUE)
             {
-                s_stSvcMCp.stDbV2xStatusTx.unTxVehicleSpeed = DB_MGR_DEFAULT_VEHICLE_SPEED;
+                s_stSvcMCp.stDbV2xStatusTx.unTxVehicleSpeed = MULTI_DB_MGR_DEFAULT_VEHICLE_SPEED;
                 s_bFirstMsg = FALSE;
                 PrintWarn("stDbV2xStatus.bFirstPacket's speed is the default value [%d]", s_stSvcMCp.stDbV2xStatusTx.unTxVehicleSpeed);
             }
             else
             {
-                if(s_usGpsSpeedCalCnt == SVC_MCP_GPS_SPEED_CAL_CNT_MAX)
+                if(s_usMultiGpsSpeedCalCnt == SVC_MCP_GPS_SPEED_CAL_CNT_MAX)
                 {
-                    s_stDbV2xStatus.stV2xGpsInfoTx.nLatitudeNow = s_stSvcMCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
-                    s_stDbV2xStatus.stV2xGpsInfoTx.nLongitudeNow = s_stSvcMCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
-                    s_stDbV2xStatus.stV2xGpsInfoTx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
+                    s_stMultiDbV2xStatus.stV2xGpsInfoTx.nLatitudeNow = s_stSvcMCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
+                    s_stMultiDbV2xStatus.stV2xGpsInfoTx.nLongitudeNow = s_stSvcMCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
+                    s_stMultiDbV2xStatus.stV2xGpsInfoTx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
 
-                    nCurrSpeed = DI_GPS_CalculateSpeed(&s_stDbV2xStatus.stV2xGpsInfoTx);
+                    nCurrSpeed = DI_GPS_CalculateSpeed(&s_stMultiDbV2xStatus.stV2xGpsInfoTx);
                     if(nCurrSpeed == 0)
                     {
-                        s_stSvcMCp.stDbV2xStatusTx.unTxVehicleSpeed = s_usLastSpeedTx;
+                        s_stSvcMCp.stDbV2xStatusTx.unTxVehicleSpeed = s_usMultiLastSpeedTx;
                     }
                     else
                     {
                         s_stSvcMCp.stDbV2xStatusTx.unTxVehicleSpeed = nCurrSpeed;
                     }
 
-                    s_usLastSpeedTx = nCurrSpeed;
+                    s_usMultiLastSpeedTx = nCurrSpeed;
 
-                    s_usGpsSpeedCalCnt = 0;
+                    s_usMultiGpsSpeedCalCnt = 0;
                 }
             }
 
-            if(s_usGpsSpeedCalCnt == 0)
+            if(s_usMultiGpsSpeedCalCnt == 0)
             {
-                s_stDbV2xStatus.stV2xGpsInfoTx.nLatitudeLast = s_stSvcMCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
-                s_stDbV2xStatus.stV2xGpsInfoTx.nLongitudeLast = s_stSvcMCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
-                s_stDbV2xStatus.stV2xGpsInfoTx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
+                s_stMultiDbV2xStatus.stV2xGpsInfoTx.nLatitudeLast = s_stSvcMCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
+                s_stMultiDbV2xStatus.stV2xGpsInfoTx.nLongitudeLast = s_stSvcMCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
+                s_stMultiDbV2xStatus.stV2xGpsInfoTx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
             }
 
-            s_usGpsSpeedCalCnt++;
+            s_usMultiGpsSpeedCalCnt++;
 
 #if defined(CONFIG_GPS_OBU) || defined(CONFIG_GPS_RSU)
-			s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLatitudeNow = s_stSvcMCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
-            s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLongitudeNow = s_stSvcMCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
-            s_stDbV2xStatus.stV2xGpsInfoHeadingTx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
+            s_stMultiDbV2xStatus.stV2xGpsInfoHeadingTx.nLatitudeNow = s_stSvcMCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
+            s_stMultiDbV2xStatus.stV2xGpsInfoHeadingTx.nLongitudeNow = s_stSvcMCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
+            s_stMultiDbV2xStatus.stV2xGpsInfoHeadingTx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
 
-			dHeading = DI_GPS_CalculateHeading(&s_stDbV2xStatus.stV2xGpsInfoHeadingTx);
+            dHeading = DI_GPS_CalculateHeading(&s_stMultiDbV2xStatus.stV2xGpsInfoHeadingTx);
             if (dHeading < 0)
             {
                 PrintError("DI_GPS_CalculateHeading() is failed! [dHeading:%lf]", dHeading);
@@ -569,26 +576,26 @@ static void *P_SVC_MCP_TaskTx(void *arg)
 #endif
             s_stSvcMCp.stDbV2xStatusTx.unTxVehicleHeading = (uint32_t)dHeading;
 
-			s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLatitudeLast = s_stSvcMCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
-            s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLongitudeLast = s_stSvcMCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
-            s_stDbV2xStatus.stV2xGpsInfoHeadingTx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
+            s_stMultiDbV2xStatus.stV2xGpsInfoHeadingTx.nLatitudeLast = s_stSvcMCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
+            s_stMultiDbV2xStatus.stV2xGpsInfoHeadingTx.nLongitudeLast = s_stSvcMCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
+            s_stMultiDbV2xStatus.stV2xGpsInfoHeadingTx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
 
             s_stSvcMCp.stDbV2x.ulReserved = 0;
 
             if(bMsgTx == TRUE)
             {
-                nFrameWorkRet = MSG_MANAGER_Transmit(&s_stSvcMCp.stMsgManagerTx, &s_stSvcMCp.stDbV2x, (char*)pchPayload);
+                nFrameWorkRet = MULTI_MSG_MANAGER_Transmit(&s_stSvcMCp.stMultiMsgManagerTx, &s_stSvcMCp.stDbV2x, (char*)pchPayload);
                 if(nFrameWorkRet != FRAMEWORK_OK)
                 {
-                    PrintError("MSG_MANAGER_Transmit() is failed! [nRet:%d]", nFrameWorkRet);
+                    PrintError("MULTI_MSG_MANAGER_Transmit() is failed! [nRet:%d]", nFrameWorkRet);
                 }
             }
             else
             {
-                nFrameWorkRet = DB_MANAGER_Write(&s_stSvcMCp.stDbManagerWrite, &s_stSvcMCp.stDbV2x, (char*)pchPayload);
+                nFrameWorkRet = MULTI_DB_MANAGER_Write(&s_stSvcMCp.stMultiDbManagerWrite, &s_stSvcMCp.stDbV2x, (char*)pchPayload);
                 if(nFrameWorkRet != FRAMEWORK_OK)
                 {
-                    PrintError("DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
+                    PrintError("MULTI_DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
                 }
             }
 
@@ -612,7 +619,7 @@ static void *P_SVC_MCP_TaskTx(void *arg)
             /* Increase the continuity counter */
             s_stSvcMCp.stDbV2xStatusTx.unContCnt++;
 
-            usleep((s_stSvcMCp.stMsgManagerTx.unTxDelay * USLEEP_MS));
+            usleep((s_stSvcMCp.stMultiMsgManagerTx.unTxDelay * USLEEP_MS));
         }
         else
         {
@@ -767,9 +774,9 @@ static int32_t P_SVC_MCP_Init(SVC_MCP_T *pstSvcMCp)
         PrintError("P_SVC_MCP_CreateTask() is failed! [nRet:%d]", nRet);
     }
 
-    (void*)memset(&pstSvcMCp->stDbManagerWrite, 0x00, sizeof(DB_MANAGER_WRITE_T));
-    (void*)memset(&pstSvcMCp->stMsgManagerTx, 0x00, sizeof(MSG_MANAGER_TX_T));
-    (void*)memset(&pstSvcMCp->stMsgManagerRx, 0x00, sizeof(MSG_MANAGER_RX_T));
+    (void*)memset(&pstSvcMCp->stMultiDbManagerWrite, 0x00, sizeof(MULTI_DB_MANAGER_WRITE_T));
+    (void*)memset(&pstSvcMCp->stMultiMsgManagerTx, 0x00, sizeof(MULTI_MSG_MANAGER_TX_T));
+    (void*)memset(&pstSvcMCp->stMultiMsgManagerRx, 0x00, sizeof(MULTI_MSG_MANAGER_RX_T));
     (void*)memset(&pstSvcMCp->stDbV2x, 0x00, sizeof(DB_V2X_T));
     (void*)memset(&pstSvcMCp->stDbV2xStatusTx, 0x00, sizeof(DB_V2X_STATUS_TX_T));
     (void*)memset(&s_stSvcMCp, 0x00, sizeof(SVC_MCP_T));
@@ -805,24 +812,24 @@ void SVC_MCP_ShowSettings(SVC_MCP_T *pstSvcMCp)
 {
     PrintTrace("========================================================");
     PrintWarn("MSG V2X Tx Info>");
-    PrintDebug(" ePayloadType[%d]", pstSvcMCp->stMsgManagerTx.ePayloadType);
-    PrintDebug(" eCommType[%d]", pstSvcMCp->stMsgManagerTx.eCommType);
-    PrintDebug(" eSignId[%d]", pstSvcMCp->stMsgManagerTx.eSignId);
-    PrintDebug(" eV2xFreq[%d]", pstSvcMCp->stMsgManagerTx.eV2xFreq);
-    PrintDebug(" ePriority[%d]", pstSvcMCp->stMsgManagerTx.ePriority);
-    PrintDebug(" eV2xDataRate[%d]", pstSvcMCp->stMsgManagerTx.eV2xDataRate);
-    PrintDebug(" eV2xTimeSlot[%d]", pstSvcMCp->stMsgManagerTx.eV2xTimeSlot);
-    PrintDebug(" unPsid[%d]", pstSvcMCp->stMsgManagerTx.unPsid);
-    PrintDebug(" nTxPower[%d]", pstSvcMCp->stMsgManagerTx.nTxPower);
-    PrintDebug(" unTxCount[%d]", pstSvcMCp->stMsgManagerTx.unTxCount);
-    PrintDebug(" unTxDelay[%d ms]", pstSvcMCp->stMsgManagerTx.unTxDelay);
-    for(int i = 0; i < MSG_MANAGER_MAC_LENGTH; i++)
+    PrintDebug(" ePayloadType[%d]", pstSvcMCp->stMultiMsgManagerTx.ePayloadType);
+    PrintDebug(" eCommType[%d]", pstSvcMCp->stMultiMsgManagerTx.eCommType);
+    PrintDebug(" eSignId[%d]", pstSvcMCp->stMultiMsgManagerTx.eSignId);
+    PrintDebug(" eV2xFreq[%d]", pstSvcMCp->stMultiMsgManagerTx.eV2xFreq);
+    PrintDebug(" ePriority[%d]", pstSvcMCp->stMultiMsgManagerTx.ePriority);
+    PrintDebug(" eV2xDataRate[%d]", pstSvcMCp->stMultiMsgManagerTx.eV2xDataRate);
+    PrintDebug(" eV2xTimeSlot[%d]", pstSvcMCp->stMultiMsgManagerTx.eV2xTimeSlot);
+    PrintDebug(" unPsid[%d]", pstSvcMCp->stMultiMsgManagerTx.unPsid);
+    PrintDebug(" nTxPower[%d]", pstSvcMCp->stMultiMsgManagerTx.nTxPower);
+    PrintDebug(" unTxCount[%d]", pstSvcMCp->stMultiMsgManagerTx.unTxCount);
+    PrintDebug(" unTxDelay[%d ms]", pstSvcMCp->stMultiMsgManagerTx.unTxDelay);
+    for(int i = 0; i < MULTI_MSG_MANAGER_MAC_LENGTH; i++)
     {
-        PrintDebug(" unTxCount[i:%d][0x%x]", i, pstSvcMCp->stMsgManagerTx.uchPeerMacAddr[i]);
+        PrintDebug(" unTxCount[i:%d][0x%x]", i, pstSvcMCp->stMultiMsgManagerTx.uchPeerMacAddr[i]);
     }
 
-    PrintDebug(" unTransmitterProfileId[%d]", pstSvcMCp->stMsgManagerTx.unTransmitterProfileId);
-    PrintDebug(" unPeerL2Id[%d]", pstSvcMCp->stMsgManagerTx.unPeerL2Id);
+    PrintDebug(" unTransmitterProfileId[%d]", pstSvcMCp->stMultiMsgManagerTx.unTransmitterProfileId);
+    PrintDebug(" unPeerL2Id[%d]", pstSvcMCp->stMultiMsgManagerTx.unPeerL2Id);
 
     PrintWarn("DB V2X Info>");
     PrintDebug(" eDeviceType[%d]", pstSvcMCp->stDbV2x.eDeviceType);
@@ -929,8 +936,8 @@ int32_t SVC_MCP_Open(SVC_MCP_T *pstSvcMCp)
 {
     int32_t nRet = APP_ERROR;
     int32_t nFrameWorkRet = FRAMEWORK_ERROR;
-    DB_MANAGER_T *pstDbManager;
-    MSG_MANAGER_T *pstMsgManager;
+    MULTI_DB_MANAGER_T *pstMultiDbManager;
+    MULTI_MSG_MANAGER_T *pstMultiMsgManager;
     DI_T *pstDi;
     uint32_t nRetryCnt = 0;
 
@@ -940,43 +947,43 @@ int32_t SVC_MCP_Open(SVC_MCP_T *pstSvcMCp)
         return nRet;
     }
 
-    pstDbManager = FRAMEWORK_GetDbManagerInstance();
-    if(pstDbManager == NULL)
+    pstMultiDbManager = FRAMEWORK_GetMultiDbManagerInstance();
+    if(pstMultiDbManager == NULL)
     {
-        PrintError("pstDbManager == NULL!!");
+        PrintError("pstMultiDbManager == NULL!!");
         nRet = APP_ERROR;
         return nRet;
     }
 
-    pstDbManager->eFileType = pstSvcMCp->stDbManagerWrite.eFileType;
-    pstDbManager->eSvcType = DB_MANAGER_SVC_TYPE_V2X_STATUS;
+    pstMultiDbManager->eMultiFileType = pstSvcMCp->stMultiDbManagerWrite.eMultiFileType;
+    pstMultiDbManager->eMultiSvcType = MULTI_DB_MANAGER_SVC_TYPE_V2X_STATUS;
 
-    nFrameWorkRet = DB_MANAGER_Open(pstDbManager);
+    nFrameWorkRet = MULTI_DB_MANAGER_Open(pstMultiDbManager);
     if(nFrameWorkRet != FRAMEWORK_OK)
     {
-        PrintError("DB_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
+        PrintError("MULTI_DB_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
         return nRet;
     }
 
-    pstMsgManager = FRAMEWORK_GetMsgManagerInstance();
-    if(pstMsgManager == NULL)
+    pstMultiMsgManager = FRAMEWORK_GetMultiMsgManagerInstance();
+    if(pstMultiMsgManager == NULL)
     {
-        PrintError("pstMsgManager == NULL!!");
+        PrintError("pstMultiMsgManager == NULL!!");
         nRet = APP_ERROR;
         return nRet;
     }
 
-    pstMsgManager->eDeviceType = pstSvcMCp->stDbV2x.eDeviceType;
-    PrintDebug("eDeviceType[%d]", pstMsgManager->eDeviceType);
-    pstMsgManager->pchIfaceName = pstSvcMCp->pchIfaceName;
-    pstMsgManager->stExtMsgWsr.unPsid = pstSvcMCp->unPsid;
-    pstMsgManager->pchIpAddr = pstSvcMCp->pchIpAddr;
-    pstMsgManager->unPort = pstSvcMCp->unPort;
+    pstMultiMsgManager->eDeviceType = pstSvcMCp->stDbV2x.eDeviceType;
+    PrintDebug("eDeviceType[%d]", pstMultiMsgManager->eDeviceType);
+    pstMultiMsgManager->pchIfaceName = pstSvcMCp->pchIfaceName;
+    pstMultiMsgManager->stExtMultiMsgWsr.unPsid = pstSvcMCp->unPsid;
+    pstMultiMsgManager->pchIpAddr = pstSvcMCp->pchIpAddr;
+    pstMultiMsgManager->unPort = pstSvcMCp->unPort;
 
-    nFrameWorkRet = MSG_MANAGER_Open(pstMsgManager);
+    nFrameWorkRet = MULTI_MSG_MANAGER_Open(pstMultiMsgManager);
     if(nFrameWorkRet != FRAMEWORK_OK)
     {
-        PrintError("MSG_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
+        PrintError("MULTI_MSG_MANAGER_Open() is failed! [nRet:%d]", nFrameWorkRet);
         return nRet;
     }
 
@@ -1012,8 +1019,8 @@ int32_t SVC_MCP_Close(SVC_MCP_T *pstSvcMCp)
 {
     int32_t nRet = APP_ERROR;
     DI_T *pstDi;
-    DB_MANAGER_T *pstDbManager;
-    MSG_MANAGER_T *pstMsgManager;
+    MULTI_DB_MANAGER_T *pstMultiDbManager;
+    MULTI_MSG_MANAGER_T *pstMultiMsgManager;
     char chTempDate[SVC_MCP_DATE_LEN+1];
     char chTempHour[SVC_MCP_HOUR_LEN+1];
     char chTempMin[SVC_MCP_MIN_LEN+1];
@@ -1032,21 +1039,21 @@ int32_t SVC_MCP_Close(SVC_MCP_T *pstSvcMCp)
         return nRet;
     }
 
-    pstMsgManager = FRAMEWORK_GetMsgManagerInstance();
-    if(pstMsgManager == NULL)
+    pstMultiMsgManager = FRAMEWORK_GetMultiMsgManagerInstance();
+    if(pstMultiMsgManager == NULL)
     {
-        PrintError("pstMsgManager == NULL!!");
+        PrintError("pstMultiMsgManager == NULL!!");
         nRet = APP_ERROR;
         return nRet;
     }
 
-    pstMsgManager->pchIfaceName = pstSvcMCp->pchIfaceName;
-    pstMsgManager->stExtMsgWsr.unPsid = pstSvcMCp->unPsid;
+    pstMultiMsgManager->pchIfaceName = pstSvcMCp->pchIfaceName;
+    pstMultiMsgManager->stExtMultiMsgWsr.unPsid = pstSvcMCp->unPsid;
 
-    nRet = MSG_MANAGER_Close(pstMsgManager);
+    nRet = MULTI_MSG_MANAGER_Close(pstMultiMsgManager);
     if(nRet != FRAMEWORK_OK)
     {
-        PrintError("MSG_MANAGER_Close() is failed! [nRet:%d]", nRet);
+        PrintError("MULTI_MSG_MANAGER_Close() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
@@ -1057,115 +1064,115 @@ int32_t SVC_MCP_Close(SVC_MCP_T *pstSvcMCp)
         return nRet;
     }
 
-    pstDbManager = FRAMEWORK_GetDbManagerInstance();
-    if (pstDbManager == NULL)
+    pstMultiDbManager = FRAMEWORK_GetMultiDbManagerInstance();
+    if (pstMultiDbManager == NULL)
     {
         PrintError("FRAMEWORK_GetDbManagerInstance() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
-    nRet = DB_MANAGER_Close(pstDbManager);
+    nRet = MULTI_DB_MANAGER_Close(pstMultiDbManager);
     if(nRet != FRAMEWORK_OK)
     {
-        PrintError("DB_MANAGER_Close() is failed! [nRet:%d]", nRet);
+        PrintError("MULTI_DB_MANAGER_Close() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
     /* Tx */
-    sprintf(s_chStrBufTxRxType, "%s", SVC_MCP_DB_TX);
-    pstDbManager->stDbFile.pchTxRxType = s_chStrBufTxRxType;
+    sprintf(s_chMultiStrBufTxRxType, "%s", SVC_MCP_DB_TX);
+    pstMultiDbManager->stMultiDbFile.pchTxRxType = s_chMultiStrBufTxRxType;
     if(s_stSvcMCp.stDbV2x.eDeviceType == DB_V2X_DEVICE_TYPE_OBU)
     {
 
-        sprintf(s_chStrBufDevType, "%s", SVC_MCP_DEV_OBU);
-        PrintTrace("CONFIG_OBU is enabled, s_chStrBufDevType [%s]", s_chStrBufDevType);
+        sprintf(s_chMultiStrBufDevType, "%s", SVC_MCP_DEV_OBU);
+        PrintTrace("CONFIG_OBU is enabled, s_chMultiStrBufDevType [%s]", s_chMultiStrBufDevType);
     }
     else if(s_stSvcMCp.stDbV2x.eDeviceType == DB_V2X_DEVICE_TYPE_RSU)
     {
-        sprintf(s_chStrBufDevType, "%s", SVC_MCP_DEV_RSU);
-        PrintTrace("CONFIG_RSU is enabled, s_chStrBufDevType [%s]", s_chStrBufDevType);
+        sprintf(s_chMultiStrBufDevType, "%s", SVC_MCP_DEV_RSU);
+        PrintTrace("CONFIG_RSU is enabled, s_chMultiStrBufDevType [%s]", s_chMultiStrBufDevType);
     }
     else
     {
-        sprintf(s_chStrBufDevType, "%s", SVC_MCP_DEV_UNKNOWN);
+        sprintf(s_chMultiStrBufDevType, "%s", SVC_MCP_DEV_UNKNOWN);
         PrintError("unknown device type[%d]", s_stSvcMCp.stDbV2x.eDeviceType);
     }
-    pstDbManager->stDbFile.pchDeviceType = s_chStrBufDevType;
+    pstMultiDbManager->stMultiDbFile.pchDeviceType = s_chMultiStrBufDevType;
 
-    sprintf(s_chStrBufDevId, "%s%s", DB_V2X_DEVICE_ID_PREFIX, s_stSvcMCp.pchDeviceName);
-    pstDbManager->stDbFile.pchDeviceId = s_chStrBufDevId;
+    sprintf(s_chMultiStrBufDevId, "%s%s", MULTI_DB_V2X_DEVICE_ID_PREFIX, s_stSvcMCp.pchDeviceName);
+    pstMultiDbManager->stMultiDbFile.pchDeviceId = s_chMultiStrBufDevId;
 
-    sprintf(s_chStrBufStartTime, "%ld", s_stSvcMCp.ulDbStartTime);
-    strncpy(chTempDate, s_chStrBufStartTime, SVC_MCP_DATE_LEN);
+    sprintf(s_chMultiStrBufStartTime, "%ld", s_stSvcMCp.ulDbStartTime);
+    strncpy(chTempDate, s_chMultiStrBufStartTime, SVC_MCP_DATE_LEN);
     chTempDate[SVC_MCP_DATE_LEN] = '\0';
-    strncpy(chTempHour, s_chStrBufStartTime + SVC_MCP_DATE_LEN, SVC_MCP_HOUR_LEN);
+    strncpy(chTempHour, s_chMultiStrBufStartTime + SVC_MCP_DATE_LEN, SVC_MCP_HOUR_LEN);
     chTempHour[SVC_MCP_HOUR_LEN] = '\0';
-    strncpy(chTempMin, s_chStrBufStartTime + SVC_MCP_DATE_LEN + SVC_MCP_HOUR_LEN, SVC_MCP_MIN_LEN);
+    strncpy(chTempMin, s_chMultiStrBufStartTime + SVC_MCP_DATE_LEN + SVC_MCP_HOUR_LEN, SVC_MCP_MIN_LEN);
     chTempMin[SVC_MCP_MIN_LEN] = '\0';
-    strncpy(chTempSec, s_chStrBufStartTime + SVC_MCP_DATE_LEN + SVC_MCP_HOUR_LEN + SVC_MCP_MIN_LEN, SVC_MCP_SEC_LEN);
+    strncpy(chTempSec, s_chMultiStrBufStartTime + SVC_MCP_DATE_LEN + SVC_MCP_HOUR_LEN + SVC_MCP_MIN_LEN, SVC_MCP_SEC_LEN);
     chTempSec[SVC_MCP_SEC_LEN] = '\0';
-    sprintf(s_chStrBufStartTime, "%s-%s-%s-%s", chTempDate, chTempHour, chTempMin, chTempSec);
-    pstDbManager->stDbFile.pchStartTime = s_chStrBufStartTime;
+    sprintf(s_chMultiStrBufStartTime, "%s-%s-%s-%s", chTempDate, chTempHour, chTempMin, chTempSec);
+    pstMultiDbManager->stMultiDbFile.pchStartTime = s_chMultiStrBufStartTime;
 
-    sprintf(s_chStrBufEndTime, "%ld", s_stSvcMCp.ulDbEndTime);
-    strncpy(chTempDate, s_chStrBufEndTime, SVC_MCP_DATE_LEN);
+    sprintf(s_chMultiStrBufEndTime, "%ld", s_stSvcMCp.ulDbEndTime);
+    strncpy(chTempDate, s_chMultiStrBufEndTime, SVC_MCP_DATE_LEN);
     chTempDate[SVC_MCP_DATE_LEN] = '\0';
-    strncpy(chTempHour, s_chStrBufEndTime + SVC_MCP_DATE_LEN, SVC_MCP_HOUR_LEN);
+    strncpy(chTempHour, s_chMultiStrBufEndTime + SVC_MCP_DATE_LEN, SVC_MCP_HOUR_LEN);
     chTempHour[SVC_MCP_HOUR_LEN] = '\0';
-    strncpy(chTempMin, s_chStrBufEndTime + SVC_MCP_DATE_LEN + SVC_MCP_HOUR_LEN, SVC_MCP_MIN_LEN);
+    strncpy(chTempMin, s_chMultiStrBufEndTime + SVC_MCP_DATE_LEN + SVC_MCP_HOUR_LEN, SVC_MCP_MIN_LEN);
     chTempMin[SVC_MCP_MIN_LEN] = '\0';
-    strncpy(chTempSec, s_chStrBufEndTime + SVC_MCP_DATE_LEN + SVC_MCP_HOUR_LEN + SVC_MCP_MIN_LEN, SVC_MCP_SEC_LEN);
+    strncpy(chTempSec, s_chMultiStrBufEndTime + SVC_MCP_DATE_LEN + SVC_MCP_HOUR_LEN + SVC_MCP_MIN_LEN, SVC_MCP_SEC_LEN);
     chTempSec[SVC_MCP_SEC_LEN] = '\0';
 
-    sprintf(s_chStrBufEndTime, "%s-%s-%s-%s", chTempDate, chTempHour, chTempMin, chTempSec);
-    pstDbManager->stDbFile.pchEndTime = s_chStrBufEndTime;
+    sprintf(s_chMultiStrBufEndTime, "%s-%s-%s-%s", chTempDate, chTempHour, chTempMin, chTempSec);
+    pstMultiDbManager->stMultiDbFile.pchEndTime = s_chMultiStrBufEndTime;
 
-    sprintf(s_chStrBufTotalTime, "%d%s", s_stSvcMCp.unDbTotalWrittenTime, "secs");
-    pstDbManager->stDbFile.pchTotalTime = s_chStrBufTotalTime;
+    sprintf(s_chMultiStrBufTotalTime, "%d%s", s_stSvcMCp.unDbTotalWrittenTime, "secs");
+    pstMultiDbManager->stMultiDbFile.pchTotalTime = s_chMultiStrBufTotalTime;
 
-    nRet = DB_MANAGER_MakeDbFile(pstDbManager);
+    nRet = MULTI_DB_MANAGER_MakeDbFile(pstMultiDbManager);
     if(nRet != FRAMEWORK_OK)
     {
-        PrintError("DB_MANAGER_MakeDbFile() is failed! [nRet:%d]", nRet);
+        PrintError("MULTI_DB_MANAGER_MakeDbFile() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
-    nRet = DB_MANAGER_RemoveTempFile(pstDbManager);
+    nRet = MULTI_DB_MANAGER_RemoveTempFile(pstMultiDbManager);
     if(nRet != FRAMEWORK_OK)
     {
-        PrintError("DB_MANAGER_RemoveTempFile() is failed! [nRet:%d]", nRet);
+        PrintError("MULTI_DB_MANAGER_RemoveTempFile() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
-    nRet = DB_MANAGER_UploadFile(pstDbManager);
+    nRet = MULTI_DB_MANAGER_UploadFile(pstMultiDbManager);
     if(nRet != FRAMEWORK_OK)
     {
-        PrintError("DB_MANAGER_UploadFile() is failed! [nRet:%d]", nRet);
+        PrintError("MULTI_DB_MANAGER_UploadFile() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
     /* Rx */
-    sprintf(s_chStrBufTxRxType, "%s", SVC_MCP_DB_RX);
-    pstDbManager->stDbFile.pchTxRxType = s_chStrBufTxRxType;
+    sprintf(s_chMultiStrBufTxRxType, "%s", SVC_MCP_DB_RX);
+    pstMultiDbManager->stMultiDbFile.pchTxRxType = s_chMultiStrBufTxRxType;
 
-    nRet = DB_MANAGER_MakeDbFile(pstDbManager);
+    nRet = MULTI_DB_MANAGER_MakeDbFile(pstMultiDbManager);
     if(nRet != FRAMEWORK_OK)
     {
-        PrintError("DB_MANAGER_MakeDbFile() is failed! [nRet:%d]", nRet);
+        PrintError("MULTI_DB_MANAGER_MakeDbFile() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
-    nRet = DB_MANAGER_RemoveTempFile(pstDbManager);
+    nRet = MULTI_DB_MANAGER_RemoveTempFile(pstMultiDbManager);
     if(nRet != FRAMEWORK_OK)
     {
-        PrintError("DB_MANAGER_RemoveTempFile() is failed! [nRet:%d]", nRet);
+        PrintError("MULTI_DB_MANAGER_RemoveTempFile() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
-    nRet = DB_MANAGER_UploadFile(pstDbManager);
+    nRet = MULTI_DB_MANAGER_UploadFile(pstMultiDbManager);
     if(nRet != FRAMEWORK_OK)
     {
-        PrintError("DB_MANAGER_UploadFile() is failed! [nRet:%d]", nRet);
+        PrintError("MULTI_DB_MANAGER_UploadFile() is failed! [nRet:%d]", nRet);
         return nRet;
     }
 
@@ -1296,4 +1303,5 @@ int32_t SVC_MCP_DeInit(SVC_MCP_T *pstSvcMCp)
 
     return nRet;
 }
+#endif
 
