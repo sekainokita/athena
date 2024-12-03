@@ -4487,18 +4487,14 @@ window.onload = function() {
             }
 
             if (!isNaN(nTxAttitude)) {
-                console.log('Updating Tx Attitude:', nTxAttitude); // 디버깅용 로그 추가
                 document.getElementById('tx-attitude-value').innerText = `${nTxAttitude.toFixed(2)}°`;
             } else {
-                console.warn('Invalid Tx Attitude:', nTxAttitude); // 경고 로그 추가
                 document.getElementById('tx-attitude-value').innerText = 'Invalid Attitude';
             }
 
             if (!isNaN(nRxAttitude)) {
-                console.log('Updating Rx Attitude:', nRxAttitude); // 디버깅용 로그 추가
                 document.getElementById('rx-attitude-value').innerText = `${nRxAttitude.toFixed(2)}°`;
             } else {
-                console.warn('Invalid Rx Attitude:', nRxAttitude); // 경고 로그 추가
                 document.getElementById('rx-attitude-value').innerText = 'Invalid Attitude';
             }
 
