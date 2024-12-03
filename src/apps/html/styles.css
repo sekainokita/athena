@@ -156,6 +156,61 @@
     font-weight: bold;
 }
 
+/* 위치, 거리 등 정보 표 */
+#status-table-container {
+    position: absolute;
+    bottom: 150px;
+    left: 20px;
+    z-index: 100;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#status-table {
+    width: 100%;
+    max-width: 500px;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+}
+
+#status-table th {
+    background-color: #444;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #555;
+    font-size: 15px;
+}
+
+#status-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    color: #333;
+}
+
+#status-table td[colspan="2"] {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    color: #333;
+}
+
+#status-table td:hover {
+    background-color: rgba(0, 128, 255, 0.1);
+}
+
+#status-table td:first-child, #status-table th:first-child {
+    font-weight: bold;
+    background-color: #f3f3f3;
+}
+
 #autoTrackButton, #projectionButton, #connectedStatusButton, #visiblePathButton {
     position: absolute;
     padding: 7.5px 15px;

@@ -164,6 +164,8 @@ window.onload = function() {
         let s_unRxDevId, s_nRxLatitude, s_nRxLongitude, s_unRxVehicleHeading, s_unRxVehicleSpeed;
         let s_unTxDevId, s_nTxLatitude, s_nTxLongitude, s_unTxVehicleHeading, s_unTxVehicleSpeed;
         let s_unPdr, s_ulLatencyL1, s_ulTotalPacketCnt, s_unSeqNum;
+        let s_nTxAttitude, s_nRxAttitude;
+        let s_usCommDistance, s_nRssi, s_ucRcpi, s_eRsvLevel;
 
         function updateV2VPath(pathId, marker) {
             const V2VCoordinates = [
@@ -3355,17 +3357,23 @@ window.onload = function() {
                     s_unRxDevId = data[48];
                     s_nRxLatitude = data[62];
                     s_nRxLongitude = data[63];
+                    s_nRxAttitude = data[64];
                     s_unRxVehicleSpeed = data[55];
                     s_unRxVehicleHeading = reverseHeading(data[56]);
                     s_unTxDevId = data[18];
                     s_nTxLatitude = data[32];
                     s_nTxLongitude = data[33];
+                    s_nTxAttitude = data[34];
                     s_unTxVehicleSpeed = data[37];
                     s_unTxVehicleHeading = reverseHeading(data[38]);
                     s_unPdr = data[68];
                     s_ulLatencyL1 = data[43];
                     s_ulTotalPacketCnt = data[66];
                     s_unSeqNum = data[35];
+                    s_usCommDistance = data[61];
+                    s_nRssi = data[58];
+                    s_ucRcpi = data[59];
+                    s_eRsvLevel = data[60];
                 }
             }
 
@@ -4441,6 +4449,16 @@ window.onload = function() {
             const unPdr = parseFloat(s_unPdr);
             const ulLatencyL1 = parseFloat(s_ulLatencyL1);
             const ulTotalPacketCnt = parseFloat(s_ulTotalPacketCnt);
+            const nRxLatitude = parseFloat(s_nRxLatitude);
+            const nRxLongitude = parseFloat(s_nRxLongitude);
+            const nRxAttitude = parseFloat(s_nRxAttitude);
+            const nTxLatitude = parseFloat(s_nTxLatitude);
+            const nTxLongitude = parseFloat(s_nTxLongitude);
+            const nTxAttitude = parseFloat(s_nTxAttitude);
+            const usCommDistance = parseFloat(s_usCommDistance);
+            const nRssi = parseFloat(s_nRssi);
+            const ucRcpi = parseFloat(s_ucRcpi);
+            const eRsvLevel = parseFloat(s_eRsvLevel);
 
             let refinedPdr = unPdr;
             if (unPdr < 99.9 || unPdr > 100.00 || isNaN(unPdr)) {
@@ -4453,6 +4471,60 @@ window.onload = function() {
                 refinedLatency = Math.random() * (10 - 8) + 1;
             }
             refinedLatency = parseFloat(refinedLatency.toFixed(3));
+
+            if (!isNaN(nTxLatitude) && !isNaN(nTxLongitude)) {
+                const txCoordinate = `(${nTxLatitude.toFixed(6)}, ${nTxLongitude.toFixed(6)})`;
+                document.getElementById('tx-coordinate-value').innerText = txCoordinate;
+            } else {
+                document.getElementById('tx-coordinate-value').innerText = 'Invalid Coordinates';
+            }
+
+            if (!isNaN(nRxLatitude) && !isNaN(nRxLongitude)) {
+                const rxCoordinate = `(${nRxLatitude.toFixed(6)}, ${nRxLongitude.toFixed(6)})`;
+                document.getElementById('rx-coordinate-value').innerText = rxCoordinate;
+            } else {
+                document.getElementById('rx-coordinate-value').innerText = 'Invalid Coordinates';
+            }
+
+            if (!isNaN(nTxAttitude)) {
+                console.log('Updating Tx Attitude:', nTxAttitude); // 디버깅용 로그 추가
+                document.getElementById('tx-attitude-value').innerText = `${nTxAttitude.toFixed(2)}°`;
+            } else {
+                console.warn('Invalid Tx Attitude:', nTxAttitude); // 경고 로그 추가
+                document.getElementById('tx-attitude-value').innerText = 'Invalid Attitude';
+            }
+
+            if (!isNaN(nRxAttitude)) {
+                console.log('Updating Rx Attitude:', nRxAttitude); // 디버깅용 로그 추가
+                document.getElementById('rx-attitude-value').innerText = `${nRxAttitude.toFixed(2)}°`;
+            } else {
+                console.warn('Invalid Rx Attitude:', nRxAttitude); // 경고 로그 추가
+                document.getElementById('rx-attitude-value').innerText = 'Invalid Attitude';
+            }
+
+            if (!isNaN(usCommDistance)) {
+                document.getElementById('distance-value').innerText = `${usCommDistance.toFixed(2)} m`;
+            } else {
+                document.getElementById('distance-value').innerText = 'Invalid Distance';
+            }
+
+            if (!isNaN(nRssi)) {
+                document.getElementById('nRssi-value').innerText = `${nRssi.toFixed(2)} dBm`;
+            } else {
+                document.getElementById('nRssi-value').innerText = 'Invalid nRssi';
+            }
+
+            if (!isNaN(ucRcpi)) {
+                document.getElementById('ucRcpi-value').innerText = `${ucRcpi.toFixed(2)} dBm`;
+            } else {
+                document.getElementById('ucRcpi-value').innerText = 'Invalid ucRcpi';
+            }
+
+            if (!isNaN(eRsvLevel)) {
+                document.getElementById('eRsvLevel-value').innerText = `${eRsvLevel.toFixed(2)}`;
+            } else {
+                document.getElementById('eRsvLevel-value').innerText = 'Invalid eRsvLevel';
+            }
 
             if (!isNaN(refinedPdr) && !isNaN(ulTotalPacketCnt)) {
                 updateGraph1(ulTotalPacketCnt, refinedPdr);

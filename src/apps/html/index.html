@@ -77,6 +77,47 @@
     <p id="traffic-light-status" style="color: green;">Green Light<br>(GO)</p>
 </div>
 
+<div id="status-table-container">
+    <table id="status-table">
+        <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Tx_Vehicle</th>
+                <th>Rx_Vehicle</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Coordinate</td>
+                <td id="tx-coordinate-value">Latitude, Longitude</td>
+                <td id="rx-coordinate-value">Latitude, Longitude</td>
+            </tr>
+            <tr>
+                <td>Attitude</td>
+                <td id="tx-attitude-value">nTxAttitude</td>
+                <td id="rx-attitude-value">nRxAttitude</td>
+            </tr>
+            <tr>
+                <td>Distance</td>
+                <td id="distance-value" colspan="2">usCommDistance</td>
+            </tr>
+            <tr>
+                <td>Rssi</td>
+                <td id="nRssi-value" colspan="2">nRssi</td>
+            </tr>
+            <tr>
+                <td>Rcpi</td>
+                <td id="ucRcpi-value" colspan="2">ucRcpi</td>
+            </tr>
+            <tr>
+                <td>eRsvLevel</td>
+                <td id="eRsvLevel-value" colspan="2">eRsvLevel</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
 <button id="autoTrackButton">AUTO TRACK</button>
 <button id="projectionButton">PROJECTION</button>
 <button id="connectedStatusButton">CONNECTED STATUS</button>
