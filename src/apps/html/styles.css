@@ -117,8 +117,8 @@
 /* PDR 상태 정보 스타일 */
 #pdr-status {
     position: absolute;
-    top: 0;
-    right: 10px;
+    top: 1px;
+    left: 1950px;
     background-color: rgba(0, 0, 0, 0.8); /* 약간 투명한 검은색 배경 */
     padding: 10px 20px;
     border-radius: 10px;
@@ -127,14 +127,14 @@
     font-size: 20px;
     color: white;
     z-index: 2;
-    text-align: center;
+    text-align: left;
 }
 
 /* Latency 상태 정보 스타일 */
 #latency-status {
     position: absolute;
     top: 50px; /* PDR 상태 정보 아래 */
-    right: 10px;
+    left: 1950px;
     background-color: rgba(0, 0, 0, 0.8); /* 약간 투명한 검은색 배경 */
     padding: 10px 20px;
     border-radius: 10px;
@@ -143,16 +143,16 @@
     font-size: 20px;
     color: white;
     z-index: 2;
-    text-align: center;
+    text-align: right;
 }
 
 #pdr-value {
-    color: #32CD32; /* PDR 문구의 초록색 */
+    color: #FFD700; /* PDR 문구의 주황색 */
     font-weight: bold;
 }
 
 #latency-value {
-    color: #1E90FF; /* Latency 문구의 파란색 */
+    color: #FF7F50; /* Latency 문구의 코랄색 */
     font-weight: bold;
 }
 

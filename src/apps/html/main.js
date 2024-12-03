@@ -4486,18 +4486,19 @@ window.onload = function() {
 
                 // TotalPacketCount 텍스트 추가
                 let totalPacketCount = xValue[0];
-                let middleYValue = (95 + 100) / 2;
+                let middleYValue = (99 + 100) / 2;
 
                 Plotly.relayout('graph1', {
                     yaxis: {
-                        range: [95, 100],
-                        title: 'PDR (Packet Delivery Rate) (%)',
+                        range: [99, 100],
+                        title: 'PRR (Packet Reception Rate) (%)',
                         dtick: 1,
                         tickfont: {
                             size: 10  // y축 숫자 글씨 크기 줄이기
                         }
                     },
                     xaxis: {
+                        range : [Math.max(0, xValue[0] - 500), xValue[0]],
                         title: 'The Total Received Rx Packets',
                         tickfont: {
                             size: 10  // x축 숫자 글씨 크기 줄이기
@@ -4529,7 +4530,7 @@ window.onload = function() {
                     */
                 });
 
-                document.getElementById('pdr-value').innerText = `PDR(Packet Delivery Rate) ${unPdrValue[0]}%`;
+                document.getElementById('pdr-value').innerText = `PRR (Packet Reception Rate) ${unPdrValue[0]}%`;
             } else {
                 console.error('Invalid data points for Graph1.');
             }
@@ -4557,7 +4558,7 @@ window.onload = function() {
 
                 Plotly.relayout('graph2', {
                     yaxis: {
-                        range: [0, 5],
+                        range: [0, 4],
                         title: 'Latency (ms)',
                         dtick: 1,
                         tickfont: {
@@ -4565,6 +4566,7 @@ window.onload = function() {
                         }
                     },
                     xaxis: {
+                        range : [Math.max(0, xValue[0] - 500), xValue[0]],
                         title: 'The Total Received Rx Packets',
                         tickfont: {
                             size: 10  // x축 숫자 글씨 크기 줄이기
@@ -4576,7 +4578,7 @@ window.onload = function() {
                             x0: latencyData[0].x, x1: latencyData[latencyData.length - 1].x,
                             y0: avgLatency, y1: avgLatency,
                             line: {
-                                color: 'red',
+                                color: '#FFD700',
                                 width: 2,
                                 dash: 'dash'
                             }
@@ -4584,7 +4586,7 @@ window.onload = function() {
                     ],
                     annotations: [
                         {
-                            x: latencyData[latencyData.length - 1].x,
+                            x: latencyData[latencyData.length - 1]?.x || 0,
                             y: avgLatency,
                             xref: 'x',
                             yref: 'y',
@@ -4593,21 +4595,21 @@ window.onload = function() {
                             font: {
                                 family: 'Arial, sans-serif',
                                 size: 16,
-                                color: 'red',
+                                color: '#000000',
                             },
                             align: 'right',
-                            xanchor: 'left',
+                            xanchor: 'right',
                             yanchor: 'bottom',
-                            bordercolor: 'red',
+                            bordercolor: '#FFD700',
                             borderwidth: 2,
                             borderpad: 4,
-                            bgcolor: '#ffffff',
+                            bgcolor: '#FFFFE0',
                             opacity: 0.8
                         }
                     ]
                 });
 
-                document.getElementById('latency-value').innerText = `Latency(Air to Air) ${ulLatencyValue[0]}ms, Avg: ${avgLatency.toFixed(2)}ms`;
+                document.getElementById('latency-value').innerText = `Latency (Air to Air) ${ulLatencyValue[0]}ms, Avg: ${avgLatency.toFixed(2)}ms`;
             } else {
                 console.error('Invalid data points for Graph2.');
             }
@@ -4618,14 +4620,14 @@ window.onload = function() {
             y: [],
             type: 'scatter',
             mode: 'lines+markers',
-            line: { color: 'green', width: 2 },
-            marker: { color: 'green', size: 6 }
+            line: { color: '#FFD700', width: 1 },
+            marker: { color: '#FFD700', size: 3 }
         }], {
             margin: { t: 60, b: 40, l: 50, r: 30 }, // 타이틀 높이에 맞게 top margin 증가
-            yaxis: { range: [95, 100], title: 'PDR (%)', showgrid: true, zeroline: true, dtick: 1 },
+            yaxis: { range: [99, 100], title: 'PRR (%)', showgrid: true, zeroline: true, dtick: 1 },
             xaxis: { title: 'ulTotalPacketCnt', showgrid: true },
             title: {
-                text: 'Real-time PDR Monitoring',
+                text: 'Real-time PRR Monitoring',
                 font: {
                     size: 20,  // 타이틀 글자 크기만 설정
                     color: 'white'
@@ -4652,11 +4654,11 @@ window.onload = function() {
             y: [],
             type: 'scatter',
             mode: 'lines+markers',
-            line: { color: 'blue', width: 2 },
-            marker: { color: 'blue', size: 6 }
+            line: { color: '#FF7F50', width: 1 },
+            marker: { color: '#FF7F50', size: 3 }
         }], {
             margin: { t: 60, b: 40, l: 50, r: 30 }, // 타이틀 높이에 맞게 top margin 증가
-            yaxis: { range: [0, 5], title: 'Latency (ms)', showgrid: true, zeroline: true, dtick: 1 },
+            yaxis: { range: [0, 4], title: 'Latency (ms)', showgrid: true, zeroline: true, dtick: 1 },
             xaxis: { title: 'ulTotalPacketCnt', showgrid: true },
             title: {
                 text: 'Real-time Latency Monitoring',
