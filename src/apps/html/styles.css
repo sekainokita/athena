@@ -169,8 +169,8 @@
 }
 
 #status-table {
-    width: 100%;
-    max-width: 500px;
+    width: 550px;
+    table-layout: fixed;
     border-collapse: collapse;
     font-family: Arial, sans-serif;
     font-size: 14px;
@@ -204,11 +204,6 @@
 
 #status-table td:hover {
     background-color: rgba(0, 128, 255, 0.1);
-}
-
-#status-table td:first-child, #status-table th:first-child {
-    font-weight: bold;
-    background-color: #f3f3f3;
 }
 
 #autoTrackButton, #projectionButton, #connectedStatusButton, #visiblePathButton {

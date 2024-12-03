@@ -166,6 +166,7 @@ window.onload = function() {
         let s_unPdr, s_ulLatencyL1, s_ulTotalPacketCnt, s_unSeqNum;
         let s_nTxAttitude, s_nRxAttitude;
         let s_usCommDistance, s_nRssi, s_ucRcpi, s_eRsvLevel;
+        let s_usTxSwVerL1, s_usTxSwVerL2, s_usTxSwVerL3, s_usRxSwVerL1, s_usRxSwVerL2, s_usRxSwVerL3;
 
         function updateV2VPath(pathId, marker) {
             const V2VCoordinates = [
@@ -3374,6 +3375,12 @@ window.onload = function() {
                     s_nRssi = data[58];
                     s_ucRcpi = data[59];
                     s_eRsvLevel = data[60];
+                    s_usTxSwVerL1 = data[19];
+                    s_usTxSwVerL2 = data[20];
+                    s_usTxSwVerL3 = data[21];
+                    s_usRxSwVerL1 = data[49];
+                    s_usRxSwVerL2 = data[50];
+                    s_usRxSwVerL3 = data[51];
                 }
             }
 
@@ -4459,6 +4466,26 @@ window.onload = function() {
             const nRssi = parseFloat(s_nRssi);
             const ucRcpi = parseFloat(s_ucRcpi);
             const eRsvLevel = parseFloat(s_eRsvLevel);
+            const devId0 = parseFloat(s_unRxDevId);
+            const devId1 = parseFloat(s_unTxDevId);
+            const usTxSwVerL1 = parseFloat(s_usTxSwVerL1);
+            const usTxSwVerL2 = parseFloat(s_usTxSwVerL2);
+            const usTxSwVerL3 = parseFloat(s_usTxSwVerL3);
+            const usRxSwVerL1 = parseFloat(s_usRxSwVerL1);
+            const usRxSwVerL2 = parseFloat(s_usRxSwVerL2);
+            const usRxSwVerL3 = parseFloat(s_usRxSwVerL3);
+
+            if (!isNaN(devId0)) {
+                document.getElementById('rx-vehicle-header').innerText = `OBU#${devId0}`;
+            } else {
+                document.getElementById('rx-vehicle-header').innerText = 'Rx_Vehicle';
+            }
+
+            if (!isNaN(devId1)) {
+                document.getElementById('tx-vehicle-header').innerText = `OBU#${devId1}`;
+            } else {
+                document.getElementById('tx-vehicle-header').innerText = 'Tx_Vehicle';
+            }
 
             let refinedPdr = unPdr;
             if (unPdr < 99.9 || unPdr > 100.00 || isNaN(unPdr)) {
@@ -4487,15 +4514,51 @@ window.onload = function() {
             }
 
             if (!isNaN(nTxAttitude)) {
-                document.getElementById('tx-attitude-value').innerText = `${nTxAttitude.toFixed(2)}°`;
+                document.getElementById('tx-attitude-value').innerText = `${nTxAttitude.toFixed(2)}`;
             } else {
                 document.getElementById('tx-attitude-value').innerText = 'Invalid Attitude';
             }
 
             if (!isNaN(nRxAttitude)) {
-                document.getElementById('rx-attitude-value').innerText = `${nRxAttitude.toFixed(2)}°`;
+                document.getElementById('rx-attitude-value').innerText = `${nRxAttitude.toFixed(2)}`;
             } else {
                 document.getElementById('rx-attitude-value').innerText = 'Invalid Attitude';
+            }
+
+            if (!isNaN(usTxSwVerL1)) {
+                document.getElementById('tx-swver1-value').innerText = `${usTxSwVerL1}`;
+            } else {
+                document.getElementById('tx-swver1-value').innerText = 'Invalid SwVer';
+            }
+
+            if (!isNaN(usRxSwVerL1)) {
+                document.getElementById('rx-swver1-value').innerText = `${usRxSwVerL1}`;
+            } else {
+                document.getElementById('rx-swver1-value').innerText = 'Invalid SwVer';
+            }
+
+            if (!isNaN(usTxSwVerL2)) {
+                document.getElementById('tx-swver2-value').innerText = `${usTxSwVerL2}`;
+            } else {
+                document.getElementById('tx-swver2-value').innerText = 'Invalid SwVer';
+            }
+
+            if (!isNaN(usRxSwVerL2)) {
+                document.getElementById('rx-swver2-value').innerText = `${usRxSwVerL2}`;
+            } else {
+                document.getElementById('rx-swver2-value').innerText = 'Invalid SwVer';
+            }
+
+            if (!isNaN(usTxSwVerL3)) {
+                document.getElementById('tx-swver3-value').innerText = `${usTxSwVerL3}`;
+            } else {
+                document.getElementById('tx-swver3-value').innerText = 'Invalid SwVer';
+            }
+
+            if (!isNaN(usRxSwVerL3)) {
+                document.getElementById('rx-swver3-value').innerText = `${usRxSwVerL3}`;
+            } else {
+                document.getElementById('rx-swver3-value').innerText = 'Invalid SwVer';
             }
 
             if (!isNaN(usCommDistance)) {
@@ -4505,19 +4568,19 @@ window.onload = function() {
             }
 
             if (!isNaN(nRssi)) {
-                document.getElementById('nRssi-value').innerText = `${nRssi.toFixed(2)} dBm`;
+                document.getElementById('nRssi-value').innerText = `${nRssi} dBm`;
             } else {
                 document.getElementById('nRssi-value').innerText = 'Invalid nRssi';
             }
 
             if (!isNaN(ucRcpi)) {
-                document.getElementById('ucRcpi-value').innerText = `${ucRcpi.toFixed(2)} dBm`;
+                document.getElementById('ucRcpi-value').innerText = `${ucRcpi} dBm`;
             } else {
                 document.getElementById('ucRcpi-value').innerText = 'Invalid ucRcpi';
             }
 
             if (!isNaN(eRsvLevel)) {
-                document.getElementById('eRsvLevel-value').innerText = `${eRsvLevel.toFixed(2)}`;
+                document.getElementById('eRsvLevel-value').innerText = `${eRsvLevel}`;
             } else {
                 document.getElementById('eRsvLevel-value').innerText = 'Invalid eRsvLevel';
             }
