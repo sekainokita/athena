@@ -131,6 +131,20 @@ window.onload = function() {
         document.getElementById('CD7').style.display = 'block';
         document.getElementById('CD8').style.display = 'block';
 
+        /*
+        const config = mapboxConfigs[selectedRegion];
+        if (config) {
+            mapboxgl.accessToken = config.accessToken;
+            map.setStyle(config.style);
+
+            map.once('styledata', () => {
+                map.jumpTo({ center: config.center, zoom: 19 });
+            });
+        } else {
+            console.error('Invalid region selected:', selectedRegion);
+        }
+        */
+
         main(isTxTest, ipAddress);
     };
 
@@ -166,7 +180,7 @@ window.onload = function() {
         let s_unPdr, s_ulLatencyL1, s_ulTotalPacketCnt, s_unSeqNum;
         let s_nTxAttitude, s_nRxAttitude;
         let s_usCommDistance, s_nRssi, s_ucRcpi, s_eRsvLevel;
-        let s_usTxSwVerL1, s_usTxSwVerL2, s_usTxSwVerL3, s_usRxSwVerL1, s_usRxSwVerL2, s_usRxSwVerL3;
+        let s_usTxSwVerL1, s_usTxSwVerL2, s_usTxHwVerL1, s_usTxHwVerL2, s_usRxSwVerL1, s_usRxSwVerL2, s_usRxHwVerL1, s_usRxHwVerL2;
 
         function updateV2VPath(pathId, marker) {
             const V2VCoordinates = [
@@ -276,7 +290,63 @@ window.onload = function() {
         });
 
         map.addControl(new mapboxgl.NavigationControl());
+        /*
+        const mapboxConfigs = {
+            pangyo: {
+                accessToken: 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q',
+                style: 'mapbox://styles/yesbman/cm3mdtaea00bj01sq91q9egy8',
+                center: [127.1021, 37.4064] // 판교 좌표
+            },
+            daegu: {
+                accessToken: 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q',
+                style: 'mapbox://styles/yesbman/cm3pfcrd1000j01svb1deeqr0',
+                center: [128.601763, 35.869757] // 대구 좌표
+            },
+            incheon: {
+                accessToken: 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q',
+                style: 'mapbox://styles/yesbman/cm2t00fr600dl01r6hpir3mvk',
+                center: [126.705206, 37.456256] // 인천 좌표
+            }
+        };
 
+        // 초기 지도 설정 (기본 판교)
+        const initialRegion = 'pangyo';
+        mapboxgl.accessToken = mapboxConfigs[initialRegion].accessToken;
+
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: mapboxConfigs[initialRegion].style,
+            center: mapboxConfigs[initialRegion].center,
+            zoom: 19,
+            projection: 'globe'
+        });
+
+        // Mapbox 컨트롤 추가
+        map.addControl(new mapboxgl.NavigationControl());
+
+        // 지역 변경 이벤트 핸들러
+        document.getElementById('regionSelect').addEventListener('change', (event) => {
+            console.log('Selected value:', event.target.value);
+            const selectedRegion = event.target.value;
+            const config = mapboxConfigs[selectedRegion];
+
+            if (config) {
+                // Access Token 재설정
+                mapboxgl.accessToken = config.accessToken;
+
+                // 스타일 변경
+                map.setStyle(config.style);
+
+                // 스타일 변경 완료 후 중심 좌표 이동
+                map.once('styledata', () => {
+                    console.log(`Style loaded for ${selectedRegion}, moving to ${config.center}`);
+                    map.jumpTo({ center: config.center, zoom: 19 });
+                });
+            } else {
+                console.error('Invalid region selected:', selectedRegion);
+            }
+        });
+*/
         map.on('style.load', () => {
             map.setFog({});
 
@@ -3377,10 +3447,12 @@ window.onload = function() {
                     s_eRsvLevel = data[60];
                     s_usTxSwVerL1 = data[19];
                     s_usTxSwVerL2 = data[20];
-                    s_usTxSwVerL3 = data[21];
                     s_usRxSwVerL1 = data[49];
                     s_usRxSwVerL2 = data[50];
-                    s_usRxSwVerL3 = data[51];
+                    s_usTxHwVerL1 = data[22];
+                    s_usTxHwVerL2 = data[23];
+                    s_usRxHwVerL1 = data[52];
+                    s_usRxHwVerL2 = data[53];
                 }
             }
 
@@ -4470,10 +4542,12 @@ window.onload = function() {
             const devId1 = parseFloat(s_unTxDevId);
             const usTxSwVerL1 = parseFloat(s_usTxSwVerL1);
             const usTxSwVerL2 = parseFloat(s_usTxSwVerL2);
-            const usTxSwVerL3 = parseFloat(s_usTxSwVerL3);
             const usRxSwVerL1 = parseFloat(s_usRxSwVerL1);
             const usRxSwVerL2 = parseFloat(s_usRxSwVerL2);
-            const usRxSwVerL3 = parseFloat(s_usRxSwVerL3);
+            const usTxHwVerL1 = parseFloat(s_usTxHwVerL1);
+            const usTxHwVerL2 = parseFloat(s_usTxHwVerL2);
+            const usRxHwVerL1 = parseFloat(s_usRxHwVerL1);
+            const usRxHwVerL2 = parseFloat(s_usRxHwVerL2);
 
             if (!isNaN(devId0)) {
                 document.getElementById('rx-vehicle-header').innerText = `OBU#${devId0}`;
@@ -4499,18 +4573,28 @@ window.onload = function() {
             }
             refinedLatency = parseFloat(refinedLatency.toFixed(3));
 
-            if (!isNaN(nTxLatitude) && !isNaN(nTxLongitude)) {
-                const txCoordinate = `(${nTxLatitude.toFixed(6)}, ${nTxLongitude.toFixed(6)})`;
-                document.getElementById('tx-coordinate-value').innerText = txCoordinate;
+            if (!isNaN(nTxLatitude)) {
+                document.getElementById('tx-latitude-value').innerText = `${nTxLatitude.toFixed(6)}`;
             } else {
-                document.getElementById('tx-coordinate-value').innerText = 'Invalid Coordinates';
+                document.getElementById('tx-latitude-value').innerText = 'Invalid Latitude';
             }
 
-            if (!isNaN(nRxLatitude) && !isNaN(nRxLongitude)) {
-                const rxCoordinate = `(${nRxLatitude.toFixed(6)}, ${nRxLongitude.toFixed(6)})`;
-                document.getElementById('rx-coordinate-value').innerText = rxCoordinate;
+            if (!isNaN(nTxLongitude)) {
+                document.getElementById('tx-longitude-value').innerText = `${nTxLongitude.toFixed(6)}`;
             } else {
-                document.getElementById('rx-coordinate-value').innerText = 'Invalid Coordinates';
+                document.getElementById('tx-longitude-value').innerText = 'Invalid Longitude';
+            }
+
+            if (!isNaN(nRxLatitude)) {
+                document.getElementById('rx-latitude-value').innerText = `${nRxLatitude.toFixed(6)}`;
+            } else {
+                document.getElementById('rx-latitude-value').innerText = 'Invalid Latitude';
+            }
+
+            if (!isNaN(nRxLongitude)) {
+                document.getElementById('rx-longitude-value').innerText = `${nRxLongitude.toFixed(6)}`;
+            } else {
+                document.getElementById('rx-longitude-value').innerText = 'Invalid Longitude';
             }
 
             if (!isNaN(nTxAttitude)) {
@@ -4549,16 +4633,28 @@ window.onload = function() {
                 document.getElementById('rx-swver2-value').innerText = 'Invalid SwVer';
             }
 
-            if (!isNaN(usTxSwVerL3)) {
-                document.getElementById('tx-swver3-value').innerText = `${usTxSwVerL3}`;
+            if (!isNaN(usTxHwVerL1)) {
+                document.getElementById('tx-hwver1-value').innerText = `${usTxHwVerL1}`;
             } else {
-                document.getElementById('tx-swver3-value').innerText = 'Invalid SwVer';
+                document.getElementById('tx-hwver1-value').innerText = 'Invalid HwVer';
             }
 
-            if (!isNaN(usRxSwVerL3)) {
-                document.getElementById('rx-swver3-value').innerText = `${usRxSwVerL3}`;
+            if (!isNaN(usRxHwVerL1)) {
+                document.getElementById('rx-hwver1-value').innerText = `${usRxHwVerL1}`;
             } else {
-                document.getElementById('rx-swver3-value').innerText = 'Invalid SwVer';
+                document.getElementById('rx-hwver1-value').innerText = 'Invalid HwVer';
+            }
+
+            if (!isNaN(usTxHwVerL2)) {
+                document.getElementById('tx-hwver2-value').innerText = `${usTxHwVerL2}`;
+            } else {
+                document.getElementById('tx-hwver2-value').innerText = 'Invalid HwVer';
+            }
+
+            if (!isNaN(usRxHwVerL2)) {
+                document.getElementById('rx-hwver2-value').innerText = `${usRxHwVerL2}`;
+            } else {
+                document.getElementById('rx-hwver2-value').innerText = 'Invalid HwVer';
             }
 
             if (!isNaN(usCommDistance)) {
