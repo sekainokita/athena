@@ -281,12 +281,60 @@ window.onload = function() {
         let CD8NegotiationMarker = null;
 
         mapboxgl.accessToken = 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q';
+
+        const mapboxConfigs = {
+            pangyo: {
+                accessToken: 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q',
+                style: 'mapbox://styles/yesbman/cm3mdtaea00bj01sq91q9egy8',
+                center: [127.1021, 37.4064] // 판교 좌표
+            },
+            daegu: {
+                accessToken: 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q',
+                style: 'mapbox://styles/yesbman/cm3pfcrd1000j01svb1deeqr0',
+                center: [128.601763, 35.869757] // 대구 좌표
+            },
+            incheon: {
+                accessToken: 'pk.eyJ1IjoieWVzYm1hbiIsImEiOiJjbHoxNHVydHQyNzBzMmpzMHNobGUxNnZ6In0.bAFH10On30d_Cj-zTMi53Q',
+                style: 'mapbox://styles/yesbman/cm2t00fr600dl01r6hpir3mvk',
+                center: [126.705206, 37.456256] // 인천 좌표
+            }
+        };
+
+        // 초기 지도 설정 (기본 판교)
+        const initialRegion = 'pangyo';
+        mapboxgl.accessToken = mapboxConfigs[initialRegion].accessToken;
+
         const map = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/yesbman/clyzkeh8900dr01pxdqow8awk',
-            projection: 'globe',
+            style: mapboxConfigs[initialRegion].style,
+            center: mapboxConfigs[initialRegion].center,
             zoom: 19,
-            center: [cKetiPangyolongitude, cKetiPangyoLatitude]
+            projection: 'globe'
+        });
+
+        // Mapbox 컨트롤 추가
+        map.addControl(new mapboxgl.NavigationControl());
+
+        // 지역 변경 이벤트 핸들러
+        document.getElementById('regionSelect').addEventListener('change', (event) => {
+            const selectedRegion = event.target.value;
+            const config = mapboxConfigs[selectedRegion];
+
+            if (config) {
+                // Access Token 재설정
+                mapboxgl.accessToken = config.accessToken;
+
+                // 스타일 변경
+                map.setStyle(config.style);
+
+                // 스타일 변경 완료 후 중심 좌표 이동
+                map.once('styledata', () => {
+                    console.log(`Style loaded for ${selectedRegion}, moving to ${config.center}`);
+                    map.jumpTo({ center: config.center, zoom: 19 });
+                });
+            } else {
+                console.error('Invalid region selected:', selectedRegion);
+            }
         });
 
         map.addControl(new mapboxgl.NavigationControl());
