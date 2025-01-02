@@ -11,7 +11,6 @@
 app-v2x
 plat-chem-obu-compact-app
 athena
-build/
 objs/
 build/Desktop_Qt_6_7_0-Debug/
 venus.pro.user*
