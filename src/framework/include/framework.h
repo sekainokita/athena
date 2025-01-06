@@ -1,5 +1,5 @@
-#ifndef	_FRAMEWORK_H_
-#define	_FRAMEWORK_H_
+#ifndef _FRAMEWORK_H_
+#define _FRAMEWORK_H_
 
 /******************************************************************************
 *
@@ -83,13 +83,12 @@ typedef struct FRAMEWORK {
 /***************************** Function Protype ******************************/
 void FRAMEWORK_SetLog(FRAMEWORK_T *pstFramework, bool bOnOff);
 int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework);
+int32_t FRAMEWORK_Multi_Init(FRAMEWORK_T * pstFrameworkMulti);
 MSG_MANAGER_T* FRAMEWORK_GetMsgManagerInstance(void);
 DB_MANAGER_T* FRAMEWORK_GetDbManagerInstance(void);
 TIME_MANAGER_T* FRAMEWORK_GetTimeManagerInstance(void);
-#if defined(CONFIG_MULTI_DEV)
 MULTI_MSG_MANAGER_T* FRAMEWORK_GetMultiMsgManagerInstance(void);
 MULTI_DB_MANAGER_T* FRAMEWORK_GetMultiDbManagerInstance(void);
-#endif
 
-#endif	/* _FRAMEWORK_H_ */
+#endif  /* _FRAMEWORK_H_ */
 

@@ -78,8 +78,8 @@
 
 #define MULTI_DB_V2X_PORT                               50008
 #define MULTI_DB_V2X_IP                                 "221.140.137.186"
-#define MULTI_DB_V2X_YEAR                               "2024"
-#define MULTI_DB_V2X_MONTH                              "M_11"
+#define MULTI_DB_V2X_YEAR                               "2025"
+#define MULTI_DB_V2X_MONTH                              "M_01"
 #define MULTI_DB_V2X_STORAGE                            "/exStorage/hdd_v2x_db_1/5g-nr-v2x/5g-nr-v2x-db/keti/results"
 
 #define MULTI_DB_V2X_DEVICE_ID_PREFIX                   "VEH-ID"

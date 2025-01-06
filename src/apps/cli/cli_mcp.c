@@ -43,26 +43,21 @@
 
 
 /***************************** Include ***************************************/
-/* #if defined(CONFIG_MULTI_DEV) */
 #include "cli.h"
 #include "app.h"
 #include "db_v2x.h"
 #include "db_v2x_status.h"
 #include "multi_db_manager.h"
 #include "framework.h"
-/* #endif */
 
 /***************************** Definition ************************************/
 
 /***************************** Static Variable *******************************/
-#if defined(CONFIG_MULTI_DEV)
 static char s_chMultiSetBufDevId[CLI_MULTI_DB_V2X_DEFAULT_BUF_LEN];
 static char s_chMultiSetEth[CLI_MULTI_DB_V2X_DEFAULT_BUF_LEN];
 static char s_chMultiSetIp[CLI_MULTI_DB_V2X_DEFAULT_BUF_LEN];
-#endif
 
 /***************************** Function Protype ******************************/
-#if defined(CONFIG_MULTI_DEV)
 void P_CLI_MCP_WriteConfigToFile(FILE *h_fdModelConf, SVC_MCP_T *pstSvcMCp)
 {
     fprintf(h_fdModelConf, "model=%s\n", CONFIG_MODEL_NAME);
@@ -796,5 +791,4 @@ int32_t CLI_MCP_InitCmds(void)
 
     return nRet;
 }
-#endif
 

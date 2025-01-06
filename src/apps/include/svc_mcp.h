@@ -53,7 +53,7 @@
 #include "multi_msg_manager.h"
 
 /***************************** Definition ************************************/
-#define SVC_MCP_TASK_MSG_KEY                 (0x2319)
+#define SVC_MCP_TASK_MSG_KEY                 (0x2531)
 #define SVC_MCP_DEFAULT_ETH_DEV              "eth1"
 #define SVC_MCP_DEFAULT_RSU_ETH_DEV          "eno8303"
 #define SVC_MCP_V2V_PSID                     (58200)

@@ -49,7 +49,6 @@
 ******************************************************************************/
 
 /***************************** Include ***************************************/
-/* #if defined(CONFIG_MULTI_DEV) */
 #include "framework.h"
 #include "db_manager.h"
 #include "svc_mcp.h"
@@ -58,18 +57,14 @@
 #include <sys/msg.h>
 #include "app.h"
 #include "di.h"
-/* #endif */
 
 /***************************** Definition ************************************/
-#if defined(CONFIG_MULTI_DEV)
 #define SVC_MCP_GPS_SPEED_CAL_CNT_MAX    (10)
 #define SVC_MCP_SET_BUF_SIZE             (256)
-#endif
 
 /***************************** Enum and Structure ****************************/
 
 /***************************** Static Variable *******************************/
-#if defined(CONFIG_MULTI_DEV)
 FILE* sh_pSvcMCpTxMsg;
 FILE* sh_pSvcMCpRxMsg;
 
@@ -97,11 +92,9 @@ static char s_chMultiStrBufTotalTime[SVC_MCP_STR_BUF_LEN];
 static char s_chMultiDeviceName[SVC_MCP_SET_BUF_SIZE] = MULTI_DB_MGR_DEFAULT_COMM_DEV_ID;
 static char s_chMultiIfaceName[SVC_MCP_SET_BUF_SIZE] = SVC_MCP_DEFAULT_ETH_DEV;
 static char s_chMultiIpAddr[SVC_MCP_SET_BUF_SIZE] = SVC_MCP_DEFAULT_IP;
-#endif
 
 /***************************** Function  *************************************/
 
-#if defined(CONFIG_MULTI_DEV)
 int32_t P_SVC_MCP_SetSettings(SVC_MCP_T *pstSvcMCp)
 {
     int32_t nRet = APP_ERROR;
@@ -745,7 +738,7 @@ int32_t P_SVC_MCP_CreateTask(void)
         nRet = APP_OK;
     }
 #endif
-	return nRet;
+    return nRet;
 }
 
 static int32_t P_SVC_MCP_Init(SVC_MCP_T *pstSvcMCp)
@@ -1303,5 +1296,4 @@ int32_t SVC_MCP_DeInit(SVC_MCP_T *pstSvcMCp)
 
     return nRet;
 }
-#endif
 

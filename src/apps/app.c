@@ -62,8 +62,10 @@ static APP_T s_stApp;
 static DI_T s_stDi;
 static SVC_PLATOONING_T s_stSvcPlatooning;
 static SVC_CP_T s_stSvcCp;
-#if defined(CONFIG_MULTI_DEV)
 static SVC_MCP_T s_stSvcMCp;
+
+#if defined(CONFIG_MULTI_DEV)
+static FRAMEWORK_T s_stFrameworkMulti;
 #endif
 
 /***************************** Function  *************************************/
@@ -93,14 +95,13 @@ int32_t APP_Init(APP_T *pstApp)
         PrintError("SVC_CP_Init() is failed! [unRet:%d]", nRet);
         return nRet;
     }
-#if defined(CONFIG_MULTI_DEV)
+
     nRet = SVC_MCP_Init(&s_stSvcMCp);
     if (nRet != APP_OK)
     {
         PrintError("SVC_MCP_Init() is failed! [unRet:%d]", nRet);
         return nRet;
     }
-#endif
 
     printf(COLOR_YELLOW "=======================================================\r\n");
     printf(COLOR_YELLOW "\r\n");
@@ -142,12 +143,10 @@ SVC_CP_T* APP_GetSvcCpInstance(void)
     return &s_stSvcCp;
 }
 
-#if defined(CONFIG_MULTI_DEV)
 SVC_MCP_T* APP_GetSvcMCpInstance(void)
 {
     return &s_stSvcMCp;
 }
-#endif
 
 SVC_PLATOONING_T* APP_GetSvcPlatooningInstance(void)
 {
@@ -168,15 +167,18 @@ int main(int argc, char *argv[])
 
     PrintDebug("Start the main");
 
-    (void*)memset(&s_stFramework, 0x00, sizeof(FRAMEWORK_T));
     (void*)memset(&s_stApp, 0x00, sizeof(APP_T));
     (void*)memset(&s_stSvcPlatooning, 0x00, sizeof(SVC_PLATOONING_T));
     (void*)memset(&s_stSvcCp, 0x00, sizeof(SVC_CP_T));
-#if defined(CONFIG_MULTI_DEV)
     (void*)memset(&s_stSvcMCp, 0x00, sizeof(SVC_MCP_T));
+#if defined(CONFIG_MULTI_DEV)
+    (void*)memset(&s_stFrameworkMulti, 0x00, sizeof(FRAMEWORK_T));
+    PrintDebug("s_stFrameworkMulti [0x%p]", &s_stFrameworkMulti);
+#else
+    (void*)memset(&s_stFramework, 0x00, sizeof(FRAMEWORK_T));
+    PrintDebug("s_stFramework [0x%p]", &s_stFramework);
 #endif
 
-    PrintDebug("pstFramework [0x%p]", &s_stFramework);
     PrintDebug("s_stApp [0x%p]", &s_stApp);
 
     nRet = DI_Init(&s_stDi);
@@ -186,12 +188,21 @@ int main(int argc, char *argv[])
         return nRet;
     }
 
+#if defined(CONFIG_MULTI_DEV)
+    nRet = FRAMEWORK_Multi_Init(&s_stFrameworkMulti);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("FRAMEWORK_Multi_Init() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+#else
     nRet = FRAMEWORK_Init(&s_stFramework);
     if (nRet != FRAMEWORK_OK)
     {
         PrintError("FRAMEWORK_Init() is failed! [nRet:%d]", nRet);
         return nRet;
     }
+#endif
 
     nRet = APP_Init(&s_stApp);
     if (nRet != APP_OK)

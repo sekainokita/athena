@@ -49,7 +49,6 @@
 ******************************************************************************/
 
 /***************************** Include ***************************************/
-/*#if defined(CONFIG_MULTI_DEV)*/
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -74,10 +73,8 @@
 #include "nr_v2x_interface.h"
 
 #include "cli_util.h"
-/*#endif*/
 
 /***************************** Definition ************************************/
-#if defined(CONFIG_MULTI_DEV)
 #define MULTI_SAMPLE_V2X_API_VER                          (0x0001)
 #define MULTI_SAMPLE_V2X_IP_ADDR                          ("192.168.1.11")
 #define MULTI_SAMPLE_V2X_MSG_LEN                          (100)
@@ -109,10 +106,8 @@
 #define htonll(x)   ((((uint64_t)htonl(x)) << 32) + htonl(x >> 32))
 #define ntohll(x)   ((((uint64_t)ntohl(x)) << 32) + ntohl(x >> 32))
 #endif
-#endif
 
 /***************************** Static Variable *******************************/
-#if defined(CONFIG_MULTI_DEV)
 static int32_t s_nMultiSocketHandle = -1;
 static int s_nMultiDbTaskMsgId, s_nMultiMsgTxTaskMsgId, s_nMultiMsgRxTaskMsgId;
 static key_t s_MultidbTaskMsgKey = FRAMEWORK_DB_TASK_MSG_KEY;
@@ -126,13 +121,11 @@ static bool s_bMultiMsgMgrLog = OFF;
 static bool s_bMultiFirstPacket = TRUE;
 
 static uint32_t s_unMultiV2xMsgTxLen = 0, s_unMultiV2xMsgRxLen = 0;
-#endif
 
 /***************************** Function  *************************************/
 
 /////////////////////////////////////////////////////////////////////////////////////////
 /* Global Variable Value */
-#if defined(CONFIG_MULTI_DEV)
 
 static void P_MULTI_MSG_NABAGER_PrintMsgInfo(int msqid)
 {
@@ -2865,4 +2858,3 @@ int32_t MULTI_MSG_MANAGER_DeInit(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
 
     return nRet;
 }
-#endif

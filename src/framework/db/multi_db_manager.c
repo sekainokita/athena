@@ -49,24 +49,19 @@
 ******************************************************************************/
 
 /***************************** Include ***************************************/
-/*#if defined(CONFIG_MULTI_DEV)*/
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
-/*#if defined(CONFIG_SQLITE)*/
 #include <sqlite3.h>
-/*#endif*/
 #include "db_v2x_status.h"
 #include "framework.h"
 #include "multi_db_manager.h"
 #include "di.h"
 #include "app.h"
 #include "svc_mcp.h"
-/*#endif*/
 
 /***************************** Definition ************************************/
 
-#if defined(CONFIG_MULTI_DEV)
 #define MULTI_DB_MANAGER_DB_TEMP_PATH                "/tmp/"
 
 #define MULTI_DB_MANAGER_TXT_TX_FILE                 MULTI_DB_MANAGER_DB_TEMP_PATH"db_v2x_tx_temp_writing.txt"
@@ -86,12 +81,10 @@
 
 #define MULTI_SVC_MCP_GPS_SPEED_CAL_CNT_MAX          (10)
 #define MULTI_DB_MGR_TIME_US_TO_MS                   (1000)
-#endif
 
 /***************************** Enum and Structure ****************************/
 
 /***************************** Static Variable *******************************/
-#if defined(CONFIG_MULTI_DEV)
 FILE* sh_pMultiDbMgrTxMsg;
 FILE* sh_pMultiDbMgrRxMsg;
 #if defined(CONFIG_SQLITE)
@@ -116,11 +109,9 @@ static int32_t P_MULTI_DB_MANAGER_GetV2xStatus(MULTI_DB_MANAGER_V2X_STATUS_T *ps
 static uint16_t s_usMultiGpsSpeedCalCnt = 0;
 static uint32_t s_usMultiLastSpeedTx;
 static uint32_t s_usMultiLastSpeedRx;
-#endif
 
 /***************************** Function  *************************************/
 
-#if defined(CONFIG_MULTI_DEV)
 static int32_t P_MULTI_DB_MANAGER_PrintStatus(DB_V2X_STATUS_TX_T *pstDbV2xStatusTx, DB_V2X_STATUS_RX_T *pstDbV2xStatusRx)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -3226,11 +3217,11 @@ int32_t MULTI_DB_MANAGER_MakeDbFile(MULTI_DB_MANAGER_T *pstMultiDbManager)
             nCharCnt += sprintf(chFileName+nCharCnt, "%s", "txt");
             if(strcmp("Tx", pstMultiDbManager->stMultiDbFile.pchTxRxType) == 0)
             {
-                sprintf(chSysCallStr, "mcp %s %s/%s", MULTI_DB_MANAGER_TXT_TX_FILE, MULTI_DB_V2X_FOLDER_DIR, chFileName);
+                sprintf(chSysCallStr, "cp %s %s/%s", MULTI_DB_MANAGER_TXT_TX_FILE, MULTI_DB_V2X_FOLDER_DIR, chFileName);
             }
             else if(strcmp("Rx", pstMultiDbManager->stMultiDbFile.pchTxRxType) == 0)
             {
-                sprintf(chSysCallStr, "mcp %s %s/%s", MULTI_DB_MANAGER_TXT_RX_FILE, MULTI_DB_V2X_FOLDER_DIR, chFileName);
+                sprintf(chSysCallStr, "cp %s %s/%s", MULTI_DB_MANAGER_TXT_RX_FILE, MULTI_DB_V2X_FOLDER_DIR, chFileName);
             }
             else
             {
@@ -3243,11 +3234,11 @@ int32_t MULTI_DB_MANAGER_MakeDbFile(MULTI_DB_MANAGER_T *pstMultiDbManager)
             nCharCnt += sprintf(chFileName+nCharCnt, "%s", "csv");
             if(strcmp("Tx", pstMultiDbManager->stMultiDbFile.pchTxRxType) == 0)
             {
-                sprintf(chSysCallStr, "mcp %s %s/%s", MULTI_DB_MANAGER_CSV_TX_FILE, MULTI_DB_V2X_FOLDER_DIR, chFileName);
+                sprintf(chSysCallStr, "cp %s %s/%s", MULTI_DB_MANAGER_CSV_TX_FILE, MULTI_DB_V2X_FOLDER_DIR, chFileName);
             }
             else if(strcmp("Rx", pstMultiDbManager->stMultiDbFile.pchTxRxType) == 0)
             {
-                sprintf(chSysCallStr, "mcp %s %s/%s", MULTI_DB_MANAGER_CSV_RX_FILE, MULTI_DB_V2X_FOLDER_DIR, chFileName);
+                sprintf(chSysCallStr, "cp %s %s/%s", MULTI_DB_MANAGER_CSV_RX_FILE, MULTI_DB_V2X_FOLDER_DIR, chFileName);
             }
             else
             {
@@ -3260,11 +3251,11 @@ int32_t MULTI_DB_MANAGER_MakeDbFile(MULTI_DB_MANAGER_T *pstMultiDbManager)
             nCharCnt += sprintf(chFileName+nCharCnt, "%s", "db");
             if(strcmp("Tx", pstMultiDbManager->stMultiDbFile.pchTxRxType) == 0)
             {
-                sprintf(chSysCallStr, "mcp %s %s/%s", MULTI_DB_MANAGER_SQL_TX_FILE, MULTI_DB_V2X_FOLDER_DIR, chFileName);
+                sprintf(chSysCallStr, "cp %s %s/%s", MULTI_DB_MANAGER_SQL_TX_FILE, MULTI_DB_V2X_FOLDER_DIR, chFileName);
             }
             else if(strcmp("Rx", pstMultiDbManager->stMultiDbFile.pchTxRxType) == 0)
             {
-                sprintf(chSysCallStr, "mcp %s %s/%s", MULTI_DB_MANAGER_SQL_RX_FILE, MULTI_DB_V2X_FOLDER_DIR, chFileName);
+                sprintf(chSysCallStr, "cp %s %s/%s", MULTI_DB_MANAGER_SQL_RX_FILE, MULTI_DB_V2X_FOLDER_DIR, chFileName);
             }
             else
             {
@@ -3719,5 +3710,4 @@ int32_t MULTI_DB_MANAGER_DeInit(MULTI_DB_MANAGER_T *pstMultiDbManager)
 
     return nRet;
 }
-#endif
 
