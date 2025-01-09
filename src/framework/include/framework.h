@@ -55,8 +55,11 @@
 
 /***************************** Definition ************************************/
 #define FRAMEWORK_DB_TASK_MSG_KEY               (0x840919)
+#define FRAMEWORK_DB_TASK_MSG_MULTI_KEY         (0x980531)
 #define FRAMEWORK_MSG_TX_TASK_MSG_KEY           (0x121202)
-#define FRAMEWORK_MSG_RX_TASK_MSG_KEY           (0x220916)
+#define FRAMEWORK_MSG_TX_TASK_MSG_MULTI_KEY     (0x121203)
+#define FRAMEWORK_MSG_RX_TASK_MSG_KEY           (0x121204)
+#define FRAMEWORK_MSG_RX_TASK_MSG_MULTI_KEY     (0x121205)
 #define FRAMEWORK_TIME_TASK_MSG_KEY             (0x230525)
 
 //#define CONFIG_PTHREAD_JOINABLE                 (1)

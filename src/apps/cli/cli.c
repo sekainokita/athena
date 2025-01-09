@@ -285,14 +285,6 @@ static int32_t P_CLI_InitCmd(void)
         PrintError("CLI_Init() is failed! [nRet:%d]", nRet);
     }
 
-#if defined(CONFIG_MULTI_DEV)
-    nRet = CLI_MCP_InitCmds();
-    if (nRet != APP_OK)
-    {
-        PrintError("CLI_MCP_InitCmds() is failed! [nRet:%d]", nRet);
-    }
-#endif
-
     nRet = CLI_MSG_InitCmds();
     if (nRet != APP_OK)
     {
@@ -315,6 +307,12 @@ static int32_t P_CLI_InitCmd(void)
     if (nRet != APP_OK)
     {
         PrintError("CLI_CP_InitCmds() is failed! [nRet:%d]", nRet);
+    }
+
+    nRet = CLI_MCP_InitCmds();
+    if (nRet != APP_OK)
+    {
+        PrintError("CLI_MCP_InitCmds() is failed! [nRet:%d]", nRet);
     }
 
     nRet = CLI_DI_InitCmds();

@@ -90,7 +90,7 @@ void FRAMEWORK_SetLog(FRAMEWORK_T *pstFramework, bool bOnOff)
             {
                 PrintError("DB_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
             }
-#if defined(CONFIG_MULTI_DEV)
+
             s_stMultiMsgManager.bLogLevel = bOnOff;
             nRet = MULTI_MSG_MANAGER_SetLog(&s_stMultiMsgManager);
             if (nRet != FRAMEWORK_OK)
@@ -104,7 +104,7 @@ void FRAMEWORK_SetLog(FRAMEWORK_T *pstFramework, bool bOnOff)
             {
                 PrintError("MULTI_DB_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
             }
-#endif
+
             break;
 
         default:
@@ -171,17 +171,6 @@ int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
     return nRet;
 }
 
-MSG_MANAGER_T* FRAMEWORK_GetMsgManagerInstance(void)
-{
-    return &s_stMsgManager;
-}
-
-DB_MANAGER_T* FRAMEWORK_GetDbManagerInstance(void)
-{
-    return &s_stDbManager;
-}
-
-#if defined(CONFIG_MULTI_DEV)
 int32_t FRAMEWORK_Multi_Init(FRAMEWORK_T *pstFrameworkMulti)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -222,7 +211,16 @@ int32_t FRAMEWORK_Multi_Init(FRAMEWORK_T *pstFrameworkMulti)
 
     return nRet;
 }
-#endif
+
+MSG_MANAGER_T* FRAMEWORK_GetMsgManagerInstance(void)
+{
+    return &s_stMsgManager;
+}
+
+DB_MANAGER_T* FRAMEWORK_GetDbManagerInstance(void)
+{
+    return &s_stDbManager;
+}
 
 MULTI_MSG_MANAGER_T* FRAMEWORK_GetMultiMsgManagerInstance(void)
 {

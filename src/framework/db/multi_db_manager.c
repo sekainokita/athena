@@ -93,9 +93,9 @@ sqlite3* sh_pMultiDbMgrRxSqlMsg;
 #endif
 
 static int s_nMultiDbTaskMsgId, s_nMultiMsgTxTaskMsgId, s_nMultiMsgRxTaskMsgId;
-static key_t s_MultidbTaskMsgKey = FRAMEWORK_DB_TASK_MSG_KEY;
-static key_t s_MultiMsgTxTaskMsgKey = FRAMEWORK_MSG_TX_TASK_MSG_KEY;
-static key_t s_MultiMsgRxTaskMsgKey = FRAMEWORK_MSG_RX_TASK_MSG_KEY;
+static key_t s_MultidbTaskMsgKey = FRAMEWORK_DB_TASK_MSG_MULTI_KEY;
+static key_t s_MultiMsgTxTaskMsgKey = FRAMEWORK_MSG_TX_TASK_MSG_MULTI_KEY;
+static key_t s_MultiMsgRxTaskMsgKey = FRAMEWORK_MSG_RX_TASK_MSG_MULTI_KEY;
 
 static pthread_t sh_MultiDbMgrTask;
 
@@ -2599,7 +2599,7 @@ static int32_t P_MULTI_DB_MANAGER_WriteCsv(MULTI_DB_MANAGER_EVENT_MSG_T *pstMult
 
     switch(pstMultiEventMsg->pstDbV2x->ePayloadType)
     {
-        case DB_V2X_PAYLOAD_TYPE_V2X_STATUS:
+        case DB_V2X_PAYLOAD_TYPE_V2X_MULTI_STATUS:
         {
             nRet = P_MULTI_DB_MANAGER_WriteCsvV2xStatus(pstMultiEventMsg);
             if(nRet != FRAMEWORK_OK)

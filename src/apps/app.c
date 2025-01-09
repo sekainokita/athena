@@ -57,16 +57,12 @@
 
 /***************************** Static Variable *******************************/
 
-static FRAMEWORK_T s_stFramework;
+static FRAMEWORK_T s_stFramework, s_stFrameworkMulti;
 static APP_T s_stApp;
 static DI_T s_stDi;
 static SVC_PLATOONING_T s_stSvcPlatooning;
 static SVC_CP_T s_stSvcCp;
 static SVC_MCP_T s_stSvcMCp;
-
-#if defined(CONFIG_MULTI_DEV)
-static FRAMEWORK_T s_stFrameworkMulti;
-#endif
 
 /***************************** Function  *************************************/
 
@@ -171,14 +167,11 @@ int main(int argc, char *argv[])
     (void*)memset(&s_stSvcPlatooning, 0x00, sizeof(SVC_PLATOONING_T));
     (void*)memset(&s_stSvcCp, 0x00, sizeof(SVC_CP_T));
     (void*)memset(&s_stSvcMCp, 0x00, sizeof(SVC_MCP_T));
-#if defined(CONFIG_MULTI_DEV)
     (void*)memset(&s_stFrameworkMulti, 0x00, sizeof(FRAMEWORK_T));
-    PrintDebug("s_stFrameworkMulti [0x%p]", &s_stFrameworkMulti);
-#else
     (void*)memset(&s_stFramework, 0x00, sizeof(FRAMEWORK_T));
-    PrintDebug("s_stFramework [0x%p]", &s_stFramework);
-#endif
 
+    PrintDebug("s_stFramework [0x%p]", &s_stFramework);
+    PrintDebug("s_stFrameworkMulti [0x%p]", &s_stFrameworkMulti);
     PrintDebug("s_stApp [0x%p]", &s_stApp);
 
     nRet = DI_Init(&s_stDi);
@@ -188,21 +181,19 @@ int main(int argc, char *argv[])
         return nRet;
     }
 
-#if defined(CONFIG_MULTI_DEV)
-    nRet = FRAMEWORK_Multi_Init(&s_stFrameworkMulti);
-    if (nRet != FRAMEWORK_OK)
-    {
-        PrintError("FRAMEWORK_Multi_Init() is failed! [nRet:%d]", nRet);
-        return nRet;
-    }
-#else
     nRet = FRAMEWORK_Init(&s_stFramework);
     if (nRet != FRAMEWORK_OK)
     {
         PrintError("FRAMEWORK_Init() is failed! [nRet:%d]", nRet);
         return nRet;
     }
-#endif
+
+    nRet = FRAMEWORK_Multi_Init(&s_stFrameworkMulti);
+    if (nRet != FRAMEWORK_OK)
+    {
+        PrintError("FRAMEWORK_Multi_Init() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
 
     nRet = APP_Init(&s_stApp);
     if (nRet != APP_OK)
