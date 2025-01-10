@@ -71,12 +71,16 @@ const int MAX_LINE = 2048;
 const int BACKLOG = 10;
 const int LISTENQ = 6666;
 const int MAX_CONNECT = 20;
+#define MAX_CLIENTS 100
 
 /***************************** Static Variable *******************************/
 static MSG_MANAGER_TX_T s_stMsgManagerTx;
 static MSG_MANAGER_RX_T s_stMsgManagerRx;
 static DB_V2X_T s_stDbV2x;
 static bool s_bCliMsgLog = FALSE;
+int client_sockets[MAX_CLIENTS];
+int client_count = 0;
+pthread_mutex_t client_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #if defined(CONFIG_WEBSOCKET)
 struct per_session_data {
@@ -556,8 +560,26 @@ int32_t P_CLI_MSG_TcpClientStart(char *pcIpAddr)
     return nRet;
 }
 
-void *P_CLI_MSG_TcpMultiServerSendTask(void *fd)
-{
+void P_CLI_MSG_TcpMultiAddClient(int socket_fd) {
+    pthread_mutex_lock(&client_mutex);
+    if (client_count < MAX_CLIENTS) {
+        client_sockets[client_count++] = socket_fd;
+    }
+    pthread_mutex_unlock(&client_mutex);
+}
+
+void P_CLI_MSG_TcpMultiRemoveClient(int socket_fd) {
+    pthread_mutex_lock(&client_mutex);
+    for (int i = 0; i < client_count; i++) {
+        if (client_sockets[i] == socket_fd) {
+            client_sockets[i] = client_sockets[--client_count];
+            break;
+        }
+    }
+    pthread_mutex_unlock(&client_mutex);
+}
+
+void *P_CLI_MSG_TcpMultiServerSendTask(void *fd) {
     int h_nSocket = *(int *)fd;
     char cMsgBuf[MAX_LINE];
 
@@ -589,104 +611,127 @@ void *P_CLI_MSG_TcpMultiServerSendTask(void *fd)
     return NULL;
 }
 
-void *P_CLI_MSG_TcpMultiServerTask(void *fd)
-{
+void *P_CLI_MSG_TcpMultiServerTask(void *fd) {
     int h_nSocket = *(int *)fd;
     char cMsgBuf[MAX_LINE];
     int nRevLen;
-    pthread_t h_stRecvTid;
 
-    if (pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpMultiServerSendTask, fd) != 0)
-    {
-        PrintError("pthread create error for send task.");
-        return NULL;
-    }
+    P_CLI_MSG_TcpMultiAddClient(h_nSocket);
 
-    while(1)
-    {
-        memset(cMsgBuf , 0 , MAX_LINE);
-        if((nRevLen = recv(h_nSocket , cMsgBuf , MAX_LINE , 0)) == -1)
-        {
-            PrintError("recv error.\n");
-            break;
-        }
-
-        if (nRevLen == 0)
-        {
-            PrintDebug("Client closed.\n");
-            close(h_nSocket);
+    while (1) {
+        memset(cMsgBuf, 0, MAX_LINE);
+        if ((nRevLen = recv(h_nSocket, cMsgBuf, MAX_LINE, 0)) <= 0) {
+            if (nRevLen == 0) {
+                PrintDebug("Client disconnected.");
+            } else {
+                PrintError("recv error.");
+            }
             break;
         }
 
         cMsgBuf[nRevLen] = '\0';
         PrintTrace("Received message from client: %s", cMsgBuf);
 
-        if (send(h_nSocket, cMsgBuf, strlen(cMsgBuf), 0) == -1) {
-            PrintError("send error.\n");
-            break;
+        pthread_mutex_lock(&client_mutex);
+        for (int i = 0; i < client_count; i++) {
+            if (client_sockets[i] != h_nSocket) {
+                if (send(client_sockets[i], cMsgBuf, nRevLen, 0) == -1) {
+                    PrintError("send error to client %d", client_sockets[i]);
+                }
+            }
         }
-
+        pthread_mutex_unlock(&client_mutex);
     }
 
-    pthread_cancel(h_stRecvTid);
-    pthread_join(h_stRecvTid, NULL);
+    P_CLI_MSG_TcpMultiRemoveClient(h_nSocket);
+    close(h_nSocket);
     free(fd);
+    return NULL;
+}
+
+void *P_CLI_MSG_ServerInputTask(void *fd) {
+    char cMsgBuf[MAX_LINE];
+    UNUSED(fd);
+
+    while (1) {
+        printf("Enter message to client: ");
+        if (fgets(cMsgBuf, MAX_LINE, stdin) == NULL) {
+            PrintError("Error reading input.");
+            continue;
+        }
+
+        if (strcmp(cMsgBuf, "exit\n") == 0) {
+            printf("Server exiting...\n");
+            exit(0);
+        }
+
+        pthread_mutex_lock(&client_mutex);
+        for (int i = 0; i < client_count; i++) {
+            if (send(client_sockets[i], cMsgBuf, strlen(cMsgBuf), 0) == -1) {
+                PrintError("send error to client %d", client_sockets[i]);
+            }
+        }
+        pthread_mutex_unlock(&client_mutex);
+
+        PrintTrace("Broadcasted message: %s", cMsgBuf);
+    }
 
     return NULL;
 }
 
-int32_t P_CLI_MSG_TcpMultiServerStart(void)
-{
+int32_t P_CLI_MSG_TcpMultiServerStart(void) {
     int32_t nRet = APP_ERROR;
     int h_nListen, h_nConn;
-    pthread_t h_stRecvTid;
+    pthread_t h_stRecvTid, h_stInputTid;
     struct sockaddr_in stServerAddr, stClientAddr;
     socklen_t stClientLen = sizeof(stClientAddr);
     int nVal = 1;
+    int client_fd;
 
-    if((h_nListen = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-    {
+    if ((h_nListen = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         PrintError("socket error.\n");
         return nRet;
     }
 
     stServerAddr.sin_family = AF_INET;
     stServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    stServerAddr.sin_port = htons(SVC_CP_DEFAULT_RSU_PORT);
+    stServerAddr.sin_port = htons(SVC_MCP_DEFAULT_RSU_PORT);
 
-    if (setsockopt(h_nListen, SOL_SOCKET, SO_REUSEADDR, (char *) &nVal, sizeof nVal) < 0) {
-        PrintError("setsockopt");
+    if (setsockopt(h_nListen, SOL_SOCKET, SO_REUSEADDR, (char *)&nVal, sizeof(nVal)) < 0) {
+        PrintError("setsockopt error.");
         close(h_nListen);
-        return -1;
+        return nRet;
     }
 
-    if(bind(h_nListen, (struct sockaddr *)&stServerAddr, sizeof(stServerAddr)) < 0)
-    {
+    if (bind(h_nListen, (struct sockaddr *)&stServerAddr, sizeof(stServerAddr)) < 0) {
         PrintError("bind error.");
         return nRet;
     }
 
-    if(listen(h_nListen, LISTENQ) < 0)
-    {
+    if (listen(h_nListen, LISTENQ) < 0) {
         PrintError("listen error.");
         return nRet;
     }
 
-    while(1)
-    {
-        if((h_nConn = accept(h_nListen, (struct sockaddr *)&stClientAddr, &stClientLen)) < 0)
-        {
+    if (pthread_create(&h_stInputTid, NULL, P_CLI_MSG_ServerInputTask, NULL) != 0) {
+        PrintError("pthread create error for input task.");
+        return nRet;
+    }
+
+    while (1) {
+        if ((h_nConn = accept(h_nListen, (struct sockaddr *)&stClientAddr, &stClientLen)) < 0) {
             PrintError("accept error.");
             return nRet;
         }
 
-        int *client_sock = malloc(sizeof(int));
-        *client_sock = h_nConn;
+        int *client_sock = malloc(sizeof(client_fd));
+        if (client_sock != NULL) {
+            *client_sock = h_nConn;
+        }
 
         PrintDebug("server: got connection from %s", inet_ntoa(stClientAddr.sin_addr));
 
-        if(pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpMultiServerTask, (void*)client_sock) == -1)
-        {
+        if (pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpMultiServerTask, (void *)client_sock) != 0) {
             PrintError("pthread create error.");
             free(client_sock);
             return nRet;
@@ -698,37 +743,29 @@ int32_t P_CLI_MSG_TcpMultiServerStart(void)
     return nRet;
 }
 
-void *P_CLI_MSG_TcpMultiClientTask(void *fd)
-{
+void *P_CLI_MSG_TcpMultiClientTask(void *fd) {
     int h_nSocket = *(int *)fd;
     char cMsgBuf[MAX_LINE];
     int nRevLen;
 
-    while (1)
-    {
+    while (1) {
         memset(cMsgBuf, 0, MAX_LINE);
-        nRevLen = recv(h_nSocket, cMsgBuf, MAX_LINE, 0);
-
-        if (nRevLen < 0)
-        {
-            PrintError("recv error.");
-            break;
-        }
-        else if (nRevLen == 0)
-        {
-            PrintDebug("Server closed connection.");
+        if ((nRevLen = recv(h_nSocket, cMsgBuf, MAX_LINE, 0)) <= 0) {
+            if (nRevLen == 0) {
+                PrintDebug("Server closed connection.");
+            } else {
+                PrintError("recv error.");
+            }
             close(h_nSocket);
             break;
         }
 
         cMsgBuf[nRevLen] = '\0';
-        PrintTrace("Sent message to server: %s", cMsgBuf);
+        PrintTrace("Received message: %s", cMsgBuf);
     }
 
     return NULL;
 }
-
-
 
 int32_t P_CLI_MSG_TcpMultiClientStart(char *pcIpAddr, char *pcId)
 {
