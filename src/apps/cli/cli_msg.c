@@ -631,16 +631,6 @@ void *P_CLI_MSG_TcpMultiServerTask(void *fd) {
 
         cMsgBuf[nRevLen] = '\0';
         PrintTrace("Received message from client: %s", cMsgBuf);
-
-        pthread_mutex_lock(&client_mutex);
-        for (int i = 0; i < client_count; i++) {
-            if (client_sockets[i] != h_nSocket) {
-                if (send(client_sockets[i], cMsgBuf, nRevLen, 0) == -1) {
-                    PrintError("send error to client %d", client_sockets[i]);
-                }
-            }
-        }
-        pthread_mutex_unlock(&client_mutex);
     }
 
     P_CLI_MSG_TcpMultiRemoveClient(h_nSocket);
@@ -791,7 +781,7 @@ int32_t P_CLI_MSG_TcpMultiClientStart(char *pcIpAddr, char *pcId)
     }
 
     stServerAddr.sin_family = AF_INET;
-    stServerAddr.sin_port = htons(SVC_CP_DEFAULT_RSU_PORT);
+    stServerAddr.sin_port = htons(SVC_MCP_DEFAULT_RSU_PORT);
 
     if(inet_pton(AF_INET, pcIpAddr, &stServerAddr.sin_addr) < 0)
     {
