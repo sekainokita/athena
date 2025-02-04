@@ -110,7 +110,7 @@ Data struct (Payload 부분)
 	| PSID | message |
 	|------|---------|
 	|  4   |    n    |
- 
+
  - Rx Message (payload Id = 0x11)
 	| PSID | RCPI | message |
 	|------|------|---------|
@@ -153,8 +153,8 @@ Extensible Message (payload 부분)
 
 	PSID : 58200(V2V), 58201(V2I), 58202(I2V)
 	T : 58220(Overall), 588221(Raw Data), 58222(SSOV), 58223(Status)
-	L : 
-	V : 
+	L :
+	V :
 	C : CRC16
  */
 
@@ -329,7 +329,7 @@ typedef struct _FtpConnInfoReq
 	uint32_t	psid;
 	uint8_t		unit_id;
 	uint32_t	link_id;
-	uint16_t	crc;
+//	uint16_t	crc;
 }__attribute__((__packed__)) FtpConnInfoReq;
 
 typedef struct _FtpConnInfoResp

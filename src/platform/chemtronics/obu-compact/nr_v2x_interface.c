@@ -609,6 +609,7 @@ bool Test_App_Main(int fd)
 #if defined(CONFIG_KETI)
         Test_Msg_Print("[%d] Create DB File", CMD_SEND_TEST_CREATE_DB);
 #endif
+		Test_Msg_Print("[%d] Send FTP Connection Information Response", CMD_SEND_TEST_FTP_CONN_INFO_RESP);
         Test_Msg_Print("< EXIT >-------------------------------");
         Test_Msg_Print("[0] Exit and Create DB File");
     }
@@ -1263,6 +1264,7 @@ bool Test_App_Main(int fd)
         p_overall->version = 2;
         p_overall->num_package = 0;
         p_overall->len_package = 0;
+		//p_overall->bitwize = 0x11;
         p_overall->bitwize = 0x77;
 
         package_len = ntohs(p_overall->len_package);
@@ -1339,7 +1341,8 @@ bool Test_App_Main(int fd)
         p_overall->version = 2;
         p_overall->num_package = 0;
         p_overall->len_package = 0;
-        p_overall->bitwize = 0x77;
+		//p_overall->bitwize = 0x77;
+		p_overall->bitwize = 0x0;
 
         package_len = ntohs(p_overall->len_package);
 
@@ -1363,7 +1366,10 @@ bool Test_App_Main(int fd)
             *crc16 = htons(CalcCRC16((uint8_t *)p_dummy, size + 6)); // TLVC 중 CRC만 제외
         }
 
-        AddExtStatusV2Data(p_overall, eStatusTxRx_Tx);
+		if (p_overall->bitwize != 0)
+        {
+            AddExtStatusV2Data(p_overall, eStatusTxRx_Tx);
+        }
 
         memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
         send_len = 16 + sizeof(TLVC_Overall_V2) + ntohs(p_overall->len_package); // 16 : header(10) + psid(4) + crc(2)
@@ -1603,6 +1609,49 @@ bool Test_App_Main(int fd)
 #endif
         break;
     }
+
+
+    case CMD_SEND_TEST_FTP_CONN_INFO_RESP:
+    {
+        int size = -1;
+        uint16_t *crc16;
+        uint16_t calc_crc16;
+        FtpConnInfoResp *p_fci_resp = (FtpConnInfoResp*)hdr->data;
+        uint16_t package_len;
+        char *ftp_id, *ftp_pw;
+        int len_id, len_pw;
+        struct in_addr addr;
+
+        Debug_Msg_Print(DEBUG_MSG_LV_LOW," >> Send FCI Response DATA");
+
+        p_fci_resp->psid = htonl(EM_FTP_RESP);
+        p_fci_resp->unit_id = UNIT_ID_OBU_COMMUNICATION;
+        p_fci_resp->link_id = htonl(0x73CE654B);
+        p_fci_resp->ip_addr = htonl(inet_addr("192.168.1.99"));
+        p_fci_resp->port = htons(21);
+        ftp_id = p_fci_resp->data;
+        strcpy(ftp_id, "chemr");
+        len_id = strlen(ftp_id);
+        ftp_pw = ftp_id + len_id + 1;
+        *(ftp_id+len_id) = 0;
+        strcpy(ftp_pw, "rchem");
+        len_pw = strlen(ftp_pw);
+        *(ftp_pw+len_pw) = 0;
+
+        send_len = sizeof(FtpConnInfoResp) + len_id + len_pw + 2 + sizeof(V2x_App_Hdr) + 2;		// ftp_id와 ftp_pw의 NULL 2개, crc 2byte
+
+        memcpy(hdr->magic, V2X_INF_EXT_MAGIC, sizeof(hdr->magic));
+        hdr->len = htons(send_len - 6);	// magic 4byte, len 2byte
+        hdr->seq = 0;
+        hdr->payload_id = htons(EM_FTP_RESP);
+
+        crc16 = (uint16_t*)&buf[send_len-2];
+        calc_crc16 = CalcCRC16(buf + SIZE_MAGIC_NUMBER_OF_HEADER, send_len - 6);		// magic(4), crc(2)
+        *crc16 = htons(calc_crc16);
+
+        break;
+    }
+
     default:
         Debug_Msg_Print(DEBUG_MSG_LV_LOW, "\tIt was the wrong choice !");
         break;
@@ -2030,6 +2079,7 @@ static void PrintExtStatusV2Msg(void *p)
         printf("\tVersion - HW : %d / SW : %d\n", htons(p_control->hw_ver), htons(p_control->sw_ver));
         sprintf(buf, "%lu", be64toh(p_control->timestamp));
         printf("\tTimestamp - %s\n", buf);
+		printf("\tTemperature - In : %d, Out : %d\n", p_control->cpu_temp, p_control->peri_temp);
         cal_crc = CalcCRC16((uint8_t *)p_control, htons(p_control->len) + 4); // T, L, V 길이
         if (cal_crc != ntohs(p_control->crc))
             printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_control->crc), cal_crc);
@@ -2144,15 +2194,22 @@ static int AnalyzeMsg(uint8_t *msg, int len)
         PrintDb("[%s] Number of Packages = %d / All Length of Package= %d\n", GetCurrentTime(),  p_overall->num_package, ntohs(package_len));
 #endif
 
-        cal_crc = CalcCRC16((uint8_t *)p_overall, overall_len + 4); // T, L, V 길이
-        if (cal_crc != ntohs(p_overall->crc))
-            printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_overall->crc), cal_crc);
-
         // AddExtStatusData(p_overall, eStatusTxRx_Rx);
-        if (p_overall->version == 1)
-            p = (uint8_t *)p_overall + sizeof(TLVC_Overall); // next TLVC
-        else if (p_overall->version == 2)
-            p = (uint8_t *)p_overall_v2 + sizeof(TLVC_Overall_V2); // next TLVC
+		if (p_overall->version == 1)
+		{
+			cal_crc = CalcCRC16((uint8_t*)p_overall, overall_len + 4);	// T, L, V 길이
+			if (cal_crc != ntohs(p_overall->crc))
+				printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_overall->crc), cal_crc);
+			p = (uint8_t*)p_overall + sizeof(TLVC_Overall);	// next TLVC
+		}
+		else if (p_overall->version == 2)
+		{
+			printf("Bitwize = 0x%02X\n", p_overall_v2->bitwize);
+			cal_crc = CalcCRC16((uint8_t*)p_overall_v2, overall_len + 4);	// T, L, V 길이
+			if (cal_crc != ntohs(p_overall_v2->crc))
+				printf("[Error] CRC Error : %04X / need : %04X\n", ntohs(p_overall_v2->crc), cal_crc);
+			p = (uint8_t*)p_overall_v2 + sizeof(TLVC_Overall_V2);	// next TLVC
+		}
         else
         {
             printf("[Error] Unknown Version = %d\n", p_overall->version);
