@@ -451,7 +451,7 @@ int32_t P_MSG_MANAGER_SetV2xWsrSetting(MSG_MANAGER_T *pstMsgManager)
 
     PrintDebug("Action ID[%s], PSID[%u]", (pstMsgManager->stExtMsgWsr.ucAction == eMSG_MANAGER_EXT_MSG_ACTION_ADD) ? "ADD":"DEL", pstMsgManager->stExtMsgWsr.unPsid);
 
-    PrintDebug("\nWSM Service REQ>\n"
+    PrintEnter("\nWSM Service REQ>\n"
            "  cMagicNumber   : %s\n"
            "  usLength       : %d\n"
            "  usSeqNum       : %d\n"
@@ -504,7 +504,7 @@ int32_t P_MSG_MANAGER_SetV2xWsrSetting(MSG_MANAGER_T *pstMsgManager)
         {
             P_MSG_MANAGER_PrintMsgData(ucRxMsgBuf, nRxLen);
 
-            PrintDebug("\nWSM Service RESP>\n"
+            PrintExit("\nWSM Service RESP>\n"
                    "  cMagicNumber   : %s\n"
                    "  usLength       : %d\n"
                    "  usSeqNum       : %d\n"
