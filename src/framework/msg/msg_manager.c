@@ -841,8 +841,19 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
             PrintDebug("[%ld]-[%ld]=[%ld]", pstTimeManager->ulTimeStamp, pstEventMsg->pstDbV2x->ulTimeStamp, pstTimeManager->ulTimeStamp-pstEventMsg->pstDbV2x->ulTimeStamp);
         }
     }
-
-    unPsid = MSG_MANAGER_EXT_MSG_V2V_PSID;
+    if (pstEventMsg->pstDbV2x->eCommId == DB_V2X_COMM_ID_V2V)
+    {
+        unPsid = MSG_MANAGER_EXT_MSG_V2V_PSID;
+    }
+    else if (pstEventMsg->pstDbV2x->eCommId == DB_V2X_COMM_ID_I2V)
+    {
+        unPsid = MSG_MANAGER_EXT_MSG_I2V_PSID;
+    }
+    else
+    {
+        unPsid = MSG_MANAGER_EXT_MSG_V2V_PSID;
+        PrintError("unknown pstEventMsg->pstDbV2x->eCommId[%d] set PSID of V2V", pstEventMsg->pstDbV2x->eCommId);
+    }
 
     pstExtMsgOverall = (MSG_MANAGER_EXT_MSG_TLVC_OVERALL*)pstExtMsgTx->ucPayload;
     pstExtMsgOverall->unType = htonl(MSG_MANAGER_EXT_MSG_OVERALL_PKG);
@@ -854,6 +865,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     pstExtMsgOverall->ucVersion = MSG_MANAGER_EXT_MSG_OVERALL_PKG_VER;
     pstExtMsgOverall->ucNumOfPkg = 0;
     pstExtMsgOverall->usLenOfPkg = 0;
+    pstExtMsgOverall->ucBitwise = 0x77;
 
     unExtMsgPkgLen = ntohs(pstExtMsgOverall->usLenOfPkg);
 
@@ -914,7 +926,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
 
     memcpy(pstExtMsg->cMagicNumber, MSG_MANAGER_EXT_MSG_MAGIC_NUM_NAME, sizeof(pstExtMsg->cMagicNumber));
     unTxMsgLen = 16 + sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL) + ntohs(pstExtMsgOverall->usLenOfPkg);   // 16 : header(10) + psid(4) + crc(2)
-    pstExtMsg->usLength = htons(10 + sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL) + ntohs(pstExtMsgOverall->usLenOfPkg));        // seq(2) + payload id(2) + crc(2) + psid(4)
+    pstExtMsg->usLength = htons(SIZE_HDR_LEN_EXCEPT_DATA + sizeof(MSG_MANAGER_EXT_MSG_TLVC_OVERALL) + ntohs(pstExtMsgOverall->usLenOfPkg));        // seq(2) + payload id(2) + crc(2) + psid(4)
     pstExtMsg->usSeqNum = 0;
     pstExtMsg->usPayloadId = htons(eMSG_MANAGER_EXT_MSG_PAYLOAD_ID_TX);
     pstExtMsgTx->unPsid = htonl(unPsid);
@@ -1502,6 +1514,8 @@ static void P_MSG_MANAGER_PrintExtMsgPkg(void *pvExtMsgPkg)
                 PrintDebug("ucTxPwr[%d], usTxFreq[%d], ucTxBw[%d], ucMcs[%d], ucScs[%d]", pstExtMsgModemTx->ucTxPwr, htons(pstExtMsgModemTx->usTxFreq), pstExtMsgModemTx->ucTxBw, pstExtMsgModemTx->ucMcs, pstExtMsgModemTx->ucScs);
                 PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemTx->nLatitude), htonl(pstExtMsgModemTx->nLongitude));
                 PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgModemTx->ulTimeStamp));
+                PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgModemTx->ulTimeStamp));
+                PrintDebug("chCpuTemp[%d], chPeriTemp[%d]", pstExtMsgModemTx->chCpuTemp, pstExtMsgModemTx->chPeriTemp);
 
                 usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemTx, htons(pstExtMsgModemTx->usLenth) + 4); // T, L, V 길이
                 if(usCalcCrc16 != ntohs(pstExtMsgModemTx->usCrc16))
@@ -1517,6 +1531,7 @@ static void P_MSG_MANAGER_PrintExtMsgPkg(void *pvExtMsgPkg)
                 PrintDebug("nRssi[%d], ucRcpi[%d]", pstExtMsgModemRx->nRssi, pstExtMsgModemRx->ucRcpi);
                 PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemRx->nLatitude), htonl(pstExtMsgModemRx->nLongitude));
                 PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgModemRx->ulTimeStamp));
+                PrintDebug("chCpuTemp[%d], chPeriTemp[%d]", pstExtMsgModemRx->chCpuTemp, pstExtMsgModemRx->chPeriTemp);
 
                 usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemRx, htons(pstExtMsgModemRx->usLenth) + 4);	// T, L, V 길이
                 if(usCalcCrc16 != ntohs(pstExtMsgModemRx->usCrc16))
@@ -1541,6 +1556,7 @@ static void P_MSG_MANAGER_PrintExtMsgPkg(void *pvExtMsgPkg)
             PrintDebug("unDevId[%d]", htonl(pstExtMsgComm->unDevId));
             PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgComm->usHwVer), htons(pstExtMsgComm->usSwVer));
             PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgComm->ulTimeStamp));
+            PrintDebug("chCpuTemp[%d], chPeriTemp[%d]", pstExtMsgComm->chCpuTemp, pstExtMsgComm->chPeriTemp);
 
             usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgComm, htons(pstExtMsgComm->usLenth) + 4);	// T, L, V 길이
             if(usCalcCrc16 != ntohs(pstExtMsgComm->usCrc16))
@@ -1559,6 +1575,7 @@ static void P_MSG_MANAGER_PrintExtMsgPkg(void *pvExtMsgPkg)
             PrintDebug("unDevId[%d]", htonl(pstExtMsgComm->unDevId));
             PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgComm->usHwVer), htons(pstExtMsgComm->usSwVer));
             PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgComm->ulTimeStamp));
+            PrintDebug("chCpuTemp[%d], chPeriTemp[%d]", pstExtMsgComm->chCpuTemp, pstExtMsgComm->chPeriTemp);
 
             usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgComm, htons(pstExtMsgComm->usLenth) + 4);	// T, L, V 길이
             if(usCalcCrc16 != ntohs(pstExtMsgComm->usCrc16))
@@ -1583,6 +1600,7 @@ static void P_MSG_MANAGER_PrintExtMsgPkg(void *pvExtMsgPkg)
                 PrintDebug("ucTxPwr[%d], usTxFreq[%d], ucTxBw[%d], ucMcs[%d], ucScs[%d]", pstExtMsgModemTx->ucTxPwr, htons(pstExtMsgModemTx->usTxFreq), pstExtMsgModemTx->ucTxBw, pstExtMsgModemTx->ucMcs, pstExtMsgModemTx->ucScs);
                 PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemTx->nLatitude), htonl(pstExtMsgModemTx->nLongitude));
                 PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgModemTx->ulTimeStamp));
+                PrintDebug("chCpuTemp[%d], chPeriTemp[%d]", pstExtMsgModemTx->chCpuTemp, pstExtMsgModemTx->chPeriTemp);
 
                 usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemTx, htons(pstExtMsgModemTx->usLenth) + 4);	// T, L, V 길이
                 if(usCalcCrc16 != ntohs(pstExtMsgModemTx->usCrc16))
@@ -1598,6 +1616,7 @@ static void P_MSG_MANAGER_PrintExtMsgPkg(void *pvExtMsgPkg)
                 PrintDebug("nRssi[%d], ucRcpi[%d]", pstExtMsgModemRx->nRssi, pstExtMsgModemRx->ucRcpi);
                 PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemRx->nLatitude), htonl(pstExtMsgModemRx->nLongitude));
                 PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgModemRx->ulTimeStamp));
+                PrintDebug("chCpuTemp[%d], chPeriTemp[%d]", pstExtMsgModemRx->chCpuTemp, pstExtMsgModemRx->chPeriTemp);
 
                 usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemRx, htons(pstExtMsgModemRx->usLenth) + 4);	// T, L, V 길이
                 if(usCalcCrc16 != ntohs(pstExtMsgModemRx->usCrc16))
@@ -1622,6 +1641,7 @@ static void P_MSG_MANAGER_PrintExtMsgPkg(void *pvExtMsgPkg)
             PrintDebug("unDevId[%d]", htonl(pstExtMsgCtrl->unDevId));
             PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgCtrl->usHwVer), htons(pstExtMsgCtrl->usSwVer));
             PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgCtrl->ulTimeStamp));
+            PrintDebug("chCpuTemp[%d], chPeriTemp[%d]", pstExtMsgCtrl->chCpuTemp, pstExtMsgCtrl->chPeriTemp);
 
             usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgCtrl, htons(pstExtMsgCtrl->usLenth) + 4);	// T, L, V 길이
             if(usCalcCrc16 != ntohs(pstExtMsgCtrl->usCrc16))
@@ -1712,6 +1732,7 @@ static int32_t P_MSG_MANAGER_AnalyzeRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
 
         PrintWarn("[Overall Package] ucVersion[%d], unOverallPkgLen[%d]", pstExtMsgOverall->ucVersion, unOverallPkgLen);
         PrintDebug("Number of Packages[%d], Total Length of Package[%d]", pstExtMsgOverall->ucNumOfPkg, ntohs(unTotalPkgLen));
+        PrintDebug("bitsize[%d]", pstExtMsgOverall->ucBitwise);
 
         usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgOverall, unOverallPkgLen + 4);	// T, L, V 길이
         if(usCalcCrc16 != ntohs(pstExtMsgOverall->usCrc16))

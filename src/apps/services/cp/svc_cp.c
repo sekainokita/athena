@@ -269,7 +269,15 @@ int32_t P_SVC_CP_SetDefaultSettings(SVC_CP_T *pstSvcCp)
     pstSvcCp->stDbV2x.eActionType = DB_V2X_ACTION_TYPE_REQUEST;
     pstSvcCp->stDbV2x.eRegionId = DB_V2X_REGION_ID_SEONGNAM;
     pstSvcCp->stDbV2x.ePayloadType = DB_V2X_PAYLOAD_TYPE_V2X_STATUS;
+#if defined(CONFIG_OBU)
     pstSvcCp->stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
+#elif defined(CONFIG_RSU)
+    pstSvcCp->stDbV2x.eCommId = DB_V2X_COMM_ID_I2V;
+#else
+    PrintError("check eCommId type!!");
+    return APP_ERROR;
+#endif
+
     pstSvcCp->stDbV2x.usDbVer = (DB_V2X_VERSION_MAJOR << CLI_DB_V2X_MAJOR_SHIFT) | DB_V2X_VERSION_MINOR;
     pstSvcCp->stDbV2x.usHwVer = CLI_DB_V2X_DEFAULT_HW_VER;
     pstSvcCp->stDbV2x.usSwVer = CLI_DB_V2X_DEFAULT_SW_VER;

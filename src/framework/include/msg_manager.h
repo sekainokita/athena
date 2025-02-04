@@ -83,7 +83,7 @@
 #define MSG_MANAGER_EXT_MSG_OVERALL_PKG_OVERALL	    'O'
 #define MSG_MANAGER_EXT_MSG_OVERALL_PKG_PACKAGE	    'P'
 
-#define MSG_MANAGER_EXT_MSG_OVERALL_PKG_VER         (1)
+#define MSG_MANAGER_EXT_MSG_OVERALL_PKG_VER         (2)
 #define MSG_MANAGER_EXT_MSG_V2V_PSID                (58200)
 #define MSG_MANAGER_EXT_MSG_V2I_PSID                (58201)
 #define MSG_MANAGER_EXT_MSG_I2V_PSID                (58202)
@@ -92,6 +92,20 @@
 #define MSG_MANAGER_EXT_MSG_RAW_DATA_PKG            (58221)
 #define MSG_MANAGER_EXT_MSG_SSOV_PKG                (58222)
 #define MSG_MANAGER_EXT_MSG_STATUS_PKG              (58223)
+
+#define MSG_MANAGER_EXT_MSG_FTP_REQ                 (58240)
+#define MSG_MANAGER_EXT_MSG_FTP_RESP                (58241)
+
+#define MSG_MANAGER_EXT_MSG_TEMP_NO_MEASURE         (-128)
+#define MSG_MANAGER_EXT_MSG_TEMP_LIMIT_OVER         (127)
+#define MSG_MANAGER_EXT_MSG_TEMP_LIMIT_BELOW        (-127)
+
+#define MSG_MANAGER_EXT_MSG_UNIT_ID_OBU_MODEM       (0x1)
+#define MSG_MANAGER_EXT_MSG_UNIT_ID_OBU_COMM        (0x2)
+#define MSG_MANAGER_EXT_MSG_UNIT_ID_OBU_CONTROL     (0x4)
+#define MSG_MANAGER_EXT_MSG_UNIT_ID_RSU_MODEM       (0x10)
+#define MSG_MANAGER_EXT_MSG_UNIT_ID_RSU_COMM        (0x20)
+#define MSG_MANAGER_EXT_MSG_UNIT_ID_RSU_CONTROL     (0x40)
 
  /**
 * @details V2X Web Socket
@@ -405,16 +419,26 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_t
 * @param ucVersion (V) the overall package version (0~255)
 * @param ucNumOfPkg (V) the number of following packages (n) (excluding overall package) number of packages)
 * @param usLenOfPkg (V) the sum of the following package lengths (= T+L+V+C) (length sum) (Total length of packages excluding overall package)
+* @param ucBitsize (V) optional status package additional field (unit bit 1 means adding status package), unit bit (0:OBU Modem unit)
+                        . bit 0 : OBU modem unit
+                        . bit 1 : OBU communication unit
+                        . bit 2 : OBU control unit
+                        . bit 3 : unused
+                        . bit 4 : RSU modem unit
+                        . bit 5 : RSU communication unit
+                        . bit 6 : RSU control unit
+                        . bit 7 : unused
 * @param usCrcv (C) CRC16
 */
 typedef struct MSG_MANAGER_EXT_MSG_TLVC_OVERALL_t
 {
     uint32_t    unType;
     uint16_t    usLength;
-    char        chMagicNum[4];
+    char        chMagicNum[MSG_MANAGER_EXT_MSG_MAGIC_NUM_LEN];
     uint8_t     ucVersion;
     uint8_t     ucNumOfPkg;
     uint16_t    usLenOfPkg;
+    uint8_t     ucBitwise;
     uint16_t    usCrc16;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC_OVERALL;
 
@@ -435,6 +459,8 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_OVERALL_t
 * @param ucMcs          the MCS Index (x, [7..6] mcs table [5…0] mcs index)
 * @param nLatitude      the latitide of obu modem
 * @param nLongitude     the longtitude of obu modem
+* @param chCpuTemp      the CPU temperature of inside
+* @param chPeriTemp     the CPU temeprature of outside by using temperature sensors if it is available
 * @param usCrc          the CRC16
 */
 typedef struct MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX_t
@@ -454,6 +480,8 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX_t
     uint8_t     ucMcs;
     int32_t     nLatitude;
     int32_t     nLongitude;
+    char        chCpuTemp;
+    char        chPeriTemp;
     uint16_t    usCrc16;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX;
 
@@ -471,6 +499,8 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_TX_t
 * @param ucRcpi         the receive channel power indicator [0~100] 0 : cRssi < -100 dBm, 1~99 : (cRssi + 101), 100 : cRssi >= -25 dBm
 * @param nLatitude      the latitide of obu modem
 * @param nLongitude     the longtitude of obu modem
+* @param chCpuTemp      the CPU temperature of inside
+* @param chPeriTemp     the CPU temeprature of outside by using temperature sensors if it is available
 * @param usCrc          the CRC16
 */
 typedef struct MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_RX_t
@@ -487,6 +517,8 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_RX_t
     uint8_t     ucRcpi;
     int32_t     nLatitude;
     int32_t     nLongitude;
+    char        chCpuTemp;
+    char        chPeriTemp;
     uint16_t    usCrc16;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_RX;
 
@@ -500,6 +532,8 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_MODEM_UNIT_RX_t
 * @param usHwVer        the hardware version of obu modem
 * @param usSwVer        the software version of obu modem
 * @param ulTimeStamp    the Rx timestamp of obu modem
+* @param chCpuTemp      the CPU temperature of inside
+* @param chPeriTemp     the CPU temeprature of outside by using temperature sensors if it is available
 * @param usCrc          the CRC16
 */
 typedef struct MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT_t
@@ -512,6 +546,8 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT_t
     uint16_t    usHwVer;
     uint16_t    usSwVer;
     uint64_t    ulTimeStamp;
+    char        chCpuTemp;
+    char        chPeriTemp;
     uint16_t    usCrc16;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT;
 
@@ -525,6 +561,8 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT_t
 * @param usHwVer        the hardware version of obu modem
 * @param usSwVer        the software version of obu modem
 * @param ulTimeStamp    the Rx timestamp of obu modem
+* @param chCpuTemp      the CPU temperature of inside
+* @param chPeriTemp     the CPU temeprature of outside by using temperature sensors if it is available
 * @param usCrc          the CRC16
 */
 typedef struct MSG_MANAGER_EXT_MSG_TLVC_CONTROL_UNIT_t
@@ -537,8 +575,55 @@ typedef struct MSG_MANAGER_EXT_MSG_TLVC_CONTROL_UNIT_t
     uint16_t    usHwVer;
     uint16_t    usSwVer;
     uint64_t    ulTimeStamp;
+    char        chCpuTemp;
+    char        chPeriTemp;
     uint16_t    usCrc16;
 }__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_TLVC_CONTROL_UNIT;
+
+/**
+* @details MSG_MANAGER_EXT_MSG_FTP_CONN_INFO_REQ
+* @param unPsid         the PSID : 58240
+* @param ucUnitId       the unit ID
+                        . 01h : OBU modem unit – 1 (ettifos)
+                        . 02h : OBU communication unit
+                        . 04h : OBU control unit
+                        . 08h : OBU modem unit – 2 (autotalks)
+                        . 10h : RSU modem unit – 1 (ettifos)
+                        . 20h : RSU communication unit
+                        . 40h : RSU control unit
+                        . 80h : RSU modem unit – 2 (autotalks)
+* @param unLinkId       the identification ID of the unit that sent the FTP connection information request
+                        4 byte random number generated by unit
+* @param usCrc          the CRC16 (TODO)
+*/
+typedef struct MSG_MANAGER_EXT_MSG_FTP_CONN_INFO_REQ_t
+{
+	uint32_t	unPsid;
+	uint8_t		ucUnitId;
+	uint32_t	unLinkId;
+//	uint16_t	usCrc;
+}__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_FTP_CONN_INFO_REQ;
+
+/**
+* @details MSG_MANAGER_EXT_MSG_FTP_CONN_INFO_RESP
+* @param unPsid         the
+* @param ucUnitId       the same as MSG_MANAGER_EXT_MSG_FTP_CONN_INFO_REQ
+* @param unLinkId       the same as MSG_MANAGER_EXT_MSG_FTP_CONN_INFO_REQ
+* @param unIpAddr       the FTP server address
+* @param usPort         the FTP server port
+* @param chData         the NULL data of between ID and Password string
+* @param usCrc          the CRC16 (TODO)
+*/
+typedef struct MSG_MANAGER_EXT_MSG_FTP_CONN_INFO_RESP_t
+{
+	uint32_t	unPsid;
+	uint8_t		ucUnitId;
+	uint32_t	unLinkId;
+	uint32_t	unIpAddr;
+	uint16_t	usPort;
+	char		chData[];
+	//uint16_t	usCrc;
+}__attribute__((__packed__)) MSG_MANAGER_EXT_MSG_FTP_CONN_INFO_RESP;
 
 /**
 * @details MSG_MANAGER_TX_T
