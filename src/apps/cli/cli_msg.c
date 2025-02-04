@@ -117,17 +117,17 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
         case LWS_CALLBACK_ESTABLISHED:
             PrintWarn("LWS_CALLBACK_ESTABLISHED");
 
-            if(s_eFileType == eMSG_MANAGER_FILE_TYPE_TX)
+            if (s_eFileType == eMSG_MANAGER_FILE_TYPE_TX)
             {
                 s_hWebSocket = fopen(MSG_MANAGER_WEBSERVER_FILE_TX, "r");
                 PrintTrace("MSG_MANAGER_WEBSERVER_FILE_TX:%s", MSG_MANAGER_WEBSERVER_FILE_TX);
             }
-            else if(s_eFileType == eMSG_MANAGER_FILE_TYPE_RX)
+            else if (s_eFileType == eMSG_MANAGER_FILE_TYPE_RX)
             {
                 s_hWebSocket = fopen(MSG_MANAGER_WEBSERVER_FILE_RX, "r");
                 PrintTrace("MSG_MANAGER_WEBSERVER_FILE_RX:%s", MSG_MANAGER_WEBSERVER_FILE_RX);
             }
-            else if(s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_TX)
+            else if (s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_TX)
             {
                 nRet = system("cp -f ~/work/athena/src/apps/html/db/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_TX " "MSG_MANAGER_DB_FILE_PATH);
                 if(nRet < FRAMEWORK_OK)
@@ -139,7 +139,7 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
                 s_hWebSocket = fopen("/tmp/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_TX, "r");
                 PrintTrace("MSG_MANAGER_WEBSERVER_FILE_SAMPLE_TX:/tmp/%s", MSG_MANAGER_WEBSERVER_FILE_SAMPLE_TX);
             }
-            else if(s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_RX)
+            else if (s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_RX)
             {
                 nRet = system("cp -f ~/work/athena/src/apps/html/db/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_RX " "MSG_MANAGER_DB_FILE_PATH);
                 if(nRet < FRAMEWORK_OK)
@@ -156,7 +156,7 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
                 PrintError("unknown file format[%d]", s_eFileType);
             }
 
-            if(s_hWebSocket == NULL)
+            if (s_hWebSocket == NULL)
             {
                 PrintError("s_hWebSocket is NULL!!");
                 return nRet;
@@ -166,7 +166,7 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
                 PrintTrace("file type[%d] is opened", s_eFileType);
             }
 
-            if((s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_TX) || (s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_RX))
+            if ((s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_TX) || (s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_RX))
             {
                 /* read from the first */
                 fseek(s_hWebSocket, 0, SEEK_SET);
@@ -297,7 +297,7 @@ static int32_t P_MSG_MANAGER_WebSocketDeInit(void)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
-    if(s_pLwsContext != NULL)
+    if (s_pLwsContext != NULL)
     {
         lws_context_destroy(s_pLwsContext);
         PrintDebug("P_MSG_MANAGER_WebSocketDeInit() is deinit.");
@@ -408,7 +408,8 @@ int32_t P_CLI_MSG_TcpServerStart(void)
     stServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     stServerAddr.sin_port = htons(SVC_CP_DEFAULT_RSU_PORT);
 
-    if (setsockopt(h_nListen, SOL_SOCKET, SO_REUSEADDR, (char *) &nVal, sizeof nVal) < 0) {
+    if (setsockopt(h_nListen, SOL_SOCKET, SO_REUSEADDR, (char *) &nVal, sizeof(nVal)) < 0)
+    {
         PrintError("setsockopt");
         close(h_nListen);
         return -1;
@@ -560,26 +561,36 @@ int32_t P_CLI_MSG_TcpClientStart(char *pcIpAddr)
     return nRet;
 }
 
-void P_CLI_MSG_TcpMultiAddClient(int socket_fd) {
+void P_CLI_MSG_TcpMultiAddClient(int socket_fd)
+{
     pthread_mutex_lock(&client_mutex);
-    if (client_count < MAX_CLIENTS) {
+
+    if (client_count < MAX_CLIENTS)
+    {
         client_sockets[client_count++] = socket_fd;
     }
+
     pthread_mutex_unlock(&client_mutex);
 }
 
-void P_CLI_MSG_TcpMultiRemoveClient(int socket_fd) {
+void P_CLI_MSG_TcpMultiRemoveClient(int socket_fd)
+{
     pthread_mutex_lock(&client_mutex);
-    for (int i = 0; i < client_count; i++) {
-        if (client_sockets[i] == socket_fd) {
+
+    for (int i = 0; i < client_count; i++)
+    {
+        if (client_sockets[i] == socket_fd)
+        {
             client_sockets[i] = client_sockets[--client_count];
             break;
         }
     }
+
     pthread_mutex_unlock(&client_mutex);
 }
 
-void *P_CLI_MSG_TcpMultiServerSendTask(void *fd) {
+void *P_CLI_MSG_TcpMultiServerSendTask(void *fd)
+{
     int h_nSocket = *(int *)fd;
     char cMsgBuf[MAX_LINE];
 
@@ -611,19 +622,26 @@ void *P_CLI_MSG_TcpMultiServerSendTask(void *fd) {
     return NULL;
 }
 
-void *P_CLI_MSG_TcpMultiServerTask(void *fd) {
+void *P_CLI_MSG_TcpMultiServerTask(void *fd)
+{
     int h_nSocket = *(int *)fd;
     char cMsgBuf[MAX_LINE];
     int nRevLen;
 
     P_CLI_MSG_TcpMultiAddClient(h_nSocket);
 
-    while (1) {
+    while (1)
+    {
         memset(cMsgBuf, 0, MAX_LINE);
-        if ((nRevLen = recv(h_nSocket, cMsgBuf, MAX_LINE, 0)) <= 0) {
-            if (nRevLen == 0) {
+
+        if ((nRevLen = recv(h_nSocket, cMsgBuf, MAX_LINE, 0)) <= 0)
+        {
+            if (nRevLen == 0)
+            {
                 PrintDebug("Client disconnected.");
-            } else {
+            }
+            else
+            {
                 PrintError("recv error.");
             }
             break;
@@ -639,25 +657,31 @@ void *P_CLI_MSG_TcpMultiServerTask(void *fd) {
     return NULL;
 }
 
-void *P_CLI_MSG_ServerInputTask(void *fd) {
+void *P_CLI_MSG_ServerInputTask(void *fd)
+{
     char cMsgBuf[MAX_LINE];
     UNUSED(fd);
 
-    while (1) {
+    while (1)
+    {
         printf("Enter message to client: ");
-        if (fgets(cMsgBuf, MAX_LINE, stdin) == NULL) {
+        if (fgets(cMsgBuf, MAX_LINE, stdin) == NULL)
+        {
             PrintError("Error reading input.");
             continue;
         }
 
-        if (strcmp(cMsgBuf, "exit\n") == 0) {
+        if (strcmp(cMsgBuf, "exit\n") == 0)
+        {
             printf("Server exiting...\n");
             exit(0);
         }
 
         pthread_mutex_lock(&client_mutex);
-        for (int i = 0; i < client_count; i++) {
-            if (send(client_sockets[i], cMsgBuf, strlen(cMsgBuf), 0) == -1) {
+        for (int i = 0; i < client_count; i++)
+        {
+            if (send(client_sockets[i], cMsgBuf, strlen(cMsgBuf), 0) == -1)
+            {
                 PrintError("send error to client %d", client_sockets[i]);
             }
         }
@@ -669,7 +693,8 @@ void *P_CLI_MSG_ServerInputTask(void *fd) {
     return NULL;
 }
 
-int32_t P_CLI_MSG_TcpMultiServerStart(void) {
+int32_t P_CLI_MSG_TcpMultiServerStart(void)
+{
     int32_t nRet = APP_ERROR;
     int h_nListen, h_nConn;
     pthread_t h_stRecvTid, h_stInputTid;
@@ -678,7 +703,8 @@ int32_t P_CLI_MSG_TcpMultiServerStart(void) {
     int nVal = 1;
     int client_fd;
 
-    if ((h_nListen = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    if ((h_nListen = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    {
         PrintError("socket error.\n");
         return nRet;
     }
@@ -687,18 +713,21 @@ int32_t P_CLI_MSG_TcpMultiServerStart(void) {
     stServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     stServerAddr.sin_port = htons(SVC_MCP_DEFAULT_RSU_PORT);
 
-    if (setsockopt(h_nListen, SOL_SOCKET, SO_REUSEADDR, (char *)&nVal, sizeof(nVal)) < 0) {
+    if (setsockopt(h_nListen, SOL_SOCKET, SO_REUSEADDR, (char *)&nVal, sizeof(nVal)) < 0)
+    {
         PrintError("setsockopt error.");
         close(h_nListen);
         return nRet;
     }
 
-    if (bind(h_nListen, (struct sockaddr *)&stServerAddr, sizeof(stServerAddr)) < 0) {
+    if (bind(h_nListen, (struct sockaddr *)&stServerAddr, sizeof(stServerAddr)) < 0)
+    {
         PrintError("bind error.");
         return nRet;
     }
 
-    if (listen(h_nListen, LISTENQ) < 0) {
+    if (listen(h_nListen, LISTENQ) < 0)
+    {
         PrintError("listen error.");
         return nRet;
     }
@@ -708,20 +737,24 @@ int32_t P_CLI_MSG_TcpMultiServerStart(void) {
         return nRet;
     }
 
-    while (1) {
-        if ((h_nConn = accept(h_nListen, (struct sockaddr *)&stClientAddr, &stClientLen)) < 0) {
+    while (1)
+    {
+        if ((h_nConn = accept(h_nListen, (struct sockaddr *)&stClientAddr, &stClientLen)) < 0)
+        {
             PrintError("accept error.");
             return nRet;
         }
 
         int *client_sock = malloc(sizeof(client_fd));
-        if (client_sock != NULL) {
+        if (client_sock != NULL)
+        {
             *client_sock = h_nConn;
         }
 
         PrintDebug("server: got connection from %s", inet_ntoa(stClientAddr.sin_addr));
 
-        if (pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpMultiServerTask, (void *)client_sock) != 0) {
+        if (pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpMultiServerTask, (void *)client_sock) != 0)
+        {
             PrintError("pthread create error.");
             free(client_sock);
             return nRet;
