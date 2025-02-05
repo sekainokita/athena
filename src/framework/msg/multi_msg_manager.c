@@ -485,7 +485,7 @@ int32_t P_MULTI_MSG_MANAGER_SetV2xWsrSetting(MULTI_MSG_MANAGER_T *pstMultiMsgMan
 
     PrintDebug("Action ID[%s], PSID[%u]", (pstMultiMsgManager->stExtMultiMsgWsr.ucAction == eMULTI_MSG_MANAGER_EXT_MSG_ACTION_ADD) ? "ADD":"DEL", pstMultiMsgManager->stExtMultiMsgWsr.unPsid);
 
-    PrintEnter("\nWSM Service REQ>\n"
+    PrintDebug("\nWSM Service REQ>\n"
            "  cMagicNumber   : %s\n"
            "  usLength       : %d\n"
            "  usSeqNum       : %d\n"
@@ -501,8 +501,10 @@ int32_t P_MULTI_MSG_MANAGER_SetV2xWsrSetting(MULTI_MSG_MANAGER_T *pstMultiMsgMan
            ntohl(pstWsr->unPsid),
            ntohs(pstWsr->usCrc16));
 
-    P_MULTI_MSG_MANAGER_PrintMsgData(
-        ucTxMultiMsgBuf, nTxLen);
+    P_MULTI_MSG_MANAGER_PrintMsgData(ucTxMultiMsgBuf, nTxLen);
+
+    PrintEnter("unDevIdx[%d]", unDevIdx);
+
     nRxLen = send(s_nMultiSocketHandle[unDevIdx], ucTxMultiMsgBuf, nTxLen, 0);
     if ((nRxLen < 0) || (nRxLen == 0))
     {
