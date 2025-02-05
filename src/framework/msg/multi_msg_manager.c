@@ -2730,6 +2730,29 @@ int32_t MULTI_MSG_MANAGER_Open(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
         return nRet;
     }
 
+    switch(pstMultiMsgManager->eDeviceType)
+    {
+        case DB_V2X_DEVICE_TYPE_OBU:
+        {
+            pstMultiMsgManager->unMaxDevCnt = MULTI_MSG_MGR_OBU_MAX_DEV_CNT;
+
+            PrintTrace("DB_V2X_DEVICE_TYPE_OBU[unMaxDevCnt:%d", pstMultiMsgManager->unMaxDevCnt);
+            break;
+        }
+
+        case DB_V2X_DEVICE_TYPE_RSU:
+        {
+            pstMultiMsgManager->unMaxDevCnt = MULTI_MSG_MGR_RSU_MAX_DEV_CNT;
+
+            PrintTrace("DB_V2X_DEVICE_TYPE_RSU[unMaxDevCnt:%d", pstMultiMsgManager->unMaxDevCnt);
+            break;
+        }
+
+        default:
+            PrintError("Error! unknown device type[%d]", pstMultiMsgManager->eDeviceType);
+            break;
+    }
+
     nRet = P_MULTI_MSG_MANAGER_ConnectV2XDevice(pstMultiMsgManager);
     if (nRet != FRAMEWORK_OK)
     {
@@ -2939,29 +2962,6 @@ int32_t MULTI_MSG_MANAGER_Init(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
 
     s_bMultiMsgMgrLog = pstMultiMsgManager->bLogLevel;
     PrintDebug("s_bMsgMgrLog [%s]", s_bMultiMsgMgrLog == ON ? "ON" : "OFF");
-
-    switch(pstMultiMsgManager->eDeviceType)
-    {
-        case DB_V2X_DEVICE_TYPE_OBU:
-        {
-            pstMultiMsgManager->unMaxDevCnt = MULTI_MSG_MGR_OBU_MAX_DEV_CNT;
-
-            PrintTrace("DB_V2X_DEVICE_TYPE_OBU[unMaxDevCnt:%d", pstMultiMsgManager->unMaxDevCnt);
-            break;
-        }
-
-        case DB_V2X_DEVICE_TYPE_RSU:
-        {
-            pstMultiMsgManager->unMaxDevCnt = MULTI_MSG_MGR_RSU_MAX_DEV_CNT;
-
-            PrintTrace("DB_V2X_DEVICE_TYPE_RSU[unMaxDevCnt:%d", pstMultiMsgManager->unMaxDevCnt);
-            break;
-        }
-
-        default:
-            PrintError("Error! unknown device type[%d]", pstMultiMsgManager->eDeviceType);
-            break;
-    }
 
     return nRet;
 }
