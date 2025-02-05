@@ -95,6 +95,7 @@
 #define MULTI_MSG_MANAGER_MAX_RX_PKG_SIZE                 (MULTI_MSG_MANAGER_MAX_DATA_SIZE + MULTI_MSG_MANAGER_EXT_MSG_HEADER_SIZE + MULTI_MSG_MANAGER_EXT_MSG_RX_SIZE + MULTI_MSG_MANAGER_CRC16_LEN)
 
 #define MULTI_MSG_MGR_RSU_LISTENQ                         (1024)
+#define MULTI_MSG_MGR_RSU_MAX_COUNT                       (6)
 
 //#define CONFIG_TEMP_OBU_TEST (1)
 //#define CONFIG_TEST_EXT_MSG_STATUS_PKG (1)
@@ -106,6 +107,8 @@
 #define htonll(x)   ((((uint64_t)htonl(x)) << 32) + htonl(x >> 32))
 #define ntohll(x)   ((((uint64_t)ntohl(x)) << 32) + ntohl(x >> 32))
 #endif
+
+pthread_mutex_t pRsuMutex = PTHREAD_MUTEX_INITIALIZER;
 
 /***************************** Static Variable *******************************/
 static int32_t s_nMultiSocketHandle = -1;
@@ -121,9 +124,14 @@ static bool s_bMultiMsgMgrLog = OFF;
 static bool s_bMultiFirstPacket = TRUE;
 
 static uint32_t s_unMultiV2xMsgTxLen = 0, s_unMultiV2xMsgRxLen = 0;
+static int s_nMultiRsuSocket[MULTI_MSG_MGR_RSU_MAX_COUNT];
+static int s_nMultiRsuCount = 0;
 
 /***************************** Function  *************************************/
-
+static int32_t P_MULTI_MSG_MANAGER_ConnectRsuClient(int32_t nSocket);
+#if 0 // TODO
+static int32_t P_MULTI_MSG_MANAGER_DisconnectRsuClient(int32_t nSocket);
+#endif
 /////////////////////////////////////////////////////////////////////////////////////////
 /* Global Variable Value */
 
@@ -234,8 +242,7 @@ static int32_t P_MULTI_MSG_MANAGER_ConnectRsu(MULTI_MSG_MANAGER_T *pstMultiMsgMa
     int32_t nRet = FRAMEWORK_ERROR;
     int32_t nSocketHandle = -1;
     int32_t nClientSocket = -1;
-    int nVal = 1;
-
+    int nVal = 1, i = 0;
     struct sockaddr_in stServerAddr, stClientAddr;
     socklen_t stClientLen = sizeof(stClientAddr);
 
@@ -257,43 +264,88 @@ static int32_t P_MULTI_MSG_MANAGER_ConnectRsu(MULTI_MSG_MANAGER_T *pstMultiMsgMa
     stServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     stServerAddr.sin_port = htons(pstMultiMsgManager->unPort);
 
-    if (setsockopt(nSocketHandle, SOL_SOCKET, SO_REUSEADDR, (char *) &nVal, sizeof nVal) < 0) {
-        PrintError("setsockopt() is failed!");
+    if (setsockopt(nSocketHandle, SOL_SOCKET, SO_REUSEADDR, (char *) &nVal, sizeof (nVal)) < 0)
+    {
+        PrintError("setsockopt error.");
         close(nSocketHandle);
         return nRet;
     }
 
-    if(bind(nSocketHandle, (struct sockaddr *)&stServerAddr, sizeof(stServerAddr)) < 0)
+    if (bind(nSocketHandle, (struct sockaddr *)&stServerAddr, sizeof(stServerAddr)) < 0)
     {
-        PrintError("bind() is failed!");
+        PrintError("bind error.");
         return nRet;
     }
 
-    if(listen(nSocketHandle, MULTI_MSG_MGR_RSU_LISTENQ) < 0)
+    if (listen(nSocketHandle, MULTI_MSG_MGR_RSU_LISTENQ) < 0)
     {
-        PrintError("listen() is failed!");
+        PrintError("listen error.");
         return nRet;
     }
 
     PrintWarn("Listening to the client of RSU controller.");
 
-    if((nClientSocket = accept(nSocketHandle, (struct sockaddr *)&stClientAddr, &stClientLen)) < 0)
+    for(i = 0; i < MULTI_MSG_MGR_RSU_MAX_COUNT; i++)
     {
-        PrintError("accept() is failed!");
-        return nRet;
+        if ((nClientSocket = accept(nSocketHandle, (struct sockaddr *)&stClientAddr, &stClientLen)) < 0)
+        {
+            PrintError("accept error.");
+            return nRet;
+        }
+
+        PrintTrace("server: got connection from [IP: %s, Port: %d]", inet_ntoa(stClientAddr.sin_addr), ntohs(stClientAddr.sin_port));
+
+        nRet = P_MULTI_MSG_MANAGER_ConnectRsuClient(nClientSocket);
+        if (nRet != FRAMEWORK_OK)
+        {
+            PrintError("P_MULTI_MSG_MANAGER_ConnectRsuClient() is failed!");
+        }
+
+        PrintTrace("[s_nMultiRsuSocket[%d/%d]: 0x%x]", i, MULTI_MSG_MGR_RSU_MAX_COUNT, s_nMultiRsuSocket[i]);
     }
-
-    PrintTrace("server: got connection from [IP: %s, Port: %d]", inet_ntoa(stClientAddr.sin_addr), ntohs(stClientAddr.sin_port));
-
-
-    s_nMultiSocketHandle = nClientSocket;
-
-    PrintTrace("[s_nMultiSocketHandle: 0x%x]", s_nMultiSocketHandle);
 
     nRet = FRAMEWORK_OK;
 
     return nRet;
 }
+
+static int32_t P_MULTI_MSG_MANAGER_ConnectRsuClient(int32_t nSocket)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    pthread_mutex_lock(&pRsuMutex);
+    if (s_nMultiRsuCount < MULTI_MSG_MGR_RSU_MAX_COUNT)
+    {
+        s_nMultiRsuSocket[s_nMultiRsuCount++] = nSocket;
+    }
+    pthread_mutex_unlock(&pRsuMutex);
+
+    nRet = FRAMEWORK_OK;
+
+    return nRet;
+}
+
+#if 0 // TODO
+static int32_t P_MULTI_MSG_MANAGER_DisconnectRsuClient(int32_t nSocket)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    pthread_mutex_lock(&pRsuMutex);
+    for (int i = 0; i < s_nMultiRsuCount; i++)
+    {
+        if (s_nMultiRsuSocket[i] == nSocket)
+        {
+            s_nMultiRsuSocket[i] = s_nMultiRsuSocket[--s_nMultiRsuCount];
+            break;
+        }
+    }
+    pthread_mutex_unlock(&pRsuMutex);
+
+    nRet = FRAMEWORK_OK;
+
+    return nRet;
+}
+#endif
 
 static int32_t P_MULTI_MSG_MANAGER_ConnectV2XDevice(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
 {
@@ -524,6 +576,7 @@ int32_t P_MULTI_MSG_MANAGER_SetV2xWsrSetting(MULTI_MSG_MANAGER_T *pstMultiMsgMan
 
     return nRet;
 }
+
 #else
 int32_t P_MULTI_MSG_MANAGER_SetV2xWsrSetting(void)
 {
