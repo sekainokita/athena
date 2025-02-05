@@ -697,6 +697,7 @@ typedef struct MULTI_MSG_MANAGER_t {
     uint32_t                              unPort;
     bool                                  bLogLevel;
     MULTI_MSG_MANAGER_EXT_MSG_WSR         stExtMultiMsgWsr;
+    uint32_t                              unMaxDevCnt;
     uint32_t                              unReserved;
 } MULTI_MSG_MANAGER_T;
 

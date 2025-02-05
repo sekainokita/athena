@@ -94,8 +94,12 @@
 #define MULTI_MSG_MANAGER_MAX_TX_PKG_SIZE                 (MULTI_MSG_MANAGER_MAX_DATA_SIZE + MULTI_MSG_MANAGER_EXT_MSG_HEADER_SIZE + MULTI_MSG_MANAGER_EXT_MSG_TX_SIZE + MULTI_MSG_MANAGER_CRC16_LEN)
 #define MULTI_MSG_MANAGER_MAX_RX_PKG_SIZE                 (MULTI_MSG_MANAGER_MAX_DATA_SIZE + MULTI_MSG_MANAGER_EXT_MSG_HEADER_SIZE + MULTI_MSG_MANAGER_EXT_MSG_RX_SIZE + MULTI_MSG_MANAGER_CRC16_LEN)
 
+#define MULTI_MSG_MGR_SOCKET_DEV_MAX_COUNT                (10)
+
+#define MULTI_MSG_MGR_OBU_MAX_DEV_CNT                     (7)
+
 #define MULTI_MSG_MGR_RSU_LISTENQ                         (1024)
-#define MULTI_MSG_MGR_RSU_MAX_COUNT                       (6)
+#define MULTI_MSG_MGR_RSU_MAX_DEV_CNT                     (6)
 
 //#define CONFIG_TEMP_OBU_TEST (1)
 //#define CONFIG_TEST_EXT_MSG_STATUS_PKG (1)
@@ -111,7 +115,7 @@
 pthread_mutex_t pRsuMutex = PTHREAD_MUTEX_INITIALIZER;
 
 /***************************** Static Variable *******************************/
-static int32_t s_nMultiSocketHandle = -1;
+static int32_t s_nMultiSocketHandle[MULTI_MSG_MGR_SOCKET_DEV_MAX_COUNT] = { 0, };
 static int s_nMultiDbTaskMsgId, s_nMultiMsgTxTaskMsgId, s_nMultiMsgRxTaskMsgId;
 static key_t s_MultidbTaskMsgKey = FRAMEWORK_DB_TASK_MSG_MULTI_KEY;
 static key_t s_MultiMsgTxTaskMsgKey = FRAMEWORK_MSG_TX_TASK_MSG_MULTI_KEY;
@@ -124,14 +128,11 @@ static bool s_bMultiMsgMgrLog = OFF;
 static bool s_bMultiFirstPacket = TRUE;
 
 static uint32_t s_unMultiV2xMsgTxLen = 0, s_unMultiV2xMsgRxLen = 0;
-static int s_nMultiRsuSocket[MULTI_MSG_MGR_RSU_MAX_COUNT];
 static int s_nMultiRsuCount = 0;
 
 /***************************** Function  *************************************/
 static int32_t P_MULTI_MSG_MANAGER_ConnectRsuClient(int32_t nSocket);
-#if 0 // TODO
 static int32_t P_MULTI_MSG_MANAGER_DisconnectRsuClient(int32_t nSocket);
-#endif
 /////////////////////////////////////////////////////////////////////////////////////////
 /* Global Variable Value */
 
@@ -159,6 +160,7 @@ static int32_t P_MULTI_MSG_MANAGER_ConnectObu(MULTI_MSG_MANAGER_T *pstMultiMsgMa
     int32_t nRet = FRAMEWORK_ERROR;
     int32_t nSocketHandle = -1;
     int32_t nFlags = 0;
+    uint32_t unDevIdx = 0;
 
     if (pstMultiMsgManager == NULL)
     {
@@ -228,9 +230,9 @@ static int32_t P_MULTI_MSG_MANAGER_ConnectObu(MULTI_MSG_MANAGER_T *pstMultiMsgMa
         return nRet;
     }
 
-    s_nMultiSocketHandle = nSocketHandle;
+    s_nMultiSocketHandle[unDevIdx] = nSocketHandle;
 
-    PrintTrace("Connection of V2X Device is successed! [s_nMultiSocketHandle:0x%x]", s_nMultiSocketHandle);
+    PrintTrace("Connection of V2X Device is successed! [s_nMultiSocketHandle[%d]:0x%x]", unDevIdx, s_nMultiSocketHandle[unDevIdx]);
 
     nRet = FRAMEWORK_OK;
 
@@ -242,7 +244,8 @@ static int32_t P_MULTI_MSG_MANAGER_ConnectRsu(MULTI_MSG_MANAGER_T *pstMultiMsgMa
     int32_t nRet = FRAMEWORK_ERROR;
     int32_t nSocketHandle = -1;
     int32_t nClientSocket = -1;
-    int nVal = 1, i = 0;
+    int32_t nVal = 1;
+    uint32_t unDevIdx = 0;
     struct sockaddr_in stServerAddr, stClientAddr;
     socklen_t stClientLen = sizeof(stClientAddr);
 
@@ -285,7 +288,7 @@ static int32_t P_MULTI_MSG_MANAGER_ConnectRsu(MULTI_MSG_MANAGER_T *pstMultiMsgMa
 
     PrintWarn("Listening to the client of RSU controller.");
 
-    for(i = 0; i < MULTI_MSG_MGR_RSU_MAX_COUNT; i++)
+    for(unDevIdx = 0; unDevIdx < pstMultiMsgManager->unMaxDevCnt; unDevIdx++)
     {
         if ((nClientSocket = accept(nSocketHandle, (struct sockaddr *)&stClientAddr, &stClientLen)) < 0)
         {
@@ -301,7 +304,7 @@ static int32_t P_MULTI_MSG_MANAGER_ConnectRsu(MULTI_MSG_MANAGER_T *pstMultiMsgMa
             PrintError("P_MULTI_MSG_MANAGER_ConnectRsuClient() is failed!");
         }
 
-        PrintTrace("[s_nMultiRsuSocket[%d/%d]: 0x%x]", i, MULTI_MSG_MGR_RSU_MAX_COUNT, s_nMultiRsuSocket[i]);
+        PrintTrace("[s_nMultiSocketHandle[%d/%d]: 0x%x]", unDevIdx, pstMultiMsgManager->unMaxDevCnt, s_nMultiSocketHandle[unDevIdx]);
     }
 
     nRet = FRAMEWORK_OK;
@@ -314,9 +317,9 @@ static int32_t P_MULTI_MSG_MANAGER_ConnectRsuClient(int32_t nSocket)
     int32_t nRet = FRAMEWORK_ERROR;
 
     pthread_mutex_lock(&pRsuMutex);
-    if (s_nMultiRsuCount < MULTI_MSG_MGR_RSU_MAX_COUNT)
+    if (s_nMultiRsuCount < MULTI_MSG_MGR_RSU_MAX_DEV_CNT)
     {
-        s_nMultiRsuSocket[s_nMultiRsuCount++] = nSocket;
+        s_nMultiSocketHandle[s_nMultiRsuCount++] = nSocket;
     }
     pthread_mutex_unlock(&pRsuMutex);
 
@@ -325,7 +328,6 @@ static int32_t P_MULTI_MSG_MANAGER_ConnectRsuClient(int32_t nSocket)
     return nRet;
 }
 
-#if 0 // TODO
 static int32_t P_MULTI_MSG_MANAGER_DisconnectRsuClient(int32_t nSocket)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -333,9 +335,9 @@ static int32_t P_MULTI_MSG_MANAGER_DisconnectRsuClient(int32_t nSocket)
     pthread_mutex_lock(&pRsuMutex);
     for (int i = 0; i < s_nMultiRsuCount; i++)
     {
-        if (s_nMultiRsuSocket[i] == nSocket)
+        if (s_nMultiSocketHandle[i] == nSocket)
         {
-            s_nMultiRsuSocket[i] = s_nMultiRsuSocket[--s_nMultiRsuCount];
+            s_nMultiSocketHandle[i] = s_nMultiSocketHandle[--s_nMultiRsuCount];
             break;
         }
     }
@@ -345,7 +347,6 @@ static int32_t P_MULTI_MSG_MANAGER_DisconnectRsuClient(int32_t nSocket)
 
     return nRet;
 }
-#endif
 
 static int32_t P_MULTI_MSG_MANAGER_ConnectV2XDevice(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
 {
@@ -392,15 +393,15 @@ static int32_t P_MULTI_MSG_MANAGER_ConnectV2XDevice(MULTI_MSG_MANAGER_T *pstMult
     return nRet;
 }
 
-static int32_t P_MULTI_MSG_MANAGER_DisconnectV2XDevice(void)
+static int32_t P_MULTI_MSG_MANAGER_DisconnectV2XDevice(uint32_t unDevIdx)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
-    if (s_nMultiSocketHandle >= 0)
+    if (s_nMultiSocketHandle[unDevIdx] >= 0)
     {
-        close(s_nMultiSocketHandle);
-        s_nMultiSocketHandle = -1;
-        PrintTrace("s_nMultiSocketHandle is closed, s_nMultiSocketHandle[%d]", s_nMultiSocketHandle);
+        close(s_nMultiSocketHandle[unDevIdx]);
+        s_nMultiSocketHandle[unDevIdx] = -1;
+        PrintTrace("s_nMultiSocketHandle is closed, s_nMultiSocketHandle[%d] : 0x%x", unDevIdx, s_nMultiSocketHandle[unDevIdx]);
         nRet = FRAMEWORK_OK;
     }
     else
@@ -449,7 +450,7 @@ void P_MULTI_MSG_MANAGER_PrintMsgData(unsigned char* ucMultiMsgData, int nLength
     }
 }
 
-int32_t P_MULTI_MSG_MANAGER_SetV2xWsrSetting(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
+int32_t P_MULTI_MSG_MANAGER_SetV2xWsrSetting(MULTI_MSG_MANAGER_T *pstMultiMsgManager, uint32_t unDevIdx)
 {
     int32_t nRet = FRAMEWORK_ERROR;
     int nRxLen = 0, nTxLen = 0;
@@ -502,7 +503,7 @@ int32_t P_MULTI_MSG_MANAGER_SetV2xWsrSetting(MULTI_MSG_MANAGER_T *pstMultiMsgMan
 
     P_MULTI_MSG_MANAGER_PrintMsgData(
         ucTxMultiMsgBuf, nTxLen);
-    nRxLen = send(s_nMultiSocketHandle, ucTxMultiMsgBuf, nTxLen, 0);
+    nRxLen = send(s_nMultiSocketHandle[unDevIdx], ucTxMultiMsgBuf, nTxLen, 0);
     if ((nRxLen < 0) || (nRxLen == 0))
     {
         PrintError("send() is failed!!");
@@ -521,7 +522,7 @@ int32_t P_MULTI_MSG_MANAGER_SetV2xWsrSetting(MULTI_MSG_MANAGER_T *pstMultiMsgMan
 
     while (nRxLen <= 0)
     {
-        nRxLen = recv(s_nMultiSocketHandle, &ucRxMultiMsgBuf, sizeof(ucRxMultiMsgBuf), 0);
+        nRxLen = recv(s_nMultiSocketHandle[unDevIdx], &ucRxMultiMsgBuf, sizeof(ucRxMultiMsgBuf), 0);
         if (nRxLen < 0)
         {
             if ((errno != EAGAIN) && (errno != EWOULDBLOCK))
@@ -604,7 +605,7 @@ int32_t P_MULTI_MSG_MANAGER_SetV2xWsrSetting(void)
            ntohl(ws_req.psid));
 
     // Send the request
-    ssize_t n = send(s_nMultiSocketHandle, &ws_req, sizeof(ws_req), 0);
+    ssize_t n = send(s_nMultiSocketHandle[0], &ws_req, sizeof(ws_req), 0);
     if (n < 0)
     {
         PrintError("send() is failed!!");
@@ -623,7 +624,7 @@ int32_t P_MULTI_MSG_MANAGER_SetV2xWsrSetting(void)
 
     while (n <= 0)
     {
-        n = recv(s_nMultiSocketHandle, &ws_resp, sizeof(ws_resp), 0);
+        n = recv(s_nMultiSocketHandle[0], &ws_resp, sizeof(ws_resp), 0);
         if (n < 0)
         {
             if (errno != EAGAIN && errno != EWOULDBLOCK)
@@ -792,6 +793,9 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
     MULTI_MSG_MANAGER_EXT_MSG_SSOV *pstTxSsovPkg;
     uint16_t unExtMultiMsgPkgLen;
 
+    uint32_t unDevIdx = 0;
+    uint32_t unMaxDevCnt = 0;
+
     s_unMultiV2xMsgTxLen = unDbV2xPacketLength;
 
     if(s_bMultiMsgMgrLog == ON)
@@ -880,16 +884,18 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
     if (pstEventMultiMsg->pstDbV2x->eCommId == DB_V2X_COMM_ID_V2V)
     {
         unPsid = MULTI_MSG_MANAGER_EXT_MSG_V2V_PSID;
-
+        unMaxDevCnt = MULTI_MSG_MGR_OBU_MAX_DEV_CNT;
     }
     else if (pstEventMultiMsg->pstDbV2x->eCommId == DB_V2X_COMM_ID_I2V)
     {
         unPsid = MULTI_MSG_MANAGER_EXT_MSG_I2V_PSID;
+        unMaxDevCnt = MULTI_MSG_MGR_RSU_MAX_DEV_CNT;
     }
     else
     {
         unPsid = MULTI_MSG_MANAGER_EXT_MSG_V2V_PSID;
-        PrintError("unknown pstEventMsg->pstDbV2x->eCommId[%d] set PSID of V2V", pstEventMultiMsg->pstDbV2x->eCommId);
+        unMaxDevCnt = MULTI_MSG_MGR_OBU_MAX_DEV_CNT;
+        PrintError("unknown pstEventMsg->pstDbV2x->eCommId[%d] set PSID of V2V, unMaxDevCnt[%d]", pstEventMultiMsg->pstDbV2x->eCommId, unMaxDevCnt);
     }
 
     pstExtMultiMsgOverall = (MULTI_MSG_MANAGER_EXT_MSG_TLVC_OVERALL*)pstExtMultiMsgTx->ucPayload;
@@ -983,22 +989,25 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
         }
     }
 
-    nRetSendSize = send(s_nMultiSocketHandle, ucMultiMsgBuf, unTxMultiMsgLen, 0);
-    if (nRetSendSize < 0)
+    for(unDevIdx = 0; unDevIdx < unMaxDevCnt ; unDevIdx++)
     {
-        PrintError("send() is failed! [nRetSendSize:%ld]", nRetSendSize);
-    }
-    else if (nRetSendSize != (int32_t)unTxMultiMsgLen)
-    {
-        PrintError("send() is failed! sent a different number of bytes than expected [nRetSendSize:%ld], unTxMultiMsgLen[%d]", nRetSendSize, unTxMultiMsgLen);
-    }
-    else if (nRetSendSize == 0)
-    {
-        PrintError("send() is failed! [nRetSendSize:%ld]", nRetSendSize);
-    }
-    else
-    {
-        nRet = FRAMEWORK_OK;
+        nRetSendSize = send(s_nMultiSocketHandle[unDevIdx], ucMultiMsgBuf, unTxMultiMsgLen, 0);
+        if (nRetSendSize < 0)
+        {
+            PrintError("send() is failed! [nRetSendSize:%ld]", nRetSendSize);
+        }
+        else if (nRetSendSize != (int32_t)unTxMultiMsgLen)
+        {
+            PrintError("send() is failed! sent a different number of bytes than expected [nRetSendSize:%ld], unTxMultiMsgLen[%d]", nRetSendSize, unTxMultiMsgLen);
+        }
+        else if (nRetSendSize == 0)
+        {
+            PrintError("send() is failed! [nRetSendSize:%ld]", nRetSendSize);
+        }
+        else
+        {
+            nRet = FRAMEWORK_OK;
+        }
     }
 
     nRet = P_MULTI_MSG_MANAGER_SendTxMsgToDbMgr(pstEventMultiMsg, ntohl(ulDbV2xTotalPacketCrc32));
@@ -1174,7 +1183,7 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
         }
     }
 
-    nRetSendSize = send(s_nMultiSocketHandle, pstV2xTxPdu, unV2xTxPduLength, 0);
+    nRetSendSize = send(s_nMultiSocketHandle[0], pstV2xTxPdu, unV2xTxPduLength, 0);
     if (nRetSendSize < 0)
     {
         PrintError("send() is failed!!");
@@ -2181,6 +2190,9 @@ static int32_t P_MULTI_MSG_MANAGER_ReceiveRxMsg(MULTI_MSG_MANAGER_RX_EVENT_MSG_T
     int32_t nRet = FRAMEWORK_ERROR;
     uint8_t ucMsgBuf[MULTI_MSG_MANAGER_MAX_RX_PKG_SIZE] = {0};
     int nRecvLen = -1;
+    uint32_t unDevIdx = 0;
+
+    PrintEnter("unDevIdx[%d]", unDevIdx);
 
     if(pstEventMultiMsg == NULL)
     {
@@ -2190,7 +2202,7 @@ static int32_t P_MULTI_MSG_MANAGER_ReceiveRxMsg(MULTI_MSG_MANAGER_RX_EVENT_MSG_T
 
     while (1)
     {
-        nRecvLen = recv(s_nMultiSocketHandle, ucMsgBuf, sizeof(ucMsgBuf), 0);
+        nRecvLen = recv(s_nMultiSocketHandle[unDevIdx], ucMsgBuf, sizeof(ucMsgBuf), 0);
         if (nRecvLen < 0)
         {
             if ((errno != EAGAIN) && (errno != EWOULDBLOCK))
@@ -2255,7 +2267,7 @@ static int32_t P_MULTI_MSG_MANAGER_ReceiveRxMsg(MULTI_MSG_MANAGER_RX_EVENT_MSG_T
 
     while (1)
     {
-        nRecvLen = recv(s_nMultiSocketHandle, buf, sizeof(buf), 0);
+        nRecvLen = recv(s_nMultiSocketHandle[0], buf, sizeof(buf), 0);
         if (nRecvLen < 0)
         {
             if ((errno != EAGAIN) && (errno != EWOULDBLOCK))
@@ -2710,6 +2722,7 @@ int32_t MULTI_MSG_MANAGER_SetLog(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
 int32_t MULTI_MSG_MANAGER_Open(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
+    uint32_t unDevIdx = 0;
 
     if(pstMultiMsgManager == NULL)
     {
@@ -2731,21 +2744,24 @@ int32_t MULTI_MSG_MANAGER_Open(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
     {
         case DB_V2X_DEVICE_TYPE_OBU:
         {
-            PrintTrace("DB_V2X_DEVICE_TYPE_OBU");
-            nRet = P_MULTI_MSG_MANAGER_SetV2xWsrSetting(pstMultiMsgManager);
-            if (nRet != FRAMEWORK_OK)
+            PrintTrace("DB_V2X_DEVICE_TYPE_OBU[unDevIdx:%d]", unDevIdx);
+            for(unDevIdx = 0; unDevIdx < pstMultiMsgManager->unMaxDevCnt; unDevIdx++)
             {
-                PrintError("P_MULTI_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
-                return nRet;
-            }
+                nRet = P_MULTI_MSG_MANAGER_SetV2xWsrSetting(pstMultiMsgManager, unDevIdx);
+                if (nRet != FRAMEWORK_OK)
+                {
+                    PrintError("P_MULTI_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
+                    return nRet;
+                }
 
-            /* Set I2V */
-            pstMultiMsgManager->stExtMultiMsgWsr.unPsid = SVC_MCP_I2V_PSID;
-            nRet = P_MULTI_MSG_MANAGER_SetV2xWsrSetting(pstMultiMsgManager);
-            if (nRet != FRAMEWORK_OK)
-            {
-                PrintError("P_MULTI_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
-                return nRet;
+                /* Set I2V */
+                pstMultiMsgManager->stExtMultiMsgWsr.unPsid = SVC_MCP_I2V_PSID;
+                nRet = P_MULTI_MSG_MANAGER_SetV2xWsrSetting(pstMultiMsgManager, unDevIdx);
+                if (nRet != FRAMEWORK_OK)
+                {
+                    PrintError("P_MULTI_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
+                    return nRet;
+                }
             }
 
             /* Reset Value as V2V */
@@ -2755,12 +2771,15 @@ int32_t MULTI_MSG_MANAGER_Open(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
 
         case DB_V2X_DEVICE_TYPE_RSU:
         {
-            PrintTrace("DB_V2X_DEVICE_TYPE_RSU");
-            nRet = P_MULTI_MSG_MANAGER_SetV2xWsrSetting(pstMultiMsgManager);
-            if (nRet != FRAMEWORK_OK)
+            for(unDevIdx = 0; unDevIdx < pstMultiMsgManager->unMaxDevCnt; unDevIdx++)
             {
-                PrintError("P_MULTI_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
-                return nRet;
+                PrintTrace("DB_V2X_DEVICE_TYPE_RSU[unDevIdx:%d]", unDevIdx);
+                nRet = P_MULTI_MSG_MANAGER_SetV2xWsrSetting(pstMultiMsgManager, unDevIdx);
+                if (nRet != FRAMEWORK_OK)
+                {
+                    PrintError("P_MULTI_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
+                    return nRet;
+                }
             }
             break;
         }
@@ -2788,6 +2807,7 @@ int32_t MULTI_MSG_MANAGER_Open(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
 int32_t MULTI_MSG_MANAGER_Close(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
+    uint32_t unDevIdx = 0;
 
     if(pstMultiMsgManager == NULL)
     {
@@ -2795,16 +2815,26 @@ int32_t MULTI_MSG_MANAGER_Close(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
         return nRet;
     }
 
-    if(s_nMultiSocketHandle != 0)
+    for(unDevIdx = 0; unDevIdx < pstMultiMsgManager->unMaxDevCnt; unDevIdx++)
     {
-        close(s_nMultiSocketHandle);
-        s_nMultiSocketHandle = 0;
-        PrintTrace("Close Connection of V2X Device is successed! [s_nMultiSocketHandle:0x%x]", s_nMultiSocketHandle);
-        nRet = FRAMEWORK_OK;
-    }
-    else
-    {
-        PrintError("Disconnected [s_nMultiSocketHandle:0x%x]", s_nMultiSocketHandle);
+        if(s_nMultiSocketHandle[unDevIdx] != 0)
+        {
+            nRet = P_MULTI_MSG_MANAGER_DisconnectRsuClient(s_nMultiSocketHandle[unDevIdx]);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("P_MULTI_MSG_MANAGER_DisconnectRsuClient() is failed!!, nRet[%d]", nRet);
+                return nRet;
+            }
+
+            close(s_nMultiSocketHandle[unDevIdx]);
+            s_nMultiSocketHandle[unDevIdx] = 0;
+            PrintTrace("Close Connection of V2X Device is successed! [s_nMultiSocketHandle:0x%x]", s_nMultiSocketHandle[unDevIdx]);
+            nRet = FRAMEWORK_OK;
+        }
+        else
+        {
+            PrintError("Disconnected [s_nMultiSocketHandle:0x%x]", s_nMultiSocketHandle[unDevIdx]);
+        }
     }
 
     s_bMultiFirstPacket = TRUE;
@@ -2910,12 +2940,36 @@ int32_t MULTI_MSG_MANAGER_Init(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
     s_bMultiMsgMgrLog = pstMultiMsgManager->bLogLevel;
     PrintDebug("s_bMsgMgrLog [%s]", s_bMultiMsgMgrLog == ON ? "ON" : "OFF");
 
+    switch(pstMultiMsgManager->eDeviceType)
+    {
+        case DB_V2X_DEVICE_TYPE_OBU:
+        {
+            pstMultiMsgManager->unMaxDevCnt = MULTI_MSG_MGR_OBU_MAX_DEV_CNT;
+
+            PrintTrace("DB_V2X_DEVICE_TYPE_OBU[unMaxDevCnt:%d", pstMultiMsgManager->unMaxDevCnt);
+            break;
+        }
+
+        case DB_V2X_DEVICE_TYPE_RSU:
+        {
+            pstMultiMsgManager->unMaxDevCnt = MULTI_MSG_MGR_RSU_MAX_DEV_CNT;
+
+            PrintTrace("DB_V2X_DEVICE_TYPE_RSU[unMaxDevCnt:%d", pstMultiMsgManager->unMaxDevCnt);
+            break;
+        }
+
+        default:
+            PrintError("Error! unknown device type[%d]", pstMultiMsgManager->eDeviceType);
+            break;
+    }
+
     return nRet;
 }
 
 int32_t MULTI_MSG_MANAGER_DeInit(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
+    uint32_t unDevIdx = 0;
 
     if(pstMultiMsgManager == NULL)
     {
@@ -2923,12 +2977,45 @@ int32_t MULTI_MSG_MANAGER_DeInit(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
         return nRet;
     }
 
-    nRet = P_MULTI_MSG_MANAGER_DisconnectV2XDevice();
-    if (nRet != FRAMEWORK_OK)
+    switch(pstMultiMsgManager->eDeviceType)
     {
-        PrintError("P_MULTI_MSG_MANAGER_DisconnectV2XDevice() is failed!!, nRet[%d]", nRet);
-        return nRet;
+        case DB_V2X_DEVICE_TYPE_OBU:
+        {
+            for(unDevIdx = 0; unDevIdx < pstMultiMsgManager->unMaxDevCnt; unDevIdx++)
+            {
+                PrintTrace("DB_V2X_DEVICE_TYPE_OBU[unDevIdx:%d]", unDevIdx);
+                nRet = P_MULTI_MSG_MANAGER_DisconnectV2XDevice(unDevIdx);
+                if (nRet != FRAMEWORK_OK)
+                {
+                    PrintError("P_MULTI_MSG_MANAGER_DisconnectV2XDevice() is failed!!, nRet[%d]", nRet);
+                    return nRet;
+                }
+            }
+
+            break;
+        }
+
+        case DB_V2X_DEVICE_TYPE_RSU:
+        {
+            for(unDevIdx = 0; unDevIdx < pstMultiMsgManager->unMaxDevCnt; unDevIdx++)
+            {
+                PrintTrace("DB_V2X_DEVICE_TYPE_RSU[unDevIdx:%d]", unDevIdx);
+                nRet = P_MULTI_MSG_MANAGER_DisconnectV2XDevice(unDevIdx);
+                if (nRet != FRAMEWORK_OK)
+                {
+                    PrintError("P_MULTI_MSG_MANAGER_DisconnectV2XDevice() is failed!!, nRet[%d]", nRet);
+                    return nRet;
+                }
+            }
+            break;
+        }
+
+        default:
+            PrintError("Error! unknown device type[%d]", pstMultiMsgManager->eDeviceType);
+            break;
     }
+
 
     return nRet;
 }
+
