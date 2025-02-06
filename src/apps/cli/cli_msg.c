@@ -1278,7 +1278,7 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         {
             (void)P_CLI_MSG_ShowTxSettings();
         }
-        else if(IS_CMD(pcCmd, "log"))
+        else if(IS_CMD(pcCmd, "flog"))
         {
             pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
             if(pcCmd != NULL)
@@ -1744,7 +1744,7 @@ int32_t CLI_MSG_InitCmds(void)
                "and the command name.\n\n"
                "msg info          show msg settings\n"
                "msg log           on/off\n"
-               "msg log [opt]     show msg debug logs (on/off)\n"
+               "msg flog [opt]    show msg debug logs of framework (on/off)\n"
                "msg open [eth#]   open message protocol, connect TCP server, e.g. msg open eth1\n"
                "msg close         close message protocol\n"
                "msg tx            send v2x messages to v2x devices (set msg open before)\n"
