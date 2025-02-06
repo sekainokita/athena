@@ -1198,7 +1198,14 @@ int32_t SVC_MCP_Start(SVC_MCP_T *pstSvcMCp)
     nRet = msgsnd(s_nSvcMCpTaskMsgId, &stEventMsg, sizeof(SVC_MCP_EVENT_MSG_T), IPC_NOWAIT);
     if(nRet < 0)
     {
-        PrintError("msgsnd() is failed! [nRet:%d]", nRet);
+        PrintWarn("msgsnd() is failed! [nRet:%d], start with direct call", nRet);
+
+        nRet = P_SVC_MCP_Start(&stEventMsg);
+        if (nRet != APP_OK)
+        {
+            PrintError("SVC_MCP_Start() is failed! [unRet:%d]", nRet);
+        }
+
         return nRet;
     }
     else
@@ -1227,7 +1234,13 @@ int32_t SVC_MCP_Stop(SVC_MCP_T *pstSvcMCp)
     nRet = msgsnd(s_nSvcMCpTaskMsgId, &stEventMsg, sizeof(SVC_MCP_EVENT_MSG_T), IPC_NOWAIT);
     if(nRet < 0)
     {
-        PrintError("msgsnd() is failed! [nRet:%d]", nRet);
+        PrintWarn("msgsnd() is failed! [nRet:%d], stop with direct call", nRet);
+
+        nRet = P_SVC_MCP_Stop(&stEventMsg);
+        if (nRet != APP_OK)
+        {
+            PrintError("P_SVC_MCP_Stop() is failed! [unRet:%d]", nRet);
+        }
         return nRet;
     }
 
