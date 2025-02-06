@@ -993,6 +993,11 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
 
     for(unDevIdx = 0; unDevIdx < unMaxDevCnt ; unDevIdx++)
     {
+        if(s_bMultiMsgMgrLog == ON)
+        {
+            PrintDebug("s_nMultiSocketHandle[unDevIdx:%d] : 0x%x", unDevIdx, s_nMultiSocketHandle[unDevIdx]);
+        }
+
         nRetSendSize = send(s_nMultiSocketHandle[unDevIdx], ucMultiMsgBuf, unTxMultiMsgLen, 0);
         if (nRetSendSize < 0)
         {
