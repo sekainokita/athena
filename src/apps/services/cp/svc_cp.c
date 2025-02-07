@@ -466,17 +466,8 @@ static void *P_SVC_CP_TaskTx(void *arg)
     {
         if(s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_START)
         {
-            for(DB_V2X_COMMUNCATION_ID_E eCommtype = 0; eCommtype < (int)DB_V2X_COMM_ID_V2I; eCommtype++)
+            for(DB_V2X_COMMUNCATION_ID_E eCommtype = DB_V2X_COMM_ID_V2V; eCommtype =< DB_V2X_COMM_ID_V2I; eCommtype++)
             {
-                if (eCommtype == DB_V2X_COMM_ID_V2V)
-                {
-                    s_stSvcCp.stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
-                }
-                else
-                {
-                    s_stSvcCp.stDbV2x.eCommId = DB_V2X_COMM_ID_V2I;
-                }
-
                 s_stSvcCp.stDbV2x.ulPayloadLength = sizeof(s_stSvcCp.stDbV2xStatusTx);
 
                 pchPayload = (char*)malloc(sizeof(char)*s_stSvcCp.stDbV2x.ulPayloadLength);
@@ -591,6 +582,20 @@ static void *P_SVC_CP_TaskTx(void *arg)
                 s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLatitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
                 s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLongitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
                 s_stDbV2xStatus.stV2xGpsInfoHeadingTx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
+
+                if (eCommtype == DB_V2X_COMM_ID_V2V)
+                {
+                    s_stSvcCp.stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
+                }
+                else if (eCommtype == DB_V2X_COMM_ID_V2I)
+                {
+                    s_stSvcCp.stDbV2x.eCommId = DB_V2X_COMM_ID_V2I;
+                }
+                else
+                {
+                    s_stSvcCp.stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
+                    PrintError("unknown eCommtype[%d]", eCommtype);
+                }
 
                 s_stSvcCp.stDbV2x.ulReserved = 0;
 
