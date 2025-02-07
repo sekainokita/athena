@@ -466,143 +466,133 @@ static void *P_SVC_CP_TaskTx(void *arg)
     {
         if(s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_START)
         {
-            s_stSvcCp.stDbV2x.ulPayloadLength = sizeof(s_stSvcCp.stDbV2xStatusTx);
-
-            pchPayload = (char*)malloc(sizeof(char)*s_stSvcCp.stDbV2x.ulPayloadLength);
-            if(pchPayload == NULL)
+            for(DB_V2X_COMMUNCATION_ID_E eCommtype = 0; eCommtype < (int)DB_V2X_COMM_ID_V2I; eCommtype++)
             {
-                PrintError("malloc() is failed! [NULL]");
-                break;
-            }
-
-            (void*)memset(pchPayload, 0x00, sizeof(sizeof(char)*s_stSvcCp.stDbV2x.ulPayloadLength));
-
-            pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
-            if(pstTimeManager == NULL)
-            {
-                PrintError("pstTimeManager is NULL!");
-            }
-
-            /* Set at the Rx Device by Using Ext Msg */
-            s_stSvcCp.stDbV2xStatusTx.stDbV2xDevL1.ulTimeStamp = 0;
-            s_stSvcCp.stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp = 0;
-
-            nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
-            if(nFrameWorkRet != FRAMEWORK_OK)
-            {
-                PrintError("TIME_MANAGER_Get() is failed! [nRet:%d]", nFrameWorkRet);
-            }
-            else
-            {
-                s_stSvcCp.stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
-
-                /* Set the application timestamp before sending */
-                s_stSvcCp.stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp = pstTimeManager->ulTimeStamp;
-            }
-
-            pstDi = APP_GetDiInstance();
-            if(pstDi == NULL)
-            {
-                PrintError("pstDi is NULL!");
-            }
-
-            /* Set the GPS values */
-            nRet = DI_GPS_Get(&pstDi->stDiGps);
-            if (nRet != DI_OK)
-            {
-                PrintError("DI_GPS_Get() is failed! [nRet:%d]", nRet);
-            }
-
-            s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLatitude * SVC_CP_GPS_VALUE_CONVERT);
-            s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLongitude * SVC_CP_GPS_VALUE_CONVERT);
-            s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxAttitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fAltitude * SVC_CP_GPS_VALUE_CONVERT);
-
-            memcpy(pchPayload, (char*)&s_stSvcCp.stDbV2xStatusTx, sizeof(char)*s_stSvcCp.stDbV2x.ulPayloadLength);
-
-            if(s_bFirstMsg == TRUE)
-            {
-                s_stSvcCp.stDbV2xStatusTx.unTxVehicleSpeed = DB_MGR_DEFAULT_VEHICLE_SPEED;
-                s_bFirstMsg = FALSE;
-                PrintWarn("stDbV2xStatus.bFirstPacket's speed is the default value [%d]", s_stSvcCp.stDbV2xStatusTx.unTxVehicleSpeed);
-            }
-            else
-            {
-                if(s_usGpsSpeedCalCnt == SVC_CP_GPS_SPEED_CAL_CNT_MAX)
+                if (eCommtype == DB_V2X_COMM_ID_V2V)
                 {
-                    s_stDbV2xStatus.stV2xGpsInfoTx.nLatitudeNow = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
-                    s_stDbV2xStatus.stV2xGpsInfoTx.nLongitudeNow = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
-                    s_stDbV2xStatus.stV2xGpsInfoTx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
-
-                    nCurrSpeed = DI_GPS_CalculateSpeed(&s_stDbV2xStatus.stV2xGpsInfoTx);
-                    if(nCurrSpeed == 0)
-                    {
-                        s_stSvcCp.stDbV2xStatusTx.unTxVehicleSpeed = s_usLastSpeedTx;
-                    }
-                    else
-                    {
-                        s_stSvcCp.stDbV2xStatusTx.unTxVehicleSpeed = nCurrSpeed;
-                    }
-
-                    s_usLastSpeedTx = nCurrSpeed;
-
-                    s_usGpsSpeedCalCnt = 0;
+                    s_stSvcCp.stDbV2x.eCommId = DB_V2X_COMM_ID_V2V;
                 }
-            }
+                else
+                {
+                    s_stSvcCp.stDbV2x.eCommId = DB_V2X_COMM_ID_V2I;
+                }
 
-            if(s_usGpsSpeedCalCnt == 0)
-            {
-                s_stDbV2xStatus.stV2xGpsInfoTx.nLatitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
-                s_stDbV2xStatus.stV2xGpsInfoTx.nLongitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
-                s_stDbV2xStatus.stV2xGpsInfoTx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
-            }
+                s_stSvcCp.stDbV2x.ulPayloadLength = sizeof(s_stSvcCp.stDbV2xStatusTx);
 
-            s_usGpsSpeedCalCnt++;
+                pchPayload = (char*)malloc(sizeof(char)*s_stSvcCp.stDbV2x.ulPayloadLength);
+                if(pchPayload == NULL)
+                {
+                    PrintError("malloc() is failed! [NULL]");
+                    break;
+                }
+
+                (void*)memset(pchPayload, 0x00, sizeof(sizeof(char)*s_stSvcCp.stDbV2x.ulPayloadLength));
+
+                pstTimeManager = FRAMEWORK_GetTimeManagerInstance();
+                if(pstTimeManager == NULL)
+                {
+                    PrintError("pstTimeManager is NULL!");
+                }
+
+                /* Set at the Rx Device by Using Ext Msg */
+                s_stSvcCp.stDbV2xStatusTx.stDbV2xDevL1.ulTimeStamp = 0;
+                s_stSvcCp.stDbV2xStatusTx.stDbV2xDevL2.ulTimeStamp = 0;
+
+                nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
+                if(nFrameWorkRet != FRAMEWORK_OK)
+                {
+                    PrintError("TIME_MANAGER_Get() is failed! [nRet:%d]", nFrameWorkRet);
+                }
+                else
+                {
+                    s_stSvcCp.stDbV2x.ulTimeStamp = pstTimeManager->ulTimeStamp;
+
+                    /* Set the application timestamp before sending */
+                    s_stSvcCp.stDbV2xStatusTx.stDbV2xDevL3.ulTimeStamp = pstTimeManager->ulTimeStamp;
+                }
+
+                pstDi = APP_GetDiInstance();
+                if(pstDi == NULL)
+                {
+                    PrintError("pstDi is NULL!");
+                }
+
+                /* Set the GPS values */
+                nRet = DI_GPS_Get(&pstDi->stDiGps);
+                if (nRet != DI_OK)
+                {
+                    PrintError("DI_GPS_Get() is failed! [nRet:%d]", nRet);
+                }
+
+                s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLatitude * SVC_CP_GPS_VALUE_CONVERT);
+                s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fLongitude * SVC_CP_GPS_VALUE_CONVERT);
+                s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxAttitude = (int32_t)(pstDi->stDiGps.stDiGpsData.fAltitude * SVC_CP_GPS_VALUE_CONVERT);
+
+                memcpy(pchPayload, (char*)&s_stSvcCp.stDbV2xStatusTx, sizeof(char)*s_stSvcCp.stDbV2x.ulPayloadLength);
+
+                if(s_bFirstMsg == TRUE)
+                {
+                    s_stSvcCp.stDbV2xStatusTx.unTxVehicleSpeed = DB_MGR_DEFAULT_VEHICLE_SPEED;
+                    s_bFirstMsg = FALSE;
+                    PrintWarn("stDbV2xStatus.bFirstPacket's speed is the default value [%d]", s_stSvcCp.stDbV2xStatusTx.unTxVehicleSpeed);
+                }
+                else
+                {
+                    if(s_usGpsSpeedCalCnt == SVC_CP_GPS_SPEED_CAL_CNT_MAX)
+                    {
+                        s_stDbV2xStatus.stV2xGpsInfoTx.nLatitudeNow = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
+                        s_stDbV2xStatus.stV2xGpsInfoTx.nLongitudeNow = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
+                        s_stDbV2xStatus.stV2xGpsInfoTx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
+
+                        nCurrSpeed = DI_GPS_CalculateSpeed(&s_stDbV2xStatus.stV2xGpsInfoTx);
+                        if(nCurrSpeed == 0)
+                        {
+                            s_stSvcCp.stDbV2xStatusTx.unTxVehicleSpeed = s_usLastSpeedTx;
+                        }
+                        else
+                        {
+                            s_stSvcCp.stDbV2xStatusTx.unTxVehicleSpeed = nCurrSpeed;
+                        }
+
+                        s_usLastSpeedTx = nCurrSpeed;
+
+                        s_usGpsSpeedCalCnt = 0;
+                    }
+                }
+
+                if(s_usGpsSpeedCalCnt == 0)
+                {
+                    s_stDbV2xStatus.stV2xGpsInfoTx.nLatitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
+                    s_stDbV2xStatus.stV2xGpsInfoTx.nLongitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
+                    s_stDbV2xStatus.stV2xGpsInfoTx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
+                }
+
+                s_usGpsSpeedCalCnt++;
 
 #if defined(CONFIG_GPS_OBU) || defined(CONFIG_GPS_RSU)
-			s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLatitudeNow = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
-            s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLongitudeNow = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
-            s_stDbV2xStatus.stV2xGpsInfoHeadingTx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
+                s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLatitudeNow = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
+                s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLongitudeNow = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
+                s_stDbV2xStatus.stV2xGpsInfoHeadingTx.ulTimeStampNow = pstTimeManager->ulTimeStamp;
 
-			dHeading = DI_GPS_CalculateHeading(&s_stDbV2xStatus.stV2xGpsInfoHeadingTx);
-            if (dHeading < 0)
-            {
-                PrintError("DI_GPS_CalculateHeading() is failed! [dHeading:%lf]", dHeading);
-            }
+                dHeading = DI_GPS_CalculateHeading(&s_stDbV2xStatus.stV2xGpsInfoHeadingTx);
+                if (dHeading < 0)
+                {
+                    PrintError("DI_GPS_CalculateHeading() is failed! [dHeading:%lf]", dHeading);
+                }
 #else
-            dHeading = DI_GPS_GetHeading(&pstDi->stDiGps);
-            if (dHeading < 0)
-            {
-                PrintError("DI_GPS_GetHeading() is failed! [dHeading:%lf]", dHeading);
-            }
+                dHeading = DI_GPS_GetHeading(&pstDi->stDiGps);
+                if (dHeading < 0)
+                {
+                    PrintError("DI_GPS_GetHeading() is failed! [dHeading:%lf]", dHeading);
+                }
 #endif
-            s_stSvcCp.stDbV2xStatusTx.unTxVehicleHeading = (uint32_t)dHeading;
+                s_stSvcCp.stDbV2xStatusTx.unTxVehicleHeading = (uint32_t)dHeading;
 
-			s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLatitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
-            s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLongitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
-            s_stDbV2xStatus.stV2xGpsInfoHeadingTx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
+                s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLatitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLatitude;
+                s_stDbV2xStatus.stV2xGpsInfoHeadingTx.nLongitudeLast = s_stSvcCp.stDbV2xStatusTx.stTxPosition.nTxLongitude;
+                s_stDbV2xStatus.stV2xGpsInfoHeadingTx.ulTimeStampLast = pstTimeManager->ulTimeStamp;
 
-            s_stSvcCp.stDbV2x.ulReserved = 0;
-
-            if(bMsgTx == TRUE)
-            {
-                nFrameWorkRet = MSG_MANAGER_Transmit(&s_stSvcCp.stMsgManagerTx, &s_stSvcCp.stDbV2x, (char*)pchPayload);
-                if(nFrameWorkRet != FRAMEWORK_OK)
-                {
-                    PrintError("MSG_MANAGER_Transmit() is failed! [nRet:%d]", nFrameWorkRet);
-                }
-            }
-            else
-            {
-                nFrameWorkRet = DB_MANAGER_Write(&s_stSvcCp.stDbManagerWrite, &s_stSvcCp.stDbV2x, (char*)pchPayload);
-                if(nFrameWorkRet != FRAMEWORK_OK)
-                {
-                    PrintError("DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
-                }
-            }
-
-            if (s_stSvcCp.stDbV2x.eCommId == DB_V2X_COMM_ID_V2V)
-            {
-                s_stSvcCp.stDbV2x.eCommId = DB_V2X_COMM_ID_V2I;
+                s_stSvcCp.stDbV2x.ulReserved = 0;
 
                 if(bMsgTx == TRUE)
                 {
@@ -620,27 +610,26 @@ static void *P_SVC_CP_TaskTx(void *arg)
                         PrintError("DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
                     }
                 }
+
+                /* free(pchPayload) is free at the P_MSG_MANAGER_SendTxMsg() */
+                if(s_stSvcCp.stDbV2xStatusTx.unSeqNum == DB_V2X_STATUS_SEQ_NUM_MAX)
+                {
+                    /* Reset the sequence number */
+                    s_stSvcCp.stDbV2xStatusTx.unSeqNum = 0;
+                }
+
+                if(s_stSvcCp.stDbV2xStatusTx.unContCnt == DB_V2X_STATUS_CONT_CNT_MAX)
+                {
+                    /* Reset the continuity counter */
+                    s_stSvcCp.stDbV2xStatusTx.unContCnt = 0;
+                }
+
+                /* Increase the sequence number */
+                s_stSvcCp.stDbV2xStatusTx.unSeqNum++;
+
+                /* Increase the continuity counter */
+                s_stSvcCp.stDbV2xStatusTx.unContCnt++;
             }
-
-            /* free(pchPayload) is free at the P_MSG_MANAGER_SendTxMsg() */
-
-            if(s_stSvcCp.stDbV2xStatusTx.unSeqNum == DB_V2X_STATUS_SEQ_NUM_MAX)
-            {
-                /* Reset the sequence number */
-                s_stSvcCp.stDbV2xStatusTx.unSeqNum = 0;
-            }
-
-            if(s_stSvcCp.stDbV2xStatusTx.unContCnt == DB_V2X_STATUS_CONT_CNT_MAX)
-            {
-                /* Reset the continuity counter */
-                s_stSvcCp.stDbV2xStatusTx.unContCnt = 0;
-            }
-
-            /* Increase the sequence number */
-            s_stSvcCp.stDbV2xStatusTx.unSeqNum++;
-
-            /* Increase the continuity counter */
-            s_stSvcCp.stDbV2xStatusTx.unContCnt++;
 
             usleep((s_stSvcCp.stMsgManagerTx.unTxDelay * USLEEP_MS));
         }
