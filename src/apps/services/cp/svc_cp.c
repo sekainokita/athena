@@ -600,6 +600,28 @@ static void *P_SVC_CP_TaskTx(void *arg)
                 }
             }
 
+            if (s_stSvcCp.stDbV2x.eCommId == DB_V2X_COMM_ID_V2V)
+            {
+                s_stSvcCp.stDbV2x.eCommId = DB_V2X_COMM_ID_V2I;
+
+                if(bMsgTx == TRUE)
+                {
+                    nFrameWorkRet = MSG_MANAGER_Transmit(&s_stSvcCp.stMsgManagerTx, &s_stSvcCp.stDbV2x, (char*)pchPayload);
+                    if(nFrameWorkRet != FRAMEWORK_OK)
+                    {
+                        PrintError("MSG_MANAGER_Transmit() is failed! [nRet:%d]", nFrameWorkRet);
+                    }
+                }
+                else
+                {
+                    nFrameWorkRet = DB_MANAGER_Write(&s_stSvcCp.stDbManagerWrite, &s_stSvcCp.stDbV2x, (char*)pchPayload);
+                    if(nFrameWorkRet != FRAMEWORK_OK)
+                    {
+                        PrintError("DB_MANAGER_Write() is failed! [nRet:%d]", nFrameWorkRet);
+                    }
+                }
+            }
+
             /* free(pchPayload) is free at the P_MSG_MANAGER_SendTxMsg() */
 
             if(s_stSvcCp.stDbV2xStatusTx.unSeqNum == DB_V2X_STATUS_SEQ_NUM_MAX)

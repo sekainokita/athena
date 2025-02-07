@@ -841,9 +841,14 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
             PrintDebug("[%ld]-[%ld]=[%ld]", pstTimeManager->ulTimeStamp, pstEventMsg->pstDbV2x->ulTimeStamp, pstTimeManager->ulTimeStamp-pstEventMsg->pstDbV2x->ulTimeStamp);
         }
     }
+
     if (pstEventMsg->pstDbV2x->eCommId == DB_V2X_COMM_ID_V2V)
     {
         unPsid = MSG_MANAGER_EXT_MSG_V2V_PSID;
+    }
+    else if (pstEventMsg->pstDbV2x->eCommId ==  DB_V2X_COMM_ID_V2I)
+    {
+        unPsid = MSG_MANAGER_EXT_MSG_V2I_PSID;
     }
     else if (pstEventMsg->pstDbV2x->eCommId == DB_V2X_COMM_ID_I2V)
     {
@@ -853,6 +858,11 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
     {
         unPsid = MSG_MANAGER_EXT_MSG_V2V_PSID;
         PrintError("unknown pstEventMsg->pstDbV2x->eCommId[%d] set PSID of V2V", pstEventMsg->pstDbV2x->eCommId);
+    }
+
+    if(s_bMsgMgrLog == ON)
+    {
+        PrintDebug("unPsid[%d]", unPsid);
     }
 
     pstExtMsgOverall = (MSG_MANAGER_EXT_MSG_TLVC_OVERALL*)pstExtMsgTx->ucPayload;
