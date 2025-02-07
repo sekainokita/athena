@@ -862,7 +862,7 @@ static int32_t P_MSG_MANAGER_SendTxMsg(MSG_MANAGER_TX_EVENT_MSG_T *pstEventMsg)
 
     if(s_bMsgMgrLog == ON)
     {
-        PrintDebug("unPsid[%d]", unPsid);
+        PrintDebug("eCommId[%d]. unPsid[%d]", pstEventMsg->pstDbV2x->eCommId, unPsid);
     }
 
     pstExtMsgOverall = (MSG_MANAGER_EXT_MSG_TLVC_OVERALL*)pstExtMsgTx->ucPayload;

@@ -634,9 +634,9 @@ static void *P_SVC_CP_TaskTx(void *arg)
 
                 /* Increase the continuity counter */
                 s_stSvcCp.stDbV2xStatusTx.unContCnt++;
-            }
 
-            usleep((s_stSvcCp.stMsgManagerTx.unTxDelay * USLEEP_MS));
+                usleep((s_stSvcCp.stMsgManagerTx.unTxDelay * USLEEP_MS));
+            }
         }
         else
         {
