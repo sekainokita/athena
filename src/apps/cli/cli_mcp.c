@@ -698,39 +698,38 @@ static int P_CLI_MCP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintError("P_CLI_MCP_StopV2xStatusScenario() is failed![nRet:%d]", nRet);
             }
         }
-        else if(IS_CMD(pcCmd, "flog"))
+        else if(IS_CMD(pcCmd, "log"))
         {
             pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
             if(pcCmd != NULL)
             {
-                MULTI_DB_MANAGER_T *pstMultiDbManager;
-
-                pstMultiDbManager = FRAMEWORK_GetMultiDbManagerInstance();
-                PrintDebug("pstMultiDbManager[0x%p]", pstMultiDbManager);
+                MULTI_MSG_MANAGER_T *pstMultiMsgManager;
+                pstMultiMsgManager = FRAMEWORK_GetMultiMsgManagerInstance();
+                PrintDebug("pstMultiMsgManager[0x%p]", pstMultiMsgManager);
 
 
                 if(IS_CMD(pcCmd, "on"))
                 {
-                    pstMultiDbManager->bLogLevel = ON;
+                    pstMultiMsgManager->bLogLevel = ON;
                 }
                 else if(IS_CMD(pcCmd, "off"))
                 {
-                    pstMultiDbManager->bLogLevel = OFF;
+                    pstMultiMsgManager->bLogLevel = OFF;
                 }
                 else
                 {
                     PrintError("mcp log on/off, e.g. mcp log on, or mcp log off");
                 }
 
-                nRet = MULTI_DB_MANAGER_SetLog(pstMultiDbManager);
+                nRet = MULTI_MSG_MANAGER_SetLog(pstMultiMsgManager);
                 if (nRet != FRAMEWORK_OK)
                 {
-                    PrintError("MULTI_DB_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
+                    PrintError("MULTI_MSG_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
                 }
             }
             else
             {
-                PrintError("msg log on/off, e.g. msg log on, or msg log off");
+                PrintError("mcp log on/off, e.g. msg log on, or msg log off");
             }
         }
         else if(IS_CMD(pcCmd, "status"))
@@ -802,6 +801,7 @@ int32_t CLI_MCP_InitCmds(void)
                "    test                         test mcp command\n"
                "    set                          set Device ID (should be set mcp ready first)\n"
                "    check                        check V2X scenario\n"
+               "    msg flog [opt]               show msg debug logs of framework (on/off)\n"
                "    base                         start a base Multi Communication Performance scenario\n"
                "    ready                        ready V2X scenario\n"
                "    start                        start V2X scenario (should be set mcp ready first)\n"

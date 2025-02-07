@@ -993,6 +993,11 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
 
     for(unDevIdx = 0; unDevIdx < unMaxDevCnt ; unDevIdx++)
     {
+        if(s_bMultiMsgMgrLog == ON)
+        {
+            PrintDebug("s_nMultiSocketHandle[unDevIdx:%d] : 0x%x", unDevIdx, s_nMultiSocketHandle[unDevIdx]);
+        }
+
         nRetSendSize = send(s_nMultiSocketHandle[unDevIdx], ucMultiMsgBuf, unTxMultiMsgLen, 0);
         if (nRetSendSize < 0)
         {
@@ -2805,6 +2810,16 @@ int32_t MULTI_MSG_MANAGER_Open(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
                     PrintError("P_MULTI_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
                     return nRet;
                 }
+
+                pstMultiMsgManager->stExtMultiMsgWsr.unPsid = SVC_MCP_V2I_PSID;
+                nRet = P_MULTI_MSG_MANAGER_SetV2xWsrSetting(pstMultiMsgManager, unDevIdx);
+                if (nRet != FRAMEWORK_OK)
+                {
+                    PrintError("P_MULTI_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
+                    return nRet;
+                }
+                /* Reset Value as V2V */
+                pstMultiMsgManager->stExtMultiMsgWsr.unPsid = SVC_MCP_I2V_PSID;
             }
             break;
         }
