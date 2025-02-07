@@ -57,6 +57,7 @@
 #define SVC_MCP_DEFAULT_ETH_DEV              "eth1"
 #define SVC_MCP_DEFAULT_RSU_ETH_DEV          "eno8303"
 #define SVC_MCP_V2V_PSID                     (58200)
+#define SVC_MCP_V2I_PSID                     (58201)
 #define SVC_MCP_I2V_PSID                     (58202)
 
 #define SVC_MCP_GPS_OPEN_RETRY_CNT           (10)

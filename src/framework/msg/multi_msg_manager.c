@@ -2810,6 +2810,16 @@ int32_t MULTI_MSG_MANAGER_Open(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
                     PrintError("P_MULTI_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
                     return nRet;
                 }
+
+                pstMultiMsgManager->stExtMultiMsgWsr.unPsid = SVC_MCP_V2I_PSID;
+                nRet = P_MULTI_MSG_MANAGER_SetV2xWsrSetting(pstMultiMsgManager, unDevIdx);
+                if (nRet != FRAMEWORK_OK)
+                {
+                    PrintError("P_MULTI_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
+                    return nRet;
+                }
+                /* Reset Value as V2V */
+                pstMultiMsgManager->stExtMultiMsgWsr.unPsid = SVC_MCP_I2V_PSID;
             }
             break;
         }
