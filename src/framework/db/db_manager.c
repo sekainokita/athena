@@ -2602,6 +2602,7 @@ static int32_t P_DB_MANAGER_WriteCsv(DB_MANAGER_EVENT_MSG_T *pstEventMsg)
     switch(pstEventMsg->pstDbV2x->ePayloadType)
     {
         case DB_V2X_PAYLOAD_TYPE_V2X_STATUS:
+        case DB_V2X_PAYLOAD_TYPE_V2X_MULTI_STATUS:
         {
             nRet = P_DB_MANAGER_WriteCsvV2xStatus(pstEventMsg);
             if(nRet != FRAMEWORK_OK)
