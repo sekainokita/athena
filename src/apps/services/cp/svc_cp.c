@@ -466,7 +466,7 @@ static void *P_SVC_CP_TaskTx(void *arg)
     {
         if(s_stSvcCp.eSvcCpStatus == SVC_CP_STATUS_START)
         {
-            for(DB_V2X_COMMUNCATION_ID_E eCommtype = DB_V2X_COMM_ID_V2V; eCommtype =< DB_V2X_COMM_ID_V2I; eCommtype++)
+            for(DB_V2X_COMMUNCATION_ID_E eCommtype = DB_V2X_COMM_ID_V2V; eCommtype <= DB_V2X_COMM_ID_V2I; eCommtype++)
             {
                 s_stSvcCp.stDbV2x.ulPayloadLength = sizeof(s_stSvcCp.stDbV2xStatusTx);
 
