@@ -2728,7 +2728,7 @@ int32_t MULTI_MSG_MANAGER_Open(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
         {
             pstMultiMsgManager->unMaxDevCnt = MULTI_MSG_MGR_RSU_MAX_DEV_CNT;
 
-            PrintTrace("DB_V2X_DEVICE_TYPE_RSU[unMaxDevCnt:%d], CONFIG_RSU_MAX_DEV[%d]", pstMultiMsgManager->unMaxDevCnt, CONFIG_RSU_MAX_DEV);
+            PrintTrace("DB_V2X_DEVICE_TYPE_RSU[unMaxDevCnt:%d]", pstMultiMsgManager->unMaxDevCnt);
             break;
         }
 
