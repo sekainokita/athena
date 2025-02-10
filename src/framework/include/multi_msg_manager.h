@@ -303,6 +303,14 @@ typedef enum
 } MULTI_MSG_MANAGER_EXT_MSG_STATUS_E;
 
 /**
+* @details MULTI_MSG_MANAGER_TASK
+* @param unDevIdx  device ID
+*/
+typedef struct MULTI_MSG_MANAGER_TASK_t {
+    uint32_t    unDevIdx;
+} MULTI_MSG_MANAGER_TASK_T;
+
+/**
 * @details MULTI_MSG_MANAGER_EXT_MSG
 * @param cMagicNumber (4bytes) 5GVX, frame identifier
 * @param usLength (2bytes) length between usSeqNum and CRC16

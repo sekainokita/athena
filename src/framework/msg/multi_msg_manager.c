@@ -105,6 +105,8 @@
 #define MULTI_MSG_MGR_RSU_MAX_DEV_CNT                     (1)
 #endif
 
+#define MULTI_MSG_MGR_RX_NUM_TASKS                        (MULTI_MSG_MGR_RSU_MAX_DEV_CNT)
+
 //#define CONFIG_TEMP_OBU_TEST (1)
 //#define CONFIG_TEST_EXT_MSG_STATUS_PKG (1)
 
@@ -126,7 +128,7 @@ static key_t s_MultiMsgTxTaskMsgKey = FRAMEWORK_MSG_TX_TASK_MSG_MULTI_KEY;
 static key_t s_MultiMsgRxTaskMsgKey = FRAMEWORK_MSG_RX_TASK_MSG_MULTI_KEY;
 
 static pthread_t sh_MultimsgMgrTxTask;
-static pthread_t sh_MultimsgMgrRxTask;
+static pthread_t sh_MultimsgMgrRxTask[MULTI_MSG_MGR_RX_NUM_TASKS];
 
 static bool s_bMultiMsgMgrLog = OFF;
 static bool s_bMultiFirstPacket = TRUE;
@@ -2175,12 +2177,11 @@ static int32_t P_MULTI_MSG_MANAGER_ProcessRxMsg(MULTI_MSG_MANAGER_RX_EVENT_MSG_T
     return nRet;
 }
 
-static int32_t P_MULTI_MSG_MANAGER_ReceiveRxMsg(MULTI_MSG_MANAGER_RX_EVENT_MSG_T *pstEventMultiMsg)
+static int32_t P_MULTI_MSG_MANAGER_ReceiveRxMsg(MULTI_MSG_MANAGER_RX_EVENT_MSG_T *pstEventMultiMsg, uint32_t unDevIdx)
 {
     int32_t nRet = FRAMEWORK_ERROR;
     uint8_t ucMsgBuf[MULTI_MSG_MANAGER_MAX_RX_PKG_SIZE] = {0};
     int nRecvLen = -1;
-    uint32_t unDevIdx = 0;
 
     PrintEnter("unDevIdx[%d]", unDevIdx);
 
@@ -2548,9 +2549,13 @@ static void *P_MULTI_MSG_MANAGER_RxTask(void *arg)
 
     MULTI_MSG_MANAGER_RX_EVENT_MSG_T stEventMultiMsg;
     MULTI_MSG_MANAGER_RX_T           stMultiMsgManagerRx;
-    DB_V2X_T                   stDbV2x;
+    DB_V2X_T                         stDbV2x;
+    MULTI_MSG_MANAGER_TASK_T        *pTaskParam = (MULTI_MSG_MANAGER_TASK_T *)arg;
+    uint32_t unDevIdx = 0;
 
-    UNUSED(arg);
+    unDevIdx = pTaskParam->unDevIdx;
+
+    free(pTaskParam);
 
     (void*)memset(&stEventMultiMsg, 0x00, sizeof(MULTI_MSG_MANAGER_RX_EVENT_MSG_T));
     (void*)memset(&stMultiMsgManagerRx, 0x00, sizeof(MULTI_MSG_MANAGER_RX_T));
@@ -2559,7 +2564,7 @@ static void *P_MULTI_MSG_MANAGER_RxTask(void *arg)
     stEventMultiMsg.pstMultiMsgManagerRx = &stMultiMsgManagerRx;
     stEventMultiMsg.pstDbV2x = &stDbV2x;
 
-    nRet = P_MULTI_MSG_MANAGER_ReceiveRxMsg(&stEventMultiMsg);
+    nRet = P_MULTI_MSG_MANAGER_ReceiveRxMsg(&stEventMultiMsg, unDevIdx);
     if (nRet != FRAMEWORK_OK)
     {
         PrintError("P_MULTI_MSG_MANAGER_ReceiveRxMsg() is faild! [nRet:%d]", nRet);
@@ -2587,16 +2592,31 @@ int32_t P_MULTI_MSG_MANAGER_CreateTask(void)
         nRet = FRAMEWORK_OK;
     }
 
-    nRet = pthread_create(&sh_MultimsgMgrRxTask, &attr, P_MULTI_MSG_MANAGER_RxTask, NULL);
-    if (nRet != FRAMEWORK_OK)
+    for (uint32_t i = 0; i < MULTI_MSG_MGR_RX_NUM_TASKS; i++)
     {
-        PrintError("pthread_create() is failed!! (P_MULTI_MSG_MANAGER_RxTask) [nRet:%d]", nRet);
+        MULTI_MSG_MANAGER_TASK_T *pTaskParam = malloc(sizeof(MULTI_MSG_MANAGER_TASK_T));
+        if (pTaskParam == NULL)
+        {
+            PrintError("Memory allocation failed for unDevIdx[%d]\n", i);
+            continue;
+        }
+        pTaskParam->unDevIdx = i;
+
+        PrintTrace("Creating task with unDevIdx[%d]\n", i);
+        nRet = pthread_create(&sh_MultimsgMgrRxTask[i], &attr, P_MULTI_MSG_MANAGER_RxTask, pTaskParam);
+        if (nRet != FRAMEWORK_OK)
+        {
+            PrintError("pthread_create() failed for unDevIdx[%d] [nRet:%d]\n", i, nRet);
+            free(pTaskParam);
+        }
+        else
+        {
+            PrintTrace("P_MULTI_MSG_MANAGER_RxTask() is successfully created.");
+            nRet = FRAMEWORK_OK;
+        }
     }
-    else
-    {
-        PrintTrace("P_MULTI_MSG_MANAGER_RxTask() is successfully created.");
-        nRet = FRAMEWORK_OK;
-    }
+
+    pthread_attr_destroy(&attr);
 
 #if defined(CONFIG_PTHREAD_JOINABLE)
     nRet = pthread_join(sh_MultimsgMgrTxTask, NULL);
