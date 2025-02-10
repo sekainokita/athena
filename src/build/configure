@@ -50,6 +50,7 @@ CONFIGS_FILE=.config
 
 CONFIG_MODEL_UI_CO1XG=ui-co1xg_defconfig
 CONFIG_MODEL_UI_DR2RG=ui-dr2rg_defconfig
+CONFIG_MODEL_UI_DR2RGM=ui-dr2rgm_defconfig
 CONFIG_MODEL_NO_CO1XG=no-co1xg_defconfig
 CONFIG_MODEL_NO_CO2XG=no-co2xg_defconfig
 CONFIG_MODEL_NO_CO2XGR=no-co2xgr_defconfig
@@ -66,6 +67,7 @@ echo "========================================================================="
 echo "[Platform Configurations Options]"
 echo "    ./configure ui-co1xg   : Ubuntu Intel OBU"
 echo "                ui-dr2rg   : Ubuntu Intel RSU"
+echo "                ui-dr2rg   : Ubuntu Intel RSU Including Moving Base Station"
 echo "                no-co1xg   : NVIDIA ORIN RxAnt.1 MODEM, XSENS GPS"
 echo "                no-co2xg   : NVIDIA ORIN RxAnt.2 MODEM, XSENS GPS"
 echo "                no-co2xgr  : NVIDIA ORIN RxAnt.2 MODEM, XSENS GPS, ROS"
@@ -94,6 +96,12 @@ elif [ "ui-dr2rg" = "$1" ]; then
     echo "========================================================================="
     echo -e "$W"
     cp ${CONFIGS_DIR}/${CONFIG_MODEL_UI_DR2RG} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+elif [ "ui-dr2rgm" = "$1" ]; then
+    echo -e "$BL"
+	echo "Ubuntu Intel RSU Including Moving Base Station"
+    echo "========================================================================="
+    echo -e "$W"
+    cp ${CONFIGS_DIR}/${CONFIG_MODEL_UI_DR2RGM} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
 elif [ "no-co1xg" = "$1" ]; then
     echo -e "$BL"
 	echo "NVIDIA ORIN RxAnt.1 MODEM"
