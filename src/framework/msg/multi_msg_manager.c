@@ -136,6 +136,8 @@ static bool s_bMultiFirstPacket = TRUE;
 static uint32_t s_unMultiV2xMsgTxLen = 0, s_unMultiV2xMsgRxLen = 0;
 static int s_nMultiRsuCount = 0;
 
+static bool s_bWsrInitialized = FALSE;
+
 /***************************** Function  *************************************/
 static int32_t P_MULTI_MSG_MANAGER_ConnectRsuClient(int32_t nSocket);
 static int32_t P_MULTI_MSG_MANAGER_DisconnectRsuClient(int32_t nSocket);
@@ -2564,10 +2566,13 @@ static void *P_MULTI_MSG_MANAGER_RxTask(void *arg)
     stEventMultiMsg.pstMultiMsgManagerRx = &stMultiMsgManagerRx;
     stEventMultiMsg.pstDbV2x = &stDbV2x;
 
-    nRet = P_MULTI_MSG_MANAGER_ReceiveRxMsg(&stEventMultiMsg, unDevIdx);
-    if (nRet != FRAMEWORK_OK)
+    if(s_bWsrInitialized == TRUE)
     {
-        PrintError("P_MULTI_MSG_MANAGER_ReceiveRxMsg() is faild! [nRet:%d]", nRet);
+        nRet = P_MULTI_MSG_MANAGER_ReceiveRxMsg(&stEventMultiMsg, unDevIdx);
+        if (nRet != FRAMEWORK_OK)
+        {
+            PrintError("P_MULTI_MSG_MANAGER_ReceiveRxMsg() is faild! [nRet:%d]", nRet);
+        }
     }
 
     return NULL;
@@ -2843,6 +2848,7 @@ int32_t MULTI_MSG_MANAGER_Open(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
 #endif
 
     s_bMultiFirstPacket = TRUE;
+    s_bWsrInitialized = TRUE;
 
     return nRet;
 }
