@@ -99,7 +99,7 @@
 #define MULTI_MSG_MGR_OBU_MAX_DEV_CNT                     (7)
 
 #define MULTI_MSG_MGR_RSU_LISTENQ                         (1024)
-#define MULTI_MSG_MGR_RSU_MAX_DEV_CNT                     (6)
+#define MULTI_MSG_MGR_RSU_MAX_DEV_CNT                     (7)
 
 //#define CONFIG_TEMP_OBU_TEST (1)
 //#define CONFIG_TEST_EXT_MSG_STATUS_PKG (1)
@@ -2804,12 +2804,6 @@ int32_t MULTI_MSG_MANAGER_Open(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
             for(unDevIdx = 0; unDevIdx < pstMultiMsgManager->unMaxDevCnt; unDevIdx++)
             {
                 PrintTrace("DB_V2X_DEVICE_TYPE_RSU[unDevIdx:%d]", unDevIdx);
-                nRet = P_MULTI_MSG_MANAGER_SetV2xWsrSetting(pstMultiMsgManager, unDevIdx);
-                if (nRet != FRAMEWORK_OK)
-                {
-                    PrintError("P_MULTI_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
-                    return nRet;
-                }
 
                 pstMultiMsgManager->stExtMultiMsgWsr.unPsid = SVC_MCP_V2I_PSID;
                 nRet = P_MULTI_MSG_MANAGER_SetV2xWsrSetting(pstMultiMsgManager, unDevIdx);
@@ -2820,6 +2814,12 @@ int32_t MULTI_MSG_MANAGER_Open(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
                 }
                 /* Reset Value as V2V */
                 pstMultiMsgManager->stExtMultiMsgWsr.unPsid = SVC_MCP_I2V_PSID;
+                nRet = P_MULTI_MSG_MANAGER_SetV2xWsrSetting(pstMultiMsgManager, unDevIdx);
+                if (nRet != FRAMEWORK_OK)
+                {
+                    PrintError("P_MULTI_MSG_MANAGER_SetV2xWsrSetting() is failed!!, nRet[%d]", nRet);
+                    return nRet;
+                }
             }
             break;
         }
