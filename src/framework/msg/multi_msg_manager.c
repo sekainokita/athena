@@ -2074,12 +2074,18 @@ static int32_t P_MULTI_MSG_MANAGER_ProcessRxMsg(MULTI_MSG_MANAGER_RX_EVENT_MSG_T
     }
     else if (unPsid == MULTI_MSG_MANAGER_EXT_MSG_V2I_PSID)
     {
-        PrintTrace("Get Extensible Message - V2I");
+        if (s_bMultiMsgMgrLog == ON)
+        {
+            PrintTrace("Get Extensible Message - V2I");
+        }
         bExtMultiMsgFlag = TRUE;
     }
     else if (unPsid == MULTI_MSG_MANAGER_EXT_MSG_I2V_PSID)
     {
-        PrintTrace("Get Extensible Message - I2V");
+        if (s_bMultiMsgMgrLog == ON)
+        {
+            PrintTrace("Get Extensible Message - I2V");
+        }
         bExtMultiMsgFlag = TRUE;
     }
     else

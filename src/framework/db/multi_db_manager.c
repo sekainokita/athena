@@ -386,15 +386,6 @@ static int32_t P_MULTI_DB_MANAGER_UpdateStatus(MULTI_DB_MANAGER_EVENT_MSG_T *pst
         PrintDebug("update ulTotalPacketCnt[%ld] as the unSeqNum[%d]", pstDbV2xStatusRx->ulTotalPacketCnt, pstDbV2xStatusTx->unSeqNum);
     }
 
-    if(stMultiDbV2xStatus.unLastContCnt != stMultiDbV2xStatus.unCurrentContCnt)
-    {
-        PrintTrace("ContCnt does not be matched! [+1 increased unLastContCnt:%d], [unCurrentContCnt:%d]", stMultiDbV2xStatus.unLastContCnt, stMultiDbV2xStatus.unCurrentContCnt);
-        stMultiDbV2xStatus.unContCntLoss++;
-        stMultiDbV2xStatus.stV2xStatusRx.ulTotalErrCnt++;
-        stMultiDbV2xStatus.stV2xStatusRx.ucErrIndicator = TRUE;
-        PrintWarn("Increased unContCntLoss[%d], ulTotalErrCnt[%ld], set ucErrIndicator[%d]", stMultiDbV2xStatus.unContCntLoss, stMultiDbV2xStatus.stV2xStatusRx.ulTotalErrCnt, stMultiDbV2xStatus.stV2xStatusRx.ucErrIndicator);
-    }
-
     if(s_bMultiDbMgrLog  == TRUE)
     {
         PrintDebug("[+1 increased unLastContCnt:%d] == [unCurrentContCnt:%d]", stMultiDbV2xStatus.unLastContCnt, stMultiDbV2xStatus.unCurrentContCnt);
