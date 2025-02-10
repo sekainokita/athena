@@ -99,7 +99,11 @@
 #define MULTI_MSG_MGR_OBU_MAX_DEV_CNT                     (7)
 
 #define MULTI_MSG_MGR_RSU_LISTENQ                         (1024)
+#if defined(CONFIG_RSU)
 #define MULTI_MSG_MGR_RSU_MAX_DEV_CNT                     CONFIG_RSU_MAX_DEV
+#else
+#define MULTI_MSG_MGR_RSU_MAX_DEV_CNT                     (1)
+#endif
 
 //#define CONFIG_TEMP_OBU_TEST (1)
 //#define CONFIG_TEST_EXT_MSG_STATUS_PKG (1)
