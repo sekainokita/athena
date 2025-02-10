@@ -1439,12 +1439,6 @@ static int32_t P_MULTI_MSG_MANAGER_ProcessExtMsgPkg(MULTI_MSG_MANAGER_RX_EVENT_M
         case eMULTI_MSG_MANAGER_EXT_MSG_DEV_TYPE_RSU:
         {
             pstExtMultiMsgComm = (MULTI_MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT*)pvExtMultiMsgPkg;
-
-            PrintDebug("RSU AP : %s", (pstExtMultiMsgComm->ucStatus == eMULTI_MSG_MANAGER_EXT_MSG_STATUS_TX) ? "Tx":"Rx");
-            PrintDebug("unDevId[%d]", htonl(pstExtMultiMsgComm->unDevId));
-            PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMultiMsgComm->usHwVer), htons(pstExtMultiMsgComm->usSwVer));
-            PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMultiMsgComm->ulTimeStamp));
-
             usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMultiMsgComm, htons(pstExtMultiMsgComm->usLenth) + 4);	// T, L, V 길이
             if(usCalcCrc16 != ntohs(pstExtMultiMsgComm->usCrc16))
             {
@@ -1462,13 +1456,6 @@ static int32_t P_MULTI_MSG_MANAGER_ProcessExtMsgPkg(MULTI_MSG_MANAGER_RX_EVENT_M
 
             if (ucStatus == eMULTI_MSG_MANAGER_EXT_MSG_STATUS_TX)
             {
-                PrintDebug("RSU Modem : Tx");
-                PrintDebug("unDevId[%u]", htonl(pstExtMultiMsgModemTx->unDevId));
-                PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMultiMsgModemTx->usHwVer), htons(pstExtMultiMsgModemTx->usSwVer));
-                PrintDebug("ucTxPwr[%d], usTxFreq[%d], ucTxBw[%d], ucMcs[%d], ucScs[%d]", pstExtMultiMsgModemTx->ucTxPwr, htons(pstExtMultiMsgModemTx->usTxFreq), pstExtMultiMsgModemTx->ucTxBw, pstExtMultiMsgModemTx->ucMcs, pstExtMultiMsgModemTx->ucScs);
-                PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMultiMsgModemTx->nLatitude), htonl(pstExtMultiMsgModemTx->nLongitude));
-                PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMultiMsgModemTx->ulTimeStamp));
-
                 usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMultiMsgModemTx, htons(pstExtMultiMsgModemTx->usLenth) + 4);	// T, L, V 길이
                 if(usCalcCrc16 != ntohs(pstExtMultiMsgModemTx->usCrc16))
                 {
@@ -1477,13 +1464,6 @@ static int32_t P_MULTI_MSG_MANAGER_ProcessExtMsgPkg(MULTI_MSG_MANAGER_RX_EVENT_M
             }
             else if (ucStatus == eMULTI_MSG_MANAGER_EXT_MSG_STATUS_RX)
             {
-                PrintDebug("RSU Modem : Rx");
-                PrintDebug("unDevId[%u]", htonl(pstExtMultiMsgModemRx->unDevId));
-                PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMultiMsgModemRx->usHwVer), htons(pstExtMultiMsgModemRx->usSwVer));
-                PrintDebug("nRssi[%d], ucRcpi[%d]", pstExtMultiMsgModemRx->nRssi, pstExtMultiMsgModemRx->ucRcpi);
-                PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMultiMsgModemRx->nLatitude), htonl(pstExtMultiMsgModemRx->nLongitude));
-                PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMultiMsgModemRx->ulTimeStamp));
-
                 usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMultiMsgModemRx, htons(pstExtMultiMsgModemRx->usLenth) + 4);	// T, L, V 길이
                 if(usCalcCrc16 != ntohs(pstExtMultiMsgModemRx->usCrc16))
                 {
@@ -1495,19 +1475,12 @@ static int32_t P_MULTI_MSG_MANAGER_ProcessExtMsgPkg(MULTI_MSG_MANAGER_RX_EVENT_M
                 PrintError("Error type [ucStatus:%d]\n", ucStatus);
                 return nRet;
             }
-
             break;
         }
 
         case eMULTI_MSG_MANAGER_EXT_MSG_DEV_TYPE_RSU_CTL:
         {
             pstExtMultiMsgCtrl = (MULTI_MSG_MANAGER_EXT_MSG_TLVC_CONTROL_UNIT*)pvExtMultiMsgPkg;
-
-            PrintDebug("RSU Controller : %s", (pstExtMultiMsgCtrl->ucStatus == eMULTI_MSG_MANAGER_EXT_MSG_STATUS_TX) ? "Tx":"Rx");
-            PrintDebug("unDevId[%d]", htonl(pstExtMultiMsgCtrl->unDevId));
-            PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMultiMsgCtrl->usHwVer), htons(pstExtMultiMsgCtrl->usSwVer));
-            PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMultiMsgCtrl->ulTimeStamp));
-
             usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMultiMsgCtrl, htons(pstExtMultiMsgCtrl->usLenth) + 4);	// T, L, V 길이
             if(usCalcCrc16 != ntohs(pstExtMultiMsgCtrl->usCrc16))
             {

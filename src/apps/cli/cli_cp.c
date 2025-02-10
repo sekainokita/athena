@@ -654,6 +654,39 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 return CLI_CMD_Showusage(pstCmd);
             }
         }
+        else if(IS_CMD(pcCmd, "log"))
+        {
+            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+            if(pcCmd != NULL)
+            {
+                MSG_MANAGER_T *pstMsgManager;
+                pstMsgManager = FRAMEWORK_GetMsgManagerInstance();
+                PrintDebug("pstMsgManager[0x%p]", pstMsgManager);
+
+                if(IS_CMD(pcCmd, "on"))
+                {
+                    pstMsgManager->bLogLevel = ON;
+                }
+                else if(IS_CMD(pcCmd, "off"))
+                {
+                    pstMsgManager->bLogLevel = OFF;
+                }
+                else
+                {
+                    PrintError("cp log on/off, e.g. mcp log on, or mcp log off");
+                }
+
+                nRet = MSG_MANAGER_SetLog(pstMsgManager);
+                if (nRet != FRAMEWORK_OK)
+                {
+                    PrintError("MSG_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
+                }
+            }
+            else
+            {
+                PrintError("cp log on/off, e.g. msg log on, or msg log off");
+            }
+        }
         else if(IS_CMD(pcCmd, "check") || IS_CMD(pcCmd, "get"))
         {
             nRet = P_CLI_CP_CheckV2xStatusScenario();
@@ -766,6 +799,7 @@ int32_t CLI_CP_InitCmds(void)
                "cp [OPTIONS]\n"
                "   test                         test cp command\n"
                "   set                          set Device ID (should be set cp ready first)\n"
+               "   log on/off                   enable log of cp"
                "   check                        check V2X scenario\n"
                "   base                         start a base Communication Performance scenario\n"
                "   ready                        ready V2X scenario\n"

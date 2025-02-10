@@ -1518,6 +1518,7 @@ static int32_t P_MULTI_DB_MANAGER_WriteCsv(MULTI_DB_MANAGER_EVENT_MSG_T *pstMult
 
     switch(pstMultiEventMsg->pstDbV2x->ePayloadType)
     {
+        case DB_V2X_PAYLOAD_TYPE_V2X_STATUS:
         case DB_V2X_PAYLOAD_TYPE_V2X_MULTI_STATUS:
         {
             nRet = P_MULTI_DB_MANAGER_WriteCsvV2xStatus(pstMultiEventMsg);

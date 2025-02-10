@@ -801,6 +801,7 @@ int32_t CLI_MCP_InitCmds(void)
                "    test                         test mcp command\n"
                "    set                          set Device ID (should be set mcp ready first)\n"
                "    check                        check V2X scenario\n"
+               "    log on/off                   enable log of mcp"
                "    msg flog [opt]               show msg debug logs of framework (on/off)\n"
                "    base                         start a base Multi Communication Performance scenario\n"
                "    ready                        ready V2X scenario\n"

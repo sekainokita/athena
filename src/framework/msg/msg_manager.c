@@ -1396,12 +1396,6 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
         case eMSG_MANAGER_EXT_MSG_DEV_TYPE_RSU:
         {
             pstExtMsgComm = (MSG_MANAGER_EXT_MSG_TLVC_COMM_UNIT*)pvExtMsgPkg;
-
-            PrintDebug("RSU AP : %s", (pstExtMsgComm->ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX) ? "Tx":"Rx");
-            PrintDebug("unDevId[%d]", htonl(pstExtMsgComm->unDevId));
-            PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgComm->usHwVer), htons(pstExtMsgComm->usSwVer));
-            PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgComm->ulTimeStamp));
-
             usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgComm, htons(pstExtMsgComm->usLenth) + 4);	// T, L, V 길이
             if(usCalcCrc16 != ntohs(pstExtMsgComm->usCrc16))
             {
@@ -1419,13 +1413,6 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
 
             if (ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX)
             {
-                PrintDebug("RSU Modem : Tx");
-                PrintDebug("unDevId[%u]", htonl(pstExtMsgModemTx->unDevId));
-                PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgModemTx->usHwVer), htons(pstExtMsgModemTx->usSwVer));
-                PrintDebug("ucTxPwr[%d], usTxFreq[%d], ucTxBw[%d], ucMcs[%d], ucScs[%d]", pstExtMsgModemTx->ucTxPwr, htons(pstExtMsgModemTx->usTxFreq), pstExtMsgModemTx->ucTxBw, pstExtMsgModemTx->ucMcs, pstExtMsgModemTx->ucScs);
-                PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemTx->nLatitude), htonl(pstExtMsgModemTx->nLongitude));
-                PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgModemTx->ulTimeStamp));
-
                 usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemTx, htons(pstExtMsgModemTx->usLenth) + 4);	// T, L, V 길이
                 if(usCalcCrc16 != ntohs(pstExtMsgModemTx->usCrc16))
                 {
@@ -1434,13 +1421,6 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
             }
             else if (ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_RX)
             {
-                PrintDebug("RSU Modem : Rx");
-                PrintDebug("unDevId[%u]", htonl(pstExtMsgModemRx->unDevId));
-                PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgModemRx->usHwVer), htons(pstExtMsgModemRx->usSwVer));
-                PrintDebug("nRssi[%d], ucRcpi[%d]", pstExtMsgModemRx->nRssi, pstExtMsgModemRx->ucRcpi);
-                PrintDebug("nLatitude[%d], nLongitude[%d]", htonl(pstExtMsgModemRx->nLatitude), htonl(pstExtMsgModemRx->nLongitude));
-                PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgModemRx->ulTimeStamp));
-
                 usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgModemRx, htons(pstExtMsgModemRx->usLenth) + 4);	// T, L, V 길이
                 if(usCalcCrc16 != ntohs(pstExtMsgModemRx->usCrc16))
                 {
@@ -1459,12 +1439,6 @@ static int32_t P_MSG_MANAGER_ProcessExtMsgPkg(MSG_MANAGER_RX_EVENT_MSG_T *pstEve
         case eMSG_MANAGER_EXT_MSG_DEV_TYPE_RSU_CTL:
         {
             pstExtMsgCtrl = (MSG_MANAGER_EXT_MSG_TLVC_CONTROL_UNIT*)pvExtMsgPkg;
-
-            PrintDebug("RSU Controller : %s", (pstExtMsgCtrl->ucStatus == eMSG_MANAGER_EXT_MSG_STATUS_TX) ? "Tx":"Rx");
-            PrintDebug("unDevId[%d]", htonl(pstExtMsgCtrl->unDevId));
-            PrintDebug("usHwVer[%d], usSwVer[%d]", htons(pstExtMsgCtrl->usHwVer), htons(pstExtMsgCtrl->usSwVer));
-            PrintDebug("ulTimeStamp[%ld]", ntohll(pstExtMsgCtrl->ulTimeStamp));
-
             usCalcCrc16 = CLI_UTIL_GetCrc16((uint8_t*)pstExtMsgCtrl, htons(pstExtMsgCtrl->usLenth) + 4);	// T, L, V 길이
             if(usCalcCrc16 != ntohs(pstExtMsgCtrl->usCrc16))
             {
@@ -2056,12 +2030,18 @@ static int32_t P_MSG_MANAGER_ProcessRxMsg(MSG_MANAGER_RX_EVENT_MSG_T *pstEventMs
     }
     else if (unPsid == MSG_MANAGER_EXT_MSG_V2I_PSID)
     {
-        PrintTrace("Get Extensible Message - V2I");
+        if (s_bMsgMgrLog == ON)
+        {
+            PrintTrace("Get Extensible Message - V2I");
+        }
         bExtMsgFlag = TRUE;
     }
     else if (unPsid == MSG_MANAGER_EXT_MSG_I2V_PSID)
     {
-        PrintTrace("Get Extensible Message - I2V");
+        if (s_bMsgMgrLog == ON)
+        {
+            PrintTrace("Get Extensible Message - I2V");
+        }
         bExtMsgFlag = TRUE;
     }
     else
