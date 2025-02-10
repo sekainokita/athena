@@ -99,7 +99,7 @@
 #define MULTI_MSG_MGR_OBU_MAX_DEV_CNT                     (7)
 
 #define MULTI_MSG_MGR_RSU_LISTENQ                         (1024)
-#define MULTI_MSG_MGR_RSU_MAX_DEV_CNT                     (7)
+#define MULTI_MSG_MGR_RSU_MAX_DEV_CNT                     CONFIG_RSU_MAX_DEV
 
 //#define CONFIG_TEMP_OBU_TEST (1)
 //#define CONFIG_TEST_EXT_MSG_STATUS_PKG (1)
@@ -2724,7 +2724,7 @@ int32_t MULTI_MSG_MANAGER_Open(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
         {
             pstMultiMsgManager->unMaxDevCnt = MULTI_MSG_MGR_RSU_MAX_DEV_CNT;
 
-            PrintTrace("DB_V2X_DEVICE_TYPE_RSU[unMaxDevCnt:%d", pstMultiMsgManager->unMaxDevCnt);
+            PrintTrace("DB_V2X_DEVICE_TYPE_RSU[unMaxDevCnt:%d], CONFIG_RSU_MAX_DEV[%d]", pstMultiMsgManager->unMaxDevCnt, CONFIG_RSU_MAX_DEV);
             break;
         }
 
