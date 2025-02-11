@@ -73,6 +73,8 @@
 #define MULTI_MSG_MANAGER_V2X_TX_COUNT                    (10)
 #define MULTI_MSG_MANAGER_V2X_TX_DELAY                    (1000)
 
+#define MULTI_MSG_MANAGER_SEND_DELAY                      (100 * 1000)
+
  /**
 * @details Multi V2X Extensible Message Format
 */

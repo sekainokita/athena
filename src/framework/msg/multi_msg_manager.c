@@ -1003,7 +1003,7 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
     {
         if(s_bMultiMsgMgrLog == ON)
         {
-            PrintDebug("s_nMultiSocketHandle[unDevIdx:%d] : 0x%x", unDevIdx, s_nMultiSocketHandle[unDevIdx]);
+            PrintDebug("s_nMultiSocketHandle[unDevIdx:%d]:0x%x, MULTI_MSG_MANAGER_SEND_DELAY[%d]us", unDevIdx, s_nMultiSocketHandle[unDevIdx], MULTI_MSG_MANAGER_SEND_DELAY);
         }
 
         nRetSendSize = send(s_nMultiSocketHandle[unDevIdx], ucMultiMsgBuf, unTxMultiMsgLen, 0);
@@ -1023,6 +1023,8 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
         {
             nRet = FRAMEWORK_OK;
         }
+
+        usleep(MULTI_MSG_MANAGER_SEND_DELAY);
     }
 
     nRet = P_MULTI_MSG_MANAGER_SendTxMsgToDbMgr(pstEventMultiMsg, ntohl(ulDbV2xTotalPacketCrc32));
