@@ -310,7 +310,7 @@ static int32_t P_MULTI_MSG_MANAGER_ConnectRsu(MULTI_MSG_MANAGER_T *pstMultiMsgMa
             return nRet;
         }
 
-        PrintTrace("server: got connection from [IP: %s, Port: %d]", inet_ntoa(stClientAddr.sin_addr), ntohs(stClientAddr.sin_port))
+        PrintTrace("server: got connection from [IP: %s, Port: %d]", inet_ntoa(stClientAddr.sin_addr), ntohs(stClientAddr.sin_port));
 
         /* Enable TCP Keep-Alive */
         if (setsockopt(nClientSocket, SOL_SOCKET, SO_KEEPALIVE, &nKeepAlive, sizeof(nKeepAlive)) < 0)
