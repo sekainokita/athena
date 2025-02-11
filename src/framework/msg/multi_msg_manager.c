@@ -2197,45 +2197,56 @@ static int32_t P_MULTI_MSG_MANAGER_ReceiveRxMsg(MULTI_MSG_MANAGER_RX_EVENT_MSG_T
 
     while (1)
     {
-        nRecvLen = recv(s_nMultiSocketHandle[unDevIdx], ucMsgBuf, sizeof(ucMsgBuf), 0);
-        if (nRecvLen < 0)
-        {
-            if ((errno != EAGAIN) && (errno != EWOULDBLOCK))
-            {
-                if(s_bMultiMsgMgrLog == ON)
-                {
-                    PrintError("recv() is failed!!");
-                }
 
-                usleep(1000*1000);
+        if(s_bWsrInitialized == TRUE)
+        {
+            nRecvLen = recv(s_nMultiSocketHandle[unDevIdx], ucMsgBuf, sizeof(ucMsgBuf), 0);
+            if (nRecvLen < 0)
+            {
+                if ((errno != EAGAIN) && (errno != EWOULDBLOCK))
+                {
+                    if(s_bMultiMsgMgrLog == ON)
+                    {
+                        PrintError("recv() is failed!!");
+                    }
+
+                    usleep(1000*1000);
+                }
+                else
+                {
+                    usleep(10*1000);
+                    continue;
+                }
+            }
+            else if (nRecvLen == 0)
+            {
+                PrintError("recv()'s connection is closed by peer!!");
+                break;
             }
             else
             {
-                usleep(10*1000);
-                continue;
+                if(s_bMultiMsgMgrLog == ON)
+                {
+                    PrintDebug("recv():nRecvLen[%u], s_bWsrInitialized[%d], unDevIdx[%d]", nRecvLen, s_bWsrInitialized, unDevIdx);
+                    nRet = P_MULTI_MSG_MANAGER_AnalyzeRxMsg(pstEventMultiMsg, ucMsgBuf, nRecvLen);
+                    if(nRet != FRAMEWORK_OK)
+                    {
+                        PrintError("P_MULTI_MSG_MANAGER_AnalyzeRxMsg() is failed! [nRet:%d]", nRet);
+                    }
+                }
+
+                nRet =  P_MULTI_MSG_MANAGER_ProcessRxMsg(pstEventMultiMsg, ucMsgBuf, nRecvLen);
+                if(nRet != FRAMEWORK_OK)
+                {
+                    PrintError("P_MULTI_MSG_MANAGER_ProcessRxMsg() is failed! [nRet:%d]", nRet);
+                }
             }
-        }
-        else if (nRecvLen == 0)
-        {
-            PrintError("recv()'s connection is closed by peer!!");
-            break;
         }
         else
         {
             if(s_bMultiMsgMgrLog == ON)
             {
-                PrintDebug("recv() is success, nRecvLen[%u]", nRecvLen);
-                nRet = P_MULTI_MSG_MANAGER_AnalyzeRxMsg(pstEventMultiMsg, ucMsgBuf, nRecvLen);
-                if(nRet != FRAMEWORK_OK)
-                {
-                    PrintError("P_MULTI_MSG_MANAGER_AnalyzeRxMsg() is failed! [nRet:%d]", nRet);
-                }
-            }
-
-            nRet =  P_MULTI_MSG_MANAGER_ProcessRxMsg(pstEventMultiMsg, ucMsgBuf, nRecvLen);
-            if(nRet != FRAMEWORK_OK)
-            {
-                PrintError("P_MULTI_MSG_MANAGER_ProcessRxMsg() is failed! [nRet:%d]", nRet);
+                PrintError("s_bWsrInitialized[%d] is not initialized!", s_bWsrInitialized);
             }
         }
     }
@@ -2568,13 +2579,10 @@ static void *P_MULTI_MSG_MANAGER_RxTask(void *arg)
     stEventMultiMsg.pstMultiMsgManagerRx = &stMultiMsgManagerRx;
     stEventMultiMsg.pstDbV2x = &stDbV2x;
 
-    if(s_bWsrInitialized == TRUE)
+    nRet = P_MULTI_MSG_MANAGER_ReceiveRxMsg(&stEventMultiMsg, unDevIdx);
+    if (nRet != FRAMEWORK_OK)
     {
-        nRet = P_MULTI_MSG_MANAGER_ReceiveRxMsg(&stEventMultiMsg, unDevIdx);
-        if (nRet != FRAMEWORK_OK)
-        {
-            PrintError("P_MULTI_MSG_MANAGER_ReceiveRxMsg() is faild! [nRet:%d]", nRet);
-        }
+        PrintError("P_MULTI_MSG_MANAGER_ReceiveRxMsg() is faild! [nRet:%d]", nRet);
     }
 
     return NULL;
