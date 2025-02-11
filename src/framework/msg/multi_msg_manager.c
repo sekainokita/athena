@@ -59,6 +59,7 @@
 #include <pthread.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+#include <netinet/tcp.h>
 
 #include "framework.h"
 #include "multi_msg_manager.h"
