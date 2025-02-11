@@ -1009,7 +1009,7 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
         nRetSendSize = send(s_nMultiSocketHandle[unDevIdx], ucMultiMsgBuf, unTxMultiMsgLen, 0);
         if (nRetSendSize < 0)
         {
-            PrintError("send() is failed! [nRetSendSize:%ld]", nRetSendSize);
+            PrintError("send() is failed! [nRetSendSize:%ld], %s (errno: %d)", nRetSendSize, strerror(errno), errno);
         }
         else if (nRetSendSize != (int32_t)unTxMultiMsgLen)
         {
