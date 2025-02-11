@@ -256,6 +256,10 @@ static int32_t P_MULTI_MSG_MANAGER_ConnectRsu(MULTI_MSG_MANAGER_T *pstMultiMsgMa
     uint32_t unDevIdx = 0;
     struct sockaddr_in stServerAddr, stClientAddr;
     socklen_t stClientLen = sizeof(stClientAddr);
+    int nKeepAlive = 1;  // Enable Keep-Alive
+    int nKeepIdle = 5;   // Start Keep-Alive if no data is sent for 5 seconds
+    int nKeepInterval = 1; // Send Keep-Alive packets every 1 second
+    int nKeepCount = 3;  // Terminate connection if no response after 3 Keep-Alive packets
 
     if (pstMultiMsgManager == NULL)
     {
@@ -284,27 +288,48 @@ static int32_t P_MULTI_MSG_MANAGER_ConnectRsu(MULTI_MSG_MANAGER_T *pstMultiMsgMa
 
     if (bind(nSocketHandle, (struct sockaddr *)&stServerAddr, sizeof(stServerAddr)) < 0)
     {
-        PrintError("bind error.");
+        PrintError("bind error!");
+        close(nSocketHandle);
         return nRet;
     }
 
     if (listen(nSocketHandle, MULTI_MSG_MGR_RSU_LISTENQ) < 0)
     {
-        PrintError("listen error.");
+        PrintError("listen error!");
+        close(nSocketHandle);
         return nRet;
     }
 
     PrintWarn("Listening to the client of RSU controller.");
 
-    for(unDevIdx = 0; unDevIdx < pstMultiMsgManager->unMaxDevCnt; unDevIdx++)
+    for (unDevIdx = 0; unDevIdx < pstMultiMsgManager->unMaxDevCnt; unDevIdx++)
     {
         if ((nClientSocket = accept(nSocketHandle, (struct sockaddr *)&stClientAddr, &stClientLen)) < 0)
         {
-            PrintError("accept error.");
+            PrintError("accept error!");
             return nRet;
         }
 
-        PrintTrace("server: got connection from [IP: %s, Port: %d]", inet_ntoa(stClientAddr.sin_addr), ntohs(stClientAddr.sin_port));
+        PrintTrace("server: got connection from [IP: %s, Port: %d]", inet_ntoa(stClientAddr.sin_addr), ntohs(stClientAddr.sin_port))
+
+        /* Enable TCP Keep-Alive */
+        if (setsockopt(nClientSocket, SOL_SOCKET, SO_KEEPALIVE, &nKeepAlive, sizeof(nKeepAlive)) < 0)
+        {
+            PrintError("setsockopt(SO_KEEPALIVE) failed!");
+        }
+        if (setsockopt(nClientSocket, IPPROTO_TCP, TCP_KEEPIDLE, &nKeepIdle, sizeof(nKeepIdle)) < 0)
+        {
+            PrintError("setsockopt(TCP_KEEPIDLE) failed!");
+        }
+        if (setsockopt(nClientSocket, IPPROTO_TCP, TCP_KEEPINTVL, &nKeepInterval, sizeof(nKeepInterval)) < 0)
+        {
+            PrintError("setsockopt(TCP_KEEPINTVL) failed!");
+        }
+        if (setsockopt(nClientSocket, IPPROTO_TCP, TCP_KEEPCNT, &nKeepCount, sizeof(nKeepCount)) < 0)
+        {
+            PrintError("setsockopt(TCP_KEEPCNT) failed!");
+        }
+
 
         nRet = P_MULTI_MSG_MANAGER_ConnectRsuClient(nClientSocket);
         if (nRet != FRAMEWORK_OK)
