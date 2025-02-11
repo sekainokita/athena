@@ -2260,7 +2260,7 @@ static int32_t P_MULTI_MSG_MANAGER_ReceiveRxMsg(MULTI_MSG_MANAGER_RX_EVENT_MSG_T
             {
                 if(s_bMultiMsgMgrLog == ON)
                 {
-                    PrintDebug("recv():nRecvLen[%u], s_bWsrInitialized[%d], unDevIdx[%d]", nRecvLen, s_bWsrInitialized, unDevIdx);
+                    PrintDebug("unDevIdx[%d]: RecvLen[%u], s_bWsrInitialized[%d]", unDevIdx, nRecvLen, s_bWsrInitialized);
                     nRet = P_MULTI_MSG_MANAGER_AnalyzeRxMsg(pstEventMultiMsg, ucMsgBuf, nRecvLen);
                     if(nRet != FRAMEWORK_OK)
                     {
@@ -2279,7 +2279,7 @@ static int32_t P_MULTI_MSG_MANAGER_ReceiveRxMsg(MULTI_MSG_MANAGER_RX_EVENT_MSG_T
         {
             if(s_bMultiMsgMgrLog == ON)
             {
-                PrintError("s_bWsrInitialized[%d] is not initialized!", s_bWsrInitialized);
+                PrintError("unDevIdx[%d]: s_bWsrInitialized[%d] is not initialized!", unDevIdx, s_bWsrInitialized);
             }
         }
     }
