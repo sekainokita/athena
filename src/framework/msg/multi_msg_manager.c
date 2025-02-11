@@ -110,6 +110,7 @@
 
 //#define CONFIG_TEMP_OBU_TEST (1)
 //#define CONFIG_TEST_EXT_MSG_STATUS_PKG (1)
+//#define CONFIG_MULTI_MSG_TX_DELAY (1)
 
 #ifdef WORDS_BIGENDIAN
 #define htonll(x)   (x)
@@ -1029,7 +1030,11 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
     {
         if(s_bMultiMsgMgrLog == ON)
         {
+#if defined(CONFIG_MULTI_MSG_TX_DELAY)
             PrintDebug("s_nMultiSocketHandle[unDevIdx:%d]:0x%x, MULTI_MSG_MANAGER_SEND_DELAY[%d]us", unDevIdx, s_nMultiSocketHandle[unDevIdx], MULTI_MSG_MANAGER_SEND_DELAY);
+#else
+            PrintDebug("s_nMultiSocketHandle[unDevIdx:%d]:0x%x", unDevIdx, s_nMultiSocketHandle[unDevIdx]);
+#endif
         }
 
         nRetSendSize = send(s_nMultiSocketHandle[unDevIdx], ucMultiMsgBuf, unTxMultiMsgLen, 0);
@@ -1050,7 +1055,9 @@ static int32_t P_MULTI_MSG_MANAGER_SendTxMsg(MULTI_MSG_MANAGER_TX_EVENT_MSG_T *p
             nRet = FRAMEWORK_OK;
         }
 
+#if defined(CONFIG_MULTI_MSG_TX_DELAY)
         usleep(MULTI_MSG_MANAGER_SEND_DELAY);
+#endif
     }
 
     nRet = P_MULTI_MSG_MANAGER_SendTxMsgToDbMgr(pstEventMultiMsg, ntohl(ulDbV2xTotalPacketCrc32));
