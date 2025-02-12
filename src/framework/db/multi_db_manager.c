@@ -1794,6 +1794,25 @@ static int32_t P_MULTI_DB_MANAGER_GetV2xStatus(MULTI_DB_MANAGER_V2X_STATUS_T *ps
     return nRet;
 }
 
+int32_t P_MULTI_DB_MANAGER_GetCurrentYearAndMonth(char *pchYear, size_t szYearSize, char *pchMonth, size_t szMonthSize)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    time_t stTime = time(NULL);
+    struct tm stTimeInfo;
+    localtime_r(&stTime, &stTimeInfo);
+
+    unsigned int unYear = (unsigned int)(stTimeInfo.tm_year + 1900);
+    unsigned int unMonth = (unsigned int)(stTimeInfo.tm_mon + 1);
+
+    snprintf(pchYear, szYearSize, "%u", unYear);
+    snprintf(pchMonth, szMonthSize, "M_%02u", unMonth);
+
+    nRet = FRAMEWORK_OK;
+
+    return nRet;
+}
+
 int32_t MULTI_DB_MANAGER_SetV2xStatus(MULTI_DB_MANAGER_V2X_STATUS_T *pstMultiDbV2xStatus)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -2181,6 +2200,8 @@ int32_t MULTI_DB_MANAGER_UploadFile(MULTI_DB_MANAGER_T *pstMultiDbManager)
     char chFileName[MULTI_DB_MGR_FILE_MAX_LENGTH];
     char chSysCallStr[MULTI_DB_MGR_SYSTEM_CALL_MAX_LENGTH];
     int nCharCnt = 0, nCharCmdCnt;
+    char chYear[MULTI_DB_MGR_MAX_DATE];
+    char chMonth[MULTI_DB_MGR_MAX_DATE];
 
     if(pstMultiDbManager == NULL)
     {
@@ -2195,6 +2216,13 @@ int32_t MULTI_DB_MANAGER_UploadFile(MULTI_DB_MANAGER_T *pstMultiDbManager)
     nCharCnt += sprintf(chFileName+nCharCnt, "%s_", pstMultiDbManager->stMultiDbFile.pchEndTime);
     nCharCnt += sprintf(chFileName+nCharCnt, "%s.", pstMultiDbManager->stMultiDbFile.pchTotalTime);
 
+    nRet = P_MULTI_DB_MANAGER_GetCurrentYearAndMonth(chYear, sizeof(chYear), chMonth, sizeof(chMonth));
+    if(nRet != FRAMEWORK_OK)
+    {
+        PrintError("P_MULTI_DB_MANAGER_GetCurrentYearAndMonth() is failed! [nRet:%d]", nRet);
+        return nRet;
+    }
+
     switch(pstMultiDbManager->eMultiFileType)
     {
         case MULTI_DB_MANAGER_FILE_TYPE_TXT:
@@ -2202,12 +2230,12 @@ int32_t MULTI_DB_MANAGER_UploadFile(MULTI_DB_MANAGER_T *pstMultiDbManager)
             if(strcmp("Tx", pstMultiDbManager->stMultiDbFile.pchTxRxType) == 0)
             {
                 nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", MULTI_DB_V2X_PORT, DB_V2X_FOLDER_DIR, chFileName, MULTI_DB_V2X_IP, DB_V2X_STORAGE);
-                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", MULTI_DB_V2X_YEAR, MULTI_DB_V2X_MONTH);
+                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", chYear, chMonth);
             }
             else if(strcmp("Rx", pstMultiDbManager->stMultiDbFile.pchTxRxType) == 0)
             {
                 nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", MULTI_DB_V2X_PORT, MULTI_DB_V2X_FOLDER_DIR, chFileName, MULTI_DB_V2X_IP, MULTI_DB_V2X_STORAGE);
-                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", MULTI_DB_V2X_YEAR, MULTI_DB_V2X_MONTH);
+                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", chYear, chMonth);
             }
             else
             {
@@ -2221,12 +2249,12 @@ int32_t MULTI_DB_MANAGER_UploadFile(MULTI_DB_MANAGER_T *pstMultiDbManager)
             if(strcmp("Tx", pstMultiDbManager->stMultiDbFile.pchTxRxType) == 0)
             {
                 nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", MULTI_DB_V2X_PORT, MULTI_DB_V2X_FOLDER_DIR, chFileName, MULTI_DB_V2X_IP, MULTI_DB_V2X_STORAGE);
-                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", MULTI_DB_V2X_YEAR, MULTI_DB_V2X_MONTH);
+                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", chYear, chMonth);
             }
             else if(strcmp("Rx", pstMultiDbManager->stMultiDbFile.pchTxRxType) == 0)
             {
                 nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", MULTI_DB_V2X_PORT, MULTI_DB_V2X_FOLDER_DIR, chFileName, MULTI_DB_V2X_IP, MULTI_DB_V2X_STORAGE);
-                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", MULTI_DB_V2X_YEAR, MULTI_DB_V2X_MONTH);
+                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", chYear, chMonth);
             }
             else
             {
@@ -2240,12 +2268,12 @@ int32_t MULTI_DB_MANAGER_UploadFile(MULTI_DB_MANAGER_T *pstMultiDbManager)
             if(strcmp("Tx", pstMultiDbManager->stMultiDbFile.pchTxRxType) == 0)
             {
                 nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", MULTI_DB_V2X_PORT, MULTI_DB_V2X_FOLDER_DIR, chFileName, MULTI_DB_V2X_IP, MULTI_DB_V2X_STORAGE);
-                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", MULTI_DB_V2X_YEAR, MULTI_DB_V2X_MONTH);
+                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", chYear, chMonth);
             }
             else if(strcmp("Rx", pstMultiDbManager->stMultiDbFile.pchTxRxType) == 0)
             {
                 nCharCmdCnt = sprintf(chSysCallStr, "scp -P %d %s/%s keti@%s:%s", MULTI_DB_V2X_PORT, MULTI_DB_V2X_FOLDER_DIR, chFileName, MULTI_DB_V2X_IP, MULTI_DB_V2X_STORAGE);
-                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", MULTI_DB_V2X_YEAR, MULTI_DB_V2X_MONTH);
+                sprintf(chSysCallStr+nCharCmdCnt, "/%s/%s", chYear, chMonth);
             }
             else
             {

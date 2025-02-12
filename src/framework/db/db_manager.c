@@ -2904,6 +2904,25 @@ static int32_t P_DB_MANAGER_GetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus
     return nRet;
 }
 
+int32_t P_DB_MANAGER_GetCurrentYearAndMonth(char *pchYear, size_t szYearSize, char *pchMonth, size_t szMonthSize)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+
+    time_t stTime = time(NULL);
+    struct tm stTimeInfo;
+    localtime_r(&stTime, &stTimeInfo);
+
+    unsigned int unYear = (unsigned int)(stTimeInfo.tm_year + 1900);
+    unsigned int unMonth = (unsigned int)(stTimeInfo.tm_mon + 1);
+
+    snprintf(pchYear, szYearSize, "%u", unYear);
+    snprintf(pchMonth, szMonthSize, "M_%02u", unMonth);
+
+    nRet = FRAMEWORK_OK;
+
+    return nRet;
+}
+
 int32_t DB_MANAGER_SetV2xStatus(DB_MANAGER_V2X_STATUS_T *pstDbV2xStatus)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -3285,33 +3304,14 @@ int32_t DB_MANAGER_MakeDbFile(DB_MANAGER_T *pstDbManager)
     return nRet;
 }
 
-int32_t P_DB_MANAGER_GetCurrentYearAndMonth(char *pchYear, size_t szYearSize, char *pchMonth, size_t szMonthSize)
-{
-    int32_t nRet = FRAMEWORK_ERROR;
-
-    time_t stTime = time(NULL);
-    struct tm stTimeInfo;
-    localtime_r(&stTime, &stTimeInfo);
-
-    unsigned int unYear = (unsigned int)(stTimeInfo.tm_year + 1900);
-    unsigned int unMonth = (unsigned int)(stTimeInfo.tm_mon + 1);
-
-    snprintf(pchYear, szYearSize, "%u", unYear);
-    snprintf(pchMonth, szMonthSize, "M_%02u", unMonth);
-
-    nRet = FRAMEWORK_OK;
-
-    return nRet;
-}
-
 int32_t DB_MANAGER_UploadFile(DB_MANAGER_T *pstDbManager)
 {
     int32_t nRet = FRAMEWORK_ERROR;
     char chFileName[DB_MGR_FILE_MAX_LENGTH];
     char chSysCallStr[DB_MGR_SYSTEM_CALL_MAX_LENGTH];
     int nCharCnt = 0, nCharCmdCnt;
-    char chYear[DB_MANAGER_MAX_DATE];
-    char chMonth[DB_MANAGER_MAX_DATE];
+    char chYear[DB_MGR_MAX_DATE];
+    char chMonth[DB_MGR_MAX_DATE];
 
     if(pstDbManager == NULL)
     {
