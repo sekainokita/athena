@@ -66,22 +66,11 @@
 
 /***************************** Enum and Structure ****************************/
 
-typedef enum {
-    FRAMEWORK_LOG_ALL                   = 0,
-    FRAMEWORK_LOG_MGR_ALL               = 10,
-    FRAMEWORK_LOG_MGR_MSG               = 11,
-    FRAMEWORK_LOG_MGR_DB                = 12,
-    FRAMEWORK_LOG_MGR_TIME              = 13,
-    FRAMEWORK_LOG_SVC_ALL               = 100,
-    FRAMEWORK_LOG_SVC_PLATOONING        = 101,
-    FRAMEWORK_LOG_MAX                   = 0xFFFF
-} FRAMEWORK_LOG_E;
-
 typedef struct FRAMEWORK {
-    FRAMEWORK_LOG_E eFrameworkLog;
+    LOG_TYPE_E eLog;
+    LOG_LEVEL_E eLogLevel;
     uint32_t unReserved;
 } FRAMEWORK_T;
-
 
 /***************************** Function Protype ******************************/
 void FRAMEWORK_SetLog(FRAMEWORK_T *pstFramework, bool bOnOff);

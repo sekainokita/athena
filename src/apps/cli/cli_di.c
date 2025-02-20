@@ -89,6 +89,50 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
             }
         }
+        else if(IS_CMD(pcCmd, "log"))
+        {
+            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+            if (pcCmd == NULL)
+            {
+                return CLI_CMD_Showusage(pstCmd);
+            }
+            else
+            {
+                if(IS_CMD(pcCmd, "on"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if (pcCmd == NULL)
+                    {
+                        return CLI_CMD_Showusage(pstCmd);
+                    }
+                    else
+                    {
+                        if(IS_CMD(pcCmd, "a"))
+                        {
+                            pstDi->eLog = LOG_DI_ALL;
+                            (void)DI_SetLog(pstDi, ON);
+                        }
+                        else if(IS_CMD(pcCmd, "g"))
+                        {
+                            pstDi->eLog = LOG_DI_GPS;
+                            (void)DI_SetLog(pstDi, ON);
+                        }
+                        else
+                        {
+                            PrintError("di log on a/g, e.g. di log on a, or di log on g");
+                        }
+                    }
+                }
+                else if(IS_CMD(pcCmd, "off"))
+                {
+                    (void)DI_SetLog(pstDi, OFF);
+                }
+                else
+                {
+                    PrintError("di log on/off, e.g. di log on a/g, or di log off");
+                }
+            }
+        }
         else if(IS_CMD(pcCmd, "gps"))
         {
             pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
@@ -189,41 +233,6 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                         }
                     }
                 }
-                else if(IS_CMD(pcCmd, "log"))
-                {
-                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
-                    if(pcCmd != NULL)
-                    {
-                        if(IS_CMD(pcCmd, "on"))
-                        {
-                            pstDi->stDiGps.bLogLevel = ON;
-                            nRet = DI_GPS_SetLog(&pstDi->stDiGps);
-                            if (nRet != DI_OK)
-                            {
-                                PrintError("DI_GPS_SetLog() is failed! [nRet:%d]", nRet);
-                                return nRet;
-                            }
-                        }
-                        else if(IS_CMD(pcCmd, "off"))
-                        {
-                            pstDi->stDiGps.bLogLevel = OFF;
-                            nRet = DI_GPS_SetLog(&pstDi->stDiGps);
-                            if (nRet != DI_OK)
-                            {
-                                PrintError("DI_GPS_SetLog() is failed! [nRet:%d]", nRet);
-                                return nRet;
-                            }
-                        }
-                        else
-                        {
-                            PrintError("msg log on/off, e.g. msg log on, or msg log off");
-                        }
-                    }
-                    else
-                    {
-                        PrintError("msg log on/off, e.g. msg log on, or msg log off");
-                    }
-                }
 
                 else
                 {
@@ -252,14 +261,17 @@ int32_t CLI_DI_InitCmds(void)
                "Without any parameters, the 'di' show a description\n"
                "of available commands. For more details on a command, type and enter 'di'\n"
                "and the command name.\n\n"
-               "di test             test di command\n"
-               "di gps heading      get heading of device\n"
-               "di gps open         open a GPS device\n"
-               "di gps log on/off   show gps logs (on, off)\n"
-               "di gps close        close a GPS device\n"
-               "di gps get          get a GPS data\n"
-               "di gps tcp server   start tcp/ip server of di gps\n"
-               "di gps set na       set a GPS device as not available\n",
+               "di test               test di command\n"
+               "di log on [OPTIONS]   show di logs\n"
+               "           a          show all logs\n"
+               "           g          show gps logs\n"
+               "di log off            hide di logs"
+               "di gps heading        get heading of device\n"
+               "di gps open           open a GPS device\n"
+               "di gps close          close a GPS device\n"
+               "di gps get            get a GPS data\n"
+               "di gps tcp server     start tcp/ip server of di gps\n"
+               "di gps set na         set a GPS device as not available\n",
                "");
     if(nRet != APP_OK)
     {

@@ -155,7 +155,34 @@
     } while (0)
 
 /***************************** Enum and Structure ****************************/
+typedef enum {
+    LOG_ALL                         = 0,
+    LOG_FRAMEWORK_ALL               = 10,
+    LOG_FRAMEWORK_MGR_ALL           = 11,
+    LOG_FRAMEWORK_MGR_MSG           = 12,
+    LOG_FRAMEWORK_MGR_MULTI_MSG     = 13,
+    LOG_FRAMEWORK_MGR_DB            = 14,
+    LOG_FRAMEWORK_MGR_MULTI_DB      = 15,
+    LOG_FRAMEWORK_MGR_TIME          = 16,
+    LOG_DI_ALL                      = 50,
+    LOG_DI_GPS                      = 51,
+    LOG_APP_ALL                     = 100,
+    LOG_APP_SVC_ALL                 = 101,
+    LOG_APP_SVC_CP                  = 102,
+    LOG_APP_SVC_MULTI_CP            = 103,
+    LOG_PLATFORM_ALL                = 150,
+    LOG_MAX                         = 0xFFFF
+} LOG_TYPE_E;
 
+typedef enum {
+    LOG_LEVEL_ALL                   = 0,
+    LOG_LEVEL_DEBUG                 = 1,
+    LOG_LEVEL_WARN                  = 2,
+    LOG_LEVEL_ERROR                 = 3,
+    LOG_LEVEL_FATAL                 = 4,
+    LOG_LEVEL_NONE                  = 5, /* NONE : Log Off */
+    LOG_LEVEL_MAX                   = 0xFFFF
+} LOG_LEVEL_E;
 
 /***************************** Function Protype ******************************/
 #endif	/* _TYPE_H_ */

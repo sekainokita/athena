@@ -53,17 +53,10 @@
 
 /***************************** Enum and Structure ****************************/
 
-typedef enum {
-    DI_LOG_ALL                   = 0,
-    DI_LOG_GPS_ALL               = 10,
-    DI_LOG_CAMERA                = 11,
-    DI_LOG_VIDEO                 = 12,
-    DI_LOG_MAX                   = 0xFFFF
-} DI_LOG_E;
-
 typedef struct DI_t {
-    DI_LOG_E eDiLog;
     DI_GPS_T stDiGps;
+    LOG_TYPE_E eLog;
+    LOG_LEVEL_E eLogLevel;
     uint32_t unReserved;
 } DI_T;
 

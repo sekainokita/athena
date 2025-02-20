@@ -62,18 +62,52 @@ void DI_SetLog(DI_T *pstDi, bool bOnOff)
 {
     int32_t nRet = DI_ERROR;
 
-    switch(pstDi->eDiLog)
+    switch(pstDi->eLog)
     {
-        case DI_LOG_ALL:
-            nRet = DI_OK;
-            PrintDebug("DI_LOG_ALL [%d], bOnOff [%d]", nRet, bOnOff);
+        case LOG_DI_ALL:
+            if (bOnOff == ON)
+            {
+                pstDi->stDiGps.bLogLevel = ON;
+            }
+            else
+            {
+                pstDi->stDiGps.bLogLevel = OFF;
+            }
+
+            nRet = DI_GPS_SetLog(&pstDi->stDiGps);
+            if (nRet != DI_OK)
+            {
+                PrintError("DI_GPS_SetLog() is failed! [nRet:%d]", nRet);
+                return;
+            }
+            PrintDebug("LOG_DI_ALL [%d], bOnOff [%d]", nRet, bOnOff);
+            break;
+
+        case LOG_DI_GPS:
+            if (bOnOff == ON)
+            {
+                pstDi->stDiGps.bLogLevel = ON;
+            }
+            else
+            {
+                pstDi->stDiGps.bLogLevel = OFF;
+            }
+
+            nRet = DI_GPS_SetLog(&pstDi->stDiGps);
+            if (nRet != DI_OK)
+            {
+                PrintError("DI_GPS_SetLog() is failed! [nRet:%d]", nRet);
+                return;
+            }
+            PrintDebug("LOG_DI_GPS [%d], bOnOff [%d]", nRet, bOnOff);
             break;
 
         default:
-            PrintError("Unknown Log Type [%d]", pstDi->eDiLog);
+            PrintError("Unknown Log Type [%d]", pstDi->eLog);
             break;
     }
 }
+
 
 int32_t DI_Init(DI_T *pstDi)
 {

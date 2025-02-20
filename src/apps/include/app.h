@@ -58,9 +58,10 @@
 
 /***************************** Enum and Structure ****************************/
 typedef struct APP {
+    LOG_TYPE_E eLog;
+    LOG_LEVEL_E eLogLevel;
     uint32_t unReserved;
 } APP_T;
-
 
 /***************************** Function Protype ******************************/
 FRAMEWORK_T* APP_GetFrameworkInstance(void);

@@ -52,7 +52,9 @@
 
 
 /***************************** Enum and Structure ****************************/
-typedef struct FRAMEWORK {
+typedef struct PLATFORM_t {
+    LOG_TYPE_E eLog;
+    LOG_LEVEL_E eLogLevel;
     uint32_t unReserved;
 } PLATFORM_T;
 

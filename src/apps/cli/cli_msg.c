@@ -1289,7 +1289,39 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
                 if(IS_CMD(pcCmd, "on"))
                 {
-                    (void)FRAMEWORK_SetLog(pstFramework, ON);
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd != NULL)
+                    {
+                        if(IS_CMD(pcCmd, "a"))
+                        {
+                            pstFramework->eLog = LOG_FRAMEWORK_ALL;
+                            pstFramework->eLogLevel = LOG_LEVEL_ALL;
+                            (void)FRAMEWORK_SetLog(pstFramework, ON);
+                        }
+                        else if(IS_CMD(pcCmd, "d"))
+                        {
+                            pstFramework->eLogLevel = LOG_LEVEL_DEBUG;
+                            (void)FRAMEWORK_SetLog(pstFramework, ON);
+                        }
+                        else if(IS_CMD(pcCmd, "w"))
+                        {
+                            pstFramework->eLogLevel = LOG_LEVEL_WARN;
+                            (void)FRAMEWORK_SetLog(pstFramework, ON);
+                        }
+                        else if(IS_CMD(pcCmd, "e"))
+                        {
+                            pstFramework->eLogLevel = LOG_LEVEL_ERROR;
+                            (void)FRAMEWORK_SetLog(pstFramework, ON);
+                        }
+                        else
+                        {
+                            PrintError("msg flog on a/d/w/e, e.g. msg flog on a");
+                        }
+                    }
+                    else
+                    {
+                        PrintError("msg flog on a/d/w/e, e.g. msg flog on a");
+                    }
                 }
                 else if(IS_CMD(pcCmd, "off"))
                 {
@@ -1297,12 +1329,12 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 }
                 else
                 {
-                    PrintError("msg log on/off, e.g. msg log on, or msg log off");
+                    PrintError("msg log on/off, e.g. msg log on a/d/w/e, or msg log off");
                 }
             }
             else
             {
-                PrintError("msg log on/off, e.g. msg log on, or msg log off");
+                PrintError("msg log on/off, e.g. msg log on a/d/w/e, or msg log off");
             }
         }
         else if(IS_CMD(pcCmd, "set"))

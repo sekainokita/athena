@@ -67,9 +67,9 @@ void FRAMEWORK_SetLog(FRAMEWORK_T *pstFramework, bool bOnOff)
 {
     int32_t nRet = FRAMEWORK_ERROR;
 
-    switch(pstFramework->eFrameworkLog)
+    switch(pstFramework->eLog)
     {
-        case FRAMEWORK_LOG_ALL:
+        case LOG_FRAMEWORK_ALL:
             s_stTimeManager.bLogLevel = bOnOff;
             nRet = TIME_MANAGER_SetLog(&s_stTimeManager);
             if (nRet != FRAMEWORK_OK)
@@ -107,8 +107,96 @@ void FRAMEWORK_SetLog(FRAMEWORK_T *pstFramework, bool bOnOff)
 
             break;
 
+        case LOG_FRAMEWORK_MGR_ALL:
+            s_stTimeManager.bLogLevel = bOnOff;
+            nRet = TIME_MANAGER_SetLog(&s_stTimeManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("TIME_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
+            }
+
+            s_stMsgManager.bLogLevel = bOnOff;
+            nRet = MSG_MANAGER_SetLog(&s_stMsgManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("MSG_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
+            }
+
+            s_stDbManager.bLogLevel = bOnOff;
+            nRet = DB_MANAGER_SetLog(&s_stDbManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("DB_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
+            }
+
+            s_stMultiMsgManager.bLogLevel = bOnOff;
+            nRet = MULTI_MSG_MANAGER_SetLog(&s_stMultiMsgManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("MULTI_MSG_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
+            }
+
+            s_stMultiDbManager.bLogLevel = bOnOff;
+            nRet = MULTI_DB_MANAGER_SetLog(&s_stMultiDbManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("MULTI_DB_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
+            }
+
+            break;
+
+        case LOG_FRAMEWORK_MGR_MSG:
+            s_stMsgManager.bLogLevel = bOnOff;
+            nRet = MSG_MANAGER_SetLog(&s_stMsgManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("MSG_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
+            }
+
+            break;
+
+        case LOG_FRAMEWORK_MGR_MULTI_MSG:
+            s_stMultiMsgManager.bLogLevel = bOnOff;
+            nRet = MULTI_MSG_MANAGER_SetLog(&s_stMultiMsgManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("MULTI_MSG_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
+            }
+
+            break;
+
+        case LOG_FRAMEWORK_MGR_DB:
+            s_stDbManager.bLogLevel = bOnOff;
+            nRet = DB_MANAGER_SetLog(&s_stDbManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("DB_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
+            }
+
+            break;
+
+        case LOG_FRAMEWORK_MGR_MULTI_DB:
+            s_stMultiDbManager.bLogLevel = bOnOff;
+            nRet = MULTI_DB_MANAGER_SetLog(&s_stMultiDbManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("MULTI_DB_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
+            }
+
+            break;
+
+        case LOG_FRAMEWORK_MGR_TIME:
+            s_stTimeManager.bLogLevel = bOnOff;
+            nRet = TIME_MANAGER_SetLog(&s_stTimeManager);
+            if (nRet != FRAMEWORK_OK)
+            {
+                PrintError("TIME_MANAGER_SetLog() is failed! [nRet:%d]", nRet);
+            }
+
+            break;
+
         default:
-            PrintError("Unknown Log Type [%d]", pstFramework->eFrameworkLog);
+            PrintError("Unknown Log Type [%d]", pstFramework->eLog);
             break;
     }
 }
@@ -122,7 +210,7 @@ int32_t FRAMEWORK_Init(FRAMEWORK_T *pstFramework)
         PrintError("pstFramework == NULL!!");
         return nRet;
     }
-    
+
     (void*)memset(&s_stMsgManager, 0x00, sizeof(MSG_MANAGER_T));
     (void*)memset(&s_stDbManager, 0x00, sizeof(DB_MANAGER_T));
     (void*)memset(&s_stDbManager.stDbFile, 0x00, sizeof(DB_MANAGER_FILE_T));
