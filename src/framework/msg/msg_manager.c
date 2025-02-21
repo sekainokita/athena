@@ -2865,39 +2865,30 @@ int32_t MSG_MANAGER_SetLog(MSG_MANAGER_T *pstMsgManager)
     s_bMsgMgrLog = pstMsgManager->bLogLevel;
     PrintTrace("SET:s_bMsgMgrLog [%s]", s_bMsgMgrLog == ON ? "ON" : "OFF");
 
-    switch(pstMsgManager->eLogLevel)
+    if (s_bMsgMgrLog == ON)
     {
-        case LOG_LEVEL_ALL:
-            if (s_bMsgMgrLog == ON)
-            {
+        switch (pstMsgManager->eLogLevel)
+        {
+            case LOG_LEVEL_ALL:
                 PrintWarn("TODO");
-            }
-            break;
+                break;
 
-        case LOG_LEVEL_DEBUG:
-            if (s_bMsgMgrLog == ON)
-            {
+            case LOG_LEVEL_DEBUG:
                 PrintWarn("TODO");
-            }
-            break;
+                break;
 
-        case LOG_LEVEL_WARN:
-            if (s_bMsgMgrLog == ON)
-            {
+            case LOG_LEVEL_WARN:
                 PrintWarn("TODO");
-            }
-            break;
+                break;
 
-        case LOG_LEVEL_ERROR:
-            if (s_bMsgMgrLog == ON)
-            {
+            case LOG_LEVEL_ERROR:
                 PrintWarn("TODO");
-            }
-            break;
+                break;
 
-        default:
-            PrintError("Unknown Log Type [%d]", s_bMsgMgrLog);
-            break;
+            default:
+                PrintError("Unknown Log Type [%d]", s_bMsgMgrLog);
+                break;
+        }
     }
 
     nRet = FRAMEWORK_OK;
