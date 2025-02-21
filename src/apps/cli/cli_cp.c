@@ -665,7 +665,39 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
                 if(IS_CMD(pcCmd, "on"))
                 {
-                    pstMsgManager->bLogLevel = ON;
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd == NULL)
+                    {
+                        PrintError("cp log on a/d/w/e, e.g. cp log on a");
+                    }
+                    else
+                    {
+                        pstMsgManager->eLogType = LOG_APP_SVC_CP;
+                        if(IS_CMD(pcCmd, "a"))
+                        {
+                            pstMsgManager->bLogLevel = ON;
+                            pstMsgManager->eLogLevel = LOG_LEVEL_ALL;
+                        }
+                        else if(IS_CMD(pcCmd, "d"))
+                        {
+                            pstMsgManager->bLogLevel = ON;
+                            pstMsgManager->eLogLevel = LOG_LEVEL_DEBUG;
+                        }
+                        else if(IS_CMD(pcCmd, "w"))
+                        {
+                            pstMsgManager->bLogLevel = ON;
+                            pstMsgManager->eLogLevel = LOG_LEVEL_WARN;
+                        }
+                        else if(IS_CMD(pcCmd, "e"))
+                        {
+                            pstMsgManager->bLogLevel = ON;
+                            pstMsgManager->eLogLevel = LOG_LEVEL_ERROR;
+                        }
+                        else
+                        {
+                            PrintError("cp log on a/d/w/e, e.g. cp log on a");
+                        }
+                    }
                 }
                 else if(IS_CMD(pcCmd, "off"))
                 {
@@ -673,7 +705,7 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 }
                 else
                 {
-                    PrintError("cp log on/off, e.g. mcp log on, or mcp log off");
+                    PrintError("cp log on a/d/w/e or cp log off, e.g. cp log on a, or cp log off");
                 }
 
                 nRet = MSG_MANAGER_SetLog(pstMsgManager);
@@ -684,7 +716,7 @@ static int P_CLI_CP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             }
             else
             {
-                PrintError("cp log on/off, e.g. msg log on, or msg log off");
+                PrintError("cp log on a/d/w/e or cp log off, e.g. cp log on a, or cp log off");
             }
         }
         else if(IS_CMD(pcCmd, "check") || IS_CMD(pcCmd, "get"))
@@ -799,7 +831,7 @@ int32_t CLI_CP_InitCmds(void)
                "cp [OPTIONS]\n"
                "   test                         test cp command\n"
                "   set                          set Device ID (should be set cp ready first)\n"
-               "   log on/off                   enable log of cp"
+               "   log [OPT] [OPT]              enable log of cp (cp log on a:all/d:debug/w:warn/e:error or cp log off)"
                "   check                        check V2X scenario\n"
                "   base                         start a base Communication Performance scenario\n"
                "   ready                        ready V2X scenario\n"

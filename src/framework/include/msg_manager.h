@@ -694,6 +694,8 @@ typedef struct MSG_MANAGER_t {
     char                            *pchIfaceName;
     char                            *pchIpAddr;
     uint32_t                        unPort;
+    LOG_TYPE_E                      eLogType;
+    LOG_LEVEL_E                     eLogLevel;
     bool                            bLogLevel;
     MSG_MANAGER_EXT_MSG_WSR         stExtMsgWsr;
     uint32_t                        unReserved;
