@@ -705,6 +705,8 @@ typedef struct MULTI_MSG_MANAGER_t {
     char                                  *pchIfaceName;
     char                                  *pchIpAddr;
     uint32_t                              unPort;
+    LOG_TYPE_E                            eLogType;
+    LOG_LEVEL_E                           eLogLevel;
     bool                                  bLogLevel;
     MULTI_MSG_MANAGER_EXT_MSG_WSR         stExtMultiMsgWsr;
     uint32_t                              unMaxDevCnt;

@@ -2772,6 +2772,31 @@ int32_t MULTI_MSG_MANAGER_SetLog(MULTI_MSG_MANAGER_T *pstMultiMsgManager)
     s_bMultiMsgMgrLog = pstMultiMsgManager->bLogLevel;
     PrintTrace("SET:s_bMultiMsgMgrLog [%s]", s_bMultiMsgMgrLog == ON ? "ON" : "OFF");
 
+    if (s_bMultiMsgMgrLog == ON)
+    {
+        switch (pstMultiMsgManager->eLogLevel)
+        {
+            case LOG_LEVEL_ALL:
+                PrintWarn("TODO");
+                break;
+
+            case LOG_LEVEL_DEBUG:
+                PrintWarn("TODO");
+                break;
+
+            case LOG_LEVEL_WARN:
+                PrintWarn("TODO");
+                break;
+
+            case LOG_LEVEL_ERROR:
+                PrintWarn("TODO");
+                break;
+
+            default:
+                PrintError("Unknown Log Type [%d]", s_bMultiMsgMgrLog);
+                break;
+        }
+    }
     nRet = FRAMEWORK_OK;
 
     return nRet;

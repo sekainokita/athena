@@ -710,7 +710,39 @@ static int P_CLI_MCP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
                 if(IS_CMD(pcCmd, "on"))
                 {
-                    pstMultiMsgManager->bLogLevel = ON;
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if(pcCmd == NULL)
+                    {
+                        PrintError("mcp log on a/d/w/e, e.g. mcp log on a");
+                    }
+                    else
+                    {
+                        pstMultiMsgManager->eLogType = LOG_APP_SVC_MULTI_CP;
+                        if(IS_CMD(pcCmd, "a"))
+                        {
+                            pstMultiMsgManager->bLogLevel = ON;
+                            pstMultiMsgManager->eLogLevel = LOG_LEVEL_ALL;
+                        }
+                        else if(IS_CMD(pcCmd, "d"))
+                        {
+                            pstMultiMsgManager->bLogLevel = ON;
+                            pstMultiMsgManager->eLogLevel = LOG_LEVEL_DEBUG;
+                        }
+                        else if(IS_CMD(pcCmd, "w"))
+                        {
+                            pstMultiMsgManager->bLogLevel = ON;
+                            pstMultiMsgManager->eLogLevel = LOG_LEVEL_WARN;
+                        }
+                        else if(IS_CMD(pcCmd, "e"))
+                        {
+                            pstMultiMsgManager->bLogLevel = ON;
+                            pstMultiMsgManager->eLogLevel = LOG_LEVEL_ERROR;
+                        }
+                        else
+                        {
+                            PrintError("mcp log on a/d/w/e, e.g. mcp log on a");
+                        }
+                    }
                 }
                 else if(IS_CMD(pcCmd, "off"))
                 {
@@ -718,7 +750,7 @@ static int P_CLI_MCP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 }
                 else
                 {
-                    PrintError("mcp log on/off, e.g. mcp log on, or mcp log off");
+                    PrintError("mcp log on a/d/w/e or mcp log off, e.g. mcp log on a, or mcp log off");
                 }
 
                 nRet = MULTI_MSG_MANAGER_SetLog(pstMultiMsgManager);
@@ -729,7 +761,7 @@ static int P_CLI_MCP(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             }
             else
             {
-                PrintError("mcp log on/off, e.g. msg log on, or msg log off");
+                PrintError("mcp log on a/d/w/e or mcp log off, e.g. msg log on a, or msg log off");
             }
         }
         else if(IS_CMD(pcCmd, "status"))
@@ -801,7 +833,7 @@ int32_t CLI_MCP_InitCmds(void)
                "    test                         test mcp command\n"
                "    set                          set Device ID (should be set mcp ready first)\n"
                "    check                        check V2X scenario\n"
-               "    log on/off                   enable log of mcp"
+               "    log [OPT] [OPT]              enable log of mcp (mcp log on a:all/d:debug/w:warn/e:error or mcp log off)"
                "    msg flog [opt]               show msg debug logs of framework (on/off)\n"
                "    base                         start a base Multi Communication Performance scenario\n"
                "    ready                        ready V2X scenario\n"
