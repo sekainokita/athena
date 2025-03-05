@@ -50,7 +50,6 @@
 #include "unistd.h"
 
 /***************************** Definition ************************************/
-#define CONFIG_CMD_HISTORY (1)
 #if defined(CONFIG_CMD_HISTORY)
 #define MAX_HISTORY 10
 #define KEY_UP 65
@@ -192,6 +191,15 @@ static int P_CLI_ParseInputString(char *pszPrompt, char *pszBuffer, int nMaxLen)
     while (1)
     {
         nCh = getchar();
+        if (nCh == 'z')
+        {
+            printf("\nExiting CLI...\n");
+            fflush(stdout);
+
+            P_CLI_RestoreTerminal();
+            system("clear");
+            exit(0);
+        }
 
         if (nCh == 3)  /* Ctrl+C */
         {
@@ -224,16 +232,6 @@ static int P_CLI_ParseInputString(char *pszPrompt, char *pszBuffer, int nMaxLen)
         if ((nCh == '\r') || (nCh == '\n'))
         {
             pszBuffer[nIdx] = '\0';
-
-            if (strcmp(pszBuffer, "exit") == 0)
-            {
-                printf("\nExiting CLI...\n");
-                fflush(stdout);
-
-                P_CLI_RestoreTerminal();
-                system("clear");
-                exit(0);
-            }
 
             if (nIdx > 0)
             {
@@ -312,7 +310,7 @@ static void P_CLI_StartLoop(void)
             continue;
         }
 
-        P_CLI_StartCmd(szBuffer);
+        P_CLI_StartCmd(str);
     }
 }
 
@@ -427,6 +425,7 @@ static void P_CLI_StartLoop(void)
     for (;;)
     {
         prompt = "CLI> ";
+
         P_CLI_ReadInputString(prompt, buffer, sizeof(buffer));
 
         status = P_CLI_StartCmd(buffer);
