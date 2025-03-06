@@ -82,6 +82,69 @@ typedef enum {
     eDI_CAN_PEAK_EVENT_MAX                        = 0xFFFF
 } DI_CAN_PEAK_EVENT_E;
 
+/**
+* @details DI_CAN_PEAK_MSG_ID_156_T
+* @param unReserved
+*/
+typedef struct DI_CAN_PEAK_MSG_ID_156_t {
+    bool                        bEpsEnable;
+    bool                        bOverrideIgnore;
+    uint8_t                     unEpsSpeed;
+    bool                        bAccEnable;
+    bool                        bAebEnable;
+    float                       fAebDecelValue;
+    uint8_t                     unAliveCnt;
+    uint32_t                    unReserved;
+} DI_CAN_PEAK_MSG_ID_156_T;
+
+/**
+* @details DI_CAN_PEAK_MSG_ID_157_T
+* @param unReserved
+*/
+typedef struct DI_CAN_PEAK_MSG_ID_157_t {
+    uint32_t                    unReserved;
+} DI_CAN_PEAK_MSG_ID_157_T;
+
+/**
+* @details DI_CAN_PEAK_MSG_ID_710_T
+* @param unReserved
+*/
+typedef struct DI_CAN_PEAK_MSG_ID_710_t {
+    uint32_t                    unReserved;
+} DI_CAN_PEAK_MSG_ID_710_T;
+
+/**
+* @details DI_CAN_PEAK_MSG_ID_711_T
+* @param unReserved
+*/
+typedef struct DI_CAN_PEAK_MSG_ID_711_t {
+    uint32_t                    unReserved;
+} DI_CAN_PEAK_MSG_ID_711_T;
+
+/**
+* @details DI_CAN_PEAK_MSG_ID_713_T
+* @param unReserved
+*/
+typedef struct DI_CAN_PEAK_MSG_ID_713_t {
+    uint32_t                    unReserved;
+} DI_CAN_PEAK_MSG_ID_713_T;
+
+/**
+* @details DI_CAN_PEAK_MSG_ID_714_T
+* @param unReserved
+*/
+typedef struct DI_CAN_PEAK_MSG_ID_714_t {
+    uint32_t                    unReserved;
+} DI_CAN_PEAK_MSG_ID_714_T;
+
+/**
+* @details DI_CAN_PEAK_MSG_ID_715_T
+* @param unReserved
+*/
+typedef struct DI_CAN_PEAK_MSG_ID_715_t {
+    uint32_t                    unReserved;
+} DI_CAN_PEAK_MSG_ID_715_T;
+
 
 /**
 * @details DI_CAN_PEAK_DATA_T
