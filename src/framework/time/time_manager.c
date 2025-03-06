@@ -67,6 +67,7 @@
 #endif
 
 /***************************** Definition ************************************/
+//#define CONFIG_TIME_NTP             (1)
 #define TIME_MGR_CHECK_NTP          "rdate -p time.bora.net"
 #define TIME_MGR_SYNC_NTP           "sudo rdate -s time.bora.net"
 
@@ -290,6 +291,7 @@ int P_TIME_MANAGER_GetRtc(void)
 }
 #endif
 
+#if defined(CONFIG_TIME_NTP)
 static int32_t P_TIME_MANAGER_SyncNtpServer(TIME_MANAGER_T *pstTimeMgr)
 {
     int32_t nRet = FRAMEWORK_ERROR;
@@ -336,6 +338,7 @@ static int32_t P_TIME_MANAGER_SyncNtpServer(TIME_MANAGER_T *pstTimeMgr)
 
     return nRet;
 }
+#endif
 
 static void *P_TIME_MANAGER_Task(void *arg)
 {
@@ -790,7 +793,7 @@ int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeMgr)
     {
         PrintWarn("is successfully initialized.");
     }
-
+#if defined(CONFIG_TIME_NTP)
     nRet = P_TIME_MANAGER_SyncNtpServer(pstTimeMgr);
     if(nRet != FRAMEWORK_OK)
     {
@@ -800,6 +803,7 @@ int32_t TIME_MANAGER_Init(TIME_MANAGER_T *pstTimeMgr)
     {
         PrintWarn("P_TIME_MANAGER_SyncNtpServer() is successfully updated.");
     }
+#endif
 
 #if defined(CONFIG_RTC) && defined(TIME_MGR_RTC_TEST)
     nRet = P_TIME_MANAGER_TestRtc();

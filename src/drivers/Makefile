@@ -36,6 +36,8 @@ LIB_DI = libdi.a
 
 SRCS = $(wildcard *.c)
 SRCS += $(wildcard $(LIB_DI_GPS_PATH)/*.c)
+SRCS += $(wildcard $(LIB_DI_CAN_PATH)/*.c)
+SRCS += $(wildcard $(LIB_DI_VIDEO_PATH)/*.c)
 
 TARGET_AR = ar
 OBJS = ${SRCS:.c=.o}

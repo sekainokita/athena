@@ -49,15 +49,16 @@
 ******************************************************************************/
 
 /***************************** Include ***************************************/
-#include "di.h"
-#include "di_gps.h"
-#include "di_gps_xsens.h"
 #include <math.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+
+#include "di.h"
+#include "di_gps.h"
+#include "di_gps_xsens.h"
 
 /***************************** Definition ************************************/
 #define PI                      (3.14159265358979323846)
@@ -77,7 +78,6 @@
 
 /***************************** Static Variable *******************************/
 static bool s_bDiGpsLog = OFF;
-static DI_GPS_XSENS_T s_stDiGpsDev;
 static bool s_bLogOnOff = FALSE;
 static int32_t s_nSocketHandle = -1;
 
@@ -86,6 +86,10 @@ static key_t s_DiGpsTaskMsgKey = DI_GPS_TASK_MSG_KEY;
 static pthread_t sh_DiGpsTask;
 static pthread_mutex_t s_stDiGpsMutex = PTHREAD_MUTEX_INITIALIZER;
 static DI_GPS_DATA_T s_stDiGpsData;
+
+#if defined(CONFIG_GPS_XSENS)
+static DI_GPS_XSENS_T s_stDiGpsDev;
+#endif
 
 /***************************** Function  *************************************/
 

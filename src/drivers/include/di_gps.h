@@ -156,7 +156,5 @@ uint16_t DI_GPS_CalculateSpeed(DB_V2X_GPS_INFO_T *pstV2xGpsInfo);
 int32_t DI_GPS_StartSocketServer(DI_GPS_T *pstDiGps);
 
 void DI_GPS_Status(DI_GPS_T *pstDiGps);
-int32_t DI_GPS_Init(DI_GPS_T *pstDiGps);
-int32_t DI_GPS_DeInit(DI_GPS_T *pstDiGps);
 #endif	/* _DI_GPS_H_ */
 

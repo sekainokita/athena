@@ -59,6 +59,7 @@ export LIB_PLATFORM_PATH = $(PLATFORM_DIR)
 export LIB_DI_GPS_PATH = $(DI_DIR)/gps
 export LIB_DI_CAMERA_PATH = $(DI_DIR)/camera
 export LIB_DI_VIDEO_PATH = $(DI_DIR)/video
+export LIB_DI_CAN_PATH = $(DI_DIR)/can
 export LIB_DI_PATH = $(DI_DIR)
 export APP_PATH = $(APP_DIR)
 export APP_CLI_PATH = $(APP_DIR)/cli
