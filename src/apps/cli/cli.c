@@ -74,8 +74,10 @@ static int P_CLI_ExecuteCmd(CLI_UTIL_QUEUE_T *head);
 static int P_CLI_ProcessCmd(CLI_UTIL_QUEUE_T *head);
 static int P_CLI_StartCmd(char *str);
 static int P_CLI_ParseInputString(char *prompt, char *str, int len);
-static int P_CLI_ReadInputString(char *prompt, char *str, int maxlen);
-static int P_CLI_ReadInputString(char *prompt, char *str, int maxlen);
+#if defined(CONFIG_CMD_HISTORY)
+#else
+static int P_CLI_ReadInputString(char *prompt, char *str, int maxlen)
+#endif
 static int32_t P_CLI_InitCmd(void);
 
 #if defined(CONFIG_CMD_HISTORY)
@@ -180,6 +182,7 @@ static int P_CLI_ParseInputString(char *pszPrompt, char *pszBuffer, int nMaxLen)
 {
     int nIdx = 0;
     int nCh;
+    int nRet;
 
     s_nInputString++;
 
@@ -231,7 +234,12 @@ static int P_CLI_ParseInputString(char *pszPrompt, char *pszBuffer, int nMaxLen)
                 fflush(stdout);
 
                 P_CLI_RestoreTerminal();
-                system("clear");
+                nRet = system("clear");
+                if (nRet != 0)
+                {          
+                    PrintError("system() is failed! [nRet:%d]", nRet);
+                }
+
                 exit(0);
             }
 
@@ -282,12 +290,6 @@ static int P_CLI_ParseInputString(char *pszPrompt, char *pszBuffer, int nMaxLen)
     s_nInputString--;
     pszBuffer[nIdx] = '\0';
     return nIdx;
-}
-
-static int P_CLI_ReadInputString(char *pszPrompt, char *pszBuffer, int nMaxlen)
-{
-    pszBuffer[0] = '\0';
-    return P_CLI_ParseInputString(pszPrompt, pszBuffer, nMaxlen);
 }
 
 static void P_CLI_StartLoop(void)
