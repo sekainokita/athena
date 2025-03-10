@@ -228,7 +228,7 @@ static int P_CLI_ParseInputString(char *pszPrompt, char *pszBuffer, int nMaxLen)
         {
             pszBuffer[nIdx] = '\0';
 
-            if ((strcmp(pszBuffer, "exit") == 0) || (strcmp(pszBuffer, "z") == 0))
+            if (strcmp(pszBuffer, "exit") == 0)
             {
                 printf("\nExiting CLI...\n");
                 fflush(stdout);
@@ -240,6 +240,14 @@ static int P_CLI_ParseInputString(char *pszPrompt, char *pszBuffer, int nMaxLen)
                     PrintError("system() is failed! [nRet:%d]", nRet);
                 }
 
+                exit(0);
+            }
+
+            else if ((strcmp(pszBuffer, "z") == 0))
+            {
+                PrintTrace("Exit the CLI, kill the process");
+                P_CLI_RestoreTerminal();
+                fflush(stdout);
                 exit(0);
             }
 
