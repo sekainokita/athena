@@ -57,8 +57,8 @@ else ifeq ($(CONFIG_MODEL_NOCO2XG),y)
 APP_MODEL_NAME = noco2xg
 else ifeq ($(CONFIG_MODEL_NOCO2XGR),y)
 APP_MODEL_NAME = noco2xgr
-else ifeq ($(CONFIG_MODEL_NOCO2XGRM),y)
-APP_MODEL_NAME = noco2xgrm
+else ifeq ($(CONFIG_MODEL_NOCO2OGM),y)
+APP_MODEL_NAME = noco2ogm
 else ifeq ($(CONFIG_MODEL_UICO1XG),y)
 APP_MODEL_NAME = uico1xg
 else ifeq ($(CONFIG_MODEL_UIDR2RG),y)
