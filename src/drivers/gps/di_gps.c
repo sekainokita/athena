@@ -750,23 +750,22 @@ int32_t DI_GPS_Get(DI_GPS_T *pstDiGps)
             return nRet;
         }
 #endif
-#endif
-        pstDiGps->stDiGpsData.fAccX = s_stDiGpsData.fAccX;
-        pstDiGps->stDiGpsData.fAccY = s_stDiGpsData.fAccY;
-        pstDiGps->stDiGpsData.fAccZ = s_stDiGpsData.fAccZ;
+        pstDiGps->stDiGpsData.fAccX = s_stDiGpsDev.fAccX;
+        pstDiGps->stDiGpsData.fAccY = s_stDiGpsDev.fAccY;
+        pstDiGps->stDiGpsData.fAccZ = s_stDiGpsDev.fAccZ;
 
-        pstDiGps->stDiGpsData.fGyrX = s_stDiGpsData.fGyrX;
-        pstDiGps->stDiGpsData.fGyrY = s_stDiGpsData.fGyrY;
-        pstDiGps->stDiGpsData.fGyrZ = s_stDiGpsData.fGyrZ;
+        pstDiGps->stDiGpsData.fGyrX = s_stDiGpsDev.fGyrX;
+        pstDiGps->stDiGpsData.fGyrY = s_stDiGpsDev.fGyrY;
+        pstDiGps->stDiGpsData.fGyrZ = s_stDiGpsDev.fGyrZ;
 
-        pstDiGps->stDiGpsData.fMagX = s_stDiGpsData.fMagX;
-        pstDiGps->stDiGpsData.fMagY = s_stDiGpsData.fMagY;
-        pstDiGps->stDiGpsData.fMagZ = s_stDiGpsData.fMagZ;
+        pstDiGps->stDiGpsData.fMagX = s_stDiGpsDev.fMagX;
+        pstDiGps->stDiGpsData.fMagY = s_stDiGpsDev.fMagY;
+        pstDiGps->stDiGpsData.fMagZ = s_stDiGpsDev.fMagZ;
 
-        pstDiGps->stDiGpsData.fQuaternionW = s_stDiGpsData.fQuaternionW;
-        pstDiGps->stDiGpsData.fQuaternionX = s_stDiGpsData.fQuaternionX;
-        pstDiGps->stDiGpsData.fQuaternionY = s_stDiGpsData.fQuaternionY;
-        pstDiGps->stDiGpsData.fQuaternionZ = s_stDiGpsData.fQuaternionZ;
+        pstDiGps->stDiGpsData.fQuaternionW = s_stDiGpsDev.fQuaternionW;
+        pstDiGps->stDiGpsData.fQuaternionX = s_stDiGpsDev.fQuaternionX;
+        pstDiGps->stDiGpsData.fQuaternionY = s_stDiGpsDev.fQuaternionY;
+        pstDiGps->stDiGpsData.fQuaternionZ = s_stDiGpsDev.fQuaternionZ;
 
 #if defined(CONFIG_ROS)
         pstDiGps->stDiGpsData.fEulerRoll = s_stDiGpsData.fEulerRoll;
@@ -776,16 +775,17 @@ int32_t DI_GPS_Get(DI_GPS_T *pstDiGps)
         pstDiGps->stDiGpsData.fLongitude = s_stDiGpsData.fLongitude;
         pstDiGps->stDiGpsData.fAltitude = s_stDiGpsData.fAltitude;
 #else
-        pstDiGps->stDiGpsData.fEulerRoll = s_stDiGpsData.fEulerRoll;
-        pstDiGps->stDiGpsData.fEulerPitch = s_stDiGpsData.fEulerPitch;
-        pstDiGps->stDiGpsData.fEulerYaw = s_stDiGpsData.fEulerYaw;
-        pstDiGps->stDiGpsData.fLatitude = s_stDiGpsData.fLatitude;
-        pstDiGps->stDiGpsData.fLongitude = s_stDiGpsData.fLongitude;
-        pstDiGps->stDiGpsData.fAltitude = s_stDiGpsData.fAltitude;
+        pstDiGps->stDiGpsData.fEulerRoll = s_stDiGpsDev.fEulerRoll;
+        pstDiGps->stDiGpsData.fEulerPitch = s_stDiGpsDev.fEulerPitch;
+        pstDiGps->stDiGpsData.fEulerYaw = s_stDiGpsDev.fEulerYaw;
+        pstDiGps->stDiGpsData.fLatitude = s_stDiGpsDev.fLatitude;
+        pstDiGps->stDiGpsData.fLongitude = s_stDiGpsDev.fLongitude;
+        pstDiGps->stDiGpsData.fAltitude = s_stDiGpsDev.fAltitude;
 #endif
-        pstDiGps->stDiGpsData.fVelocityEast = s_stDiGpsData.fVelocityEast;
-        pstDiGps->stDiGpsData.fVelocityNorth = s_stDiGpsData.fVelocityNorth;
-        pstDiGps->stDiGpsData.fVelocityUp = s_stDiGpsData.fVelocityUp;
+        pstDiGps->stDiGpsData.fVelocityEast = s_stDiGpsDev.fVelocityEast;
+        pstDiGps->stDiGpsData.fVelocityNorth = s_stDiGpsDev.fVelocityNorth;
+        pstDiGps->stDiGpsData.fVelocityUp = s_stDiGpsDev.fVelocityUp;
+#endif
     }
     else
     {
