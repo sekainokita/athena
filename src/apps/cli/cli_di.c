@@ -233,7 +233,39 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                         }
                     }
                 }
-
+                else
+                {
+                    return CLI_CMD_Showusage(pstCmd);
+                }
+            }
+        }
+       else if(IS_CMD(pcCmd, "can"))
+        {
+            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+            if (pcCmd == NULL)
+            {
+                return CLI_CMD_Showusage(pstCmd);
+            }
+            else
+            {
+                if(IS_CMD(pcCmd, "open"))
+                {
+                    nRet = DI_CAN_Open(&pstDi->stDiCan);
+                    if (nRet != DI_OK)
+                    {
+                        PrintError("DI_CAN_Open() is failed! [nRet:%d]", nRet);
+                        return nRet;
+                    }
+                }
+                else if(IS_CMD(pcCmd, "close"))
+                {
+                    nRet = DI_CAN_Close(&pstDi->stDiCan);
+                    if (nRet != DI_OK)
+                    {
+                        PrintError("DI_CAN_Close() is failed! [nRet:%d]", nRet);
+                        return nRet;
+                    }
+                }
                 else
                 {
                     return CLI_CMD_Showusage(pstCmd);

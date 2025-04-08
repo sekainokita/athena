@@ -50,7 +50,6 @@
 
 /***************************** Include ***************************************/
 #include "di.h"
-#include "di_gps.h"
 
 /***************************** Definition ************************************/
 
@@ -124,6 +123,20 @@ int32_t DI_Init(DI_T *pstDi)
     if(nRet != DI_OK)
     {
         PrintError("DI_GPS_Init() is failed! [unRet:%d]", nRet);
+        return nRet;
+    }
+
+    nRet = DI_CAN_Init(&pstDi->stDiCan);
+    if(nRet != DI_OK)
+    {
+        PrintError("DI_CAN_Init() is failed! [unRet:%d]", nRet);
+        return nRet;
+    }
+
+    nRet = DI_VIDEO_Init(&pstDi->stDiVideo);
+    if(nRet != DI_OK)
+    {
+        PrintError("DI_VIDEO_Init() is failed! [unRet:%d]", nRet);
         return nRet;
     }
 

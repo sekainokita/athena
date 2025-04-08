@@ -187,30 +187,30 @@ int CLI_CMD_CheckValid(CLI_CMDLINE_T *cmd, char *validstr)
 
 static CLI_CMD_T *CLI_CMD_FindWord(CLI_CMD_T *list, char *cmdword)
 {
-	if ((list != NULL) && (list->cmdword != NULL) && (cmdword != NULL))
+	if (list == NULL || cmdword == NULL)
 	{
-		while (list)
-		{
-			if (strcmp(cmdword, list->cmdword) == 0)
-			{
-				return list;
-			}
-			list = list->sibling;
-
-			if (list->sibling == NULL)
-			{
 #if defined(CONFIG_CLI_DEBUG)
-				PrintError("sibling is NULL!!");
+		PrintError("CLI_CMD_FindWord: list[%p], cmdword[%p] — one or both are NULL!", list, cmdword);
 #endif
-				break;
-			}
-		}
+		return NULL;
 	}
-	else
+
+	while (list)
 	{
+		if (list->cmdword && strcmp(cmdword, list->cmdword) == 0)
+		{
+			return list;
+		}
+
+		list = list->sibling;
+
+		if (list && list->sibling == NULL)
+		{
 #if defined(CONFIG_CLI_DEBUG)
-		PrintError("list[%p], list->cmdword[%p], cmdword[%p], NULL!!", list, list->cmdword, cmdword);
+			PrintError("CLI_CMD_FindWord: sibling of [%s] is NULL!", list->cmdword ? list->cmdword : "???");
 #endif
+			break;
+		}
 	}
 
 	return NULL;
@@ -277,12 +277,19 @@ void CLI_CMD_BuildCmdline(CLI_UTIL_QUEUE_T *head, CLI_CMDLINE_T *cmd)
 
 int32_t CLI_CMD_AddCmd(char *command, int (*func)(CLI_CMDLINE_T *, int argc, char *argv[]), void *ref, char *help, char *usage, char *switches)
 {
-    int32_t nRet = APP_ERROR;
+	int32_t nRet = APP_ERROR;
 	CLI_CMD_T **list = &sh_pstCliCmd;
 	CLI_CMD_T *cmd = NULL;
 	CLI_UTIL_QUEUE_T tokens;
 	CLI_UTIL_QUEUE_T *cur;
 	CLI_CMD_TOKEN_T *t;
+
+	if (!command || !func) {
+#if defined(CONFIG_CLI_DEBUG)
+		PrintError("CLI_CMD_AddCmd: invalid argument. command[%p], func[%p]", command, func);
+#endif
+		return nRet;
+	}
 
 	CLI_CMD_BuildList(&tokens, command);
 	cur = tokens.q_next;
@@ -290,17 +297,19 @@ int32_t CLI_CMD_AddCmd(char *command, int (*func)(CLI_CMDLINE_T *, int argc, cha
 	while (cur != &tokens)
 	{
 		t = (CLI_CMD_TOKEN_T *)cur;
+
 		if (!P_CLI_CMD_IsWhiteSpace(t))
 		{
 			cmd = CLI_CMD_FindWord(*list, &(t->token));
 			if (!cmd)
 			{
 				cmd = malloc(sizeof(CLI_CMD_T) + strlen(&(t->token)) + 1);
-                if(cmd == NULL)
-                {
-                    PrintError("malloc() is failed! [NULL]");
-                    return nRet;
-                }
+				if (cmd == NULL)
+				{
+					PrintError("CLI_CMD_AddCmd: malloc() failed!");
+					CLI_CMD_FreeTokens(&tokens);
+					return nRet;
+				}
 
 				memset(cmd, 0, sizeof(CLI_CMD_T));
 				cmd->cmdword = (char *)(cmd + 1);
@@ -316,21 +325,22 @@ int32_t CLI_CMD_AddCmd(char *command, int (*func)(CLI_CMDLINE_T *, int argc, cha
 	CLI_CMD_FreeTokens(&tokens);
 
 	if (!cmd)
-    {
-        nRet = APP_ERROR;
-		return nRet;
-    }
-    else
-    {
-        PrintDebug("[%s] is added.", cmd->cmdword);
-        nRet = APP_OK;
-    }
+	{
+		nRet = APP_ERROR;
+	}
+	else
+	{
+#if defined(CONFIG_CLI_DEBUG)
+		PrintDebug("CLI_CMD_AddCmd: [%s] is added.", cmd->cmdword);
+#endif
+		nRet = APP_OK;
 
-	cmd->func = func;
-	cmd->usage = usage;
-	cmd->ref = ref;
-	cmd->help = help;
-	cmd->switches = switches;
+		cmd->func = func;
+		cmd->usage = usage;
+		cmd->ref = ref;
+		cmd->help = help;
+		cmd->switches = switches;
+	}
 
 	return nRet;
 }
@@ -424,40 +434,64 @@ static void P_CLI_CMD_DumpSwitch(char *str)
 
 static void P_CLI_CMD_Dump(CLI_CMD_T *cmd, int level, char **words, int verbose)
 {
-	int idx;
-	int len;
+	int idx, len;
 
 	while (cmd)
 	{
-		len = 0;
+		if (cmd->cmdword == NULL) {
+#if defined(CONFIG_CLI_DEBUG)
+			PrintError("P_CLI_CMD_Dump: cmdword is NULL at level %d", level);
+#endif
+			break;
+		}
+
 		words[level] = cmd->cmdword;
+
 		if (cmd->func)
 		{
+			len = 0;
+
 			for (idx = 0; idx < level; idx++)
 			{
-				printf("%s ", words[idx]);
-				len += strlen(words[idx]) + 1;
+				if (words[idx]) {
+					printf("%s ", words[idx]);
+					len += strlen(words[idx]) + 1;
+				}
 			}
 
 			printf("%s", cmd->cmdword);
 			len += strlen(cmd->cmdword);
-			for (idx = len; idx < 20; idx++)
-            {
-				printf(" ");
-            }
 
-			PrintInfo("%s", cmd->help);
+			for (idx = len; idx < 20; idx++)
+				printf(" ");
+
+			if (cmd->help)
+				PrintInfo("%s", cmd->help);
+			else
+				PrintInfo("<no help>");
 
 			if (verbose)
 			{
 				PrintInfo();
-				P_CLI_CMD_DumpIndent(cmd->usage, 5);
+
+				if (cmd->usage)
+					P_CLI_CMD_DumpIndent(cmd->usage, 5);
+				else
+					PrintInfo("    <no usage>");
+
 				PrintInfo();
-				P_CLI_CMD_DumpSwitch(cmd->switches);
+
+				if (cmd->switches)
+					P_CLI_CMD_DumpSwitch(cmd->switches);
+				else
+					PrintInfo("    <no switches>");
+
 				PrintInfo();
 			}
 		}
+
 		P_CLI_CMD_Dump(cmd->child, level + 1, words, verbose);
+
 		cmd = cmd->sibling;
 	}
 }

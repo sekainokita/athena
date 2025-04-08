@@ -109,3 +109,9 @@ export XSENS_MTI680G_LIB_PATH = $(XSENS_MTI680G_NANO_LIB_PATH)
 else
 export XSENS_MTI680G_LIB_PATH = $(XSENS_MTI680G_AARCH64_LIB_PATH)
 endif
+
+export PCANBASIC_PATH = $(PLATFORM_DIR)/peak/peak-linux-driver-8.20.0/libpcanbasic/pcanbasic
+export PCANBASIC_LIB_PATH = $(PCANBASIC_PATH)/lib
+export PCANBASIC_INC_PATH = $(PCANBASIC_PATH)/include
+export PCAN_DRV_PATH = $(PCANBASIC_PATH)/../../driver
+

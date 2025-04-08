@@ -48,6 +48,8 @@
 /***************************** Include ***************************************/
 #include "type.h"
 #include "di_gps.h"
+#include "di_can.h"
+#include "di_video.h"
 
 /***************************** Definition ************************************/
 
@@ -55,6 +57,8 @@
 
 typedef struct DI_t {
     DI_GPS_T stDiGps;
+    DI_CAN_T stDiCan;
+    DI_VIDEO_T stDiVideo;
     LOG_TYPE_E eLog;
     LOG_LEVEL_E eLogLevel;
     uint32_t unReserved;

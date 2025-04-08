@@ -1,0 +1,1 @@
+cmd_/home/bman/work/athena/src/platform/peak/peak-linux-driver-8.20.0/driver/modules.order := {   echo /home/bman/work/athena/src/platform/peak/peak-linux-driver-8.20.0/driver/pcan.ko; :; } | awk '!x[$$0]++' - > /home/bman/work/athena/src/platform/peak/peak-linux-driver-8.20.0/driver/modules.order

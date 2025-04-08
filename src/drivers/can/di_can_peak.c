@@ -55,14 +55,20 @@
 #include <sys/msg.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <signal.h>
 
 #include "di.h"
 #include "di_can.h"
 #include "di_can_peak.h"
 
+#include "PCANBasic.h"
+
 /***************************** Definition ************************************/
 
 //#define CONFIG_DI_CAN_PEAK_DEBUG     (1)
+
+#define PCAN_DEVICE                     PCAN_USBBUS1
+#define PCAN_EVENT_PORT                 0
 
 /***************************** Enum and Structure ****************************/
 
@@ -74,6 +80,23 @@ static key_t s_DiCanPeakTaskMsgKey = DI_CAN_PEAK_TASK_MSG_KEY;
 static pthread_t sh_DiCanPeakTask;
 
 /***************************** Function  *************************************/
+
+static void P_DI_CAN_PEAK_SignalHandler(int nSignal)
+{
+	PrintError("Interrupted by SIG[%u]!", nSignal);
+}
+
+static int P_DI_CAN_PEAK_SetupSigHandler(int nSignum, void (*pFunc)(int))
+{
+	struct sigaction stAct;
+
+	memset(&stAct, 0, sizeof stAct);
+	stAct.sa_handler = pFunc;
+
+	// note: siagaction() is thread -safe
+	return sigaction(nSignum, &stAct, NULL);
+}
+
 static void *P_DI_CAN_PEAK_Task(void *arg)
 {
     DI_CAN_PEAK_EVENT_MSG_T stEventMsg;
@@ -258,6 +281,8 @@ int32_t DI_CAN_PEAK_Get(DI_CAN_PEAK_T *pstDiCanPeak)
 int32_t DI_CAN_PEAK_Open(DI_CAN_PEAK_T *pstDiCanPeak)
 {
     int32_t nRet = DI_ERROR;
+    TPCANStatus nRetCanStatus;
+    uint32_t unPcanDev = PCAN_DEVICE;
 
     if(pstDiCanPeak == NULL)
     {
@@ -277,6 +302,23 @@ int32_t DI_CAN_PEAK_Open(DI_CAN_PEAK_T *pstDiCanPeak)
     if((pstDiCanPeak->eDiCanPeakStatus == DI_CAN_PEAK_STATUS_INITIALIZED) || (pstDiCanPeak->eDiCanPeakStatus == DI_CAN_PEAK_STATUS_CLOSED))
     {
         pstDiCanPeak->eDiCanPeakStatus = DI_CAN_PEAK_STATUS_OPENED;
+
+        PrintTrace("PCAN_EVENT_PORT [%d]", PCAN_EVENT_PORT);
+
+        P_DI_CAN_PEAK_SetupSigHandler(SIGINT, P_DI_CAN_PEAK_SignalHandler);
+
+        nRetCanStatus = CAN_Initialize(unPcanDev, PCAN_BAUD_500K, 0, PCAN_EVENT_PORT, 0);
+        if (nRetCanStatus)
+        {
+            PrintError("retStatus[%d]", nRetCanStatus);
+            nRet = DI_ERROR;
+            return nRet;
+        }
+        else
+        {
+            PrintDebug("CAN_Initialize(%xh): Status=0x%x, PCAN_BAUD_500K\n", unPcanDev, (int)nRetCanStatus);
+            nRet = DI_OK;
+        }
     }
     else
     {

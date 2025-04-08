@@ -54,6 +54,7 @@ CONFIG_MODEL_UI_DR2RGM=ui-dr2rgm_defconfig
 CONFIG_MODEL_NO_CO1XG=no-co1xg_defconfig
 CONFIG_MODEL_NO_CO2XG=no-co2xg_defconfig
 CONFIG_MODEL_NO_CO2XGR=no-co2xgr_defconfig
+CONFIG_MODEL_NO_CO2XGRC=no-co2xgrc_defconfig
 CONFIG_MODEL_NO_CO2OG=no-co2og_defconfig
 CONFIG_MODEL_NN_CO1XG=nn-co1xg_defconfig
 CONFIG_MODEL_NN_CO2XG=nn-co2xg_defconfig
@@ -71,6 +72,7 @@ echo "                ui-dr2rgm  : Ubuntu Intel RSU Including Moving Base Statio
 echo "                no-co1xg   : NVIDIA ORIN RxAnt.1 MODEM, XSENS GPS"
 echo "                no-co2xg   : NVIDIA ORIN RxAnt.2 MODEM, XSENS GPS"
 echo "                no-co2xgr  : NVIDIA ORIN RxAnt.2 MODEM, XSENS GPS, ROS"
+echo "                no-co2xgrc : NVIDIA ORIN RxAnt.2 MODEM, XSENS GPS, ROS, CAN"
 echo "                no-co2og   : NVIDIA ORIN RxAnt.2 MODEM, OBU GPS"
 echo "                no-co2ogm  : NVIDIA ORIN RxAnt.2 MODEM, OBU GPS, MULTI DEVICE"
 echo "                nn-co1xg   : NVIDIA NANO RxAnt.1 MODEM, XSENS GPS"
@@ -120,6 +122,12 @@ elif [ "no-co2xgr" = "$1" ]; then
     echo "========================================================================="
     echo -e "$W"
     cp ${CONFIGS_DIR}/${CONFIG_MODEL_NO_CO2XGR} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
+elif [ "no-co2xgrc" = "$1" ]; then
+    echo -e "$BL"
+	echo "NVIDIA ORIN RxAnt.2 MODEM, ROS, CAN"
+    echo "========================================================================="
+    echo -e "$W"
+    cp ${CONFIGS_DIR}/${CONFIG_MODEL_NO_CO2XGRC} ${BUILD_TOP_DIR}/${CONFIGS_FILE}
 elif [ "no-co2ogm" = "$1" ]; then
     echo -e "$BL"
     echo "NVIDIA ORIN RxAnt.2 MODEM, OBU GPS, MULTI DEVICE"

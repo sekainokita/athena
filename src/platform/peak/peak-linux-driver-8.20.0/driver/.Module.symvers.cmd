@@ -1,0 +1,1 @@
+cmd_/home/bman/work/athena/src/platform/peak/peak-linux-driver-8.20.0/driver/Module.symvers := sed 's/ko$$/o/' /home/bman/work/athena/src/platform/peak/peak-linux-driver-8.20.0/driver/modules.order | scripts/mod/modpost -m  -E  -o /home/bman/work/athena/src/platform/peak/peak-linux-driver-8.20.0/driver/Module.symvers -e -i Module.symvers   -T -

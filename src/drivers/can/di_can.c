@@ -233,7 +233,7 @@ static int32_t P_DI_CAN_DeInit(DI_CAN_T *pstDiCan)
         return nRet;
     }
 
-    (void*)memset(&s_stDiCanDev, 0x00, sizeof(DI_CAN_XSENS_T));
+    (void*)memset(&s_stDiCanDev, 0x00, sizeof(DI_CAN_PEAK_T));
 #else
     nRet = DI_OK;
     PrintWarn("None of CAN devices are supported.");
@@ -325,6 +325,8 @@ int32_t DI_CAN_Open(DI_CAN_T *pstDiCan)
             PrintError("DI_CAN_PEAK_Open() is failed! [unRet:%d]", nRet);
             return nRet;
         }
+#else
+        PrintError("CAN is not supported!");
 #endif
         pstDiCan->eDiCanStatus = DI_CAN_STATUS_OPENED;
     }

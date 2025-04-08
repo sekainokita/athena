@@ -93,6 +93,10 @@ TARGET_CFLAGS += -I/usr/local/include/jetson-utils
 TARGET_CFLAGS += -I/usr/local/cuda-11.4/targets/aarch64-linux/include
 endif
 
+ifeq ($(CONFIG_CAN_PEAK),y)
+TARGET_CFLAGS += -I$(PCANBASIC_INC_PATH) -I$(PCAN_DRV_PATH)
+endif
+
 TARGET_LDFLAGS ?= -L$(OUT_LIB_DIR) -l$(LIB_FRAMEWORK) -l$(LIB_PLATFORM) -l$(LIB_DI)
 TARGET_LDFLAGS += -lrt -ldl
 TARGET_LDFLAGS += -pthread
@@ -108,6 +112,10 @@ endif
 
 ifeq ($(CONFIG_WEBSOCKET),y)
 TARGET_LDFLAGS += -lwebsockets -lssl -lcrypto -luv
+endif
+
+ifeq ($(CONFIG_CAN_PEAK),y)
+TARGET_LDFLAGS += -L$(PCANBASIC_LIB_PATH) -Wl,-rpath,$(PCANBASIC_LIB_PATH) -lpcanbasic
 endif
 
 TARGET_CXXFLAGS = -I$(INC_PATH)
@@ -138,6 +146,16 @@ endif
 ifeq ($(CONFIG_GPS_XSENS),y)
 TARGET_CFLAGS += -DCONFIG_GPS_XSENS
 TARGET_CXXFLAGS += -DCONFIG_GPS_XSENS
+endif
+
+ifeq ($(CONFIG_CAN),y)
+TARGET_CFLAGS += -DCONFIG_CAN
+TARGET_CXXFLAGS += -DCONFIG_CAN
+endif
+
+ifeq ($(CONFIG_CAN_PEAK),y)
+TARGET_CFLAGS += -DCONFIG_CAN_PEAK
+TARGET_CXXFLAGS += -DCONFIG_CAN_PEAK
 endif
 
 ifeq ($(CONFIG_OBU),y)
