@@ -72,15 +72,16 @@ const int BACKLOG = 10;
 const int LISTENQ = 6666;
 const int MAX_CONNECT = 20;
 #define MAX_CLIENTS 100
+#define MAX_SAFE_WRITE_LENGTH 500  /* Maximum safe write length for websocket to prevent buffer overflow */
 
 /***************************** Static Variable *******************************/
 static MSG_MANAGER_TX_T s_stMsgManagerTx;
 static MSG_MANAGER_RX_T s_stMsgManagerRx;
 static DB_V2X_T s_stDbV2x;
 static bool s_bCliMsgLog = FALSE;
-int client_sockets[MAX_CLIENTS];
-int client_count = 0;
-pthread_mutex_t client_mutex = PTHREAD_MUTEX_INITIALIZER;
+int anClientSockets[MAX_CLIENTS];
+int nClientCount = 0;
+pthread_mutex_t hClientMutex = PTHREAD_MUTEX_INITIALIZER;
 
 #if defined(CONFIG_WEBSOCKET)
 struct per_session_data {
@@ -99,8 +100,14 @@ static MSG_MANAGER_FILE_TYPE_E s_eFileType = eMSG_MANAGER_FILE_TYPE_RX;
 static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_callback_reasons eCbReason, void *pvUser, void *pvIn, size_t szLen)
 {
     int32_t nRet = FRAMEWORK_ERROR;
-    char chLine[MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN];
+    int32_t nSystemResult = FRAMEWORK_OK;
+    int32_t nWriteResult = 0;
     long lFileSize = 0;
+    long i = 0;
+    size_t szDataLength = 0;
+    size_t szWriteLength = 0;
+    uint8_t achLine[LWS_PRE + MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN];
+    bool bProcessComplete = FALSE;
 
     UNUSED(pvUser);
     UNUSED(pvIn);
@@ -109,31 +116,44 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
     if (pstWsi == NULL)
     {
         PrintError("pstWsi is NULL!");
-        return nRet;
+        goto EXIT;
     }
 
     switch (eCbReason)
     {
         case LWS_CALLBACK_ESTABLISHED:
-            PrintWarn("LWS_CALLBACK_ESTABLISHED");
+            PrintWarn("LWS_CALLBACK_ESTABLISHED - START");
+
+            /* Validate pstWsi again for safety */
+            if (pstWsi == NULL)
+            {
+                PrintError("pstWsi is NULL in LWS_CALLBACK_ESTABLISHED!");
+                nRet = FRAMEWORK_ERROR;
+                goto EXIT;
+            }
+            PrintWarn("pstWsi validation passed: %p", pstWsi);
 
             if (s_eFileType == eMSG_MANAGER_FILE_TYPE_TX)
             {
+                PrintWarn("Opening TX file...");
                 s_hWebSocket = fopen(MSG_MANAGER_WEBSERVER_FILE_TX, "r");
                 PrintTrace("MSG_MANAGER_WEBSERVER_FILE_TX:%s", MSG_MANAGER_WEBSERVER_FILE_TX);
             }
             else if (s_eFileType == eMSG_MANAGER_FILE_TYPE_RX)
             {
+                PrintWarn("Opening RX file...");
                 s_hWebSocket = fopen(MSG_MANAGER_WEBSERVER_FILE_RX, "r");
                 PrintTrace("MSG_MANAGER_WEBSERVER_FILE_RX:%s", MSG_MANAGER_WEBSERVER_FILE_RX);
             }
             else if (s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_TX)
             {
-                nRet = system("cp -f ~/work/athena/src/apps/html/db/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_TX " "MSG_MANAGER_DB_FILE_PATH);
-                if(nRet < FRAMEWORK_OK)
+                PrintWarn("Copying and opening SAMPLE_TX file...");
+                nSystemResult = system("cp -f ~/work/athena/src/apps/html/db/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_TX " "MSG_MANAGER_DB_FILE_PATH);
+                if(nSystemResult < FRAMEWORK_OK)
                 {
-                    PrintError("system() is failed! [nRet:%d], locate your source code at ~/work/athena", nRet);
-                    return nRet;
+                    PrintError("system() is failed! [nRet:%d], locate your source code at ~/work/athena", nSystemResult);
+                    nRet = nSystemResult;
+                    goto EXIT;
                 }
 
                 s_hWebSocket = fopen("/tmp/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_TX, "r");
@@ -141,11 +161,13 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
             }
             else if (s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_RX)
             {
-                nRet = system("cp -f ~/work/athena/src/apps/html/db/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_RX " "MSG_MANAGER_DB_FILE_PATH);
-                if(nRet < FRAMEWORK_OK)
+                PrintWarn("Copying and opening SAMPLE_RX file...");
+                nSystemResult = system("cp -f ~/work/athena/src/apps/html/db/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_RX " "MSG_MANAGER_DB_FILE_PATH);
+                if(nSystemResult < FRAMEWORK_OK)
                 {
-                    PrintError("system() is failed! [nRet:%d], locate your source code at ~/work/athena", nRet);
-                    return nRet;
+                    PrintError("system() is failed! [nRet:%d], locate your source code at ~/work/athena", nSystemResult);
+                    nRet = nSystemResult;
+                    goto EXIT;
                 }
 
                 s_hWebSocket = fopen("/tmp/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_RX, "r");
@@ -154,12 +176,15 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
             else
             {
                 PrintError("unknown file format[%d]", s_eFileType);
+                nRet = FRAMEWORK_ERROR;
+                goto EXIT;
             }
 
             if (s_hWebSocket == NULL)
             {
                 PrintError("s_hWebSocket is NULL!!");
-                return nRet;
+                nRet = FRAMEWORK_ERROR;
+                goto EXIT;
             }
             else
             {
@@ -168,42 +193,142 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
 
             if ((s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_TX) || (s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_RX))
             {
+                PrintWarn("Setting file position to beginning for sample file");
                 /* read from the first */
                 fseek(s_hWebSocket, 0, SEEK_SET);
             }
             else
             {
+                PrintWarn("Setting file position to end for real-time file");
                 fseek(s_hWebSocket, 0, SEEK_END);
                 s_lLastPos = ftell(s_hWebSocket);
                 PrintDebug("Initial file position: %ld\n", s_lLastPos);
             }
 
+            PrintWarn("About to call lws_callback_on_writable...");
+
+            /* Re-validate pstWsi */
+            if (pstWsi == NULL)
+            {
+                PrintError("pstWsi became NULL before lws_callback_on_writable!");
+                nRet = FRAMEWORK_ERROR;
+                goto EXIT;
+            }
+
+            /* Validate context */
+            if (s_pLwsContext == NULL)
+            {
+                PrintError("s_pLwsContext is NULL before lws_callback_on_writable!");
+                nRet = FRAMEWORK_ERROR;
+                goto EXIT;
+            }
+
+            PrintWarn("Calling lws_callback_on_writable with pstWsi: %p", pstWsi);
             lws_callback_on_writable(pstWsi);
+            PrintWarn("lws_callback_on_writable completed successfully");
             break;
 
         case LWS_CALLBACK_SERVER_WRITEABLE:
+            PrintWarn("LWS_CALLBACK_SERVER_WRITEABLE - START");
+
+            /* Validate file pointer */
+            if (s_hWebSocket == NULL)
+            {
+                PrintError("s_hWebSocket is NULL in LWS_CALLBACK_SERVER_WRITEABLE");
+                break;
+            }
+            PrintWarn("s_hWebSocket validation passed: %p", s_hWebSocket);
+
+            /* Validate pstWsi */
+            if (pstWsi == NULL)
+            {
+                PrintError("pstWsi is NULL in LWS_CALLBACK_SERVER_WRITEABLE");
+                break;
+            }
+            PrintWarn("pstWsi validation passed: %p", pstWsi);
+
             if((s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_TX) || (s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_RX))
             {
-                if (fgets(chLine, sizeof(chLine), s_hWebSocket))
+                PrintWarn("Processing SAMPLE file type");
+
+                /* Initialize buffer - only after LWS_PRE */
+                memset(&achLine[LWS_PRE], 0, MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN);
+                PrintWarn("About to call fgets...");
+
+                /* Read with LWS_PRE offset */
+                if (fgets((char *)&achLine[LWS_PRE], MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN - 1, s_hWebSocket))
                 {
+                    /* Force NULL termination */
+                    achLine[LWS_PRE + MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN - 1] = '\0';
+
+                    szDataLength = strlen((char *)&achLine[LWS_PRE]);
+                    PrintWarn("fgets successful, line length: %zu", szDataLength);
+
                     if(s_bCliMsgLog == TRUE)
                     {
-                        PrintDebug("Read line: %s", chLine);
+                        PrintDebug("Read line: %s", (char *)&achLine[LWS_PRE]);
                     }
 
-                    lws_write(pstWsi, (unsigned char *)chLine, strlen(chLine), LWS_WRITE_TEXT);
+                    /* Safety validation */
+                    if (pstWsi != NULL && szDataLength > 0 && szDataLength < MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN)
+                    {
+                        PrintWarn("About to call lws_write with length: %zu", szDataLength);
+
+                        /* Additional safety validation */
+                        if (s_pLwsContext == NULL)
+                        {
+                            PrintError("s_pLwsContext is NULL before lws_write");
+                            break;
+                        }
+
+                        /* Apply safer length limit */
+                        szWriteLength = szDataLength;
+                        if (szWriteLength > MAX_SAFE_WRITE_LENGTH)
+                        {
+                            szWriteLength = MAX_SAFE_WRITE_LENGTH;
+                            achLine[LWS_PRE + MAX_SAFE_WRITE_LENGTH] = '\0';
+                            PrintWarn("Truncating line to %d bytes for safety", MAX_SAFE_WRITE_LENGTH);
+                        }
+
+                        if (szWriteLength == 0)
+                        {
+                            PrintError("Nothing to write");
+                            break;
+                        }
+
+                        PrintWarn("Calling lws_write with safe length: %zu", szWriteLength);
+
+                        /* Call lws_write with LWS_PRE offset (SAMPLE file) */
+                        nWriteResult = lws_write(pstWsi, &achLine[LWS_PRE], szWriteLength, LWS_WRITE_TEXT);
+
+                        if (nWriteResult < 0)
+                        {
+                            PrintError("lws_write failed with result: %d", nWriteResult);
+                        }
+                        else
+                        {
+                            PrintWarn("lws_write successful, bytes written: %d", nWriteResult);
+                        }
+                    }
+                    else
+                    {
+                        PrintWarn("Invalid pstWsi or invalid achLine length (%zu), skipping lws_write", szDataLength);
+                    }
                 }
                 else
                 {
+                    PrintWarn("fgets failed or EOF reached, seeking to beginning");
                     fseek(s_hWebSocket, 0, SEEK_SET);
                 }
             }
             else
             {
+                PrintWarn("Processing real-time file type");
                 fseek(s_hWebSocket, 0, SEEK_END);
                 lFileSize = ftell(s_hWebSocket);
+                PrintWarn("File size: %ld", lFileSize);
 
-                for (long i = lFileSize - 2; i >= 0; i--)
+                for (i = lFileSize - 2; i >= 0; i--)
                 {
                     fseek(s_hWebSocket, i, SEEK_SET);
                     if (fgetc(s_hWebSocket) == '\n')
@@ -212,27 +337,147 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
                         break;
                     }
                 }
+                PrintWarn("Last position found: %ld", s_lLastPos);
 
                 fseek(s_hWebSocket, s_lLastPos, SEEK_SET);
-                if (fgets(chLine, sizeof(chLine), s_hWebSocket))
+
+                /* Initialize buffer - only after LWS_PRE */
+                memset(&achLine[LWS_PRE], 0, MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN);
+                PrintWarn("About to call fgets for real-time...");
+
+                /* Read with LWS_PRE offset */
+                if (fgets((char *)&achLine[LWS_PRE], MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN - 1, s_hWebSocket))
                 {
+                    /* Force NULL termination */
+                    achLine[LWS_PRE + MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN - 1] = '\0';
+
+                    szDataLength = strlen((char *)&achLine[LWS_PRE]);
+                    PrintWarn("fgets successful, line length: %zu", szDataLength);
+
                     if(s_bCliMsgLog == TRUE)
                     {
-                        PrintDebug("Read last line: %s", chLine);
+                        PrintDebug("Read last line: %s", (char *)&achLine[LWS_PRE]);
                     }
 
-                    strcpy(s_chLastLine, chLine);
-                    lws_write(pstWsi, (unsigned char *)chLine, strlen(chLine), LWS_WRITE_TEXT);
+                    strcpy(s_chLastLine, (char *)&achLine[LWS_PRE]);
+
+                    /* Safety validation */
+                    if (pstWsi != NULL && szDataLength > 0 && szDataLength < MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN)
+                    {
+                        PrintWarn("About to call lws_write with length: %zu", szDataLength);
+
+                        /* Additional safety validation */
+                        if (s_pLwsContext == NULL)
+                        {
+                            PrintError("s_pLwsContext is NULL before lws_write");
+                            break;
+                        }
+
+                        /* Apply safer length limit */
+                        szWriteLength = szDataLength;
+                        if (szWriteLength > MAX_SAFE_WRITE_LENGTH)
+                        {
+                            szWriteLength = MAX_SAFE_WRITE_LENGTH;
+                            achLine[LWS_PRE + MAX_SAFE_WRITE_LENGTH] = '\0';
+                            PrintWarn("Truncating line to %d bytes for safety", MAX_SAFE_WRITE_LENGTH);
+                        }
+
+                        if (szWriteLength == 0)
+                        {
+                            PrintError("Nothing to write");
+                            break;
+                        }
+
+                        PrintWarn("Calling lws_write with safe length: %zu", szWriteLength);
+
+                        /* Call lws_write with LWS_PRE offset (Real-time) */
+                        nWriteResult = lws_write(pstWsi, &achLine[LWS_PRE], szWriteLength, LWS_WRITE_TEXT);
+
+                        if (nWriteResult < 0)
+                        {
+                            PrintError("lws_write failed with result: %d", nWriteResult);
+                        }
+                        else
+                        {
+                            PrintWarn("lws_write successful, bytes written: %d", nWriteResult);
+                        }
+                    }
+                    else
+                    {
+                        PrintWarn("Invalid pstWsi or invalid achLine length (%zu), skipping lws_write", szDataLength);
+                    }
                 }
                 else if (strlen(s_chLastLine) > 0)
                 {
-                    PrintWarn("Sending last line again: %s", s_chLastLine);
-                    lws_write(pstWsi, (unsigned char *)s_chLastLine, strlen(s_chLastLine), LWS_WRITE_TEXT);
+                    PrintWarn("Sending last line again, length: %zu", strlen(s_chLastLine));
+
+                    /* Copy s_chLastLine to LWS_PRE offset */
+                    szDataLength = strlen(s_chLastLine);
+                    memcpy(&achLine[LWS_PRE], s_chLastLine, szDataLength);
+                    achLine[LWS_PRE + szDataLength] = '\0';  /* NULL termination */
+
+                    /* Safety validation */
+                    if (pstWsi != NULL && szDataLength > 0 && szDataLength < MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN)
+                    {
+                        PrintWarn("About to call lws_write with last line, length: %zu", szDataLength);
+
+                        /* Additional safety validation */
+                        if (s_pLwsContext == NULL)
+                        {
+                            PrintError("s_pLwsContext is NULL before lws_write");
+                            break;
+                        }
+
+                        /* Apply safer length limit */
+                        szWriteLength = szDataLength;
+                        if (szWriteLength > MAX_SAFE_WRITE_LENGTH)
+                        {
+                            szWriteLength = MAX_SAFE_WRITE_LENGTH;
+                            achLine[LWS_PRE + MAX_SAFE_WRITE_LENGTH] = '\0';
+                            PrintWarn("Truncating last line to %d bytes for safety", MAX_SAFE_WRITE_LENGTH);
+                        }
+
+                        if (szWriteLength == 0)
+                        {
+                            PrintError("Nothing to write");
+                            break;
+                        }
+
+                        PrintWarn("Calling lws_write with safe last line length: %zu", szWriteLength);
+
+                        /* Call lws_write with LWS_PRE offset (Last line) */
+                        nWriteResult = lws_write(pstWsi, &achLine[LWS_PRE], szWriteLength, LWS_WRITE_TEXT);
+
+                        if (nWriteResult < 0)
+                        {
+                            PrintError("lws_write failed with result: %d", nWriteResult);
+                        }
+                        else
+                        {
+                            PrintWarn("lws_write successful, bytes written: %d", nWriteResult);
+                        }
+                    }
+                    else
+                    {
+                        PrintWarn("Invalid pstWsi or invalid s_chLastLine length (%zu), skipping lws_write", szDataLength);
+                    }
                 }
             }
 
+            PrintWarn("About to sleep and call lws_callback_on_writable...");
             usleep(SVC_PLATOONING_TX_DELAY*1000);
-            lws_callback_on_writable(pstWsi);
+
+            /* Re-validate before calling lws_callback_on_writable */
+            if (pstWsi != NULL)
+            {
+                PrintWarn("Calling lws_callback_on_writable again...");
+                lws_callback_on_writable(pstWsi);
+                PrintWarn("lws_callback_on_writable completed");
+            }
+            else
+            {
+                PrintError("pstWsi is NULL, cannot call lws_callback_on_writable");
+            }
             break;
 
         case LWS_CALLBACK_CLOSED:
@@ -251,11 +496,19 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
 
     nRet = FRAMEWORK_OK;
 
+EXIT:
     return nRet;
 }
 
 void P_MSG_MANAGER_WebSocketProcess(void)
 {
+    /* Validate websocket context */
+    if (s_pLwsContext == NULL)
+    {
+        PrintError("s_pLwsContext is NULL in P_MSG_MANAGER_WebSocketProcess");
+        return;
+    }
+
     lws_service(s_pLwsContext, 50);
 }
 
@@ -561,32 +814,34 @@ int32_t P_CLI_MSG_TcpClientStart(char *pcIpAddr)
     return nRet;
 }
 
-void P_CLI_MSG_TcpMultiAddClient(int socket_fd)
+void P_CLI_MSG_TcpMultiAddClient(int nSocketFd)
 {
-    pthread_mutex_lock(&client_mutex);
+    pthread_mutex_lock(&hClientMutex);
 
-    if (client_count < MAX_CLIENTS)
+    if (nClientCount < MAX_CLIENTS)
     {
-        client_sockets[client_count++] = socket_fd;
+        anClientSockets[nClientCount++] = nSocketFd;
     }
 
-    pthread_mutex_unlock(&client_mutex);
+    pthread_mutex_unlock(&hClientMutex);
 }
 
-void P_CLI_MSG_TcpMultiRemoveClient(int socket_fd)
+void P_CLI_MSG_TcpMultiRemoveClient(int nSocketFd)
 {
-    pthread_mutex_lock(&client_mutex);
+    int i = 0;
 
-    for (int i = 0; i < client_count; i++)
+    pthread_mutex_lock(&hClientMutex);
+
+    for (i = 0; i < nClientCount; i++)
     {
-        if (client_sockets[i] == socket_fd)
+        if (anClientSockets[i] == nSocketFd)
         {
-            client_sockets[i] = client_sockets[--client_count];
+            anClientSockets[i] = anClientSockets[--nClientCount];
             break;
         }
     }
 
-    pthread_mutex_unlock(&client_mutex);
+    pthread_mutex_unlock(&hClientMutex);
 }
 
 void *P_CLI_MSG_TcpMultiServerSendTask(void *fd)
@@ -657,37 +912,39 @@ void *P_CLI_MSG_TcpMultiServerTask(void *fd)
     return NULL;
 }
 
-void *P_CLI_MSG_ServerInputTask(void *fd)
+void *P_CLI_MSG_ServerInputTask(void *pvFd)
 {
-    char cMsgBuf[MAX_LINE];
-    UNUSED(fd);
+    char achMsgBuf[MAX_LINE];
+    int i = 0;
+
+    UNUSED(pvFd);
 
     while (1)
     {
         printf("Enter message to client: ");
-        if (fgets(cMsgBuf, MAX_LINE, stdin) == NULL)
+        if (fgets(achMsgBuf, MAX_LINE, stdin) == NULL)
         {
             PrintError("Error reading input.");
             continue;
         }
 
-        if (strcmp(cMsgBuf, "exit\n") == 0)
+        if (strcmp(achMsgBuf, "exit\n") == 0)
         {
             printf("Server exiting...\n");
             exit(0);
         }
 
-        pthread_mutex_lock(&client_mutex);
-        for (int i = 0; i < client_count; i++)
+        pthread_mutex_lock(&hClientMutex);
+        for (i = 0; i < nClientCount; i++)
         {
-            if (send(client_sockets[i], cMsgBuf, strlen(cMsgBuf), 0) == -1)
+            if (send(anClientSockets[i], achMsgBuf, strlen(achMsgBuf), 0) == -1)
             {
-                PrintError("send error to client %d", client_sockets[i]);
+                PrintError("send error to client %d", anClientSockets[i]);
             }
         }
-        pthread_mutex_unlock(&client_mutex);
+        pthread_mutex_unlock(&hClientMutex);
 
-        PrintTrace("Broadcasted message: %s", cMsgBuf);
+        PrintTrace("Broadcasted message: %s", achMsgBuf);
     }
 
     return NULL;
@@ -696,72 +953,90 @@ void *P_CLI_MSG_ServerInputTask(void *fd)
 int32_t P_CLI_MSG_TcpMultiServerStart(void)
 {
     int32_t nRet = APP_ERROR;
-    int h_nListen, h_nConn;
-    pthread_t h_stRecvTid, h_stInputTid;
-    struct sockaddr_in stServerAddr, stClientAddr;
-    socklen_t stClientLen = sizeof(stClientAddr);
+    int hListenSocket = 0;
+    int hConnSocket = 0;
+    int *pnClientSocket = NULL;
+    int nClientFd = 0;
     int nVal = 1;
-    int client_fd;
+    socklen_t stClientLen = sizeof(struct sockaddr_in);
+    pthread_t hRecvTid;
+    pthread_t hInputTid;
+    struct sockaddr_in stServerAddr;
+    struct sockaddr_in stClientAddr;
 
-    if ((h_nListen = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    hListenSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (hListenSocket == -1)
     {
         PrintError("socket error.\n");
-        return nRet;
+        nRet = APP_ERROR;
+        goto EXIT;
     }
 
     stServerAddr.sin_family = AF_INET;
     stServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     stServerAddr.sin_port = htons(SVC_MCP_DEFAULT_RSU_PORT);
 
-    if (setsockopt(h_nListen, SOL_SOCKET, SO_REUSEADDR, (char *)&nVal, sizeof(nVal)) < 0)
+    if (setsockopt(hListenSocket, SOL_SOCKET, SO_REUSEADDR, (char *)&nVal, sizeof(nVal)) < 0)
     {
         PrintError("setsockopt error.");
-        close(h_nListen);
-        return nRet;
+        close(hListenSocket);
+        nRet = APP_ERROR;
+        goto EXIT;
     }
 
-    if (bind(h_nListen, (struct sockaddr *)&stServerAddr, sizeof(stServerAddr)) < 0)
+    if (bind(hListenSocket, (struct sockaddr *)&stServerAddr, sizeof(stServerAddr)) < 0)
     {
         PrintError("bind error.");
-        return nRet;
+        nRet = APP_ERROR;
+        goto EXIT;
     }
 
-    if (listen(h_nListen, LISTENQ) < 0)
+    if (listen(hListenSocket, LISTENQ) < 0)
     {
         PrintError("listen error.");
-        return nRet;
+        nRet = APP_ERROR;
+        goto EXIT;
     }
 
-    if (pthread_create(&h_stInputTid, NULL, P_CLI_MSG_ServerInputTask, NULL) != 0) {
+    if (pthread_create(&hInputTid, NULL, P_CLI_MSG_ServerInputTask, NULL) != 0)
+    {
         PrintError("pthread create error for input task.");
-        return nRet;
+        nRet = APP_ERROR;
+        goto EXIT;
     }
 
     while (1)
     {
-        if ((h_nConn = accept(h_nListen, (struct sockaddr *)&stClientAddr, &stClientLen)) < 0)
+        hConnSocket = accept(hListenSocket, (struct sockaddr *)&stClientAddr, &stClientLen);
+        if (hConnSocket < 0)
         {
             PrintError("accept error.");
-            return nRet;
+            nRet = APP_ERROR;
+            goto EXIT;
         }
 
-        int *client_sock = malloc(sizeof(client_fd));
-        if (client_sock != NULL)
+        pnClientSocket = malloc(sizeof(nClientFd));
+        if (pnClientSocket != NULL)
         {
-            *client_sock = h_nConn;
+            *pnClientSocket = hConnSocket;
         }
 
         PrintDebug("server: got connection from %s", inet_ntoa(stClientAddr.sin_addr));
 
-        if (pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpMultiServerTask, (void *)client_sock) != 0)
+        if (pthread_create(&hRecvTid, NULL, P_CLI_MSG_TcpMultiServerTask, (void *)pnClientSocket) != 0)
         {
             PrintError("pthread create error.");
-            free(client_sock);
-            return nRet;
+            free(pnClientSocket);
+            nRet = APP_ERROR;
+            goto EXIT;
         }
 
-        pthread_detach(h_stRecvTid);
+        pthread_detach(hRecvTid);
     }
+
+    nRet = APP_OK;
+
+EXIT:
 
     return nRet;
 }
@@ -1825,4 +2100,3 @@ int32_t CLI_MSG_InitCmds(void)
 
     return nRet;
 }
-

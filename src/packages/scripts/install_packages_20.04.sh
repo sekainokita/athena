@@ -38,6 +38,8 @@ if [ $# -ne 1 ]; then
         exit 1
 fi
 
+# Save the script directory at the beginning before any cd commands
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Package
 apt-get update
@@ -96,6 +98,107 @@ pip3 install onnx-graphsurgeon
 pip3 install opencv-contrib-python
 pip3 install pygccxml
 pip3 install pybind11 pybind11-global thrift thrift-tools
+
+#******************************************************************************
+# Install PCAN-Basic for Linux (PCAN.h)
+#******************************************************************************
+
+# Install kernel headers first
+apt-get install -y linux-headers-$(uname -r)
+
+# Install PCAN driver from project
+echo "Installing PCAN driver from project..."
+cd "$SCRIPT_DIR/../../platform/peak/peak-linux-driver-8.20.0"
+
+# Build and install PCAN driver
+make clean
+make
+make install
+
+# Load PCAN module
+modprobe pcan
+
+echo "PCAN driver installation completed"
+
+# Install PCAN-Basic library from project
+echo "Installing PCAN-Basic library from project..."
+cd "$SCRIPT_DIR/../../platform/peak/peak-linux-driver-8.20.0/libpcanbasic/pcanbasic"
+
+# Build PCAN-Basic library
+make clean
+make
+
+# Install header files to system include directory
+echo "Installing PCAN header files..."
+mkdir -p /usr/local/include
+cp include/PCANBasic.h /usr/local/include/
+if [ -f "include/pcaninfo.h" ]; then
+    cp include/pcaninfo.h /usr/local/include/
+fi
+if [ -f "src/pcbcore.h" ]; then
+    cp src/pcbcore.h /usr/local/include/
+fi
+
+# Install library files
+echo "Installing PCAN library files..."
+mkdir -p /usr/local/lib
+
+# Find and copy library files
+if [ -f "lib/libpcanbasic.so" ]; then
+    cp lib/libpcanbasic.so* /usr/local/lib/
+elif [ -f "src/libpcanbasic.so" ]; then
+    cp src/libpcanbasic.so* /usr/local/lib/
+elif [ -f "libpcanbasic.so" ]; then
+    cp libpcanbasic.so* /usr/local/lib/
+else
+    echo "Warning: libpcanbasic.so not found, trying to create it..."
+    # If shared library doesn't exist, create it from objects
+    if ls src/*.o >/dev/null 2>&1; then
+        gcc -shared -o /usr/local/lib/libpcanbasic.so.1.0.0 src/*.o
+        cd /usr/local/lib
+        ln -sf libpcanbasic.so.1.0.0 libpcanbasic.so.1
+        ln -sf libpcanbasic.so.1 libpcanbasic.so
+    fi
+fi
+
+# Create pkg-config file for easy linking
+mkdir -p /usr/local/lib/pkgconfig
+cat > /usr/local/lib/pkgconfig/pcanbasic.pc << EOF
+prefix=/usr/local
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: PCANBasic
+Description: PCAN-Basic library for CAN communication
+Version: 4.0.0
+Libs: -L\${libdir} -lpcanbasic
+Cflags: -I\${includedir}
+EOF
+
+# Update library cache
+ldconfig
+
+# Verify installation
+echo "Verifying PCAN installation..."
+if [ -f "/usr/local/include/PCANBasic.h" ]; then
+    echo "✓ PCANBasic.h installed successfully"
+else
+    echo "✗ PCANBasic.h installation failed"
+    exit 1
+fi
+
+if ldconfig -p | grep -q pcanbasic; then
+    echo "✓ libpcanbasic library registered successfully"
+else
+    echo "✗ libpcanbasic library registration failed"
+    # Continue anyway, might still work
+fi
+
+echo "PCAN-Basic installation completed successfully"
+
+# Display kernel messages for verification
+dmesg | grep -i pcan | tail -5
 
 # Server
 apt-get install -y lighttpd
@@ -165,12 +268,85 @@ echo "        disable = no" >> /etc/xinetd.d/tftp
 echo "}" >> /etc/xinetd.d/tftp
 service xinetd restart
 
-#libwehsocket
-#git clone https://github.com/warmcat/libwebsockets.git
-#cd libwebsockets
-#mkdir build
-#cd build
-#cmake ..
-#make
-#sudo make install
+#******************************************************************************
+# Install libwebsockets (Stable Version)
+#******************************************************************************
+
+echo "Installing stable libwebsockets version..."
+
+# Remove any existing libwebsockets
+echo "Removing existing libwebsockets..."
+sudo apt-get remove -y libwebsockets-dev libwebsockets16 libwebsockets17 libwebsockets18 libwebsockets19 libwebsockets* 2>/dev/null || true
+
+# Clean up any local installations
+sudo rm -rf /usr/local/include/libwebsockets* 2>/dev/null || true
+sudo rm -rf /usr/local/lib/libwebsockets* 2>/dev/null || true
+sudo rm -rf /usr/local/lib/pkgconfig/libwebsockets* 2>/dev/null || true
+
+# Update package cache
+apt-get update
+
+# Force installation of libwebsockets 4.3.5 from source for stability
+echo "Building libwebsockets 4.3.5 from source for guaranteed version..."
+
+# Create temporary build directory
+TEMP_BUILD_DIR="/tmp/libwebsockets_build_$$"
+mkdir -p "$TEMP_BUILD_DIR"
+cd "$TEMP_BUILD_DIR"
+
+# Download stable version from GitHub
+echo "Downloading libwebsockets v4.3.5 (stable)..."
+wget -q https://github.com/warmcat/libwebsockets/archive/v4.3.5.tar.gz -O libwebsockets-4.3.5.tar.gz
+
+if [ ! -f "libwebsockets-4.3.5.tar.gz" ]; then
+    echo "Download failed, trying alternative method..."
+    curl -L -o libwebsockets-4.3.5.tar.gz https://github.com/warmcat/libwebsockets/archive/v4.3.5.tar.gz
+fi
+
+if [ -f "libwebsockets-4.3.5.tar.gz" ]; then
+    echo "Extracting libwebsockets-4.3.5..."
+    tar -xzf libwebsockets-4.3.5.tar.gz
+    cd libwebsockets-4.3.5
+
+    # Build with minimal features for stability
+    mkdir build
+    cd build
+    cmake .. \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DLWS_WITHOUT_TESTAPPS=ON \
+        -DLWS_WITHOUT_TEST_SERVER=ON \
+        -DLWS_WITHOUT_TEST_SERVER_EXTPOLL=ON \
+        -DLWS_WITHOUT_TEST_PING=ON \
+        -DLWS_WITHOUT_TEST_CLIENT=ON \
+        -DLWS_WITH_STATIC=OFF \
+        -DLWS_WITH_SHARED=ON
+
+    make -j$(nproc)
+    sudo make install
+    sudo ldconfig
+
+    # Clean up
+    cd /
+    rm -rf "$TEMP_BUILD_DIR"
+
+    echo "libwebsockets 4.3.5 installed successfully from source"
+else
+    echo "Error: Could not download libwebsockets source"
+    exit 1
+fi
+
+# Verify installation
+echo "Verifying libwebsockets installation..."
+if pkg-config --exists libwebsockets 2>/dev/null; then
+    LWS_VERSION=$(pkg-config --modversion libwebsockets 2>/dev/null || echo "unknown")
+    echo "✓ libwebsockets installed successfully - Version: $LWS_VERSION"
+else
+    if ldconfig -p | grep -q libwebsockets; then
+        echo "✓ libwebsockets library detected in system"
+    else
+        echo "⚠ Warning: libwebsockets installation may have issues"
+    fi
+fi
+
+echo "libwebsockets installation completed"
 
