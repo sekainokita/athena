@@ -114,7 +114,7 @@
 */
 #define MULTI_MSG_MANAGER_READ_TAIL                       (1)
 #define MULTI_MSG_MANAGER_WEBSOCKET_PORT                  (3001)
-#define MULTI_MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN           (1024)
+#define MULTI_MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN           (512)
 
 #define MULTI_MSG_MANAGER_DB_FILE_PATH                    "/tmp"
 
