@@ -35,7 +35,7 @@ This document defines the coding style guidelines for the ATHENA (KETI SDV Softw
 | `pst`  | Pointer to Struct    | Struct pointers            | `pstMsgManager`                |
 | `b`    | Boolean              | `bool`                     | `bIsConnected`, `bProcessComplete`|
 | `e`    | Enumeration          | `enum`                     | `eFileType`, `eCommType`       |
-| `s_`   | Static Variable      | Static variables           | `s_stMsgManagerTx`             |
+| `s_`   | Static Variable      | Static variables           | `s_stMsgManagerTx`, `s_bCliMsgLog`, `s_nClientCount` |
 
 ### 2.3 Variable Name Examples
 
@@ -53,6 +53,62 @@ char line_buffer[MAX_BUFFER_SIZE];
 bool connected = false;
 pthread_mutex_t client_mutex;
 size_t data_len = 0;
+```
+
+### 2.4 Static Variable Naming
+
+**All static variables must use `s_` prefix along with their type prefix.**
+
+```c
+// GOOD: Static variables with s_ prefix
+static int s_nClientCount = 0;
+static uint8_t s_achBuffer[MAX_SIZE];
+static bool s_bIsRunning = FALSE;
+static pthread_mutex_t s_hClientMutex = PTHREAD_MUTEX_INITIALIZER;
+static DB_V2X_T s_stDbV2x;
+
+// BAD: Static variables without s_ prefix
+static int nClientCount = 0;
+static uint8_t achBuffer[MAX_SIZE];
+static bool bIsRunning = FALSE;
+static pthread_mutex_t hClientMutex = PTHREAD_MUTEX_INITIALIZER;
+```
+
+### 2.5 Abbreviations in Variable Names
+
+**Common words in variable names should be abbreviated consistently.**
+
+| Full Word     | Abbreviation | Usage Example             |
+|---------------|--------------|---------------------------|
+| `Return`      | `Ret`        | `nRetValue`, `nRetCode`   |
+| `Result`      | `Res`        | `nResCode`, `nResStatus`  |
+| `System`      | `Sys`        | `nSysError`, `hSysHandle` |
+| `Count`       | `Cnt`        | `nCntTotal`, `unCntRetry` |
+| `Length`      | `Len`        | `nLenBuffer`, `szLenData` |
+| `Position`    | `Pos`        | `nPosIndex`, `nPosStart`  |
+| `Maximum`     | `Max`        | `nMaxSize`, `unMaxLength` |
+| `Minimum`     | `Min`        | `nMinValue`, `nMinBuffer` |
+| `Current`     | `Cur`        | `nCurIndex`, `pstCurNode` |
+| `Previous`    | `Prev`       | `nPrevValue`, `pstPrevNode` |
+| `Next`        | `Next`       | `pstNextNode`, `nNextIndex` |
+| `Destination` | `Dst`        | `puchDstBuffer`, `stDstAddr` |
+| `Source`      | `Src`        | `puchSrcBuffer`, `stSrcAddr` |
+| `Reference`   | `Ref`        | `nRefCount`, `unRefId` |
+| `Buffer`      | `Buf`        | `puchBufData`, `stBufInfo` |
+| `Message`     | `Msg`        | `stMsgHeader`, `pstMsgData` |
+| `Parameter`   | `Param`      | `stParamInfo`, `pstParamList` |
+| `Configuration` | `Cfg`      | `stCfgData`, `pstCfgInfo` |
+
+```c
+// GOOD: Consistent abbreviations
+int32_t nRetCode = FRAMEWORK_OK;
+int32_t nResStatus = ProcessData();
+uint32_t unMaxSize = GetMaxBufferSize();
+
+// BAD: Inconsistent or full words
+int32_t nReturnValue = FRAMEWORK_OK;  // Use nRetValue instead
+int32_t nResultStatus = ProcessData(); // Use nResStatus instead
+uint32_t unMaximumSize = GetMaxBufferSize(); // Use unMaxSize instead
 ```
 
 ## 3. Data Types
@@ -112,7 +168,7 @@ int32_t SomeFunction(void)
 
 ### 4.2 Single Return Rule
 - **There should be only one return statement per function.**
-- Use `goto EXIT` pattern for error handling.
+- Don't Use `goto EXIT` pattern for error handling.
 
 ```c
 // GOOD: Single return with goto EXIT
@@ -234,20 +290,75 @@ int nValue = 0;
 /* <- This line has no unnecessary whitespace */
 ```
 
+### 5.4 Conditional Statement Style
+- **Always use parentheses for nested conditions.**
+- **One space between if and the opening parenthesis.**
+- **One space between closing parenthesis and opening brace.**
+
+```c
+// GOOD: Proper conditional formatting with nested parentheses
+if ((nValue > MIN_VALUE) && (nValue < MAX_VALUE))
+{
+    ProcessValue();
+}
+
+if ((bIsConnected == TRUE) || (nRetryCount > MAX_RETRIES))
+{
+    CloseConnection();
+}
+
+// BAD: Missing parentheses for nested conditions
+if (nValue > MIN_VALUE && nValue < MAX_VALUE)
+{
+    ProcessValue();
+}
+
+// BAD: No space between if and parenthesis
+if(bIsConnected == TRUE)
+{
+    ProcessValue();
+}
+
+// BAD: No space between closing parenthesis and brace
+if (nValue > MIN_VALUE){
+    ProcessValue();
+}
+```
+
 ## 6. Constants and Macros
 
-### 6.1 No Magic Numbers
+### 6.1 Macro Naming
+- **Macros must have file name as prefix.**
+- **All macro names should be uppercase.**
+
+```c
+// GOOD: Macros with file name prefix
+// In file: cli_msg.c
+#define CLI_MSG_MAX_SAFE_WRITE_LENGTH 500
+#define CLI_MSG_MAX_CLIENTS 100
+
+// In file: db_manager.c
+#define DB_MANAGER_DEFAULT_PORT 8080
+#define DB_MANAGER_MAX_TIMEOUT 3000
+
+// BAD: Macros without file name prefix
+#define MAX_SAFE_WRITE_LENGTH 500
+#define MAX_CLIENTS 100
+#define DEFAULT_PORT 8080
+```
+
+### 6.2 No Magic Numbers
 - **Define meaningful constants instead of hardcoded numbers.**
 
 ```c
 // GOOD: Named constants
-#define MAX_SAFE_WRITE_LENGTH 500
-#define MAX_CLIENTS 100
-#define DEFAULT_PORT 8080
+#define CLI_MSG_MAX_SAFE_WRITE_LENGTH 500
+#define CLI_MSG_MAX_CLIENTS 100
+#define DB_MANAGER_DEFAULT_PORT 8080
 
-if (szWriteLength > MAX_SAFE_WRITE_LENGTH)
+if (szWriteLength > CLI_MSG_MAX_SAFE_WRITE_LENGTH)
 {
-    szWriteLength = MAX_SAFE_WRITE_LENGTH;
+    szWriteLength = CLI_MSG_MAX_SAFE_WRITE_LENGTH;
 }
 
 // BAD: Magic numbers
@@ -313,95 +424,87 @@ EXIT:
 }
 ```
 
-## 8. Function Design Principles
-
-### 8.1 Function Parameters
-- Apply Hungarian notation
-- Validate input parameters
+### 7.2 Code Flow Control
+- **Avoid using `goto` statements except for error handling and cleanup.**
+- **Prefer using `if-else` constructs to control code flow.**
+- **Use a single return statement at the end of the function when possible.**
 
 ```c
-int32_t ProcessMessage(const char *pchMessage, uint32_t unMessageLength, bool bIsEncrypted)
+// GOOD: Using if-else for flow control with single return
+int32_t ProcessData(uint8_t *puchData, uint32_t unLength)
 {
     int32_t nRet = FRAMEWORK_ERROR;
     
-    if (pchMessage == NULL || unMessageLength == 0)
+    if (puchData == NULL || unLength == 0)
     {
         PrintError("Invalid parameters");
-        nRet = INVALID_PARAMETER_ERROR;
+    }
+    else if (unLength > MAX_DATA_LENGTH)
+    {
+        PrintError("Data length exceeds maximum allowed");
+    }
+    else
+    {
+        // Process data
+        nRet = FRAMEWORK_OK;
+    }
+    
+    return nRet;
+}
+
+// BAD: Using multiple return statements
+int32_t ProcessData(uint8_t *puchData, uint32_t unLength)
+{
+    if (puchData == NULL || unLength == 0)
+    {
+        PrintError("Invalid parameters");
+        return FRAMEWORK_ERROR;
+    }
+    
+    if (unLength > MAX_DATA_LENGTH)
+    {
+        PrintError("Data length exceeds maximum allowed");
+        return FRAMEWORK_ERROR;
+    }
+    
+    // Process data
+    return FRAMEWORK_OK;
+}
+
+// ACCEPTABLE: Using goto for resource cleanup
+int32_t ProcessFile(const char *pchFilename)
+{
+    int32_t nRet = FRAMEWORK_ERROR;
+    FILE *hFile = NULL;
+    uint8_t *puchBuffer = NULL;
+    
+    hFile = fopen(pchFilename, "r");
+    if (hFile == NULL)
+    {
+        PrintError("Failed to open file");
         goto EXIT;
     }
     
-    /* Function implementation */
+    puchBuffer = malloc(BUFFER_SIZE);
+    if (puchBuffer == NULL)
+    {
+        PrintError("Memory allocation failed");
+        goto EXIT;
+    }
+    
+    // Process file
     nRet = FRAMEWORK_OK;
     
 EXIT:
+    // Cleanup resources
+    if (hFile != NULL)
+    {
+        fclose(hFile);
+    }
+    if (puchBuffer != NULL)
+    {
+        free(puchBuffer);
+    }
     return nRet;
 }
 ```
-
-## 9. Example: Complete Function Structure
-
-```c
-/**
- * @brief Process websocket communication data
- * @param pstWsi Websocket instance pointer
- * @param eCbReason Callback reason enumeration
- * @param pvUser User data pointer
- * @param pvIn Input data pointer
- * @param szLength Data length
- * @return FRAMEWORK_OK on success, error code on failure
- */
-static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, 
-                                               enum lws_callback_reasons eCbReason, 
-                                               void *pvUser, 
-                                               void *pvIn, 
-                                               size_t szLength)
-{
-    int32_t nRet = FRAMEWORK_ERROR;
-    int32_t nSystemResult = FRAMEWORK_OK;
-    int32_t nWriteResult = 0;
-    long lFileSize = 0;
-    long lLoopCounter = 0;
-    size_t szDataLength = 0;
-    size_t szWriteLength = 0;
-    uint8_t achLineBuffer[LWS_PRE + MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN];
-    bool bProcessComplete = FALSE;
-
-    UNUSED(pvUser);
-    UNUSED(pvIn);
-    UNUSED(szLength);
-
-    if (pstWsi == NULL)
-    {
-        PrintError("pstWsi is NULL!");
-        nRet = INVALID_PARAMETER_ERROR;
-        goto EXIT;
-    }
-
-    switch (eCbReason)
-    {
-        case LWS_CALLBACK_ESTABLISHED:
-            /* Handle connection establishment */
-            break;
-            
-        case LWS_CALLBACK_SERVER_WRITEABLE:
-            /* Handle data writing */
-            if (szWriteLength > MAX_SAFE_WRITE_LENGTH)
-            {
-                szWriteLength = MAX_SAFE_WRITE_LENGTH;
-                achLineBuffer[LWS_PRE + MAX_SAFE_WRITE_LENGTH] = '\0';
-                PrintWarn("Truncating line to %d bytes for safety", MAX_SAFE_WRITE_LENGTH);
-            }
-            break;
-            
-        default:
-            PrintError("Unknown callback reason: %d", eCbReason);
-            nRet = UNKNOWN_CALLBACK_ERROR;
-            goto EXIT;
-    }
-    
-    nRet = FRAMEWORK_OK;
-
-EXIT:
-    return nRet;
-}

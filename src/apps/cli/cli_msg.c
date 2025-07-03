@@ -71,17 +71,17 @@ const int MAX_LINE = 2048;
 const int BACKLOG = 10;
 const int LISTENQ = 6666;
 const int MAX_CONNECT = 20;
-#define MAX_CLIENTS 100
-#define MAX_SAFE_WRITE_LENGTH 500  /* Maximum safe write length for websocket to prevent buffer overflow */
+#define CLI_MSG_MAX_CLIENTS 100
+#define CLI_MSG_MAX_SAFE_WRITE_LENGTH 500  /* Maximum safe write length for websocket to prevent buffer overflow */
 
 /***************************** Static Variable *******************************/
 static MSG_MANAGER_TX_T s_stMsgManagerTx;
 static MSG_MANAGER_RX_T s_stMsgManagerRx;
 static DB_V2X_T s_stDbV2x;
 static bool s_bCliMsgLog = FALSE;
-int anClientSockets[MAX_CLIENTS];
-int nClientCount = 0;
-pthread_mutex_t hClientMutex = PTHREAD_MUTEX_INITIALIZER;
+static int32_t s_anClientSockets[CLI_MSG_MAX_CLIENTS];
+static int32_t s_nClientCount = 0;
+static pthread_mutex_t s_hClientMutex = PTHREAD_MUTEX_INITIALIZER;
 
 #if defined(CONFIG_WEBSOCKET)
 struct per_session_data {
@@ -100,12 +100,12 @@ static MSG_MANAGER_FILE_TYPE_E s_eFileType = eMSG_MANAGER_FILE_TYPE_RX;
 static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_callback_reasons eCbReason, void *pvUser, void *pvIn, size_t szLen)
 {
     int32_t nRet = FRAMEWORK_ERROR;
-    int32_t nSystemResult = FRAMEWORK_OK;
-    int32_t nWriteResult = 0;
+    int32_t nSysRes = FRAMEWORK_OK;
+    int32_t nWriteRes = 0;
     long lFileSize = 0;
-    long i = 0;
-    size_t szDataLength = 0;
-    size_t szWriteLength = 0;
+    long lI = 0;
+    size_t szDataLen = 0;
+    size_t szWriteLen = 0;
     uint8_t achLine[LWS_PRE + MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN];
     bool bProcessComplete = FALSE;
 
@@ -116,7 +116,7 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
     if (pstWsi == NULL)
     {
         PrintError("pstWsi is NULL!");
-        goto EXIT;
+        return nRet;
     }
 
     switch (eCbReason)
@@ -129,7 +129,7 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
             {
                 PrintError("pstWsi is NULL in LWS_CALLBACK_ESTABLISHED!");
                 nRet = FRAMEWORK_ERROR;
-                goto EXIT;
+                return nRet;
             }
             PrintWarn("pstWsi validation passed: %p", pstWsi);
 
@@ -148,12 +148,12 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
             else if (s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_TX)
             {
                 PrintWarn("Copying and opening SAMPLE_TX file...");
-                nSystemResult = system("cp -f ~/work/athena/src/apps/html/db/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_TX " "MSG_MANAGER_DB_FILE_PATH);
-                if(nSystemResult < FRAMEWORK_OK)
+                nSysRes = system("cp -f ~/work/athena/src/apps/html/db/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_TX " "MSG_MANAGER_DB_FILE_PATH);
+                if(nSysRes < FRAMEWORK_OK)
                 {
-                    PrintError("system() is failed! [nRet:%d], locate your source code at ~/work/athena", nSystemResult);
-                    nRet = nSystemResult;
-                    goto EXIT;
+                    PrintError("system() is failed! [nRet:%d], locate your source code at ~/work/athena", nSysRes);
+                    nRet = nSysRes;
+                    return nRet;
                 }
 
                 s_hWebSocket = fopen("/tmp/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_TX, "r");
@@ -162,12 +162,12 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
             else if (s_eFileType == eMSG_MANAGER_FILE_TYPE_SAMPLE_RX)
             {
                 PrintWarn("Copying and opening SAMPLE_RX file...");
-                nSystemResult = system("cp -f ~/work/athena/src/apps/html/db/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_RX " "MSG_MANAGER_DB_FILE_PATH);
-                if(nSystemResult < FRAMEWORK_OK)
+                nSysRes = system("cp -f ~/work/athena/src/apps/html/db/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_RX " "MSG_MANAGER_DB_FILE_PATH);
+                if(nSysRes < FRAMEWORK_OK)
                 {
-                    PrintError("system() is failed! [nRet:%d], locate your source code at ~/work/athena", nSystemResult);
-                    nRet = nSystemResult;
-                    goto EXIT;
+                    PrintError("system() is failed! [nRet:%d], locate your source code at ~/work/athena", nSysRes);
+                    nRet = nSysRes;
+                    return nRet;
                 }
 
                 s_hWebSocket = fopen("/tmp/"MSG_MANAGER_WEBSERVER_FILE_SAMPLE_RX, "r");
@@ -177,14 +177,14 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
             {
                 PrintError("unknown file format[%d]", s_eFileType);
                 nRet = FRAMEWORK_ERROR;
-                goto EXIT;
+                return nRet;
             }
 
             if (s_hWebSocket == NULL)
             {
                 PrintError("s_hWebSocket is NULL!!");
                 nRet = FRAMEWORK_ERROR;
-                goto EXIT;
+                return nRet;
             }
             else
             {
@@ -212,7 +212,7 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
             {
                 PrintError("pstWsi became NULL before lws_callback_on_writable!");
                 nRet = FRAMEWORK_ERROR;
-                goto EXIT;
+                return nRet;
             }
 
             /* Validate context */
@@ -220,7 +220,7 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
             {
                 PrintError("s_pLwsContext is NULL before lws_callback_on_writable!");
                 nRet = FRAMEWORK_ERROR;
-                goto EXIT;
+                return nRet;
             }
 
             PrintWarn("Calling lws_callback_on_writable with pstWsi: %p", pstWsi);
@@ -261,8 +261,8 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
                     /* Force NULL termination */
                     achLine[LWS_PRE + MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN - 1] = '\0';
 
-                    szDataLength = strlen((char *)&achLine[LWS_PRE]);
-                    PrintWarn("fgets successful, line length: %zu", szDataLength);
+                    szDataLen = strlen((char *)&achLine[LWS_PRE]);
+                    PrintWarn("fgets successful, line length: %zu", szDataLen);
 
                     if(s_bCliMsgLog == TRUE)
                     {
@@ -270,9 +270,9 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
                     }
 
                     /* Safety validation */
-                    if (pstWsi != NULL && szDataLength > 0 && szDataLength < MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN)
+                    if ((pstWsi != NULL) && (szDataLen > 0) && (szDataLen < MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN))
                     {
-                        PrintWarn("About to call lws_write with length: %zu", szDataLength);
+                        PrintWarn("About to call lws_write with length: %zu", szDataLen);
 
                         /* Additional safety validation */
                         if (s_pLwsContext == NULL)
@@ -282,37 +282,37 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
                         }
 
                         /* Apply safer length limit */
-                        szWriteLength = szDataLength;
-                        if (szWriteLength > MAX_SAFE_WRITE_LENGTH)
+                        szWriteLen = szDataLen;
+                        if (szWriteLen > CLI_MSG_MAX_SAFE_WRITE_LENGTH)
                         {
-                            szWriteLength = MAX_SAFE_WRITE_LENGTH;
-                            achLine[LWS_PRE + MAX_SAFE_WRITE_LENGTH] = '\0';
-                            PrintWarn("Truncating line to %d bytes for safety", MAX_SAFE_WRITE_LENGTH);
+                            szWriteLen = CLI_MSG_MAX_SAFE_WRITE_LENGTH;
+                            achLine[LWS_PRE + CLI_MSG_MAX_SAFE_WRITE_LENGTH] = '\0';
+                            PrintWarn("Truncating line to %d bytes for safety", CLI_MSG_MAX_SAFE_WRITE_LENGTH);
                         }
 
-                        if (szWriteLength == 0)
+                        if (szWriteLen == 0)
                         {
                             PrintError("Nothing to write");
                             break;
                         }
 
-                        PrintWarn("Calling lws_write with safe length: %zu", szWriteLength);
+                        PrintWarn("Calling lws_write with safe length: %zu", szWriteLen);
 
                         /* Call lws_write with LWS_PRE offset (SAMPLE file) */
-                        nWriteResult = lws_write(pstWsi, &achLine[LWS_PRE], szWriteLength, LWS_WRITE_TEXT);
+                        nWriteRes = lws_write(pstWsi, &achLine[LWS_PRE], szWriteLen, LWS_WRITE_TEXT);
 
-                        if (nWriteResult < 0)
+                        if (nWriteRes < 0)
                         {
-                            PrintError("lws_write failed with result: %d", nWriteResult);
+                            PrintError("lws_write failed with result: %d", nWriteRes);
                         }
                         else
                         {
-                            PrintWarn("lws_write successful, bytes written: %d", nWriteResult);
+                            PrintWarn("lws_write successful, bytes written: %d", nWriteRes);
                         }
                     }
                     else
                     {
-                        PrintWarn("Invalid pstWsi or invalid achLine length (%zu), skipping lws_write", szDataLength);
+                        PrintWarn("Invalid pstWsi or invalid achLine length (%zu), skipping lws_write", szDataLen);
                     }
                 }
                 else
@@ -328,9 +328,9 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
                 lFileSize = ftell(s_hWebSocket);
                 PrintWarn("File size: %ld", lFileSize);
 
-                for (i = lFileSize - 2; i >= 0; i--)
+                for (lI = lFileSize - 2; lI >= 0; lI--)
                 {
-                    fseek(s_hWebSocket, i, SEEK_SET);
+                    fseek(s_hWebSocket, lI, SEEK_SET);
                     if (fgetc(s_hWebSocket) == '\n')
                     {
                         s_lLastPos = ftell(s_hWebSocket);
@@ -351,8 +351,8 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
                     /* Force NULL termination */
                     achLine[LWS_PRE + MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN - 1] = '\0';
 
-                    szDataLength = strlen((char *)&achLine[LWS_PRE]);
-                    PrintWarn("fgets successful, line length: %zu", szDataLength);
+                    szDataLen = strlen((char *)&achLine[LWS_PRE]);
+                    PrintWarn("fgets successful, line length: %zu", szDataLen);
 
                     if(s_bCliMsgLog == TRUE)
                     {
@@ -362,9 +362,9 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
                     strcpy(s_chLastLine, (char *)&achLine[LWS_PRE]);
 
                     /* Safety validation */
-                    if (pstWsi != NULL && szDataLength > 0 && szDataLength < MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN)
+                    if ((pstWsi != NULL) && (szDataLen > 0) && (szDataLen < MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN))
                     {
-                        PrintWarn("About to call lws_write with length: %zu", szDataLength);
+                        PrintWarn("About to call lws_write with length: %zu", szDataLen);
 
                         /* Additional safety validation */
                         if (s_pLwsContext == NULL)
@@ -374,37 +374,37 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
                         }
 
                         /* Apply safer length limit */
-                        szWriteLength = szDataLength;
-                        if (szWriteLength > MAX_SAFE_WRITE_LENGTH)
+                        szWriteLen = szDataLen;
+                        if (szWriteLen > CLI_MSG_MAX_SAFE_WRITE_LENGTH)
                         {
-                            szWriteLength = MAX_SAFE_WRITE_LENGTH;
-                            achLine[LWS_PRE + MAX_SAFE_WRITE_LENGTH] = '\0';
-                            PrintWarn("Truncating line to %d bytes for safety", MAX_SAFE_WRITE_LENGTH);
+                            szWriteLen = CLI_MSG_MAX_SAFE_WRITE_LENGTH;
+                            achLine[LWS_PRE + CLI_MSG_MAX_SAFE_WRITE_LENGTH] = '\0';
+                            PrintWarn("Truncating line to %d bytes for safety", CLI_MSG_MAX_SAFE_WRITE_LENGTH);
                         }
 
-                        if (szWriteLength == 0)
+                        if (szWriteLen == 0)
                         {
                             PrintError("Nothing to write");
                             break;
                         }
 
-                        PrintWarn("Calling lws_write with safe length: %zu", szWriteLength);
+                        PrintWarn("Calling lws_write with safe length: %zu", szWriteLen);
 
                         /* Call lws_write with LWS_PRE offset (Real-time) */
-                        nWriteResult = lws_write(pstWsi, &achLine[LWS_PRE], szWriteLength, LWS_WRITE_TEXT);
+                        nWriteRes = lws_write(pstWsi, &achLine[LWS_PRE], szWriteLen, LWS_WRITE_TEXT);
 
-                        if (nWriteResult < 0)
+                        if (nWriteRes < 0)
                         {
-                            PrintError("lws_write failed with result: %d", nWriteResult);
+                            PrintError("lws_write failed with result: %d", nWriteRes);
                         }
                         else
                         {
-                            PrintWarn("lws_write successful, bytes written: %d", nWriteResult);
+                            PrintWarn("lws_write successful, bytes written: %d", nWriteRes);
                         }
                     }
                     else
                     {
-                        PrintWarn("Invalid pstWsi or invalid achLine length (%zu), skipping lws_write", szDataLength);
+                        PrintWarn("Invalid pstWsi or invalid achLine length (%zu), skipping lws_write", szDataLen);
                     }
                 }
                 else if (strlen(s_chLastLine) > 0)
@@ -412,14 +412,14 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
                     PrintWarn("Sending last line again, length: %zu", strlen(s_chLastLine));
 
                     /* Copy s_chLastLine to LWS_PRE offset */
-                    szDataLength = strlen(s_chLastLine);
-                    memcpy(&achLine[LWS_PRE], s_chLastLine, szDataLength);
-                    achLine[LWS_PRE + szDataLength] = '\0';  /* NULL termination */
+                    szDataLen = strlen(s_chLastLine);
+                    memcpy(&achLine[LWS_PRE], s_chLastLine, szDataLen);
+                    achLine[LWS_PRE + szDataLen] = '\0';  /* NULL termination */
 
                     /* Safety validation */
-                    if (pstWsi != NULL && szDataLength > 0 && szDataLength < MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN)
+                    if ((pstWsi != NULL) && (szDataLen > 0) && (szDataLen < MSG_MANAGER_WEBSOCKET_BUF_MAX_LEN))
                     {
-                        PrintWarn("About to call lws_write with last line, length: %zu", szDataLength);
+                        PrintWarn("About to call lws_write with last line, length: %zu", szDataLen);
 
                         /* Additional safety validation */
                         if (s_pLwsContext == NULL)
@@ -429,37 +429,37 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
                         }
 
                         /* Apply safer length limit */
-                        szWriteLength = szDataLength;
-                        if (szWriteLength > MAX_SAFE_WRITE_LENGTH)
+                        szWriteLen = szDataLen;
+                        if (szWriteLen > CLI_MSG_MAX_SAFE_WRITE_LENGTH)
                         {
-                            szWriteLength = MAX_SAFE_WRITE_LENGTH;
-                            achLine[LWS_PRE + MAX_SAFE_WRITE_LENGTH] = '\0';
-                            PrintWarn("Truncating last line to %d bytes for safety", MAX_SAFE_WRITE_LENGTH);
+                            szWriteLen = CLI_MSG_MAX_SAFE_WRITE_LENGTH;
+                            achLine[LWS_PRE + CLI_MSG_MAX_SAFE_WRITE_LENGTH] = '\0';
+                            PrintWarn("Truncating last line to %d bytes for safety", CLI_MSG_MAX_SAFE_WRITE_LENGTH);
                         }
 
-                        if (szWriteLength == 0)
+                        if (szWriteLen == 0)
                         {
                             PrintError("Nothing to write");
                             break;
                         }
 
-                        PrintWarn("Calling lws_write with safe last line length: %zu", szWriteLength);
+                        PrintWarn("Calling lws_write with safe last line length: %zu", szWriteLen);
 
                         /* Call lws_write with LWS_PRE offset (Last line) */
-                        nWriteResult = lws_write(pstWsi, &achLine[LWS_PRE], szWriteLength, LWS_WRITE_TEXT);
+                        nWriteRes = lws_write(pstWsi, &achLine[LWS_PRE], szWriteLen, LWS_WRITE_TEXT);
 
-                        if (nWriteResult < 0)
+                        if (nWriteRes < 0)
                         {
-                            PrintError("lws_write failed with result: %d", nWriteResult);
+                            PrintError("lws_write failed with result: %d", nWriteRes);
                         }
                         else
                         {
-                            PrintWarn("lws_write successful, bytes written: %d", nWriteResult);
+                            PrintWarn("lws_write successful, bytes written: %d", nWriteRes);
                         }
                     }
                     else
                     {
-                        PrintWarn("Invalid pstWsi or invalid s_chLastLine length (%zu), skipping lws_write", szDataLength);
+                        PrintWarn("Invalid pstWsi or invalid s_chLastLine length (%zu), skipping lws_write", szDataLen);
                     }
                 }
             }
@@ -495,8 +495,6 @@ static int32_t P_MSG_MANAGER_WebSocketCallback(struct lws *pstWsi, enum lws_call
     }
 
     nRet = FRAMEWORK_OK;
-
-EXIT:
     return nRet;
 }
 
@@ -580,13 +578,13 @@ void *P_CLI_MSG_SebSocketTask(void *fd)
 int32_t P_CLI_MSG_SebSocketStart(void)
 {
     int32_t nRet = APP_ERROR;
-    pthread_t h_stRecvTid;
+    pthread_t hRecvTid;
 
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-    nRet = pthread_create(&h_stRecvTid, &attr, P_CLI_MSG_SebSocketTask, NULL);
+    nRet = pthread_create(&hRecvTid, &attr, P_CLI_MSG_SebSocketTask, NULL);
     if (nRet != FRAMEWORK_OK)
     {
         PrintError("pthread_create() is failed!! (P_CLI_MSG_SebSocketTask) [nRet:%d]", nRet);
@@ -604,19 +602,19 @@ int32_t P_CLI_MSG_SebSocketStart(void)
 void *P_CLI_MSG_TcpServerTask(void *fd)
 {
     int h_nSocket = *(int *)fd;
-    char cMsgBuf[MAX_LINE];
+    char achMsgBuf[MAX_LINE];
     int nRevLen;
 
     while(1)
     {
-        memset(cMsgBuf , 0 , MAX_LINE);
-        if((nRevLen = recv(h_nSocket , cMsgBuf , MAX_LINE , 0)) == -1)
+        memset(achMsgBuf , 0 , MAX_LINE);
+        if((nRevLen = recv(h_nSocket , achMsgBuf , MAX_LINE , 0)) == -1)
         {
             PrintError("recv error.\n");
             break;
         }
 
-        cMsgBuf[nRevLen] = '\0';
+        achMsgBuf[nRevLen] = '\0';
 
         if (nRevLen == 0)
         {
@@ -625,14 +623,14 @@ void *P_CLI_MSG_TcpServerTask(void *fd)
             break;
         }
 
-        if(strcmp(cMsgBuf , "exit") == 0)
+        if(strcmp(achMsgBuf , "exit") == 0)
         {
             PrintDebug("Client closed.\n");
             close(h_nSocket);
             break;
         }
 
-        PrintTrace("Received message from client: %s", cMsgBuf);
+        PrintTrace("Received message from client: %s", achMsgBuf);
     }
 
 	return NULL;
@@ -642,11 +640,11 @@ int32_t P_CLI_MSG_TcpServerStart(void)
 {
     int32_t nRet = APP_ERROR;
     int h_nListen , h_nConn;
-    pthread_t h_stRecvTid;
+    pthread_t hRecvTid;
     struct sockaddr_in stServerAddr, stClientAddr;
-    socklen_t stClientLen = sizeof(stClientAddr);
-    char cMsgBuf[MAX_LINE];
-    memset(cMsgBuf, 0, MAX_LINE);
+    socklen_t szClientLen = sizeof(stClientAddr);
+    char achMsgBuf[MAX_LINE];
+    memset(achMsgBuf, 0, MAX_LINE);
     int nVal = 1;
 
     if((h_nListen = socket(AF_INET , SOCK_STREAM , 0)) == -1)
@@ -680,7 +678,7 @@ int32_t P_CLI_MSG_TcpServerStart(void)
         return nRet;
     }
 
-    if((h_nConn = accept(h_nListen, (struct sockaddr *)&stClientAddr, &stClientLen)) < 0)
+    if((h_nConn = accept(h_nListen, (struct sockaddr *)&stClientAddr, &szClientLen)) < 0)
     {
         PrintError("accept error.");
         return nRet;
@@ -688,22 +686,22 @@ int32_t P_CLI_MSG_TcpServerStart(void)
 
     PrintDebug("server: got connection from %s", inet_ntoa(stClientAddr.sin_addr));
 
-    if(pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpServerTask, &h_nConn) == -1)
+    if(pthread_create(&hRecvTid, NULL, P_CLI_MSG_TcpServerTask, &h_nConn) == -1)
     {
         PrintError("pthread create error.");
         return nRet;
     }
 
 
-    while(fgets(cMsgBuf, MAX_LINE, stdin) != NULL)
+    while(fgets(achMsgBuf, MAX_LINE, stdin) != NULL)
     {
-        if(strcmp(cMsgBuf, "exit\n") == 0)
+        if(strcmp(achMsgBuf, "exit\n") == 0)
         {
             close(h_nConn);
             exit(0);
         }
 
-        if(send(h_nConn, cMsgBuf, strlen(cMsgBuf), 0) == -1)
+        if(send(h_nConn, achMsgBuf, strlen(achMsgBuf), 0) == -1)
         {
             PrintError("send error.");
             return nRet;
@@ -716,18 +714,18 @@ int32_t P_CLI_MSG_TcpServerStart(void)
 void *P_CLI_MSG_TcpClientTask(void *fd)
 {
     int h_nSocket = *(int *)fd;
-    char cMsgBuf[MAX_LINE];
+    char achMsgBuf[MAX_LINE];
     int nRevLen;
 
     while(1)
     {
-        memset(cMsgBuf, 0, MAX_LINE);
-        if((nRevLen = recv(h_nSocket, cMsgBuf, MAX_LINE , 0)) == -1)
+        memset(achMsgBuf, 0, MAX_LINE);
+        if((nRevLen = recv(h_nSocket, achMsgBuf, MAX_LINE , 0)) == -1)
         {
             PrintError("recv error.");
             break;
         }
-        cMsgBuf[nRevLen] = '\0';
+        achMsgBuf[nRevLen] = '\0';
 
         if (nRevLen == 0)
         {
@@ -736,14 +734,14 @@ void *P_CLI_MSG_TcpClientTask(void *fd)
             break;
         }
 
-        if(strcmp(cMsgBuf , "exit") == 0)
+        if(strcmp(achMsgBuf , "exit") == 0)
         {
             PrintDebug("Server is closed.");
             close(h_nSocket);
             break;
         }
 
-        PrintTrace("Received message from server: %s", cMsgBuf);
+        PrintTrace("Received message from server: %s", achMsgBuf);
     }
 
 	return NULL;
@@ -753,10 +751,10 @@ int32_t P_CLI_MSG_TcpClientStart(char *pcIpAddr)
 {
     int32_t nRet = APP_ERROR;
     int h_nSocket;
-    pthread_t h_stRecvTid;
+    pthread_t hRecvTid;
     struct sockaddr_in stServerAddr;
-    char cMsgBuf[MAX_LINE];
-    memset(cMsgBuf , 0 , MAX_LINE);
+    char achMsgBuf[MAX_LINE];
+    memset(achMsgBuf , 0 , MAX_LINE);
 
     if(pcIpAddr == NULL)
     {
@@ -789,22 +787,22 @@ int32_t P_CLI_MSG_TcpClientStart(char *pcIpAddr)
         return nRet;
     }
 
-    if(pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpClientTask, &h_nSocket) == -1)
+    if(pthread_create(&hRecvTid, NULL, P_CLI_MSG_TcpClientTask, &h_nSocket) == -1)
     {
         PrintError("pthread create error");
         return nRet;
     }
 
-    while(fgets(cMsgBuf, MAX_LINE, stdin) != NULL)
+    while(fgets(achMsgBuf, MAX_LINE, stdin) != NULL)
     {
-        if(strcmp(cMsgBuf, "exit\n") == 0)
+        if(strcmp(achMsgBuf, "exit\n") == 0)
         {
             PrintWarn("Exit");
             close(h_nSocket);
             break;
         }
 
-        if(send(h_nSocket, cMsgBuf, strlen(cMsgBuf) , 0) == -1)
+        if(send(h_nSocket, achMsgBuf, strlen(achMsgBuf) , 0) == -1)
         {
             PrintError("send error");
             return nRet;
@@ -816,62 +814,62 @@ int32_t P_CLI_MSG_TcpClientStart(char *pcIpAddr)
 
 void P_CLI_MSG_TcpMultiAddClient(int nSocketFd)
 {
-    pthread_mutex_lock(&hClientMutex);
+    pthread_mutex_lock(&s_hClientMutex);
 
-    if (nClientCount < MAX_CLIENTS)
+    if (s_nClientCount < CLI_MSG_MAX_CLIENTS)
     {
-        anClientSockets[nClientCount++] = nSocketFd;
+        s_anClientSockets[s_nClientCount++] = nSocketFd;
     }
 
-    pthread_mutex_unlock(&hClientMutex);
+    pthread_mutex_unlock(&s_hClientMutex);
 }
 
 void P_CLI_MSG_TcpMultiRemoveClient(int nSocketFd)
 {
     int i = 0;
 
-    pthread_mutex_lock(&hClientMutex);
+    pthread_mutex_lock(&s_hClientMutex);
 
-    for (i = 0; i < nClientCount; i++)
+    for (i = 0; i < s_nClientCount; i++)
     {
-        if (anClientSockets[i] == nSocketFd)
+        if (s_anClientSockets[i] == nSocketFd)
         {
-            anClientSockets[i] = anClientSockets[--nClientCount];
+            s_anClientSockets[i] = s_anClientSockets[--s_nClientCount];
             break;
         }
     }
 
-    pthread_mutex_unlock(&hClientMutex);
+    pthread_mutex_unlock(&s_hClientMutex);
 }
 
 void *P_CLI_MSG_TcpMultiServerSendTask(void *fd)
 {
     int h_nSocket = *(int *)fd;
-    char cMsgBuf[MAX_LINE];
+    char achMsgBuf[MAX_LINE];
 
     while (1)
     {
         printf("Enter message to send to client: ");
-        if (fgets(cMsgBuf, MAX_LINE, stdin) == NULL)
+        if (fgets(achMsgBuf, MAX_LINE, stdin) == NULL)
         {
             PrintError("Error reading input.");
             break;
         }
 
-        if (strcmp(cMsgBuf, "exit\n") == 0)
+        if (strcmp(achMsgBuf, "exit\n") == 0)
         {
             printf("Server exiting...\n");
             close(h_nSocket);
             break;
         }
 
-        if (send(h_nSocket, cMsgBuf, strlen(cMsgBuf), 0) == -1)
+        if (send(h_nSocket, achMsgBuf, strlen(achMsgBuf), 0) == -1)
         {
             PrintError("send error.");
             break;
         }
 
-        PrintTrace("Sent message to client: %s", cMsgBuf);
+        PrintTrace("Sent message to client: %s", achMsgBuf);
     }
 
     return NULL;
@@ -880,16 +878,16 @@ void *P_CLI_MSG_TcpMultiServerSendTask(void *fd)
 void *P_CLI_MSG_TcpMultiServerTask(void *fd)
 {
     int h_nSocket = *(int *)fd;
-    char cMsgBuf[MAX_LINE];
+    char achMsgBuf[MAX_LINE];
     int nRevLen;
 
     P_CLI_MSG_TcpMultiAddClient(h_nSocket);
 
     while (1)
     {
-        memset(cMsgBuf, 0, MAX_LINE);
+        memset(achMsgBuf, 0, MAX_LINE);
 
-        if ((nRevLen = recv(h_nSocket, cMsgBuf, MAX_LINE, 0)) <= 0)
+        if ((nRevLen = recv(h_nSocket, achMsgBuf, MAX_LINE, 0)) <= 0)
         {
             if (nRevLen == 0)
             {
@@ -902,8 +900,8 @@ void *P_CLI_MSG_TcpMultiServerTask(void *fd)
             break;
         }
 
-        cMsgBuf[nRevLen] = '\0';
-        PrintTrace("Received message from client: %s", cMsgBuf);
+        achMsgBuf[nRevLen] = '\0';
+        PrintTrace("Received message from client: %s", achMsgBuf);
     }
 
     P_CLI_MSG_TcpMultiRemoveClient(h_nSocket);
@@ -934,15 +932,15 @@ void *P_CLI_MSG_ServerInputTask(void *pvFd)
             exit(0);
         }
 
-        pthread_mutex_lock(&hClientMutex);
-        for (i = 0; i < nClientCount; i++)
+        pthread_mutex_lock(&s_hClientMutex);
+        for (i = 0; i < s_nClientCount; i++)
         {
-            if (send(anClientSockets[i], achMsgBuf, strlen(achMsgBuf), 0) == -1)
+            if (send(s_anClientSockets[i], achMsgBuf, strlen(achMsgBuf), 0) == -1)
             {
-                PrintError("send error to client %d", anClientSockets[i]);
+                PrintError("send error to client %d", s_anClientSockets[i]);
             }
         }
-        pthread_mutex_unlock(&hClientMutex);
+        pthread_mutex_unlock(&s_hClientMutex);
 
         PrintTrace("Broadcasted message: %s", achMsgBuf);
     }
@@ -958,7 +956,7 @@ int32_t P_CLI_MSG_TcpMultiServerStart(void)
     int *pnClientSocket = NULL;
     int nClientFd = 0;
     int nVal = 1;
-    socklen_t stClientLen = sizeof(struct sockaddr_in);
+    socklen_t szClientLen = sizeof(struct sockaddr_in);
     pthread_t hRecvTid;
     pthread_t hInputTid;
     struct sockaddr_in stServerAddr;
@@ -969,7 +967,7 @@ int32_t P_CLI_MSG_TcpMultiServerStart(void)
     {
         PrintError("socket error.\n");
         nRet = APP_ERROR;
-        goto EXIT;
+        return nRet;
     }
 
     stServerAddr.sin_family = AF_INET;
@@ -981,38 +979,38 @@ int32_t P_CLI_MSG_TcpMultiServerStart(void)
         PrintError("setsockopt error.");
         close(hListenSocket);
         nRet = APP_ERROR;
-        goto EXIT;
+        return nRet;
     }
 
     if (bind(hListenSocket, (struct sockaddr *)&stServerAddr, sizeof(stServerAddr)) < 0)
     {
         PrintError("bind error.");
         nRet = APP_ERROR;
-        goto EXIT;
+        return nRet;
     }
 
     if (listen(hListenSocket, LISTENQ) < 0)
     {
         PrintError("listen error.");
         nRet = APP_ERROR;
-        goto EXIT;
+        return nRet;
     }
 
     if (pthread_create(&hInputTid, NULL, P_CLI_MSG_ServerInputTask, NULL) != 0)
     {
         PrintError("pthread create error for input task.");
         nRet = APP_ERROR;
-        goto EXIT;
+        return nRet;
     }
 
     while (1)
     {
-        hConnSocket = accept(hListenSocket, (struct sockaddr *)&stClientAddr, &stClientLen);
+        hConnSocket = accept(hListenSocket, (struct sockaddr *)&stClientAddr, &szClientLen);
         if (hConnSocket < 0)
         {
             PrintError("accept error.");
             nRet = APP_ERROR;
-            goto EXIT;
+            return nRet;
         }
 
         pnClientSocket = malloc(sizeof(nClientFd));
@@ -1028,27 +1026,24 @@ int32_t P_CLI_MSG_TcpMultiServerStart(void)
             PrintError("pthread create error.");
             free(pnClientSocket);
             nRet = APP_ERROR;
-            goto EXIT;
+            return nRet;
         }
 
         pthread_detach(hRecvTid);
     }
 
     nRet = APP_OK;
-
-EXIT:
-
     return nRet;
 }
 
 void *P_CLI_MSG_TcpMultiClientTask(void *fd) {
     int h_nSocket = *(int *)fd;
-    char cMsgBuf[MAX_LINE];
+    char achMsgBuf[MAX_LINE];
     int nRevLen;
 
     while (1) {
-        memset(cMsgBuf, 0, MAX_LINE);
-        if ((nRevLen = recv(h_nSocket, cMsgBuf, MAX_LINE, 0)) <= 0) {
+        memset(achMsgBuf, 0, MAX_LINE);
+        if ((nRevLen = recv(h_nSocket, achMsgBuf, MAX_LINE, 0)) <= 0) {
             if (nRevLen == 0) {
                 PrintDebug("Server closed connection.");
             } else {
@@ -1058,8 +1053,8 @@ void *P_CLI_MSG_TcpMultiClientTask(void *fd) {
             break;
         }
 
-        cMsgBuf[nRevLen] = '\0';
-        PrintTrace("Received message: %s", cMsgBuf);
+        achMsgBuf[nRevLen] = '\0';
+        PrintTrace("Received message: %s", achMsgBuf);
     }
 
     return NULL;
@@ -1069,12 +1064,12 @@ int32_t P_CLI_MSG_TcpMultiClientStart(char *pcIpAddr, char *pcId)
 {
     int32_t nRet = APP_ERROR;
     int h_nSocket;
-    pthread_t h_stRecvTid;
+    pthread_t hRecvTid;
     struct sockaddr_in stServerAddr;
-    char cMsgBuf[MAX_LINE];
-    memset(cMsgBuf, 0, MAX_LINE);
+    char achMsgBuf[MAX_LINE];
+    memset(achMsgBuf, 0, MAX_LINE);
 
-    if(pcIpAddr == NULL || pcId == NULL)
+    if((pcIpAddr == NULL) || (pcId == NULL))
     {
         PrintError("IP address or ID is NULL!");
         return nRet;
@@ -1110,22 +1105,22 @@ int32_t P_CLI_MSG_TcpMultiClientStart(char *pcIpAddr, char *pcId)
         return nRet;
     }
 
-    if(pthread_create(&h_stRecvTid, NULL, P_CLI_MSG_TcpMultiClientTask, &h_nSocket) == -1)
+    if(pthread_create(&hRecvTid, NULL, P_CLI_MSG_TcpMultiClientTask, &h_nSocket) == -1)
     {
         PrintError("pthread create error");
         return nRet;
     }
 
-    while(fgets(cMsgBuf, MAX_LINE, stdin) != NULL)
+    while(fgets(achMsgBuf, MAX_LINE, stdin) != NULL)
     {
-        if(strcmp(cMsgBuf, "exit\n") == 0)
+        if(strcmp(achMsgBuf, "exit\n") == 0)
         {
             PrintWarn("Exit");
             close(h_nSocket);
             break;
         }
 
-        if(send(h_nSocket, cMsgBuf, strlen(cMsgBuf), 0) == -1)
+        if(send(h_nSocket, achMsgBuf, strlen(achMsgBuf), 0) == -1)
         {
             PrintError("send error");
             return nRet;
@@ -1137,6 +1132,8 @@ int32_t P_CLI_MSG_TcpMultiClientStart(char *pcIpAddr, char *pcId)
 
 void P_CLI_MSG_ShowTxSettings(void)
 {
+    int32_t nI = 0;
+
     PrintTrace("========================================================");
     PrintWarn("MSG V2X Tx Info>");
     PrintDebug(" ePayloadType[%d]", s_stMsgManagerTx.ePayloadType);
@@ -1150,9 +1147,9 @@ void P_CLI_MSG_ShowTxSettings(void)
     PrintDebug(" nTxPower[%d]", s_stMsgManagerTx.nTxPower);
     PrintDebug(" unTxCount[%d]", s_stMsgManagerTx.unTxCount);
     PrintDebug(" unTxDelay[%d ms]", s_stMsgManagerTx.unTxDelay);
-    for(int i = 0; i < MSG_MANAGER_MAC_LENGTH; i++)
+    for(nI = 0; nI < MSG_MANAGER_MAC_LENGTH; nI++)
     {
-        PrintDebug(" unTxCount[i:%d][0x%x]", i, s_stMsgManagerTx.uchPeerMacAddr[i]);
+        PrintDebug(" unTxCount[i:%d][0x%x]", nI, s_stMsgManagerTx.uchPeerMacAddr[nI]);
     }
 
     PrintDebug(" unTransmitterProfileId[%d]", s_stMsgManagerTx.unTransmitterProfileId);
@@ -1210,7 +1207,7 @@ int32_t P_CLI_MSG_GetSettings(MSG_MANAGER_TX_T *pstMsgManagerTx, DB_V2X_T *pstDb
 int32_t P_CLI_MSG_SetDefaultSettings(void)
 {
     int32_t nRet = APP_ERROR;
-
+    int32_t nI = 0;
     MSG_MANAGER_TX_T stMsgManagerTx;
     DB_V2X_T stDbV2x;
 
@@ -1226,9 +1223,9 @@ int32_t P_CLI_MSG_SetDefaultSettings(void)
     stMsgManagerTx.unTxCount = 10;
     stMsgManagerTx.unTxDelay = 100;
 
-    for(int i = 0; i < MSG_MANAGER_MAC_LENGTH; i++)
+    for(nI = 0; nI < MSG_MANAGER_MAC_LENGTH; nI++)
     {
-        stMsgManagerTx.uchPeerMacAddr[i] = 0xFF;
+        stMsgManagerTx.uchPeerMacAddr[nI] = 0xFF;
     }
 
     stMsgManagerTx.unTransmitterProfileId = MSG_MANAGER_V2X_TX_PROFILE_ID;
@@ -1255,17 +1252,17 @@ int32_t P_CLI_MSG_SetDefaultSettings(void)
     return nRet;
 }
 
-static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
+static int32_t P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 {
     int32_t nRet = APP_OK;
-    int nFrameWorkRet = FRAMEWORK_ERROR;
+    int32_t nFrameWorkRet = FRAMEWORK_ERROR;
+    int32_t nI = 0;
     char *pcCmd;
-    char cPayload[CLI_DB_V2X_DEFAULT_PAYLOAD_LEN];
+    char achPayload[CLI_DB_V2X_DEFAULT_PAYLOAD_LEN];
     TIME_MANAGER_T *pstTimeManager;
-    uint32_t unTxCount = 0;
-    int i = 0;
+    uint32_t unTxCnt = 0;
 
-    (void*)memset(&cPayload, 0x00, sizeof(cPayload));
+    (void*)memset(&achPayload, 0x00, sizeof(achPayload));
 
     UNUSED(argc);
 
@@ -1285,10 +1282,10 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
         pcCmd = CLI_CMD_GetArg(pstCmd, CMD_0);
         if(IS_CMD(pcCmd, "test"))
         {
-            for(int i = 0; i < CMD_MAX; i++)
+            for(nI = 0; nI < CMD_MAX; nI++)
             {
-                pcCmd = CLI_CMD_GetArg(pstCmd, i);
-                PrintDebug("pcCmd[idx:%d][value:%s]", i, pcCmd);
+                pcCmd = CLI_CMD_GetArg(pstCmd, nI);
+                PrintDebug("pcCmd[idx:%d][value:%s]", nI, pcCmd);
             }
         }
         if(IS_CMD(pcCmd, "log"))
@@ -1363,7 +1360,7 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
             (void)TIME_MANAGER_CheckLatencyBegin(pstTimeManager);
 
-            for (unTxCount = 0; unTxCount < s_stMsgManagerTx.unTxCount; unTxCount++)
+            for (unTxCnt = 0; unTxCnt < s_stMsgManagerTx.unTxCount; unTxCnt++)
             {
                 nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
                 if(nFrameWorkRet != FRAMEWORK_OK)
@@ -1376,11 +1373,11 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 }
 
                 s_stDbV2x.ulPayloadLength = CLI_DB_V2X_DEFAULT_PAYLOAD_LEN;
-                for(i = 0; i < (int)s_stDbV2x.ulPayloadLength; i++)
+                for(nI = 0; nI < (int)s_stDbV2x.ulPayloadLength; nI++)
                 {
-                    cPayload[i] = rand();
+                    achPayload[nI] = rand();
                 }
-                s_stDbV2x.ulReserved = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, s_stDbV2x.ulPayloadLength);
+                s_stDbV2x.ulReserved = CLI_UTIL_GetCrc32((uint8_t*)&achPayload, s_stDbV2x.ulPayloadLength);
 
 #if defined(CONFIG_CLI_MSG_DEBUG)
                 (void)P_CLI_MSG_ShowTxSettings();
@@ -1388,11 +1385,11 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintTrace("========================================================");
                 PrintDebug("ulTimeStamp[%ld]", s_stDbV2x.ulTimeStamp);
                 PrintDebug("ulPayloadLength[%d]", s_stDbV2x.ulPayloadLength);
-                PrintDebug("cPayload");
-                for(i = 0; i < CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; i++)
+                PrintDebug("achPayload");
+                for(nI = 0; nI < CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; nI++)
                 {
-                    cPayload[i] = rand();
-                    PrintDebug("[%d:%d] ", i, cPayload[i]);
+                    achPayload[nI] = rand();
+                    PrintDebug("[%d:%d] ", nI, achPayload[nI]);
                 }
                 PrintDebug("\r\n");
 
@@ -1400,14 +1397,14 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintTrace("========================================================");
 #endif
 
-                nFrameWorkRet = MSG_MANAGER_Transmit(&s_stMsgManagerTx, &s_stDbV2x, (char*)&cPayload);
+                nFrameWorkRet = MSG_MANAGER_Transmit(&s_stMsgManagerTx, &s_stDbV2x, (char*)&achPayload);
                 if(nFrameWorkRet != FRAMEWORK_OK)
                 {
                     PrintError("MSG_MANAGER_Transmit() is failed! [nRet:%d]", nFrameWorkRet);
                 }
                 else
                 {
-                    PrintDebug("Tx Success, Counts[%u/%u], Delay[%d ms]", unTxCount + 1, s_stMsgManagerTx.unTxCount, s_stMsgManagerTx.unTxDelay);
+                    PrintDebug("Tx Success, Counts[%u/%u], Delay[%d ms]", unTxCnt + 1, s_stMsgManagerTx.unTxCount, s_stMsgManagerTx.unTxDelay);
                 }
 
                 usleep((s_stMsgManagerTx.unTxDelay*USLEEP_MS));
@@ -1422,7 +1419,7 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
 
             (void)TIME_MANAGER_CheckLatencyBegin(pstTimeManager);
 
-            for (unTxCount = 0; unTxCount < s_stMsgManagerTx.unTxCount; unTxCount++)
+            for (unTxCnt = 0; unTxCnt < s_stMsgManagerTx.unTxCount; unTxCnt++)
             {
                 nFrameWorkRet = TIME_MANAGER_Get(pstTimeManager);
                 if(nFrameWorkRet != FRAMEWORK_OK)
@@ -1435,11 +1432,11 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 }
 
                 s_stDbV2x.ulPayloadLength = CLI_DB_V2X_DEFAULT_PAYLOAD_LEN;
-                for(i = 0; i < (int)s_stDbV2x.ulPayloadLength; i++)
+                for(nI = 0; nI < (int)s_stDbV2x.ulPayloadLength; nI++)
                 {
-                    cPayload[i] = unTxCount;
+                    achPayload[nI] = unTxCnt;
                 }
-                s_stDbV2x.ulReserved = CLI_UTIL_GetCrc32((uint8_t*)&cPayload, s_stDbV2x.ulPayloadLength);
+                s_stDbV2x.ulReserved = CLI_UTIL_GetCrc32((uint8_t*)&achPayload, s_stDbV2x.ulPayloadLength);
 
 #if defined(CONFIG_CLI_MSG_DEBUG)
                 (void)P_CLI_MSG_ShowTxSettings();
@@ -1447,11 +1444,11 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintTrace("========================================================");
                 PrintDebug("ulTimeStamp[%ld]", s_stDbV2x.ulTimeStamp);
                 PrintDebug("ulPayloadLength[%d]", s_stDbV2x.ulPayloadLength);
-                PrintDebug("cPayload");
-                for(i = 0; i < CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; i++)
+                PrintDebug("achPayload");
+                for(nI = 0; nI < CLI_DB_V2X_DEFAULT_PAYLOAD_LEN; nI++)
                 {
-                    cPayload[i] = unTxCount;
-                    PrintDebug("[%d:%d] ", i, cPayload[i]);
+                    achPayload[nI] = unTxCnt;
+                    PrintDebug("[%d:%d] ", nI, achPayload[nI]);
                 }
                 PrintDebug("\r\n");
 
@@ -1459,14 +1456,14 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 PrintTrace("========================================================");
 #endif
 
-                nFrameWorkRet = MSG_MANAGER_Transmit(&s_stMsgManagerTx, &s_stDbV2x, (char*)&cPayload);
+                nFrameWorkRet = MSG_MANAGER_Transmit(&s_stMsgManagerTx, &s_stDbV2x, (char*)&achPayload);
                 if(nFrameWorkRet != FRAMEWORK_OK)
                 {
                     PrintError("MSG_MANAGER_Transmit() is failed! [nRet:%d]", nFrameWorkRet);
                 }
                 else
                 {
-                    PrintDebug("Tx Success, Counts[%u/%u], Delay[%d ms]", unTxCount + 1, s_stMsgManagerTx.unTxCount, s_stMsgManagerTx.unTxDelay);
+                    PrintDebug("Tx Success, Counts[%u/%u], Delay[%d ms]", unTxCnt + 1, s_stMsgManagerTx.unTxCount, s_stMsgManagerTx.unTxDelay);
                 }
 
                 usleep((s_stMsgManagerTx.unTxDelay*USLEEP_MS));
@@ -1939,9 +1936,9 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
             PrintDebug(" nTxPower[%d]", stMsgManagerTx.nTxPower);
             PrintDebug(" unTxCount[%d]", stMsgManagerTx.unTxCount);
             PrintDebug(" unTxDelay[%d ms]", stMsgManagerTx.unTxDelay);
-            for(int i = 0; i < MSG_MANAGER_MAC_LENGTH; i++)
+            for(nI = 0; nI < MSG_MANAGER_MAC_LENGTH; nI++)
             {
-                PrintDebug(" unTxCount[i:%d][0x%x]", i, stMsgManagerTx.uchPeerMacAddr[i]);
+                PrintDebug(" unTxCount[i:%d][0x%x]", nI, stMsgManagerTx.uchPeerMacAddr[nI]);
             }
 
             PrintDebug(" unTransmitterProfileId[%d]", stMsgManagerTx.unTransmitterProfileId);
@@ -2003,7 +2000,7 @@ static int P_CLI_MSG(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 {
                     pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
                     char *pcId = CLI_CMD_GetArg(pstCmd, CMD_3);
-                    if (pcCmd != NULL && pcId != NULL)
+                    if ((pcCmd != NULL) && (pcId != NULL))
                     {
                         nRet = P_CLI_MSG_TcpMultiClientStart(pcCmd, pcId);
                         if (nRet != APP_OK)
