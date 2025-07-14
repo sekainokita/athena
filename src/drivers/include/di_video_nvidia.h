@@ -126,6 +126,15 @@ int32_t DI_VIDEO_NVIDIA_Start(DI_VIDEO_NVIDIA_T *pstDiGps);
 int32_t DI_VIDEO_NVIDIA_Stop(DI_VIDEO_NVIDIA_T *pstDiGps);
 
 void DI_VIDEO_NVIDIA_Status(DI_VIDEO_NVIDIA_T *pstDiGps);
+
+#if defined(CONFIG_VIDEO_STREAMING)
+/* TCP streaming functions */
+int32_t DI_VIDEO_NVIDIA_SetTcpConnection(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia, const char *pchRemoteHost, int32_t nRemotePort, int32_t nLocalPort);
+int32_t DI_VIDEO_NVIDIA_StartTxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia);
+int32_t DI_VIDEO_NVIDIA_StartRxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia);
+int32_t DI_VIDEO_NVIDIA_CheckTcpConnection(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia);
+#endif
+
 #endif	/* _DI_VIDEO_NVIDIA_H_ */
 
 

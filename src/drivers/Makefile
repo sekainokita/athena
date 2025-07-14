@@ -38,6 +38,9 @@ SRCS = $(wildcard *.c)
 SRCS += $(wildcard $(LIB_DI_GPS_PATH)/*.c)
 SRCS += $(wildcard $(LIB_DI_CAN_PATH)/*.c)
 SRCS += $(wildcard $(LIB_DI_VIDEO_PATH)/*.c)
+SRCS += $(wildcard $(LIB_DI_RING_BUFFER_PATH)/*.c)
+SRCS += $(wildcard $(LIB_DI_MEMORY_POOL_PATH)/*.c)
+SRCS += $(wildcard $(LIB_DI_CAMERA_PATH)/*.c)
 
 TARGET_AR = ar
 OBJS = ${SRCS:.c=.o}

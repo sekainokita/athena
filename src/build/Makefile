@@ -358,3 +358,41 @@ clean: distclean
 distclean: lib-db-distclean lib-msg-distclean lib-time-distclean lib-di-distclean lib-platform-distclean lib-framework-distclean app-distclean
 	@$(RM) -f $(OUT_BIN_DIR)/* $(OUT_LIB_DIR)/*
 	@$(RM) -f *.txt *.csv *.db *.log
+
+ifeq ($(CONFIG_GSTREAMER),y)
+TARGET_CFLAGS += -DCONFIG_GSTREAMER
+TARGET_CXXFLAGS += -DCONFIG_GSTREAMER
+TARGET_CFLAGS += $(shell pkg-config --cflags gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0)
+TARGET_CXXFLAGS += $(shell pkg-config --cflags gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0)
+TARGET_LDFLAGS += $(shell pkg-config --libs gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0)
+endif
+
+ifeq ($(CONFIG_VIDEO_STREAMING),y)
+TARGET_CFLAGS += -DCONFIG_VIDEO_STREAMING
+TARGET_CXXFLAGS += -DCONFIG_VIDEO_STREAMING
+endif
+
+ifeq ($(CONFIG_CAMERA_NVIDIA),y)
+TARGET_CFLAGS += -DCONFIG_CAMERA_NVIDIA
+TARGET_CXXFLAGS += -DCONFIG_CAMERA_NVIDIA
+endif
+
+ifeq ($(CONFIG_DISPLAY_NVIDIA),y)
+TARGET_CFLAGS += -DCONFIG_DISPLAY_NVIDIA
+TARGET_CXXFLAGS += -DCONFIG_DISPLAY_NVIDIA
+endif
+
+ifeq ($(CONFIG_VIDEO_CODEC_HW),y)
+TARGET_CFLAGS += -DCONFIG_VIDEO_CODEC_HW
+TARGET_CXXFLAGS += -DCONFIG_VIDEO_CODEC_HW
+endif
+
+ifeq ($(CONFIG_RTSP_SERVER),y)
+TARGET_CFLAGS += -DCONFIG_RTSP_SERVER
+TARGET_CXXFLAGS += -DCONFIG_RTSP_SERVER
+endif
+
+ifeq ($(CONFIG_VIDEO_RECORD),y)
+TARGET_CFLAGS += -DCONFIG_VIDEO_RECORD
+TARGET_CXXFLAGS += -DCONFIG_VIDEO_RECORD
+endif

@@ -44,14 +44,21 @@
 
 
 /***************************** Include ***************************************/
-#include "cli.h"
-#include "app.h"
+#include "type.h"
+#include "cli_util.h"
 #include "di.h"
+#include "cli.h"
+#include "di_gps.h"
+#include "di_can.h"
+#include "svc_streaming.h"
 
 /***************************** Definition ************************************/
 
-/***************************** Static Variable *******************************/
+/***************************** Enum and Structure ****************************/
 
+/***************************** Static Variable *******************************/
+static DI_T s_stDi;
+static SVC_STREAMING_T s_stSvcStreaming = {0};
 
 /***************************** Function Protype ******************************/
 
@@ -77,7 +84,7 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
     {
         DI_T *pstDi;
 
-        pstDi = APP_GetDiInstance();
+        pstDi = &s_stDi;
         PrintDebug("pstDi [0x%p]", pstDi);
 
         pcCmd = CLI_CMD_GetArg(pstCmd, CMD_0);
@@ -239,7 +246,7 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 }
             }
         }
-       else if(IS_CMD(pcCmd, "can"))
+        else if(IS_CMD(pcCmd, "can"))
         {
             pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
             if (pcCmd == NULL)
@@ -272,13 +279,289 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                 }
             }
         }
+        else if(IS_CMD(pcCmd, "video"))
+        {
+            pcCmd = CLI_CMD_GetArg(pstCmd, CMD_1);
+            if (pcCmd == NULL)
+            {
+                return CLI_CMD_Showusage(pstCmd);
+            }
+            else
+            {
+                if(IS_CMD(pcCmd, "init"))
+                {
+#if defined(CONFIG_VIDEO_STREAMING)
+                    SVC_STREAMING_CONFIG_T stConfig;
+                    
+                    /* Set default configuration */
+                    memset(&stConfig, 0, sizeof(SVC_STREAMING_CONFIG_T));
+                    stConfig.eMode = SVC_STREAMING_MODE_TX;
+                    stConfig.eFormat = SVC_STREAMING_FORMAT_H264;
+                    stConfig.unWidth = SVC_STREAMING_DEFAULT_WIDTH;
+                    stConfig.unHeight = SVC_STREAMING_DEFAULT_HEIGHT;
+                    stConfig.unFrameRate = SVC_STREAMING_DEFAULT_FPS;
+                    stConfig.unBitrate = SVC_STREAMING_DEFAULT_BITRATE;
+                    stConfig.bHardwareAcceleration = TRUE;
+                    
+                    /* Initialize video streaming service */
+                    nRet = SVC_STREAMING_Init(&s_stSvcStreaming, &stConfig);
+                    if (nRet != FRAMEWORK_OK)
+                    {
+                        PrintError("SVC_STREAMING_Init() failed! [nRet:%d]", nRet);
+                        return nRet;
+                    }
+                    
+                    PrintDebug("Video streaming service initialized successfully");
+#else
+                    PrintError("Video streaming not supported in this build");
+#endif
+                }
+                else if(IS_CMD(pcCmd, "start"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if (pcCmd == NULL)
+                    {
+                        return CLI_CMD_Showusage(pstCmd);
+                    }
+                    else
+                    {
+#if defined(CONFIG_VIDEO_STREAMING)
+                        SVC_STREAMING_MODE_E eMode;
+                        
+                        if(IS_CMD(pcCmd, "tx"))
+                        {
+                            eMode = SVC_STREAMING_MODE_TX;
+                        }
+                        else if(IS_CMD(pcCmd, "rx"))
+                        {
+                            eMode = SVC_STREAMING_MODE_RX;
+                        }
+                        else if(IS_CMD(pcCmd, "both"))
+                        {
+                            eMode = SVC_STREAMING_MODE_BOTH;
+                        }
+                        else
+                        {
+                            PrintError("Invalid mode! Use tx/rx/both");
+                            return CLI_CMD_Showusage(pstCmd);
+                        }
+                        
+                        nRet = SVC_STREAMING_Start(&s_stSvcStreaming, eMode);
+                        if (nRet != FRAMEWORK_OK)
+                        {
+                            PrintError("SVC_STREAMING_Start() failed! [nRet:%d]", nRet);
+                            return nRet;
+                        }
+                        
+                        PrintDebug("Video streaming started in mode [%s]", pcCmd);
+#else
+                        PrintError("Video streaming not supported in this build");
+#endif
+                    }
+                }
+                else if(IS_CMD(pcCmd, "stop"))
+                {
+#if defined(CONFIG_VIDEO_STREAMING)
+                    nRet = SVC_STREAMING_Stop(&s_stSvcStreaming);
+                    if (nRet != FRAMEWORK_OK)
+                    {
+                        PrintError("SVC_STREAMING_Stop() failed! [nRet:%d]", nRet);
+                        return nRet;
+                    }
+                    
+                    PrintDebug("Video streaming stopped");
+#else
+                    PrintError("Video streaming not supported in this build");
+#endif
+                }
+                else if(IS_CMD(pcCmd, "config"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if (pcCmd == NULL)
+                    {
+#if defined(CONFIG_VIDEO_STREAMING)
+                        /* Show current configuration */
+                        SVC_STREAMING_CONFIG_T stConfig;
+                        nRet = SVC_STREAMING_GetConfig(&s_stSvcStreaming, &stConfig);
+                        if (nRet != FRAMEWORK_OK)
+                        {
+                            PrintError("SVC_STREAMING_GetConfig() failed! [nRet:%d]", nRet);
+                            return nRet;
+                        }
+                        
+                        PrintDebug("Current Configuration:");
+                        PrintDebug("  Mode: %d", stConfig.eMode);
+                        PrintDebug("  Format: %d", stConfig.eFormat);
+                        PrintDebug("  Resolution: %dx%d", stConfig.unWidth, stConfig.unHeight);
+                        PrintDebug("  Frame Rate: %d", stConfig.unFrameRate);
+                        PrintDebug("  Bitrate: %d", stConfig.unBitrate);
+                        PrintDebug("  Hardware Accel: %s", stConfig.bHardwareAcceleration ? "YES" : "NO");
+#else
+                        PrintError("Video streaming not supported in this build");
+#endif
+                    }
+                    else
+                    {
+#if defined(CONFIG_VIDEO_STREAMING)
+                        /* Set configuration options */
+                        if(IS_CMD(pcCmd, "resolution"))
+                        {
+                            char *pchWidth = CLI_CMD_GetArg(pstCmd, CMD_3);
+                            char *pchHeight = CLI_CMD_GetArg(pstCmd, CMD_4);
+                            
+                            if (pchWidth != NULL && pchHeight != NULL)
+                            {
+                                SVC_STREAMING_CONFIG_T stConfig;
+                                nRet = SVC_STREAMING_GetConfig(&s_stSvcStreaming, &stConfig);
+                                if (nRet == FRAMEWORK_OK)
+                                {
+                                    stConfig.unWidth = (uint32_t)atoi(pchWidth);
+                                    stConfig.unHeight = (uint32_t)atoi(pchHeight);
+                                    nRet = SVC_STREAMING_SetConfig(&s_stSvcStreaming, &stConfig);
+                                    if (nRet == FRAMEWORK_OK)
+                                    {
+                                        PrintDebug("Resolution set to %dx%d", stConfig.unWidth, stConfig.unHeight);
+                                    }
+                                }
+                            }
+                        }
+                        else if(IS_CMD(pcCmd, "fps"))
+                        {
+                            char *pchFps = CLI_CMD_GetArg(pstCmd, CMD_3);
+                            
+                            if (pchFps != NULL)
+                            {
+                                SVC_STREAMING_CONFIG_T stConfig;
+                                nRet = SVC_STREAMING_GetConfig(&s_stSvcStreaming, &stConfig);
+                                if (nRet == FRAMEWORK_OK)
+                                {
+                                    stConfig.unFrameRate = (uint32_t)atoi(pchFps);
+                                    nRet = SVC_STREAMING_SetConfig(&s_stSvcStreaming, &stConfig);
+                                    if (nRet == FRAMEWORK_OK)
+                                    {
+                                        PrintDebug("Frame rate set to %d fps", stConfig.unFrameRate);
+                                    }
+                                }
+                            }
+                        }
+                        else if(IS_CMD(pcCmd, "bitrate"))
+                        {
+                            char *pchBitrate = CLI_CMD_GetArg(pstCmd, CMD_3);
+                            
+                            if (pchBitrate != NULL)
+                            {
+                                SVC_STREAMING_CONFIG_T stConfig;
+                                nRet = SVC_STREAMING_GetConfig(&s_stSvcStreaming, &stConfig);
+                                if (nRet == FRAMEWORK_OK)
+                                {
+                                    stConfig.unBitrate = (uint32_t)atoi(pchBitrate);
+                                    nRet = SVC_STREAMING_SetConfig(&s_stSvcStreaming, &stConfig);
+                                    if (nRet == FRAMEWORK_OK)
+                                    {
+                                        PrintDebug("Bitrate set to %d", stConfig.unBitrate);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            PrintError("Invalid config option! Use resolution/fps/bitrate");
+                        }
+#else
+                        PrintError("Video streaming not supported in this build");
+#endif
+                    }
+                }
+                else if(IS_CMD(pcCmd, "tcp"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if (pcCmd == NULL)
+                    {
+                        return CLI_CMD_Showusage(pstCmd);
+                    }
+                    else
+                    {
+                        if(IS_CMD(pcCmd, "set"))
+                        {
+                            char *pchHost = CLI_CMD_GetArg(pstCmd, CMD_3);
+                            char *pchRemotePort = CLI_CMD_GetArg(pstCmd, CMD_4);
+                            char *pchLocalPort = CLI_CMD_GetArg(pstCmd, CMD_5);
+                            
+                            if (pchHost != NULL && pchRemotePort != NULL && pchLocalPort != NULL)
+                            {
+                                int32_t nRemotePort = atoi(pchRemotePort);
+                                int32_t nLocalPort = atoi(pchLocalPort);
+                                
+#if defined(CONFIG_VIDEO_STREAMING)
+                                nRet = SVC_STREAMING_SetTcpConnection(&s_stSvcStreaming, pchHost, nRemotePort, nLocalPort);
+                                if (nRet != FRAMEWORK_OK)
+                                {
+                                    PrintError("SVC_STREAMING_SetTcpConnection() failed! [nRet:%d]", nRet);
+                                    return nRet;
+                                }
+                                
+                                PrintDebug("TCP connection set: Host[%s] Remote[%d] Local[%d]", pchHost, nRemotePort, nLocalPort);
+#else
+                                PrintError("TCP streaming not supported in this build");
+#endif
+                            }
+                            else
+                            {
+                                PrintError("TCP set requires: host remote_port local_port");
+                            }
+                        }
+                        else if(IS_CMD(pcCmd, "check"))
+                        {
+#if defined(CONFIG_VIDEO_STREAMING)
+                            nRet = SVC_STREAMING_CheckTcpConnection(&s_stSvcStreaming);
+                            if (nRet != FRAMEWORK_OK)
+                            {
+                                PrintDebug("TCP connection check failed [nRet:%d]", nRet);
+                            }
+                            else
+                            {
+                                PrintDebug("TCP connection is active");
+                            }
+#else
+                            PrintError("TCP streaming not supported in this build");
+#endif
+                        }
+                        else
+                        {
+                            PrintError("Invalid TCP option! Use set/check");
+                        }
+                    }
+                }
+                else if(IS_CMD(pcCmd, "status"))
+                {
+#if defined(CONFIG_VIDEO_STREAMING)
+                    /* Check if streaming service is initialized */
+                    if (s_stSvcStreaming.eStatus == SVC_STREAMING_STATUS_UNINITIALIZED)
+                    {
+                        PrintError("Video streaming service not initialized. Use 'di video init' first.");
+                    }
+                    else
+                    {
+                        /* Use the existing status function */
+                        SVC_STREAMING_PrintStatus(&s_stSvcStreaming);
+                    }
+#else
+                    PrintError("Video streaming not supported in this build");
+#endif
+                }
+                else
+                {
+                    return CLI_CMD_Showusage(pstCmd);
+                }
+            }
+        }
         else
         {
             return CLI_CMD_Showusage(pstCmd);
         }
     }
 
-	return nRet;
+    return nRet;
 }
 
 int32_t CLI_DI_InitCmds(void)
@@ -297,13 +580,31 @@ int32_t CLI_DI_InitCmds(void)
                "di log on [OPTIONS]   show di logs\n"
                "           a          show all logs\n"
                "           g          show gps logs\n"
-               "di log off            hide di logs"
+               "di log off            hide di logs\n"
                "di gps heading        get heading of device\n"
                "di gps open           open a GPS device\n"
                "di gps close          close a GPS device\n"
                "di gps get            get a GPS data\n"
                "di gps tcp server     start tcp/ip server of di gps\n"
-               "di gps set na         set a GPS device as not available\n",
+               "di gps set na         set a GPS device as not available\n"
+               "di can open           open a CAN device\n"
+               "di can close          close a CAN device\n"
+               "di video init         initialize video streaming service\n"
+               "di video start tx     start video streaming in TX mode\n"
+               "di video start rx     start video streaming in RX mode\n"
+               "di video start both   start video streaming in both TX/RX mode\n"
+               "di video stop         stop video streaming\n"
+               "di video config       show current video configuration\n"
+               "di video config resolution [width] [height]\n"
+               "                      set video resolution\n"
+               "di video config fps [fps]\n"
+               "                      set video frame rate\n"
+               "di video config bitrate [bitrate]\n"
+               "                      set video bitrate\n"
+               "di video tcp set [host] [remote_port] [local_port]\n"
+               "                      set TCP connection parameters\n"
+               "di video tcp check    check TCP connection status\n"
+               "di video status       show video streaming status and statistics\n",
                "");
     if(nRet != APP_OK)
     {

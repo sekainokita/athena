@@ -425,7 +425,7 @@ EXIT:
 ```
 
 ### 7.2 Code Flow Control
-- **Avoid using `goto` statements except for error handling and cleanup.**
+- **Avoid using `goto` statements**
 - **Prefer using `if-else` constructs to control code flow.**
 - **Use a single return statement at the end of the function when possible.**
 

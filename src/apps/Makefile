@@ -39,6 +39,7 @@ SRCS = $(wildcard *.c)
 SRCS += $(wildcard $(APP_CLI_PATH)/*.c)
 SRCS += $(wildcard $(APP_SVC_PLATOONING_PATH)/*.c)
 SRCS += $(wildcard $(APP_SVC_CP_PATH)/*.c)
+SRCS += $(wildcard $(APP_SVC_PATH)/streaming/*.c)
 
 OBJS = ${SRCS:.c=.o}
 

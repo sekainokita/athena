@@ -660,6 +660,9 @@ int32_t CLI_CMD_Init(void)
         PrintError("malloc() is failed! [NULL]");
         return nRet;
     }
+    
+    /* Initialize the allocated memory */
+    memset(sh_pstCliCmd, 0, sizeof(CLI_CMD_T));
 
 	nRet = CLI_CMD_AddCmd("help",
 			   P_CLI_CMD_Help,
