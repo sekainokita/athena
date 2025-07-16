@@ -59,6 +59,7 @@
 #include "di.h"
 #include "di_video.h"
 #include "di_video_nvidia.h"
+#include "svc_streaming.h"
 
 #if defined(CONFIG_VIDEO_STREAMING)
 #include <gst/gst.h>
@@ -77,7 +78,7 @@
 #define DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_WIDTH    (1920)
 #define DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_HEIGHT   (1080)
 #define DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_FPS      (30)
-#define DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_BITRATE  (2000000)
+#define DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_BITRATE  (6000000)
 #define DI_VIDEO_NVIDIA_GST_FRAME_TIMEOUT_MS          (5000)
 #define DI_VIDEO_NVIDIA_GST_BUFFER_SIZE               (1024 * 1024)
 #endif
@@ -308,7 +309,7 @@ static void P_DI_VIDEO_NVIDIA_AppSrcNeedData(GstAppSrc *hAppSrc, guint unSize, g
 /*
  * Create TX Pipeline (Camera -> Encoder -> TCP)
  */
-static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(void)
+static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate)
 {
     int32_t nRet = DI_ERROR;
     GstBus *hBus = NULL;
@@ -317,20 +318,17 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(void)
     
     /* Create TX pipeline description with Jetson hardware acceleration */
     pchPipelineDesc = g_strdup_printf(
-        "v4l2src device=/dev/video0 do-timestamp=true ! "
+        "v4l2src device=/dev/video1 do-timestamp=true ! "
         "video/x-raw,format=YUY2,width=%d,height=%d,framerate=%d/1 ! "
         "nvvidconv ! "
         "video/x-raw(memory:NVMM),format=I420 ! "
         "nvv4l2h264enc bitrate=%d peak-bitrate=%d "
-        "iframeinterval=5 insert-sps-pps=true preset-level=0 "
-        "control-rate=0 ! "
+        "iframeinterval=15 insert-sps-pps=true preset-level=1 "
+        "profile=4 control-rate=1 ! "
         "h264parse ! "
         "tcpserversink host=0.0.0.0 port=8554 sync=false",
-        DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_WIDTH,
-        DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_HEIGHT,
-        DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_FPS,
-        DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_BITRATE,
-        DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_BITRATE + 1000000
+        unWidth, unHeight, unFrameRate,
+        unBitrate, unBitrate + 1000000
     );
     
     PrintTrace("TX Pipeline: %s", pchPipelineDesc);
@@ -345,38 +343,8 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(void)
         goto EXIT;
     }
     
-    /* Get pipeline elements */
-    s_hGstAppSrc = gst_bin_get_by_name(GST_BIN(s_hGstPipelineTx), "source");
-    if (s_hGstAppSrc == NULL)
-    {
-        PrintError("Failed to get appsrc element");
-        nRet = DI_ERROR_STREAMING_ELEMENT_NOT_FOUND;
-        goto EXIT;
-    }
-    
-    s_hGstAppSink = gst_bin_get_by_name(GST_BIN(s_hGstPipelineTx), "sink");
-    if (s_hGstAppSink == NULL)
-    {
-        PrintError("Failed to get appsink element");
-        nRet = DI_ERROR_STREAMING_ELEMENT_NOT_FOUND;
-        goto EXIT;
-    }
-    
-    /* Set appsrc callbacks */
-    GstAppSrcCallbacks stAppSrcCallbacks;
-    stAppSrcCallbacks.need_data = P_DI_VIDEO_NVIDIA_AppSrcNeedData;
-    stAppSrcCallbacks.enough_data = NULL;
-    stAppSrcCallbacks.seek_data = NULL;
-    
-    gst_app_src_set_callbacks(GST_APP_SRC(s_hGstAppSrc), &stAppSrcCallbacks, NULL, NULL);
-    
-    /* Set appsink callbacks */
-    GstAppSinkCallbacks stAppSinkCallbacks;
-    stAppSinkCallbacks.new_sample = P_DI_VIDEO_NVIDIA_AppSinkNewSample;
-    stAppSinkCallbacks.eos = NULL;
-    stAppSinkCallbacks.new_preroll = NULL;
-    
-    gst_app_sink_set_callbacks(GST_APP_SINK(s_hGstAppSink), &stAppSinkCallbacks, NULL, NULL);
+    /* TX pipeline uses v4l2src -> tcpserversink, no appsrc/appsink needed */
+    PrintTrace("TX pipeline created successfully - using v4l2src directly");
     
     /* Set bus message handler */
     hBus = gst_pipeline_get_bus(GST_PIPELINE(s_hGstPipelineTx));
@@ -408,7 +376,7 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateRxPipeline(const char *pchRemoteHost, int
     pchPipelineDesc = g_strdup_printf(
         "tcpclientsrc host=%s port=%d ! "
         "h264parse ! "
-        "nvv4l2decoder low-latency=true max-performance=true ! "
+        "nvv4l2decoder ! "
         "nvvidconv ! "
         "video/x-raw,format=I420,width=%d,height=%d ! "
         "tee name=t ! "
@@ -433,14 +401,8 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateRxPipeline(const char *pchRemoteHost, int
         goto EXIT;
     }
     
-    /* Get appsrc element */
-    s_hGstAppSrc = gst_bin_get_by_name(GST_BIN(s_hGstPipelineRx), "source");
-    if (s_hGstAppSrc == NULL)
-    {
-        PrintError("Failed to get appsrc element");
-        nRet = DI_ERROR_STREAMING_ELEMENT_NOT_FOUND;
-        goto EXIT;
-    }
+    /* RX pipeline uses tcpclientsrc -> decoder -> multiple outputs, no appsrc needed */
+    PrintTrace("RX pipeline created successfully - using tcpclientsrc directly");
     
     /* Set bus message handler */
     hBus = gst_pipeline_get_bus(GST_PIPELINE(s_hGstPipelineRx));
@@ -556,6 +518,14 @@ static int32_t P_DI_VIDEO_NVIDIA_InitBuffers(void)
         goto EXIT;
     }
     
+    /* Start TX ring buffer */
+    nRet = DI_RING_BUFFER_Start(s_pstRingBufferTx);
+    if (nRet != DI_OK)
+    {
+        PrintError("Failed to start TX ring buffer [nRet:%d]", nRet);
+        goto EXIT;
+    }
+    
     /* Initialize RX ring buffer */
     s_pstRingBufferRx = malloc(sizeof(DI_RING_BUFFER_T));
     if (s_pstRingBufferRx == NULL)
@@ -569,6 +539,14 @@ static int32_t P_DI_VIDEO_NVIDIA_InitBuffers(void)
     if (nRet != DI_OK)
     {
         PrintError("Failed to initialize RX ring buffer [nRet:%d]", nRet);
+        goto EXIT;
+    }
+    
+    /* Start RX ring buffer */
+    nRet = DI_RING_BUFFER_Start(s_pstRingBufferRx);
+    if (nRet != DI_OK)
+    {
+        PrintError("Failed to start RX ring buffer [nRet:%d]", nRet);
         goto EXIT;
     }
     
@@ -615,7 +593,7 @@ EXIT:
 /*
  * Start TX mode (Camera -> TCP Server)
  */
-static int32_t P_DI_VIDEO_NVIDIA_StartTxMode(void)
+static int32_t P_DI_VIDEO_NVIDIA_StartTxMode(uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate)
 {
     int32_t nRet = DI_ERROR;
     
@@ -623,8 +601,13 @@ static int32_t P_DI_VIDEO_NVIDIA_StartTxMode(void)
     
     if (s_bGstPipelineActive == FALSE)
     {
-        /* Create TX pipeline */
-        nRet = P_DI_VIDEO_NVIDIA_CreateTxPipeline();
+        /* Create TX pipeline with provided configuration */
+        nRet = P_DI_VIDEO_NVIDIA_CreateTxPipeline(
+            unWidth,
+            unHeight,
+            unFrameRate,
+            unBitrate
+        );
         if (nRet != DI_OK)
         {
             PrintError("Failed to create TX pipeline [nRet:%d]", nRet);
@@ -981,6 +964,7 @@ int32_t DI_VIDEO_NVIDIA_Open(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia)
     if((pstDiVideoNvidia->eDiVideoNvidiaStatus == DI_VIDEO_NVIDIA_STATUS_INITIALIZED) || (pstDiVideoNvidia->eDiVideoNvidiaStatus == DI_VIDEO_NVIDIA_STATUS_CLOSED))
     {
         pstDiVideoNvidia->eDiVideoNvidiaStatus = DI_VIDEO_NVIDIA_STATUS_OPENED;
+        nRet = DI_OK;
     }
     else
     {
@@ -989,6 +973,7 @@ int32_t DI_VIDEO_NVIDIA_Open(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia)
         if(pstDiVideoNvidia->eDiVideoNvidiaStatus == DI_VIDEO_NVIDIA_STATUS_OPENED)
         {
             PrintDebug("already DI_VIDEO_NVIDIA_STATUS_OPENED");
+            nRet = DI_OK;
         }
     }
 
@@ -1054,8 +1039,13 @@ int32_t DI_VIDEO_NVIDIA_Start(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia)
     
     if (s_bGstPipelineActive == FALSE)
     {
-        /* Create TX pipeline for video streaming */
-        nRet = P_DI_VIDEO_NVIDIA_CreateTxPipeline();
+        /* Create TX pipeline with default configuration */
+        nRet = P_DI_VIDEO_NVIDIA_CreateTxPipeline(
+            DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_WIDTH,
+            DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_HEIGHT,
+            DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_FPS,
+            DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_BITRATE
+        );
         if (nRet != DI_OK)
         {
             PrintError("P_DI_VIDEO_NVIDIA_CreateTxPipeline() is failed! [nRet:%d]", nRet);
@@ -1242,7 +1232,7 @@ EXIT:
 /*
  * Public function: Start TX mode
  */
-int32_t DI_VIDEO_NVIDIA_StartTxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia)
+int32_t DI_VIDEO_NVIDIA_StartTxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia, uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate)
 {
     int32_t nRet = DI_ERROR;
     
@@ -1259,7 +1249,7 @@ int32_t DI_VIDEO_NVIDIA_StartTxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia)
         goto EXIT;
     }
     
-    nRet = P_DI_VIDEO_NVIDIA_StartTxMode();
+    nRet = P_DI_VIDEO_NVIDIA_StartTxMode(unWidth, unHeight, unFrameRate, unBitrate);
     if (nRet != DI_OK)
     {
         PrintError("P_DI_VIDEO_NVIDIA_StartTxMode() failed [nRet:%d]", nRet);

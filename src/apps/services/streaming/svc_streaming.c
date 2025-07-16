@@ -17,7 +17,7 @@
 * MODIFICATION HISTORY:
 * Ver   Who  Date     Changes
 * ----- ---- -------- ----------------------------------------------------
-* 1.00  ai   25.01.09 First release
+* 1.00  blank  25.07.12 First release
 *
 ******************************************************************************/
 
@@ -185,20 +185,9 @@ static void *P_SVC_STREAMING_TxThread(void *pvArg)
     
     while (s_bTxThreadRunning)
     {
-        /* Get frame from camera */
-        memset(&stFrame, 0, sizeof(DI_CAMERA_FRAME_T));
-        nRet = DI_CAMERA_GetFrame(&s_stDiCamera, &stFrame);
-        
-        if (nRet == DI_OK && stFrame.puchData != NULL && stFrame.unDataSize > 0)
-        {
-            /* Frame is automatically forwarded to ring buffer by camera module */
-            /* Release frame after processing */
-            DI_CAMERA_ReleaseFrame(&s_stDiCamera, &stFrame);
-        }
-        else
-        {
-            usleep(33000); /* ~30 FPS */
-        }
+        /* TX mode uses GStreamer v4l2src directly - no manual frame processing needed */
+        /* This thread just monitors the TX streaming status */
+        usleep(5000000); /* Check every 5 seconds */
     }
     
     PrintTrace("TX thread stopped");
@@ -725,7 +714,11 @@ int32_t SVC_STREAMING_Start(SVC_STREAMING_T *pstSvcStreaming, SVC_STREAMING_MODE
     if (eMode == SVC_STREAMING_MODE_TX || eMode == SVC_STREAMING_MODE_BOTH)
     {
         /* Start TX mode (Camera -> TCP Server) */
-        nRet = DI_VIDEO_NVIDIA_StartTxMode(&s_stDiVideoNvidia);
+        nRet = DI_VIDEO_NVIDIA_StartTxMode(&s_stDiVideoNvidia, 
+                                          s_stCurrentConfig.unWidth,
+                                          s_stCurrentConfig.unHeight,
+                                          s_stCurrentConfig.unFrameRate,
+                                          s_stCurrentConfig.unBitrate);
         if (nRet != DI_OK)
         {
             PrintError("Failed to start TX mode [nRet:%d]", nRet);
@@ -805,29 +798,38 @@ int32_t SVC_STREAMING_Stop(SVC_STREAMING_T *pstSvcStreaming)
     
     pthread_mutex_lock(&s_stSvcStreamingMutex);
     
-    if (s_eCurrentStatus != SVC_STREAMING_STATUS_RUNNING)
+    /* 상태에 관계없이 정리 작업 수행 (안전 장치) */
+    bool bNeedCleanup = FALSE;
+    if (s_eCurrentStatus == SVC_STREAMING_STATUS_RUNNING)
     {
-        PrintWarn("Streaming service is not started");
-        nRet = FRAMEWORK_OK;
-        pthread_mutex_unlock(&s_stSvcStreamingMutex);
-        goto EXIT;
+        bNeedCleanup = TRUE;
+        PrintTrace("Stopping running streaming service");
+    }
+    else
+    {
+        PrintWarn("Service not running - performing safety cleanup");
+        bNeedCleanup = TRUE; /* 강제 정리 */
     }
     
+    if (bNeedCleanup == TRUE)
+    {
 #if defined(CONFIG_VIDEO_STREAMING)
-    /* Stop threads */
-    s_bTxThreadRunning = FALSE;
-    s_bRxThreadRunning = FALSE;
-    s_bStatsThreadRunning = FALSE;
-    
-    /* Stop subsystems */
-    DI_CAMERA_Stop(&s_stDiCamera);
-    DI_CAMERA_Close(&s_stDiCamera);
-    DI_VIDEO_Stop(&s_stDiVideo);
-    DI_VIDEO_Close(&s_stDiVideo);
-    
-    /* Disconnect camera from streaming */
-    DI_CAMERA_DisconnectVideoStreaming(&s_stDiCamera);
+        /* 1. 먼저 하드웨어 자원 정리 */
+        DI_VIDEO_NVIDIA_Stop(&s_stDiVideoNvidia);
+        DI_VIDEO_Stop(&s_stDiVideo);
+        DI_CAMERA_Stop(&s_stDiCamera);
+        
+        /* 2. 그 다음 스레드 종료 */
+        s_bTxThreadRunning = FALSE;
+        s_bRxThreadRunning = FALSE;
+        s_bStatsThreadRunning = FALSE;
+        
+        /* 3. 최종 자원 해제 */
+        DI_CAMERA_Close(&s_stDiCamera);
+        DI_VIDEO_Close(&s_stDiVideo);
+        DI_CAMERA_DisconnectVideoStreaming(&s_stDiCamera);
 #endif
+    }
     
     s_eCurrentStatus = SVC_STREAMING_STATUS_STOPPED;
     pstSvcStreaming->eStatus = SVC_STREAMING_STATUS_STOPPED;

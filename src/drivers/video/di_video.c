@@ -233,7 +233,7 @@ static int32_t P_DI_VIDEO_DeInit(DI_VIDEO_T *pstDiVideo)
         return nRet;
     }
 
-    (void*)memset(&s_stDiVideoDev, 0x00, sizeof(DI_VIDEO_XSENS_T));
+    (void*)memset(&s_stDiVideoDev, 0x00, sizeof(DI_VIDEO_NVIDIA_T));
 #else
     nRet = DI_OK;
     PrintWarn("None of VIDEO devices are supported.");
@@ -327,6 +327,7 @@ int32_t DI_VIDEO_Open(DI_VIDEO_T *pstDiVideo)
         }
 #endif
         pstDiVideo->eDiVideoStatus = DI_VIDEO_STATUS_OPENED;
+        nRet = DI_OK;
     }
     else
     {
@@ -335,6 +336,7 @@ int32_t DI_VIDEO_Open(DI_VIDEO_T *pstDiVideo)
         if(pstDiVideo->eDiVideoStatus == DI_VIDEO_STATUS_OPENED)
         {
             PrintDebug("already DI_VIDEO_STATUS_OPENED");
+            nRet = DI_OK;
         }
     }
 
@@ -393,12 +395,41 @@ int32_t DI_VIDEO_Start(DI_VIDEO_T *pstDiVideo)
 {
     int32_t nRet = DI_ERROR;
 
-    PrintWarn("TODO");
-
     if(pstDiVideo == NULL)
     {
         PrintError("pstDiVideo == NULL!!");
         return nRet;
+    }
+
+    if (pstDiVideo->bVideoNotAvailable == TRUE)
+    {
+        PrintWarn("bVideoNotAvailable[%d]", pstDiVideo->bVideoNotAvailable);
+        nRet = DI_OK;
+        return nRet;
+    }
+
+    if(pstDiVideo->eDiVideoStatus == DI_VIDEO_STATUS_OPENED)
+    {
+#if defined(CONFIG_VIDEO_NVIDIA)
+        nRet = DI_VIDEO_NVIDIA_Start(&s_stDiVideoDev);
+        if(nRet != DI_OK)
+        {
+            PrintError("DI_VIDEO_NVIDIA_Start() is failed! [nRet:%d]", nRet);
+            return nRet;
+        }
+#endif
+        pstDiVideo->eDiVideoStatus = DI_VIDEO_STATUS_STARTED;
+        nRet = DI_OK;
+    }
+    else
+    {
+        PrintWarn("check the status of VIDEO [%d]", pstDiVideo->eDiVideoStatus);
+        
+        if(pstDiVideo->eDiVideoStatus == DI_VIDEO_STATUS_STARTED)
+        {
+            PrintDebug("already DI_VIDEO_STATUS_STARTED");
+            nRet = DI_OK;
+        }
     }
 
     return nRet;
