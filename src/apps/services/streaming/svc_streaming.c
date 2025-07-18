@@ -718,7 +718,11 @@ int32_t SVC_STREAMING_Start(SVC_STREAMING_T *pstSvcStreaming, SVC_STREAMING_MODE
                                           s_stCurrentConfig.unWidth,
                                           s_stCurrentConfig.unHeight,
                                           s_stCurrentConfig.unFrameRate,
-                                          s_stCurrentConfig.unBitrate);
+                                          s_stCurrentConfig.unBitrate,
+                                          s_stCurrentConfig.unCodecType,
+                                          s_stCurrentConfig.unFormatType,
+                                          s_stCurrentConfig.unIFrameInterval,
+                                          s_stCurrentConfig.unPresetLevel);
         if (nRet != DI_OK)
         {
             PrintError("Failed to start TX mode [nRet:%d]", nRet);
@@ -965,6 +969,12 @@ void SVC_STREAMING_Status(SVC_STREAMING_T *pstSvcStreaming)
     PrintDebug("  Resolution: %dx%d", s_stCurrentConfig.unWidth, s_stCurrentConfig.unHeight);
     PrintDebug("  FPS: %d", s_stCurrentConfig.unFrameRate);
     PrintDebug("  Bitrate: %d", s_stCurrentConfig.unBitrate);
+    PrintDebug("  Codec: %s", (s_stCurrentConfig.unCodecType == 0) ? "H.264" : 
+                              (s_stCurrentConfig.unCodecType == 1) ? "H.265" : "MJPEG");
+    PrintDebug("  Format: %s", (s_stCurrentConfig.unFormatType == 0) ? "YUYV" : 
+                               (s_stCurrentConfig.unFormatType == 1) ? "MJPEG" : "NV12");
+    PrintDebug("  I-Frame Interval: %d", s_stCurrentConfig.unIFrameInterval);
+    PrintDebug("  Preset Level: %d", s_stCurrentConfig.unPresetLevel);
     PrintDebug("  Hardware Accel: %s", s_stCurrentConfig.bHardwareAcceleration ? "YES" : "NO");
 #endif
     PrintDebug("Statistics:");

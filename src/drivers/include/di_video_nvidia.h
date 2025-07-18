@@ -53,6 +53,20 @@
 /***************************** Definition ************************************/
 #define DI_VIDEO_NVIDIA_TASK_MSG_KEY               (0x252531)
 
+/* Multi-camera configuration constants */
+#define DI_VIDEO_CAMERA_MAX_COUNT                  6
+#define DI_VIDEO_CAMERA_TCP_PORT_BASE              8554
+#define DI_VIDEO_CAMERA_RTSP_PORT_BASE             8560
+#define DI_VIDEO_CAMERA_PORT_OFFSET                1
+#define DI_VIDEO_CAMERA_DEFAULT_AVAILABLE          FALSE
+
+/* Port calculation macros */
+#define DI_VIDEO_CAMERA_GET_TCP_PORT(id)           (DI_VIDEO_CAMERA_TCP_PORT_BASE + ((id) - 1) * DI_VIDEO_CAMERA_PORT_OFFSET)
+#define DI_VIDEO_CAMERA_GET_RTSP_PORT(id)          (DI_VIDEO_CAMERA_RTSP_PORT_BASE + ((id) - 1) * DI_VIDEO_CAMERA_PORT_OFFSET)
+
+/* Validation macros */
+#define DI_VIDEO_CAMERA_IS_VALID_ID(id)            ((id) >= 1 && (id) <= DI_VIDEO_CAMERA_MAX_COUNT)
+
 /***************************** Enum and Structure ****************************/
 /**
 * @details DI VIDEO_NVIDIA Status
@@ -111,6 +125,38 @@ typedef struct DI_VIDEO_NVIDIA_t {
     uint32_t                        unReserved;
 } DI_VIDEO_NVIDIA_T;
 
+/**
+* @details DI_VIDEO_CAMERA_CONFIG_T
+* @param unMaxCameraCount maximum number of cameras
+* @param unTcpPortBase base TCP port number
+* @param unRtspPortBase base RTSP port number
+* @param unPortOffset port offset between cameras
+* @param bDefaultAvailable default camera availability status
+*/
+typedef struct DI_VIDEO_CAMERA_CONFIG_t {
+    uint32_t                        unMaxCameraCount;
+    uint32_t                        unTcpPortBase;
+    uint32_t                        unRtspPortBase;
+    uint32_t                        unPortOffset;
+    bool                            bDefaultAvailable;
+} DI_VIDEO_CAMERA_CONFIG_T;
+
+/**
+* @details DI_VIDEO_CAMERA_T
+* @param unCameraId camera identifier (1-6)
+* @param unTcpPort assigned TCP port
+* @param unRtspPort assigned RTSP port
+* @param bCameraAvailable camera availability status
+* @param stDiVideoNvidia video nvidia instance
+*/
+typedef struct DI_VIDEO_CAMERA_t {
+    uint32_t                        unCameraId;
+    uint32_t                        unTcpPort;
+    uint32_t                        unRtspPort;
+    bool                            bCameraAvailable;
+    DI_VIDEO_NVIDIA_T               stDiVideoNvidia;
+} DI_VIDEO_CAMERA_T;
+
 /***************************** Function Protype ******************************/
 
 int32_t DI_VIDEO_NVIDIA_Init(DI_VIDEO_NVIDIA_T *pstDiGps);
@@ -130,7 +176,7 @@ void DI_VIDEO_NVIDIA_Status(DI_VIDEO_NVIDIA_T *pstDiGps);
 #if defined(CONFIG_VIDEO_STREAMING)
 /* TCP streaming functions */
 int32_t DI_VIDEO_NVIDIA_SetTcpConnection(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia, const char *pchRemoteHost, int32_t nRemotePort, int32_t nLocalPort);
-int32_t DI_VIDEO_NVIDIA_StartTxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia, uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate);
+int32_t DI_VIDEO_NVIDIA_StartTxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia, uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unFormatType, uint32_t unIFrameInterval, uint32_t unPresetLevel);
 int32_t DI_VIDEO_NVIDIA_StartRxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia);
 int32_t DI_VIDEO_NVIDIA_CheckTcpConnection(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia);
 #endif

@@ -362,9 +362,9 @@ distclean: lib-db-distclean lib-msg-distclean lib-time-distclean lib-di-distclea
 ifeq ($(CONFIG_GSTREAMER),y)
 TARGET_CFLAGS += -DCONFIG_GSTREAMER
 TARGET_CXXFLAGS += -DCONFIG_GSTREAMER
-TARGET_CFLAGS += $(shell pkg-config --cflags gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0)
-TARGET_CXXFLAGS += $(shell pkg-config --cflags gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0)
-TARGET_LDFLAGS += $(shell pkg-config --libs gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0)
+TARGET_CFLAGS += $(shell pkg-config --cflags gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0 gstreamer-rtsp-server-1.0)
+TARGET_CXXFLAGS += $(shell pkg-config --cflags gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0 gstreamer-rtsp-server-1.0)
+TARGET_LDFLAGS += $(shell pkg-config --libs gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0 gstreamer-rtsp-server-1.0)
 endif
 
 ifeq ($(CONFIG_VIDEO_STREAMING),y)

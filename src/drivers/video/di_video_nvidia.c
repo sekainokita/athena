@@ -65,6 +65,7 @@
 #include <gst/gst.h>
 #include <gst/app/gstappsrc.h>
 #include <gst/app/gstappsink.h>
+#include <gst/rtsp-server/rtsp-server.h>
 #include "di_ring_buffer.h"
 #include "di_error.h"
 #include "di_memory_pool.h"
@@ -79,6 +80,9 @@
 #define DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_HEIGHT   (1080)
 #define DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_FPS      (30)
 #define DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_BITRATE  (6000000)
+#define DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_CODEC    (0)      /* 0=H264, 1=H265, 2=MJPEG */
+#define DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_IFRAME   (15)     /* I-frame interval (GOP size) */
+#define DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_PRESET   (1)      /* Preset level (0=fastest, 3=slowest) */
 #define DI_VIDEO_NVIDIA_GST_FRAME_TIMEOUT_MS          (5000)
 #define DI_VIDEO_NVIDIA_GST_BUFFER_SIZE               (1024 * 1024)
 #endif
@@ -102,21 +106,107 @@ static GMainLoop *s_hMainLoop = NULL;
 static pthread_t s_hGstMainLoopThread;
 static bool s_bGstPipelineActive = FALSE;
 
+/* RTSP server components */
+static GstRTSPServer *s_hRtspServer = NULL;
+static GstRTSPMountPoints *s_hRtspMounts = NULL;
+static GstRTSPMediaFactory *s_hRtspFactory = NULL;
+static guint s_unRtspServerId = 0;
+
 /* Ring Buffer integration */
 static DI_RING_BUFFER_T *s_pstRingBufferTx = NULL;
 static DI_RING_BUFFER_T *s_pstRingBufferRx = NULL;
 static DI_MEMORY_POOL_T *s_pstMemoryPool = NULL;
 static pthread_mutex_t s_stGstMutex = PTHREAD_MUTEX_INITIALIZER;
 
-/* TCP connection settings */
+/* Ring Buffer pipelines */
+static GstElement *s_hGstPipelineTxEncode = NULL;
+static GstElement *s_hGstPipelineRxDisplay = NULL;
+
+/* Multi-camera configuration */
+static const DI_VIDEO_CAMERA_CONFIG_T s_stCameraConfig = {
+    .unMaxCameraCount = DI_VIDEO_CAMERA_MAX_COUNT,
+    .unTcpPortBase = DI_VIDEO_CAMERA_TCP_PORT_BASE,
+    .unRtspPortBase = DI_VIDEO_CAMERA_RTSP_PORT_BASE,
+    .unPortOffset = DI_VIDEO_CAMERA_PORT_OFFSET,
+    .bDefaultAvailable = DI_VIDEO_CAMERA_DEFAULT_AVAILABLE
+};
+
+/* Multi-camera array - Camera 1 is currently active, others unavailable */
+static DI_VIDEO_CAMERA_T s_astCameras[DI_VIDEO_CAMERA_MAX_COUNT];
+
+/* Legacy variables for backward compatibility (Camera 1) */
 static char s_achRemoteHost[256] = "127.0.0.1";
-static int32_t s_nRemotePort = 8554;
-static int32_t s_nLocalPort = 8554;
+static int32_t s_nRemotePort = DI_VIDEO_CAMERA_TCP_PORT_BASE;    /* Camera 1 TCP port */
+static int32_t s_nLocalPort = DI_VIDEO_CAMERA_TCP_PORT_BASE;     /* Camera 1 TCP port */
 #endif
 
 /***************************** Function  *************************************/
 
 #if defined(CONFIG_VIDEO_STREAMING)
+
+/*
+ * Function prototypes for ring buffer pipelines
+ */
+static int32_t P_DI_VIDEO_NVIDIA_CreateTxEncodingPipeline(uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unIFrameInterval, uint32_t unPresetLevel);
+static int32_t P_DI_VIDEO_NVIDIA_CreateRxDisplayPipeline(void);
+static GstFlowReturn P_DI_VIDEO_NVIDIA_AppSinkTxNewSample(GstAppSink *hAppSink, gpointer pvUserData);
+static void P_DI_VIDEO_NVIDIA_AppSrcNeedDataDisplay(GstAppSrc *hAppSrc, guint unSize, gpointer pvUserData);
+
+/*
+ * Camera port calculation functions
+ */
+static uint32_t P_DI_VIDEO_CAMERA_GetTcpPort(uint32_t unCameraId)
+{
+    if (!DI_VIDEO_CAMERA_IS_VALID_ID(unCameraId))
+    {
+        PrintError("Invalid camera ID [%d]. Valid range: 1-%d", unCameraId, DI_VIDEO_CAMERA_MAX_COUNT);
+        return 0; /* Invalid */
+    }
+    return s_stCameraConfig.unTcpPortBase + ((unCameraId - 1) * s_stCameraConfig.unPortOffset);
+}
+
+static uint32_t P_DI_VIDEO_CAMERA_GetRtspPort(uint32_t unCameraId)
+{
+    if (!DI_VIDEO_CAMERA_IS_VALID_ID(unCameraId))
+    {
+        PrintError("Invalid camera ID [%d]. Valid range: 1-%d", unCameraId, DI_VIDEO_CAMERA_MAX_COUNT);
+        return 0; /* Invalid */
+    }
+    return s_stCameraConfig.unRtspPortBase + ((unCameraId - 1) * s_stCameraConfig.unPortOffset);
+}
+
+/*
+ * Multi-camera initialization
+ */
+static int32_t P_DI_VIDEO_CAMERA_InitAll(void)
+{
+    int32_t nRet = DI_OK;
+    uint32_t unCameraIndex = 0;
+    
+    for (unCameraIndex = 0; unCameraIndex < s_stCameraConfig.unMaxCameraCount; unCameraIndex++)
+    {
+        uint32_t unCameraId = unCameraIndex + 1;
+        
+        s_astCameras[unCameraIndex].unCameraId = unCameraId;
+        s_astCameras[unCameraIndex].unTcpPort = P_DI_VIDEO_CAMERA_GetTcpPort(unCameraId);
+        s_astCameras[unCameraIndex].unRtspPort = P_DI_VIDEO_CAMERA_GetRtspPort(unCameraId);
+        s_astCameras[unCameraIndex].bCameraAvailable = s_stCameraConfig.bDefaultAvailable;
+        
+        /* Only Camera 1 is available by default */
+        if (unCameraId == 1)
+        {
+            s_astCameras[unCameraIndex].bCameraAvailable = TRUE;
+        }
+        
+        PrintTrace("Camera %d initialized: TCP=%d, RTSP=%d, Available=%s",
+                   unCameraId,
+                   s_astCameras[unCameraIndex].unTcpPort,
+                   s_astCameras[unCameraIndex].unRtspPort,
+                   s_astCameras[unCameraIndex].bCameraAvailable ? "YES" : "NO");
+    }
+    
+    return nRet;
+}
 /*
  * GStreamer Main Loop Thread
  */
@@ -196,6 +286,100 @@ static gboolean P_DI_VIDEO_NVIDIA_GstBusCall(GstBus *hBus, GstMessage *pstMsg, g
 }
 
 /*
+ * AppSink New Sample Callback - TX Pipeline
+ */
+static GstFlowReturn P_DI_VIDEO_NVIDIA_AppSinkTxNewSample(GstAppSink *hAppSink, gpointer pvUserData)
+{
+    GstSample *pstSample = NULL;
+    GstBuffer *pstBuffer = NULL;
+    GstMapInfo stMapInfo;
+    int32_t nRet = DI_ERROR;
+    
+    UNUSED(pvUserData);
+    
+    pstSample = gst_app_sink_pull_sample(hAppSink);
+    if (pstSample == NULL)
+    {
+        PrintError("Failed to pull sample from TX appsink");
+        return GST_FLOW_ERROR;
+    }
+    
+    pstBuffer = gst_sample_get_buffer(pstSample);
+    if (pstBuffer == NULL)
+    {
+        PrintError("Failed to get buffer from TX sample");
+        gst_sample_unref(pstSample);
+        return GST_FLOW_ERROR;
+    }
+    
+    if (gst_buffer_map(pstBuffer, &stMapInfo, GST_MAP_READ) == FALSE)
+    {
+        PrintError("Failed to map TX buffer");
+        gst_sample_unref(pstSample);
+        return GST_FLOW_ERROR;
+    }
+    
+    pthread_mutex_lock(&s_stGstMutex);
+    
+    /* Write raw frame to TX ring buffer */
+    if (s_pstRingBufferTx != NULL)
+    {
+        nRet = DI_RING_BUFFER_Write(s_pstRingBufferTx, stMapInfo.data, stMapInfo.size);
+        if (nRet != DI_OK)
+        {
+            PrintError("Failed to write to TX ring buffer [nRet:%d]", nRet);
+        }
+        else
+        {
+            /* Push data directly to AppSrc if encoding pipeline is ready */
+            if (s_hGstAppSrc != NULL && s_hGstPipelineTxEncode != NULL)
+            {
+                GstState stCurState;
+                gst_element_get_state(s_hGstPipelineTxEncode, &stCurState, NULL, 0);
+                if (stCurState >= GST_STATE_PAUSED)
+                {
+                GstBuffer *pstEncodeBuffer = gst_buffer_new_allocate(NULL, stMapInfo.size, NULL);
+                if (pstEncodeBuffer != NULL)
+                {
+                    GstMapInfo stEncodeMapInfo;
+                    if (gst_buffer_map(pstEncodeBuffer, &stEncodeMapInfo, GST_MAP_WRITE))
+                    {
+                        memcpy(stEncodeMapInfo.data, stMapInfo.data, stMapInfo.size);
+                        gst_buffer_unmap(pstEncodeBuffer, &stEncodeMapInfo);
+                        
+                        /* Set timestamp based on current time */
+                        static GstClockTime s_unTimestamp = 0;
+                        GST_BUFFER_PTS(pstEncodeBuffer) = s_unTimestamp;
+                        GST_BUFFER_DTS(pstEncodeBuffer) = s_unTimestamp;
+                        GST_BUFFER_DURATION(pstEncodeBuffer) = gst_util_uint64_scale(GST_SECOND, 1, 30);
+                        s_unTimestamp += GST_BUFFER_DURATION(pstEncodeBuffer);
+                        
+                        /* Push to AppSrc */
+                        if (gst_app_src_push_buffer(GST_APP_SRC(s_hGstAppSrc), pstEncodeBuffer) != GST_FLOW_OK)
+                        {
+                            PrintError("Failed to push buffer to AppSrc");
+                            gst_buffer_unref(pstEncodeBuffer);
+                        }
+                    }
+                    else
+                    {
+                        gst_buffer_unref(pstEncodeBuffer);
+                    }
+                }
+                }
+            }
+        }
+    }
+    
+    pthread_mutex_unlock(&s_stGstMutex);
+    
+    gst_buffer_unmap(pstBuffer, &stMapInfo);
+    gst_sample_unref(pstSample);
+    
+    return GST_FLOW_OK;
+}
+
+/*
  * AppSink New Sample Callback - RX Pipeline
  */
 static GstFlowReturn P_DI_VIDEO_NVIDIA_AppSinkNewSample(GstAppSink *hAppSink, gpointer pvUserData)
@@ -265,13 +449,15 @@ static void P_DI_VIDEO_NVIDIA_AppSrcNeedData(GstAppSrc *hAppSrc, guint unSize, g
     
     pthread_mutex_lock(&s_stGstMutex);
     
-    /* Read camera frame from TX ring buffer */
+    /* Read camera frame from TX ring buffer for encoding */
     if (s_pstRingBufferTx != NULL)
     {
         nRet = DI_RING_BUFFER_Read(s_pstRingBufferTx, achDataBuffer, DI_VIDEO_NVIDIA_GST_BUFFER_SIZE, &unReadSize);
         if (nRet != DI_OK || unReadSize == 0)
         {
+            /* No data available, wait and retry */
             pthread_mutex_unlock(&s_stGstMutex);
+            usleep(10000); /* 10ms delay */
             return;
         }
         
@@ -295,6 +481,11 @@ static void P_DI_VIDEO_NVIDIA_AppSrcNeedData(GstAppSrc *hAppSrc, guint unSize, g
         memcpy(stMapInfo.data, achDataBuffer, unReadSize);
         gst_buffer_unmap(pstBuffer, &stMapInfo);
         
+        /* Set timestamp */
+        GST_BUFFER_PTS(pstBuffer) = gst_util_uint64_scale(GST_SECOND, 1, 30); /* 30 FPS */
+        GST_BUFFER_DTS(pstBuffer) = GST_BUFFER_PTS(pstBuffer);
+        GST_BUFFER_DURATION(pstBuffer) = gst_util_uint64_scale(GST_SECOND, 1, 30);
+        
         /* Push buffer to appsrc */
         if (gst_app_src_push_buffer(hAppSrc, pstBuffer) != GST_FLOW_OK)
         {
@@ -307,29 +498,173 @@ static void P_DI_VIDEO_NVIDIA_AppSrcNeedData(GstAppSrc *hAppSrc, guint unSize, g
 }
 
 /*
+ * AppSrc Need Data Callback - RX Display Pipeline
+ */
+static void P_DI_VIDEO_NVIDIA_AppSrcNeedDataDisplay(GstAppSrc *hAppSrc, guint unSize, gpointer pvUserData)
+{
+    GstBuffer *pstBuffer = NULL;
+    GstMapInfo stMapInfo;
+    uint8_t achDataBuffer[DI_VIDEO_NVIDIA_GST_BUFFER_SIZE];
+    uint32_t unReadSize = 0;
+    int32_t nRet = DI_ERROR;
+    
+    UNUSED(pvUserData);
+    UNUSED(unSize);
+    
+    pthread_mutex_lock(&s_stGstMutex);
+    
+    /* Read decoded frame from RX ring buffer for display */
+    if (s_pstRingBufferRx != NULL)
+    {
+        nRet = DI_RING_BUFFER_Read(s_pstRingBufferRx, achDataBuffer, DI_VIDEO_NVIDIA_GST_BUFFER_SIZE, &unReadSize);
+        if (nRet != DI_OK || unReadSize == 0)
+        {
+            pthread_mutex_unlock(&s_stGstMutex);
+            return;
+        }
+        
+        /* Create GStreamer buffer */
+        pstBuffer = gst_buffer_new_allocate(NULL, unReadSize, NULL);
+        if (pstBuffer == NULL)
+        {
+            PrintError("Failed to allocate GStreamer buffer for display");
+            pthread_mutex_unlock(&s_stGstMutex);
+            return;
+        }
+        
+        if (gst_buffer_map(pstBuffer, &stMapInfo, GST_MAP_WRITE) == FALSE)
+        {
+            PrintError("Failed to map GStreamer buffer for display");
+            gst_buffer_unref(pstBuffer);
+            pthread_mutex_unlock(&s_stGstMutex);
+            return;
+        }
+        
+        memcpy(stMapInfo.data, achDataBuffer, unReadSize);
+        gst_buffer_unmap(pstBuffer, &stMapInfo);
+        
+        /* Push buffer to appsrc */
+        if (gst_app_src_push_buffer(hAppSrc, pstBuffer) != GST_FLOW_OK)
+        {
+            PrintError("Failed to push buffer to display appsrc");
+            gst_buffer_unref(pstBuffer);
+        }
+    }
+    
+    pthread_mutex_unlock(&s_stGstMutex);
+}
+
+/*
  * Create TX Pipeline (Camera -> Encoder -> TCP)
  */
-static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate)
+static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unFormatType, uint32_t unIFrameInterval, uint32_t unPresetLevel)
 {
     int32_t nRet = DI_ERROR;
     GstBus *hBus = NULL;
     gchar *pchPipelineDesc = NULL;
     GError *pstError = NULL;
     
-    /* Create TX pipeline description with Jetson hardware acceleration */
-    pchPipelineDesc = g_strdup_printf(
-        "v4l2src device=/dev/video1 do-timestamp=true ! "
-        "video/x-raw,format=YUY2,width=%d,height=%d,framerate=%d/1 ! "
-        "nvvidconv ! "
-        "video/x-raw(memory:NVMM),format=I420 ! "
-        "nvv4l2h264enc bitrate=%d peak-bitrate=%d "
-        "iframeinterval=15 insert-sps-pps=true preset-level=1 "
-        "profile=4 control-rate=1 ! "
-        "h264parse ! "
-        "tcpserversink host=0.0.0.0 port=8554 sync=false",
-        unWidth, unHeight, unFrameRate,
-        unBitrate, unBitrate + 1000000
-    );
+    /* Create TX pipeline description with format and codec selection */
+    const char *pchFormat = (unFormatType == 0) ? "YUY2" : 
+                           (unFormatType == 1) ? "MJPG" : "NV12";
+    const char *pchCaps = (unFormatType == 0) ? "video/x-raw" : 
+                         (unFormatType == 1) ? "image/jpeg" : "video/x-raw";
+    
+    if (unCodecType == 0) /* H.264 */
+    {
+        if (unFormatType == 1) /* MJPEG format */
+        {
+            pchPipelineDesc = g_strdup_printf(
+                "v4l2src device=/dev/video1 do-timestamp=true ! "
+                "image/jpeg,width=%d,height=%d,framerate=%d/1 ! "
+                "jpegdec ! "
+                "nvvidconv ! "
+                "video/x-raw(memory:NVMM),format=I420 ! "
+                "nvv4l2h264enc bitrate=%d peak-bitrate=%d "
+                "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+                "profile=4 control-rate=1 ! "
+                "h264parse ! "
+                "tcpserversink host=0.0.0.0 port=8554 sync=false",
+                unWidth, unHeight, unFrameRate,
+                unBitrate, unBitrate + 1000000,
+                unIFrameInterval, unPresetLevel
+            );
+        }
+        else /* YUYV or NV12 format */
+        {
+            pchPipelineDesc = g_strdup_printf(
+                "v4l2src device=/dev/video1 do-timestamp=true ! "
+                "video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1 ! "
+                "nvvidconv ! "
+                "video/x-raw(memory:NVMM),format=I420 ! "
+                "nvv4l2h264enc bitrate=%d peak-bitrate=%d "
+                "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+                "profile=4 control-rate=1 ! "
+                "h264parse ! "
+                "tcpserversink host=0.0.0.0 port=8554 sync=false",
+                pchFormat, unWidth, unHeight, unFrameRate,
+                unBitrate, unBitrate + 1000000,
+                unIFrameInterval, unPresetLevel
+            );
+        }
+    }
+    else if (unCodecType == 1) /* H.265 */
+    {
+        if (unFormatType == 1) /* MJPEG format */
+        {
+            pchPipelineDesc = g_strdup_printf(
+                "v4l2src device=/dev/video1 do-timestamp=true ! "
+                "image/jpeg,width=%d,height=%d,framerate=%d/1 ! "
+                "jpegdec ! "
+                "nvvidconv ! "
+                "video/x-raw(memory:NVMM),format=I420 ! "
+                "nvv4l2h265enc bitrate=%d peak-bitrate=%d "
+                "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+                "profile=1 control-rate=1 ! "
+                "h265parse ! "
+                "tcpserversink host=0.0.0.0 port=8554 sync=false",
+                unWidth, unHeight, unFrameRate,
+                unBitrate, unBitrate + 1000000,
+                unIFrameInterval, unPresetLevel
+            );
+        }
+        else /* YUYV or NV12 format */
+        {
+            pchPipelineDesc = g_strdup_printf(
+                "v4l2src device=/dev/video1 do-timestamp=true ! "
+                "video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1 ! "
+                "nvvidconv ! "
+                "video/x-raw(memory:NVMM),format=I420 ! "
+                "nvv4l2h265enc bitrate=%d peak-bitrate=%d "
+                "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+                "profile=1 control-rate=1 ! "
+                "h265parse ! "
+                "tcpserversink host=0.0.0.0 port=8554 sync=false",
+                pchFormat, unWidth, unHeight, unFrameRate,
+                unBitrate, unBitrate + 1000000,
+                unIFrameInterval, unPresetLevel
+            );
+        }
+    }
+    else if (unCodecType == 2) /* MJPEG */
+    {
+        pchPipelineDesc = g_strdup_printf(
+            "v4l2src device=/dev/video1 do-timestamp=true ! "
+            "video/x-raw,format=YUY2,width=%d,height=%d,framerate=%d/1 ! "
+            "nvvidconv ! "
+            "video/x-raw(memory:NVMM),format=I420 ! "
+            "nvjpegenc quality=%d ! "
+            "tcpserversink host=0.0.0.0 port=8554 sync=false",
+            unWidth, unHeight, unFrameRate,
+            (100 - unPresetLevel * 20) /* Quality: preset 0=100%, 1=80%, 2=60%, 3=40% */
+        );
+    }
+    else
+    {
+        PrintError("Unsupported codec type: %d", unCodecType);
+        nRet = DI_ERROR_INVALID_PARAM;
+        goto EXIT;
+    }
     
     PrintTrace("TX Pipeline: %s", pchPipelineDesc);
     
@@ -343,7 +678,7 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(uint32_t unWidth, uint32_t unH
         goto EXIT;
     }
     
-    /* TX pipeline uses v4l2src -> tcpserversink, no appsrc/appsink needed */
+    /* TX pipeline uses v4l2src -> encoder -> tcpserversink, no appsrc/appsink needed */
     PrintTrace("TX pipeline created successfully - using v4l2src directly");
     
     /* Set bus message handler */
@@ -351,6 +686,147 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(uint32_t unWidth, uint32_t unH
     gst_bus_add_watch(hBus, P_DI_VIDEO_NVIDIA_GstBusCall, s_hMainLoop);
     gst_object_unref(hBus);
     
+    nRet = DI_OK;
+    
+EXIT:
+    if (pchPipelineDesc != NULL)
+    {
+        g_free(pchPipelineDesc);
+    }
+    
+    return nRet;
+}
+
+/*
+ * Create TX Encoding Pipeline (Ring Buffer -> Encoder -> TCP)
+ */
+static int32_t P_DI_VIDEO_NVIDIA_CreateTxEncodingPipeline(uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unIFrameInterval, uint32_t unPresetLevel)
+{
+    int32_t nRet = DI_ERROR;
+    GstBus *hBus = NULL;
+    gchar *pchPipelineDesc = NULL;
+    GError *pstError = NULL;
+    
+    if (unCodecType == 0) /* H.264 */
+    {
+        pchPipelineDesc = g_strdup_printf(
+            "appsrc name=tx_src format=GST_FORMAT_TIME ! "
+            "video/x-raw,format=I420,width=%d,height=%d,framerate=%d/1 ! "
+            "nvv4l2h264enc bitrate=%d peak-bitrate=%d "
+            "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+            "profile=4 control-rate=1 ! "
+            "h264parse ! "
+            "tcpserversink host=0.0.0.0 port=8554 sync=false",
+            unWidth, unHeight, unFrameRate,
+            unBitrate, unBitrate + 1000000,
+            unIFrameInterval, unPresetLevel
+        );
+    }
+    else if (unCodecType == 1) /* H.265 */
+    {
+        pchPipelineDesc = g_strdup_printf(
+            "appsrc name=tx_src format=GST_FORMAT_TIME ! "
+            "video/x-raw,format=I420,width=%d,height=%d,framerate=%d/1 ! "
+            "nvv4l2h265enc bitrate=%d peak-bitrate=%d "
+            "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+            "profile=1 control-rate=1 ! "
+            "h265parse ! "
+            "tcpserversink host=0.0.0.0 port=8554 sync=false",
+            unWidth, unHeight, unFrameRate,
+            unBitrate, unBitrate + 1000000,
+            unIFrameInterval, unPresetLevel
+        );
+    }
+    else if (unCodecType == 2) /* MJPEG */
+    {
+        pchPipelineDesc = g_strdup_printf(
+            "appsrc name=tx_src format=GST_FORMAT_TIME ! "
+            "video/x-raw,format=I420,width=%d,height=%d,framerate=%d/1 ! "
+            "nvjpegenc quality=%d ! "
+            "tcpserversink host=0.0.0.0 port=8554 sync=false",
+            unWidth, unHeight, unFrameRate,
+            (100 - unPresetLevel * 20) /* Quality: preset 0=100%, 1=80%, 2=60%, 3=40% */
+        );
+    }
+    else
+    {
+        PrintError("Unsupported codec type: %d", unCodecType);
+        nRet = DI_ERROR_INVALID_PARAM;
+        goto EXIT;
+    }
+    
+    PrintTrace("TX Encoding Pipeline: %s", pchPipelineDesc);
+    
+    /* Parse and create encoding pipeline */
+    s_hGstPipelineTxEncode = gst_parse_launch(pchPipelineDesc, &pstError);
+    if (s_hGstPipelineTxEncode == NULL)
+    {
+        PrintError("Failed to create TX encoding pipeline: %s", pstError->message);
+        g_error_free(pstError);
+        nRet = DI_ERROR_STREAMING_PIPELINE_CREATE;
+        goto EXIT;
+    }
+    
+    /* Connect appsrc callback for encoding pipeline */
+    s_hGstAppSrc = gst_bin_get_by_name(GST_BIN(s_hGstPipelineTxEncode), "tx_src");
+    if (s_hGstAppSrc != NULL)
+    {
+        /* Set AppSrc properties */
+        g_object_set(s_hGstAppSrc,
+            "caps", gst_caps_new_simple("video/x-raw",
+                "format", G_TYPE_STRING, "I420",
+                "width", G_TYPE_INT, unWidth,
+                "height", G_TYPE_INT, unHeight,
+                "framerate", GST_TYPE_FRACTION, unFrameRate, 1,
+                NULL),
+            "stream-type", 0, /* GST_APP_STREAM_TYPE_STREAM */
+            "max-bytes", G_TYPE_UINT64, 0,
+            "block", FALSE,
+            "is-live", TRUE,
+            "do-timestamp", TRUE,
+            NULL);
+        
+        /* No callbacks needed - we'll push data manually */
+        
+        /* Push initial dummy buffer to allow pipeline to start */
+        GstBuffer *pstDummyBuffer = gst_buffer_new_allocate(NULL, unWidth * unHeight * 3 / 2, NULL);
+        if (pstDummyBuffer != NULL)
+        {
+            GstMapInfo stDummyMapInfo;
+            if (gst_buffer_map(pstDummyBuffer, &stDummyMapInfo, GST_MAP_WRITE))
+            {
+                memset(stDummyMapInfo.data, 0, stDummyMapInfo.size); /* Black frame */
+                gst_buffer_unmap(pstDummyBuffer, &stDummyMapInfo);
+                
+                GST_BUFFER_PTS(pstDummyBuffer) = 0;
+                GST_BUFFER_DTS(pstDummyBuffer) = 0;
+                GST_BUFFER_DURATION(pstDummyBuffer) = gst_util_uint64_scale(GST_SECOND, 1, 30);
+                
+                /* Push dummy buffer to prepare AppSrc */
+                gst_app_src_push_buffer(GST_APP_SRC(s_hGstAppSrc), pstDummyBuffer);
+                PrintTrace("TX AppSrc initialized with dummy buffer");
+            }
+            else
+            {
+                gst_buffer_unref(pstDummyBuffer);
+            }
+        }
+        
+        PrintTrace("TX AppSrc configured for manual push");
+    }
+    else
+    {
+        PrintError("Failed to get TX AppSrc element");
+        nRet = DI_ERROR_STREAMING_PIPELINE_CREATE;
+        goto EXIT;
+    }
+    
+    /* Set bus message handler */
+    hBus = gst_pipeline_get_bus(GST_PIPELINE(s_hGstPipelineTxEncode));
+    gst_bus_add_watch(hBus, P_DI_VIDEO_NVIDIA_GstBusCall, s_hMainLoop);
+    gst_object_unref(hBus);
+    
+    PrintTrace("TX encoding pipeline created successfully");
     nRet = DI_OK;
     
 EXIT:
@@ -372,17 +848,14 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateRxPipeline(const char *pchRemoteHost, int
     gchar *pchPipelineDesc = NULL;
     GError *pstError = NULL;
     
-    /* Create RX pipeline description with Jetson hardware acceleration */
+    /* Create RX pipeline - decode to ring buffer */
     pchPipelineDesc = g_strdup_printf(
         "tcpclientsrc host=%s port=%d ! "
         "h264parse ! "
         "nvv4l2decoder ! "
         "nvvidconv ! "
         "video/x-raw,format=I420,width=%d,height=%d ! "
-        "tee name=t ! "
-        "queue max-size-buffers=2 leaky=downstream ! nveglglessink sync=false force-aspect-ratio=true "
-        "t. ! queue max-size-buffers=30 ! videoconvert ! x264enc bitrate=1000 ! mp4mux ! filesink location=/tmp/v2x_recorded.mp4 "
-        "t. ! queue max-size-buffers=2 leaky=downstream ! videoconvert ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5000",
+        "appsink name=rx_sink sync=false",
         pchRemoteHost ? pchRemoteHost : "127.0.0.1",
         nRemotePort,
         DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_WIDTH,
@@ -401,14 +874,39 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateRxPipeline(const char *pchRemoteHost, int
         goto EXIT;
     }
     
-    /* RX pipeline uses tcpclientsrc -> decoder -> multiple outputs, no appsrc needed */
-    PrintTrace("RX pipeline created successfully - using tcpclientsrc directly");
+    /* Connect appsink callback for RX pipeline */
+    s_hGstAppSink = gst_bin_get_by_name(GST_BIN(s_hGstPipelineRx), "rx_sink");
+    if (s_hGstAppSink != NULL)
+    {
+        GstAppSinkCallbacks stAppSinkCallbacks = {
+            .new_sample = P_DI_VIDEO_NVIDIA_AppSinkNewSample,
+            .eos = NULL,
+            .new_preroll = NULL
+        };
+        gst_app_sink_set_callbacks(GST_APP_SINK(s_hGstAppSink), &stAppSinkCallbacks, NULL, NULL);
+        PrintTrace("RX AppSink callback connected successfully");
+    }
+    else
+    {
+        PrintError("Failed to get RX AppSink element");
+        nRet = DI_ERROR_STREAMING_PIPELINE_CREATE;
+        goto EXIT;
+    }
     
     /* Set bus message handler */
     hBus = gst_pipeline_get_bus(GST_PIPELINE(s_hGstPipelineRx));
     gst_bus_add_watch(hBus, P_DI_VIDEO_NVIDIA_GstBusCall, s_hMainLoop);
     gst_object_unref(hBus);
     
+    /* Create RX display pipeline */
+    nRet = P_DI_VIDEO_NVIDIA_CreateRxDisplayPipeline();
+    if (nRet != DI_OK)
+    {
+        PrintError("Failed to create RX display pipeline");
+        goto EXIT;
+    }
+    
+    PrintTrace("RX pipeline created successfully - using ring buffer");
     nRet = DI_OK;
     
 EXIT:
@@ -421,6 +919,163 @@ EXIT:
 }
 
 /*
+ * Create RX Display Pipeline (Ring Buffer -> Display)
+ */
+static int32_t P_DI_VIDEO_NVIDIA_CreateRxDisplayPipeline(void)
+{
+    int32_t nRet = DI_ERROR;
+    GstBus *hBus = NULL;
+    gchar *pchPipelineDesc = NULL;
+    GError *pstError = NULL;
+    
+    pchPipelineDesc = g_strdup_printf(
+        "appsrc name=rx_src format=GST_FORMAT_TIME ! "
+        "video/x-raw,format=I420,width=%d,height=%d ! "
+        "nveglglessink sync=false force-aspect-ratio=true",
+        DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_WIDTH,
+        DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_HEIGHT
+    );
+    
+    PrintTrace("RX Display Pipeline: %s", pchPipelineDesc);
+    
+    /* Parse and create display pipeline */
+    s_hGstPipelineRxDisplay = gst_parse_launch(pchPipelineDesc, &pstError);
+    if (s_hGstPipelineRxDisplay == NULL)
+    {
+        PrintError("Failed to create RX display pipeline: %s", pstError->message);
+        g_error_free(pstError);
+        nRet = DI_ERROR_STREAMING_PIPELINE_CREATE;
+        goto EXIT;
+    }
+    
+    /* Connect appsrc callback for display pipeline */
+    GstElement *hDisplayAppSrc = gst_bin_get_by_name(GST_BIN(s_hGstPipelineRxDisplay), "rx_src");
+    if (hDisplayAppSrc != NULL)
+    {
+        GstAppSrcCallbacks stAppSrcCallbacks = {
+            .need_data = P_DI_VIDEO_NVIDIA_AppSrcNeedDataDisplay,
+            .enough_data = NULL,
+            .seek_data = NULL
+        };
+        gst_app_src_set_callbacks(GST_APP_SRC(hDisplayAppSrc), &stAppSrcCallbacks, NULL, NULL);
+        PrintTrace("RX Display AppSrc callback connected successfully");
+    }
+    else
+    {
+        PrintError("Failed to get RX Display AppSrc element");
+        nRet = DI_ERROR_STREAMING_PIPELINE_CREATE;
+        goto EXIT;
+    }
+    
+    /* Set bus message handler */
+    hBus = gst_pipeline_get_bus(GST_PIPELINE(s_hGstPipelineRxDisplay));
+    gst_bus_add_watch(hBus, P_DI_VIDEO_NVIDIA_GstBusCall, s_hMainLoop);
+    gst_object_unref(hBus);
+    
+    PrintTrace("RX display pipeline created successfully");
+    nRet = DI_OK;
+    
+EXIT:
+    if (pchPipelineDesc != NULL)
+    {
+        g_free(pchPipelineDesc);
+    }
+    
+    return nRet;
+}
+
+/*
+ * Create RTSP Server for video streaming
+ */
+static int32_t P_DI_VIDEO_NVIDIA_CreateRtspServer(void)
+{
+    int32_t nRet = DI_ERROR;
+    gchar *pchFactoryString = NULL;
+    
+    /* Create RTSP server */
+    s_hRtspServer = gst_rtsp_server_new();
+    if (s_hRtspServer == NULL)
+    {
+        PrintError("Failed to create RTSP server");
+        nRet = DI_ERROR_STREAMING_RTSP_CREATE;
+        goto EXIT;
+    }
+    
+    /* Set server port - use Camera 1 RTSP port (8560) */
+    gchar *pchRtspPort = g_strdup_printf("%d", P_DI_VIDEO_CAMERA_GetRtspPort(1));
+    gst_rtsp_server_set_service(s_hRtspServer, pchRtspPort);
+    g_free(pchRtspPort);
+    
+    /* Get mount points */
+    s_hRtspMounts = gst_rtsp_server_get_mount_points(s_hRtspServer);
+    
+    /* Create media factory */
+    s_hRtspFactory = gst_rtsp_media_factory_new();
+    
+    /* Set factory launch string - restream from TCP to RTSP using Camera 1 port */
+    pchFactoryString = g_strdup_printf(
+        "( tcpclientsrc host=127.0.0.1 port=%d ! "
+        "h264parse ! rtph264pay name=pay0 pt=96 )",
+        P_DI_VIDEO_CAMERA_GetTcpPort(1)
+    );
+    
+    gst_rtsp_media_factory_set_launch(s_hRtspFactory, pchFactoryString);
+    gst_rtsp_media_factory_set_shared(s_hRtspFactory, TRUE);
+    
+    /* Mount the factory at /stream */
+    gst_rtsp_mount_points_add_factory(s_hRtspMounts, "/stream", s_hRtspFactory);
+    
+    g_object_unref(s_hRtspMounts);
+    
+    /* Attach server to default main context */
+    s_unRtspServerId = gst_rtsp_server_attach(s_hRtspServer, NULL);
+    if (s_unRtspServerId == 0)
+    {
+        PrintError("Failed to attach RTSP server");
+        nRet = DI_ERROR_STREAMING_RTSP_ATTACH;
+        goto EXIT;
+    }
+    
+    PrintTrace("RTSP server created successfully, streaming at rtsp://localhost:%d/stream", P_DI_VIDEO_CAMERA_GetRtspPort(1));
+    nRet = DI_OK;
+    
+EXIT:
+    if (pchFactoryString != NULL)
+    {
+        g_free(pchFactoryString);
+    }
+    
+    return nRet;
+}
+
+/*
+ * Destroy RTSP Server
+ */
+static int32_t P_DI_VIDEO_NVIDIA_DestroyRtspServer(void)
+{
+    int32_t nRet = DI_OK;
+    
+    if (s_unRtspServerId != 0)
+    {
+        g_source_remove(s_unRtspServerId);
+        s_unRtspServerId = 0;
+    }
+    
+    if (s_hRtspServer != NULL)
+    {
+        g_object_unref(s_hRtspServer);
+        s_hRtspServer = NULL;
+    }
+    
+    /* Factory will be unreferenced automatically when mounts are cleared */
+    s_hRtspFactory = NULL;
+    s_hRtspMounts = NULL;
+    
+    PrintTrace("RTSP server destroyed");
+    return nRet;
+}
+
+/*
  * Initialize GStreamer System
  */
 static int32_t P_DI_VIDEO_NVIDIA_GstInit(void)
@@ -428,6 +1083,14 @@ static int32_t P_DI_VIDEO_NVIDIA_GstInit(void)
     int32_t nRet = DI_ERROR;
     pthread_attr_t stAttr;
     GError *pstError = NULL;
+    
+    /* Initialize multi-camera configuration */
+    nRet = P_DI_VIDEO_CAMERA_InitAll();
+    if (nRet != DI_OK)
+    {
+        PrintError("Failed to initialize camera configuration [nRet:%d]", nRet);
+        goto EXIT;
+    }
     
     /* Initialize GStreamer */
     if (gst_init_check(NULL, NULL, &pstError) == FALSE)
@@ -593,7 +1256,7 @@ EXIT:
 /*
  * Start TX mode (Camera -> TCP Server)
  */
-static int32_t P_DI_VIDEO_NVIDIA_StartTxMode(uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate)
+static int32_t P_DI_VIDEO_NVIDIA_StartTxMode(uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unFormatType, uint32_t unIFrameInterval, uint32_t unPresetLevel)
 {
     int32_t nRet = DI_ERROR;
     
@@ -606,7 +1269,11 @@ static int32_t P_DI_VIDEO_NVIDIA_StartTxMode(uint32_t unWidth, uint32_t unHeight
             unWidth,
             unHeight,
             unFrameRate,
-            unBitrate
+            unBitrate,
+            unCodecType,
+            unFormatType,
+            unIFrameInterval,
+            unPresetLevel
         );
         if (nRet != DI_OK)
         {
@@ -615,7 +1282,7 @@ static int32_t P_DI_VIDEO_NVIDIA_StartTxMode(uint32_t unWidth, uint32_t unHeight
             goto EXIT;
         }
         
-        /* Start TX pipeline */
+        /* Start TX pipeline (camera capture) */
         if (gst_element_set_state(s_hGstPipelineTx, GST_STATE_PLAYING) == GST_STATE_CHANGE_FAILURE)
         {
             PrintError("Failed to start TX pipeline");
@@ -624,9 +1291,17 @@ static int32_t P_DI_VIDEO_NVIDIA_StartTxMode(uint32_t unWidth, uint32_t unHeight
             goto EXIT;
         }
         
-        /* Wait for pipeline to reach PLAYING state */
+        /* Wait for camera pipeline to start and fill ring buffer */
         GstState stState, stPending;
         GstStateChangeReturn stRet = gst_element_get_state(s_hGstPipelineTx, &stState, &stPending, 5 * GST_SECOND);
+        
+        if (stRet != GST_STATE_CHANGE_SUCCESS || stState != GST_STATE_PLAYING)
+        {
+            PrintError("TX pipeline failed to reach PLAYING state");
+            nRet = DI_ERROR_STREAMING_PIPELINE_START;
+            pthread_mutex_unlock(&s_stGstMutex);
+            goto EXIT;
+        }
         
         if (stRet == GST_STATE_CHANGE_SUCCESS && stState == GST_STATE_PLAYING)
         {
@@ -684,13 +1359,30 @@ static int32_t P_DI_VIDEO_NVIDIA_StartRxMode(void)
         
         if (stRet == GST_STATE_CHANGE_SUCCESS && stState == GST_STATE_PLAYING)
         {
+            /* Create and start RTSP server */
+            nRet = P_DI_VIDEO_NVIDIA_CreateRtspServer();
+            if (nRet != DI_OK)
+            {
+                PrintError("Failed to create RTSP server [nRet:%d]", nRet);
+                gst_element_set_state(s_hGstPipelineRx, GST_STATE_NULL);
+                pthread_mutex_unlock(&s_stGstMutex);
+                goto EXIT;
+            }
+            
             s_bGstPipelineActive = TRUE;
-            PrintTrace("RX pipeline started successfully - Connected to TCP server %s:%d", s_achRemoteHost, s_nRemotePort);
+            PrintTrace("RX pipeline and RTSP server started successfully - Connected to TCP server %s:%d", s_achRemoteHost, s_nRemotePort);
         }
         else
         {
             PrintWarn("RX pipeline may take longer to connect - State: %d", stState);
             s_bGstPipelineActive = TRUE; /* Set as active for async connection */
+            
+            /* Still create RTSP server for async connection */
+            nRet = P_DI_VIDEO_NVIDIA_CreateRtspServer();
+            if (nRet != DI_OK)
+            {
+                PrintWarn("Failed to create RTSP server during async connection [nRet:%d]", nRet);
+            }
         }
     }
     
@@ -1044,7 +1736,11 @@ int32_t DI_VIDEO_NVIDIA_Start(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia)
             DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_WIDTH,
             DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_HEIGHT,
             DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_FPS,
-            DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_BITRATE
+            DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_BITRATE,
+            DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_CODEC,
+            0, /* Default format: YUYV */
+            DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_IFRAME,
+            DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_PRESET
         );
         if (nRet != DI_OK)
         {
@@ -1112,11 +1808,14 @@ int32_t DI_VIDEO_NVIDIA_Stop(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia)
             s_hGstPipelineRx = NULL;
         }
         
+        /* Destroy RTSP server */
+        P_DI_VIDEO_NVIDIA_DestroyRtspServer();
+        
         s_hGstAppSrc = NULL;
         s_hGstAppSink = NULL;
         s_bGstPipelineActive = FALSE;
         
-        PrintTrace("GStreamer pipelines stopped successfully");
+        PrintTrace("GStreamer pipelines and RTSP server stopped successfully");
     }
     
     pthread_mutex_unlock(&s_stGstMutex);
@@ -1232,7 +1931,7 @@ EXIT:
 /*
  * Public function: Start TX mode
  */
-int32_t DI_VIDEO_NVIDIA_StartTxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia, uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate)
+int32_t DI_VIDEO_NVIDIA_StartTxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia, uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unFormatType, uint32_t unIFrameInterval, uint32_t unPresetLevel)
 {
     int32_t nRet = DI_ERROR;
     
@@ -1249,7 +1948,7 @@ int32_t DI_VIDEO_NVIDIA_StartTxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia, uint32_
         goto EXIT;
     }
     
-    nRet = P_DI_VIDEO_NVIDIA_StartTxMode(unWidth, unHeight, unFrameRate, unBitrate);
+    nRet = P_DI_VIDEO_NVIDIA_StartTxMode(unWidth, unHeight, unFrameRate, unBitrate, unCodecType, unFormatType, unIFrameInterval, unPresetLevel);
     if (nRet != DI_OK)
     {
         PrintError("P_DI_VIDEO_NVIDIA_StartTxMode() failed [nRet:%d]", nRet);

@@ -102,6 +102,10 @@ typedef struct SVC_STREAMING_CONFIG_t {
     uint32_t unFrameRate;                     /* Frame rate */
     uint32_t unBitrate;                       /* Bitrate */
     uint32_t unBufferSize;                    /* Buffer size */
+    uint32_t unCodecType;                     /* Codec type: 0=H264, 1=H265, 2=MJPEG */
+    uint32_t unFormatType;                    /* Camera format: 0=YUYV, 1=MJPEG, 2=NV12 */
+    uint32_t unIFrameInterval;                /* I-frame interval (GOP size) */
+    uint32_t unPresetLevel;                   /* Encoder preset level (0=fastest, 3=slowest) */
     bool bHardwareAcceleration;               /* Hardware acceleration */
     bool bEnableDisplay;                      /* Enable display output */
     bool bEnableRecord;                       /* Enable recording */

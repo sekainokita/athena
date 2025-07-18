@@ -44,6 +44,7 @@
 
 
 /***************************** Include ***************************************/
+#include <unistd.h>
 #include "type.h"
 #include "cli_util.h"
 #include "di.h"
@@ -301,6 +302,10 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     stConfig.unHeight = SVC_STREAMING_DEFAULT_HEIGHT;
                     stConfig.unFrameRate = SVC_STREAMING_DEFAULT_FPS;
                     stConfig.unBitrate = SVC_STREAMING_DEFAULT_BITRATE;
+                    stConfig.unCodecType = 0;           /* H.264 */
+                    stConfig.unFormatType = 0;          /* YUYV */
+                    stConfig.unIFrameInterval = 15;     /* GOP size */
+                    stConfig.unPresetLevel = 1;         /* Medium preset */
                     stConfig.bHardwareAcceleration = TRUE;
                     
                     /* Initialize video streaming service */
@@ -374,6 +379,67 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                     PrintError("Video streaming not supported in this build");
 #endif
                 }
+                else if(IS_CMD(pcCmd, "scan"))
+                {
+#if defined(CONFIG_VIDEO_STREAMING)
+                    PrintDebug("Scanning available camera devices...");
+                    
+                    /* Scan video devices from /dev/video0 to /dev/video9 */
+                    int32_t nDeviceCount = 0;
+                    int32_t nDeviceIndex = 0;
+                    char achDevicePath[64];
+                    char achCommand[256];
+                    FILE *hPipe = NULL;
+                    char achBuffer[1024];
+                    
+                    for (nDeviceIndex = 0; nDeviceIndex < 10; nDeviceIndex++)
+                    {
+                        snprintf(achDevicePath, sizeof(achDevicePath), "/dev/video%d", nDeviceIndex);
+                        
+                        /* Check if device exists */
+                        if (access(achDevicePath, F_OK) == 0)
+                        {
+                            PrintDebug("Found camera device: %s", achDevicePath);
+                            nDeviceCount++;
+                            
+                            /* Get device capabilities using v4l2-ctl */
+                            snprintf(achCommand, sizeof(achCommand), 
+                                   "v4l2-ctl --device=%s --list-formats-ext 2>/dev/null", 
+                                   achDevicePath);
+                            
+                            hPipe = popen(achCommand, "r");
+                            if (hPipe != NULL)
+                            {
+                                PrintDebug("  Supported formats:");
+                                while (fgets(achBuffer, sizeof(achBuffer), hPipe) != NULL)
+                                {
+                                    /* Remove newline */
+                                    size_t szLen = strlen(achBuffer);
+                                    if ((szLen > 0) && (achBuffer[szLen - 1] == '\n'))
+                                    {
+                                        achBuffer[szLen - 1] = '\0';
+                                    }
+                                    PrintDebug("    %s", achBuffer);
+                                }
+                                pclose(hPipe);
+                                hPipe = NULL;
+                            }
+                            PrintDebug("");
+                        }
+                    }
+                    
+                    if (nDeviceCount == 0)
+                    {
+                        PrintDebug("No camera devices found");
+                    }
+                    else
+                    {
+                        PrintDebug("Total camera devices found: %d", nDeviceCount);
+                    }
+#else
+                    PrintError("Video streaming not supported in this build");
+#endif
+                }
                 else if(IS_CMD(pcCmd, "config"))
                 {
                     pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
@@ -395,6 +461,14 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                         PrintDebug("  Resolution: %dx%d", stConfig.unWidth, stConfig.unHeight);
                         PrintDebug("  Frame Rate: %d", stConfig.unFrameRate);
                         PrintDebug("  Bitrate: %d", stConfig.unBitrate);
+                        PrintDebug("  Codec: %s", (stConfig.unCodecType == 0) ? "H.264" : 
+                                                  (stConfig.unCodecType == 1) ? "H.265" : 
+                                                  (stConfig.unCodecType == 2) ? "MJPEG" : "Unknown");
+                        PrintDebug("  Camera Format: %s", (stConfig.unFormatType == 0) ? "YUYV" :
+                                                         (stConfig.unFormatType == 1) ? "MJPEG" :
+                                                         (stConfig.unFormatType == 2) ? "NV12" : "Unknown");
+                        PrintDebug("  I-Frame Interval: %d", stConfig.unIFrameInterval);
+                        PrintDebug("  Preset Level: %d", stConfig.unPresetLevel);
                         PrintDebug("  Hardware Accel: %s", stConfig.bHardwareAcceleration ? "YES" : "NO");
 #else
                         PrintError("Video streaming not supported in this build");
@@ -463,9 +537,122 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                                 }
                             }
                         }
+                        /* Handle codec configuration */
+                        else if(IS_CMD(pcCmd, "codec"))
+                        {
+                            char *pchCodec = CLI_CMD_GetArg(pstCmd, CMD_3);
+                            
+                            if (pchCodec != NULL)
+                            {
+                                SVC_STREAMING_CONFIG_T stConfig;
+                                nRet = SVC_STREAMING_GetConfig(&s_stSvcStreaming, &stConfig);
+                                if (nRet == FRAMEWORK_OK)
+                                {
+                                    if (strncmp(pchCodec, "h264", 4) == 0)
+                                    {
+                                        stConfig.unCodecType = 0;
+                                        PrintDebug("Codec set to H.264");
+                                    }
+                                    else if (strncmp(pchCodec, "h265", 4) == 0)
+                                    {
+                                        stConfig.unCodecType = 1;
+                                        PrintDebug("Codec set to H.265");
+                                    }
+                                    else if (strncmp(pchCodec, "mjpeg", 5) == 0)
+                                    {
+                                        stConfig.unCodecType = 2;
+                                        PrintDebug("Codec set to MJPEG");
+                                    }
+                                    else
+                                    {
+                                        PrintError("Invalid codec! Use h264/h265/mjpeg");
+                                        nRet = FRAMEWORK_ERROR;
+                                    }
+                                    
+                                    if (nRet == FRAMEWORK_OK)
+                                    {
+                                        nRet = SVC_STREAMING_SetConfig(&s_stSvcStreaming, &stConfig);
+                                    }
+                                }
+                            }
+                        }
+                        /* Handle format configuration */
+                        else if(IS_CMD(pcCmd, "format"))
+                        {
+                            char *pchFormat = CLI_CMD_GetArg(pstCmd, CMD_3);
+                            
+                            if (pchFormat != NULL)
+                            {
+                                SVC_STREAMING_CONFIG_T stConfig;
+                                nRet = SVC_STREAMING_GetConfig(&s_stSvcStreaming, &stConfig);
+                                if (nRet == FRAMEWORK_OK)
+                                {
+                                    if (strncmp(pchFormat, "yuyv", 4) == 0)
+                                    {
+                                        stConfig.unFormatType = 0;
+                                        PrintDebug("Camera format set to YUYV");
+                                    }
+                                    else if (strncmp(pchFormat, "mjpeg", 5) == 0)
+                                    {
+                                        stConfig.unFormatType = 1;
+                                        PrintDebug("Camera format set to MJPEG");
+                                    }
+                                    else if (strncmp(pchFormat, "nv12", 4) == 0)
+                                    {
+                                        stConfig.unFormatType = 2;
+                                        PrintDebug("Camera format set to NV12");
+                                    }
+                                    else
+                                    {
+                                        PrintError("Invalid format! Use yuyv/mjpeg/nv12");
+                                        nRet = FRAMEWORK_ERROR;
+                                    }
+                                    
+                                    if (nRet == FRAMEWORK_OK)
+                                    {
+                                        nRet = SVC_STREAMING_SetConfig(&s_stSvcStreaming, &stConfig);
+                                    }
+                                }
+                            }
+                        }
+                        /* Handle encoder configuration */
+                        else if(IS_CMD(pcCmd, "encoder"))
+                        {
+                            char *pchOption = CLI_CMD_GetArg(pstCmd, CMD_3);
+                            char *pchValue = CLI_CMD_GetArg(pstCmd, CMD_4);
+                            
+                            if ((pchOption != NULL) && (pchValue != NULL))
+                            {
+                                SVC_STREAMING_CONFIG_T stConfig;
+                                nRet = SVC_STREAMING_GetConfig(&s_stSvcStreaming, &stConfig);
+                                if (nRet == FRAMEWORK_OK)
+                                {
+                                    if (strncmp(pchOption, "iframe", 6) == 0)
+                                    {
+                                        stConfig.unIFrameInterval = (uint32_t)atoi(pchValue);
+                                        PrintDebug("I-Frame interval set to %d", stConfig.unIFrameInterval);
+                                    }
+                                    else if (strncmp(pchOption, "preset", 6) == 0)
+                                    {
+                                        stConfig.unPresetLevel = (uint32_t)atoi(pchValue);
+                                        PrintDebug("Preset level set to %d", stConfig.unPresetLevel);
+                                    }
+                                    else
+                                    {
+                                        PrintError("Invalid encoder option! Use iframe/preset");
+                                        nRet = FRAMEWORK_ERROR;
+                                    }
+                                    
+                                    if (nRet == FRAMEWORK_OK)
+                                    {
+                                        nRet = SVC_STREAMING_SetConfig(&s_stSvcStreaming, &stConfig);
+                                    }
+                                }
+                            }
+                        }
                         else
                         {
-                            PrintError("Invalid config option! Use resolution/fps/bitrate");
+                            PrintError("Invalid config option! Use resolution/fps/bitrate/codec/format/encoder");
                         }
 #else
                         PrintError("Video streaming not supported in this build");
@@ -532,6 +719,55 @@ static int P_CLI_DI(CLI_CMDLINE_T *pstCmd, int argc, char *argv[])
                         }
                     }
                 }
+                else if(IS_CMD(pcCmd, "rtsp"))
+                {
+                    pcCmd = CLI_CMD_GetArg(pstCmd, CMD_2);
+                    if (pcCmd == NULL)
+                    {
+                        return CLI_CMD_Showusage(pstCmd);
+                    }
+                    else
+                    {
+                        if(IS_CMD(pcCmd, "start"))
+                        {
+#if defined(CONFIG_VIDEO_STREAMING)
+                            PrintDebug("RTSP server start requested");
+                            PrintDebug("RTSP server will be automatically started with RX mode");
+                            PrintDebug("Use 'di video start rx' to start both RX pipeline and RTSP server");
+                            PrintDebug("RTSP stream will be available at: rtsp://localhost:8560/stream");
+#else
+                            PrintError("Video streaming not supported in this build");
+#endif
+                        }
+                        else if(IS_CMD(pcCmd, "stop"))
+                        {
+#if defined(CONFIG_VIDEO_STREAMING)
+                            PrintDebug("RTSP server stop requested");
+                            PrintDebug("RTSP server will be automatically stopped with video stop");
+                            PrintDebug("Use 'di video stop' to stop both pipelines and RTSP server");
+#else
+                            PrintError("Video streaming not supported in this build");
+#endif
+                        }
+                        else if(IS_CMD(pcCmd, "status"))
+                        {
+#if defined(CONFIG_VIDEO_STREAMING)
+                            PrintDebug("RTSP Server Status:");
+                            PrintDebug("  Server: Integrated with RX pipeline");
+                            PrintDebug("  Port: 8560");
+                            PrintDebug("  Stream Path: /stream");
+                            PrintDebug("  Full URL: rtsp://localhost:8560/stream");
+                            PrintDebug("  Status: %s", s_stSvcStreaming.eStatus == SVC_STREAMING_STATUS_RUNNING ? "Active with RX mode" : "Inactive");
+#else
+                            PrintError("Video streaming not supported in this build");
+#endif
+                        }
+                        else
+                        {
+                            return CLI_CMD_Showusage(pstCmd);
+                        }
+                    }
+                }
                 else if(IS_CMD(pcCmd, "status"))
                 {
 #if defined(CONFIG_VIDEO_STREAMING)
@@ -594,6 +830,7 @@ int32_t CLI_DI_InitCmds(void)
                "di video start rx     start video streaming in RX mode\n"
                "di video start both   start video streaming in both TX/RX mode\n"
                "di video stop         stop video streaming\n"
+               "di video scan         scan available camera devices and formats\n"
                "di video config       show current video configuration\n"
                "di video config resolution [width] [height]\n"
                "                      set video resolution\n"
@@ -601,9 +838,20 @@ int32_t CLI_DI_InitCmds(void)
                "                      set video frame rate\n"
                "di video config bitrate [bitrate]\n"
                "                      set video bitrate\n"
+               "di video config codec [h264|h265|mjpeg]\n"
+               "                      set video codec type\n"
+               "di video config format [yuyv|mjpeg|nv12]\n"
+               "                      set camera format type\n"
+               "di video config encoder iframe [interval]\n"
+               "                      set I-frame interval (GOP size)\n"
+               "di video config encoder preset [level]\n"
+               "                      set encoder preset level (0=fastest, 3=slowest)\n"
                "di video tcp set [host] [remote_port] [local_port]\n"
                "                      set TCP connection parameters\n"
                "di video tcp check    check TCP connection status\n"
+               "di video rtsp start   start RTSP server (port 8554)\n"
+               "di video rtsp stop    stop RTSP server\n"
+               "di video rtsp status  show RTSP server status\n"
                "di video status       show video streaming status and statistics\n",
                "");
     if(nRet != APP_OK)
