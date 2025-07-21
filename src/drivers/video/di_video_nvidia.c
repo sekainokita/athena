@@ -580,11 +580,11 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(uint32_t unWidth, uint32_t unH
                 "jpegdec ! "
                 "nvvidconv ! "
                 "video/x-raw(memory:NVMM),format=I420 ! "
-                "nvv4l2h264enc bitrate=%d peak-bitrate=%d "
+                "nvv4l2h264enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
                 "iframeinterval=%d insert-sps-pps=true preset-level=%d "
                 "profile=4 control-rate=1 ! "
                 "h264parse ! "
-                "tcpserversink host=0.0.0.0 port=8554 sync=false",
+                "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
                 unWidth, unHeight, unFrameRate,
                 unBitrate, unBitrate + 1000000,
                 unIFrameInterval, unPresetLevel
@@ -597,11 +597,11 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(uint32_t unWidth, uint32_t unH
                 "video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1 ! "
                 "nvvidconv ! "
                 "video/x-raw(memory:NVMM),format=I420 ! "
-                "nvv4l2h264enc bitrate=%d peak-bitrate=%d "
+                "nvv4l2h264enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
                 "iframeinterval=%d insert-sps-pps=true preset-level=%d "
                 "profile=4 control-rate=1 ! "
                 "h264parse ! "
-                "tcpserversink host=0.0.0.0 port=8554 sync=false",
+                "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
                 pchFormat, unWidth, unHeight, unFrameRate,
                 unBitrate, unBitrate + 1000000,
                 unIFrameInterval, unPresetLevel
@@ -618,11 +618,11 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(uint32_t unWidth, uint32_t unH
                 "jpegdec ! "
                 "nvvidconv ! "
                 "video/x-raw(memory:NVMM),format=I420 ! "
-                "nvv4l2h265enc bitrate=%d peak-bitrate=%d "
+                "nvv4l2h265enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
                 "iframeinterval=%d insert-sps-pps=true preset-level=%d "
                 "profile=1 control-rate=1 ! "
                 "h265parse ! "
-                "tcpserversink host=0.0.0.0 port=8554 sync=false",
+                "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
                 unWidth, unHeight, unFrameRate,
                 unBitrate, unBitrate + 1000000,
                 unIFrameInterval, unPresetLevel
@@ -635,11 +635,11 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(uint32_t unWidth, uint32_t unH
                 "video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1 ! "
                 "nvvidconv ! "
                 "video/x-raw(memory:NVMM),format=I420 ! "
-                "nvv4l2h265enc bitrate=%d peak-bitrate=%d "
+                "nvv4l2h265enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
                 "iframeinterval=%d insert-sps-pps=true preset-level=%d "
                 "profile=1 control-rate=1 ! "
                 "h265parse ! "
-                "tcpserversink host=0.0.0.0 port=8554 sync=false",
+                "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
                 pchFormat, unWidth, unHeight, unFrameRate,
                 unBitrate, unBitrate + 1000000,
                 unIFrameInterval, unPresetLevel
@@ -654,7 +654,7 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(uint32_t unWidth, uint32_t unH
             "nvvidconv ! "
             "video/x-raw(memory:NVMM),format=I420 ! "
             "nvjpegenc quality=%d ! "
-            "tcpserversink host=0.0.0.0 port=8554 sync=false",
+            "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
             unWidth, unHeight, unFrameRate,
             (100 - unPresetLevel * 20) /* Quality: preset 0=100%, 1=80%, 2=60%, 3=40% */
         );
@@ -712,11 +712,11 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateTxEncodingPipeline(uint32_t unWidth, uint
         pchPipelineDesc = g_strdup_printf(
             "appsrc name=tx_src format=GST_FORMAT_TIME ! "
             "video/x-raw,format=I420,width=%d,height=%d,framerate=%d/1 ! "
-            "nvv4l2h264enc bitrate=%d peak-bitrate=%d "
+            "nvv4l2h264enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
             "iframeinterval=%d insert-sps-pps=true preset-level=%d "
             "profile=4 control-rate=1 ! "
             "h264parse ! "
-            "tcpserversink host=0.0.0.0 port=8554 sync=false",
+            "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
             unWidth, unHeight, unFrameRate,
             unBitrate, unBitrate + 1000000,
             unIFrameInterval, unPresetLevel
@@ -727,11 +727,11 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateTxEncodingPipeline(uint32_t unWidth, uint
         pchPipelineDesc = g_strdup_printf(
             "appsrc name=tx_src format=GST_FORMAT_TIME ! "
             "video/x-raw,format=I420,width=%d,height=%d,framerate=%d/1 ! "
-            "nvv4l2h265enc bitrate=%d peak-bitrate=%d "
+            "nvv4l2h265enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
             "iframeinterval=%d insert-sps-pps=true preset-level=%d "
             "profile=1 control-rate=1 ! "
             "h265parse ! "
-            "tcpserversink host=0.0.0.0 port=8554 sync=false",
+            "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
             unWidth, unHeight, unFrameRate,
             unBitrate, unBitrate + 1000000,
             unIFrameInterval, unPresetLevel
@@ -743,7 +743,7 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateTxEncodingPipeline(uint32_t unWidth, uint
             "appsrc name=tx_src format=GST_FORMAT_TIME ! "
             "video/x-raw,format=I420,width=%d,height=%d,framerate=%d/1 ! "
             "nvjpegenc quality=%d ! "
-            "tcpserversink host=0.0.0.0 port=8554 sync=false",
+            "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
             unWidth, unHeight, unFrameRate,
             (100 - unPresetLevel * 20) /* Quality: preset 0=100%, 1=80%, 2=60%, 3=40% */
         );
@@ -850,12 +850,12 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateRxPipeline(const char *pchRemoteHost, int
     
     /* Create RX pipeline - decode to ring buffer */
     pchPipelineDesc = g_strdup_printf(
-        "tcpclientsrc host=%s port=%d ! "
+        "tcpclientsrc host=%s port=%d buffer-size=32768 ! "
         "h264parse ! "
-        "nvv4l2decoder ! "
+        "nvv4l2decoder enable-max-performance=true ! "
         "nvvidconv ! "
         "video/x-raw,format=I420,width=%d,height=%d ! "
-        "appsink name=rx_sink sync=false",
+        "appsink name=rx_sink sync=false max-buffers=1 drop=true",
         pchRemoteHost ? pchRemoteHost : "127.0.0.1",
         nRemotePort,
         DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_WIDTH,
@@ -931,7 +931,7 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateRxDisplayPipeline(void)
     pchPipelineDesc = g_strdup_printf(
         "appsrc name=rx_src format=GST_FORMAT_TIME ! "
         "video/x-raw,format=I420,width=%d,height=%d ! "
-        "nveglglessink sync=false force-aspect-ratio=true",
+        "nveglglessink sync=false async=false max-lateness=0 force-aspect-ratio=true",
         DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_WIDTH,
         DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_HEIGHT
     );
@@ -1014,7 +1014,7 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateRtspServer(void)
     
     /* Set factory launch string - restream from TCP to RTSP using Camera 1 port */
     pchFactoryString = g_strdup_printf(
-        "( tcpclientsrc host=127.0.0.1 port=%d ! "
+        "( tcpclientsrc host=127.0.0.1 port=%d buffer-size=32768 ! "
         "h264parse ! rtph264pay name=pay0 pt=96 )",
         P_DI_VIDEO_CAMERA_GetTcpPort(1)
     );

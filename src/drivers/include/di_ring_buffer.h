@@ -51,12 +51,12 @@
 #include "type.h"
 
 /***************************** Definition ************************************/
-#define DI_RING_BUFFER_DEFAULT_SIZE           (4 * 1024 * 1024)  /* 4MB default size */
+#define DI_RING_BUFFER_DEFAULT_SIZE           (512 * 1024)       /* 512KB default size */
 #define DI_RING_BUFFER_MAX_SIZE               (16 * 1024 * 1024) /* 16MB maximum size */
-#define DI_RING_BUFFER_MIN_SIZE               (1 * 1024 * 1024)  /* 1MB minimum size */
+#define DI_RING_BUFFER_MIN_SIZE               (256 * 1024)       /* 256KB minimum size */
 #define DI_RING_BUFFER_CHUNK_SIZE             (64 * 1024)        /* 64KB chunk size */
-#define DI_RING_BUFFER_WATERMARK_HIGH         (80)               /* High watermark 80% */
-#define DI_RING_BUFFER_WATERMARK_LOW          (20)               /* Low watermark 20% */
+#define DI_RING_BUFFER_WATERMARK_HIGH         (70)               /* High watermark 70% */
+#define DI_RING_BUFFER_WATERMARK_LOW          (10)               /* Low watermark 10% */
 
 /* Ring buffer error codes */
 #define DI_RING_BUFFER_OK                     (0)
