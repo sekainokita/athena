@@ -157,6 +157,40 @@ typedef struct DI_VIDEO_CAMERA_t {
     DI_VIDEO_NVIDIA_T               stDiVideoNvidia;
 } DI_VIDEO_CAMERA_T;
 
+/**
+* @details DI_VIDEO_PIPELINE_INFO_T - GStreamer pipeline status information
+* @param unWidth current pipeline width
+* @param unHeight current pipeline height  
+* @param unFrameRate current frame rate
+* @param unBitrate current bitrate
+* @param achCodec codec name string
+* @param achFormat format name string
+* @param eGstState GStreamer pipeline state
+* @param bIsActive pipeline active status
+* @param ullFramesProcessed total processed frames (cumulative from GStreamer probes)
+* @param ullDroppedFrames dropped frames count (cumulative from GStreamer probes)
+* @param ullUdpBytes UDP bytes transmitted/received (cumulative from GStreamer probes)
+* @param dRealFrameRate current measured frame rate (frames/sec)
+* @param dCurrentByteRate current transfer rate (bytes/sec)
+* @param unLatencyMs current latency in milliseconds
+*/
+typedef struct DI_VIDEO_PIPELINE_INFO_t {
+    uint32_t unWidth;
+    uint32_t unHeight;
+    uint32_t unFrameRate;
+    uint32_t unBitrate;
+    char achCodec[32];
+    char achFormat[32];
+    uint32_t unGstState;                      /* GstState as uint32_t for header compatibility */
+    bool bIsActive;
+    uint64_t ullFramesProcessed;              /* Total frame count (cumulative) */
+    uint64_t ullDroppedFrames;                /* Total dropped frame count (cumulative) */
+    uint64_t ullUdpBytes;                     /* Total UDP bytes (cumulative) */
+    double dRealFrameRate;                    /* Current frame rate (frames/sec) */
+    double dCurrentByteRate;                  /* Current transfer rate (bytes/sec) */
+    uint32_t unLatencyMs;
+} DI_VIDEO_PIPELINE_INFO_T;
+
 /***************************** Function Protype ******************************/
 
 int32_t DI_VIDEO_NVIDIA_Init(DI_VIDEO_NVIDIA_T *pstDiGps);
@@ -177,8 +211,15 @@ void DI_VIDEO_NVIDIA_Status(DI_VIDEO_NVIDIA_T *pstDiGps);
 /* TCP streaming functions */
 int32_t DI_VIDEO_NVIDIA_SetTcpConnection(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia, const char *pchRemoteHost, int32_t nRemotePort, int32_t nLocalPort);
 int32_t DI_VIDEO_NVIDIA_StartTxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia, uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unFormatType, uint32_t unIFrameInterval, uint32_t unPresetLevel);
-int32_t DI_VIDEO_NVIDIA_StartRxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia);
+int32_t DI_VIDEO_NVIDIA_StartRxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia, uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unFormatType, uint32_t unIFrameInterval, uint32_t unPresetLevel);
 int32_t DI_VIDEO_NVIDIA_CheckTcpConnection(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia);
+
+/* UDP protocol functions */
+int32_t DI_VIDEO_NVIDIA_SetUdpProtocol(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia, uint32_t unProtocol, const char *pchRemoteHost, uint32_t unUdpPort);
+
+/* Pipeline monitoring functions */
+int32_t DI_VIDEO_NVIDIA_GetPipelineInfo(DI_VIDEO_PIPELINE_INFO_T *pstTxInfo, DI_VIDEO_PIPELINE_INFO_T *pstRxInfo);
+int32_t DI_VIDEO_NVIDIA_GetElementStats(const char *pchElementName, uint64_t *pullFrameCount, uint32_t *punLatency);
 #endif
 
 #endif	/* _DI_VIDEO_NVIDIA_H_ */

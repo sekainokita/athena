@@ -81,13 +81,13 @@
 #define DI_ERROR_STREAMING_RTSP_CREATE        (DI_ERROR_STREAMING_BASE - 14)
 #define DI_ERROR_STREAMING_RTSP_ATTACH        (DI_ERROR_STREAMING_BASE - 15)
 
-/* Ring buffer specific error codes */
-#define DI_ERROR_RING_BUFFER_BASE             (-200)
-#define DI_ERROR_RING_BUFFER_OVERFLOW         (DI_ERROR_RING_BUFFER_BASE - 1)
-#define DI_ERROR_RING_BUFFER_UNDERFLOW        (DI_ERROR_RING_BUFFER_BASE - 2)
-#define DI_ERROR_RING_BUFFER_FULL             (DI_ERROR_RING_BUFFER_BASE - 3)
-#define DI_ERROR_RING_BUFFER_EMPTY            (DI_ERROR_RING_BUFFER_BASE - 4)
-#define DI_ERROR_RING_BUFFER_SIZE_INVALID     (DI_ERROR_RING_BUFFER_BASE - 5)
+/* Ring buffer specific error codes - REMOVED (Direct GStreamer streaming) */
+/* #define DI_ERROR_RING_BUFFER_BASE             (-200) -- REMOVED */
+/* #define DI_ERROR_RING_BUFFER_OVERFLOW         (DI_ERROR_RING_BUFFER_BASE - 1) -- REMOVED */
+/* #define DI_ERROR_RING_BUFFER_UNDERFLOW        (DI_ERROR_RING_BUFFER_BASE - 2) -- REMOVED */  
+/* #define DI_ERROR_RING_BUFFER_FULL             (DI_ERROR_RING_BUFFER_BASE - 3) -- REMOVED */
+/* #define DI_ERROR_RING_BUFFER_EMPTY            (DI_ERROR_RING_BUFFER_BASE - 4) -- REMOVED */
+/* #define DI_ERROR_RING_BUFFER_SIZE_INVALID     (DI_ERROR_RING_BUFFER_BASE - 5) -- REMOVED */
 
 /* Network specific error codes */
 #define DI_ERROR_NETWORK_BASE                 (-300)

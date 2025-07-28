@@ -22,7 +22,7 @@
 #include <stdbool.h>
 #include <pthread.h>
 #include "type.h"
-#include "di_ring_buffer.h"
+/* #include "di_ring_buffer.h" -- REMOVED - Direct GStreamer streaming */
 
 #ifdef CONFIG_GSTREAMER
 #include <gst/gst.h>
@@ -92,11 +92,21 @@ typedef enum {
 } SVC_STREAMING_FORMAT_E;
 
 /**
+* @details SVC Streaming Network Protocol
+*/
+typedef enum {
+    SVC_STREAMING_PROTOCOL_TCP               = 0,
+    SVC_STREAMING_PROTOCOL_UDP               = 1,
+    SVC_STREAMING_PROTOCOL_MAX               = 255
+} SVC_STREAMING_PROTOCOL_E;
+
+/**
 * @details SVC Streaming Configuration
 */
 typedef struct SVC_STREAMING_CONFIG_t {
     SVC_STREAMING_MODE_E eMode;               /* Streaming mode */
     SVC_STREAMING_FORMAT_E eFormat;           /* Video format */
+    SVC_STREAMING_PROTOCOL_E eProtocol;       /* Network protocol: TCP/UDP */
     uint32_t unWidth;                         /* Video width */
     uint32_t unHeight;                        /* Video height */
     uint32_t unFrameRate;                     /* Frame rate */
@@ -106,6 +116,8 @@ typedef struct SVC_STREAMING_CONFIG_t {
     uint32_t unFormatType;                    /* Camera format: 0=YUYV, 1=MJPEG, 2=NV12 */
     uint32_t unIFrameInterval;                /* I-frame interval (GOP size) */
     uint32_t unPresetLevel;                   /* Encoder preset level (0=fastest, 3=slowest) */
+    uint32_t unTcpPort;                       /* TCP port for streaming */
+    uint32_t unUdpPort;                       /* UDP port for streaming */
     bool bHardwareAcceleration;               /* Hardware acceleration */
     bool bEnableDisplay;                      /* Enable display output */
     bool bEnableRecord;                       /* Enable recording */
@@ -114,6 +126,7 @@ typedef struct SVC_STREAMING_CONFIG_t {
     char achCameraDevice[64];                 /* Camera device path */
     char achDisplayDevice[64];                /* Display device path */
     char achRecordPath[256];                  /* Recording file path */
+    char achRemoteHost[64];                   /* Remote host for streaming */
 } SVC_STREAMING_CONFIG_T;
 
 /**
@@ -164,9 +177,9 @@ typedef struct SVC_STREAMING_t {
     SVC_STREAMING_STATUS_E eStatus;           /* Streaming status */
     SVC_STREAMING_STATS_T stStats;            /* Streaming statistics */
     
-    /* Ring buffer for data transport */
-    DI_RING_BUFFER_T stTxRingBuffer;          /* TX ring buffer */
-    DI_RING_BUFFER_T stRxRingBuffer;          /* RX ring buffer */
+    /* Ring buffers removed - now using direct GStreamer pipeline streaming */
+    /* DI_RING_BUFFER_T stTxRingBuffer; -- REMOVED */
+    /* DI_RING_BUFFER_T stRxRingBuffer; -- REMOVED */
     
 #ifdef CONFIG_GSTREAMER
     /* GStreamer pipeline */

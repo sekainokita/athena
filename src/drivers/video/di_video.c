@@ -316,7 +316,9 @@ int32_t DI_VIDEO_Open(DI_VIDEO_T *pstDiVideo)
         return nRet;
     }
 
-    if((pstDiVideo->eDiVideoStatus == DI_VIDEO_STATUS_INITIALIZED) || (pstDiVideo->eDiVideoStatus == DI_VIDEO_STATUS_CLOSED))
+    if((pstDiVideo->eDiVideoStatus == DI_VIDEO_STATUS_INITIALIZED) || 
+       (pstDiVideo->eDiVideoStatus == DI_VIDEO_STATUS_CLOSED) ||
+       (pstDiVideo->eDiVideoStatus == DI_VIDEO_STATUS_STOPPED))
     {
 #if defined(CONFIG_VIDEO_NVIDIA)
         nRet = DI_VIDEO_NVIDIA_Open(&s_stDiVideoDev);

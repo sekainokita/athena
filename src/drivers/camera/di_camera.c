@@ -64,7 +64,7 @@
 #endif
 
 #if defined(CONFIG_VIDEO_STREAMING)
-#include "di_ring_buffer.h"
+/* #include "di_ring_buffer.h" -- REMOVED - Direct GStreamer streaming */
 #include "di_error.h"
 #include "di_memory_pool.h"
 #endif
@@ -91,8 +91,8 @@ static DI_CAMERA_NVIDIA_T s_stDiCameraDev;
 #endif
 
 #if defined(CONFIG_VIDEO_STREAMING)
-/* Video streaming integration */
-static DI_RING_BUFFER_T *s_pstCameraRingBuffer = NULL;
+/* Video streaming integration - REMOVED (Direct GStreamer streaming) */
+/* static DI_RING_BUFFER_T *s_pstCameraRingBuffer = NULL; -- REMOVED */
 static bool s_bVideoStreamingEnabled = FALSE;
 #endif
 
@@ -505,7 +505,8 @@ int32_t DI_CAMERA_Close(DI_CAMERA_T *pstDiCamera)
         goto EXIT;
     }
     
-    if (pstDiCamera->eDiCameraStatus == DI_CAMERA_STATUS_OPENED)
+    if ((pstDiCamera->eDiCameraStatus == DI_CAMERA_STATUS_OPENED) ||
+        (pstDiCamera->eDiCameraStatus == DI_CAMERA_STATUS_STOPPED))
     {
 #if defined(CONFIG_CAMERA_NVIDIA)
         nRet = DI_CAMERA_NVIDIA_Close(&s_stDiCameraDev);
@@ -551,7 +552,8 @@ int32_t DI_CAMERA_Start(DI_CAMERA_T *pstDiCamera)
         goto EXIT;
     }
     
-    if (pstDiCamera->eDiCameraStatus == DI_CAMERA_STATUS_OPENED)
+    if ((pstDiCamera->eDiCameraStatus == DI_CAMERA_STATUS_OPENED) ||
+        (pstDiCamera->eDiCameraStatus == DI_CAMERA_STATUS_STOPPED))
     {
 #if defined(CONFIG_CAMERA_NVIDIA)
         nRet = DI_CAMERA_NVIDIA_Start(&s_stDiCameraDev);
@@ -649,18 +651,8 @@ int32_t DI_CAMERA_GetFrame(DI_CAMERA_T *pstDiCamera, DI_CAMERA_FRAME_T *pstFrame
         pstFrame->unTimestamp = (uint32_t)time(NULL);
         
 #if defined(CONFIG_VIDEO_STREAMING)
-        /* Send frame to video streaming if enabled */
-        if (s_bVideoStreamingEnabled && s_pstCameraRingBuffer != NULL && 
-            pstFrame->puchData != NULL && pstFrame->unDataSize > 0)
-        {
-            int32_t nStreamRet = DI_RING_BUFFER_Write(s_pstCameraRingBuffer, 
-                                                      pstFrame->puchData, 
-                                                      pstFrame->unDataSize);
-            if (nStreamRet != DI_OK)
-            {
-                PrintWarn("Failed to write frame to video streaming buffer [nRet:%d]", nStreamRet);
-            }
-        }
+        /* Video streaming now uses direct v4l2src→encoder pipeline (no ring buffer) */
+        /* Ring buffer frame forwarding removed - direct GStreamer streaming provides better performance */
 #endif
         
         pthread_mutex_unlock(&s_stDiCameraMutex);
@@ -731,15 +723,17 @@ void DI_CAMERA_Status(DI_CAMERA_T *pstDiCamera)
     PrintDebug("================================================");
 }
 
-#if defined(CONFIG_VIDEO_STREAMING)
+#if defined(CONFIG_VIDEO_STREAMING) && defined(RING_BUFFER_DEPRECATED_FUNCTIONS)  /* This should never be defined */
 /*
- * Connect camera to video streaming ring buffer
+ * Connect camera to video streaming ring buffer (DEPRECATED - Direct streaming)
+ * NOTE: No longer needed - camera now uses direct v4l2src→encoder connection
  */
-int32_t DI_CAMERA_ConnectVideoStreaming(DI_CAMERA_T *pstDiCamera, DI_RING_BUFFER_T *pstRingBuffer)
+int32_t DI_CAMERA_ConnectVideoStreaming_DEPRECATED(DI_CAMERA_T *pstDiCamera, void *pvRingBuffer)
 {
     int32_t nRet = DI_ERROR;
+    static void *s_pstCameraRingBuffer = NULL;  /* Local deprecated variable */
     
-    if (pstDiCamera == NULL || pstRingBuffer == NULL)
+    if (pstDiCamera == NULL || pvRingBuffer == NULL)
     {
         PrintError("Invalid parameters!");
         goto EXIT;
@@ -747,7 +741,7 @@ int32_t DI_CAMERA_ConnectVideoStreaming(DI_CAMERA_T *pstDiCamera, DI_RING_BUFFER
     
     pthread_mutex_lock(&s_stDiCameraMutex);
     
-    s_pstCameraRingBuffer = pstRingBuffer;
+    s_pstCameraRingBuffer = pvRingBuffer;
     s_bVideoStreamingEnabled = TRUE;
     
     PrintTrace("Camera connected to video streaming ring buffer");
@@ -761,11 +755,13 @@ EXIT:
 }
 
 /*
- * Disconnect camera from video streaming
+ * Disconnect camera from video streaming (DEPRECATED - Direct streaming)
+ * NOTE: No longer needed - direct v4l2src→encoder pipelines manage themselves
  */
-int32_t DI_CAMERA_DisconnectVideoStreaming(DI_CAMERA_T *pstDiCamera)
+int32_t DI_CAMERA_DisconnectVideoStreaming_DEPRECATED(DI_CAMERA_T *pstDiCamera)
 {
     int32_t nRet = DI_ERROR;
+    static void *s_pstCameraRingBuffer = NULL;  /* Local deprecated variable */
     
     if (pstDiCamera == NULL)
     {
@@ -787,4 +783,4 @@ int32_t DI_CAMERA_DisconnectVideoStreaming(DI_CAMERA_T *pstDiCamera)
 EXIT:
     return nRet;
 }
-#endif /* CONFIG_VIDEO_STREAMING */
+#endif /* CONFIG_VIDEO_STREAMING && RING_BUFFER_DEPRECATED_FUNCTIONS */

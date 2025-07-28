@@ -182,11 +182,9 @@ int32_t DI_CAMERA_ReleaseFrame(DI_CAMERA_T *pstDiCamera, DI_CAMERA_FRAME_T *pstF
 void DI_CAMERA_Status(DI_CAMERA_T *pstDiCamera);
 
 #if defined(CONFIG_VIDEO_STREAMING)
-/* Forward declaration */
-typedef struct DI_RING_BUFFER_t DI_RING_BUFFER_T;
-
-int32_t DI_CAMERA_ConnectVideoStreaming(DI_CAMERA_T *pstDiCamera, DI_RING_BUFFER_T *pstRingBuffer);
-int32_t DI_CAMERA_DisconnectVideoStreaming(DI_CAMERA_T *pstDiCamera);
+/* Ring buffer video streaming removed - now uses direct GStreamer pipelines */
+/* int32_t DI_CAMERA_ConnectVideoStreaming(DI_CAMERA_T *pstDiCamera, DI_RING_BUFFER_T *pstRingBuffer); -- REMOVED */
+/* int32_t DI_CAMERA_DisconnectVideoStreaming(DI_CAMERA_T *pstDiCamera); -- REMOVED */
 #endif
 
 #endif /* _DI_CAMERA_H_ */

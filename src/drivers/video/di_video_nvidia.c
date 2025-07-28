@@ -66,7 +66,7 @@
 #include <gst/app/gstappsrc.h>
 #include <gst/app/gstappsink.h>
 #include <gst/rtsp-server/rtsp-server.h>
-#include "di_ring_buffer.h"
+/* #include "di_ring_buffer.h" -- REMOVED - Direct GStreamer streaming */
 #include "di_error.h"
 #include "di_memory_pool.h"
 #endif
@@ -112,15 +112,43 @@ static GstRTSPMountPoints *s_hRtspMounts = NULL;
 static GstRTSPMediaFactory *s_hRtspFactory = NULL;
 static guint s_unRtspServerId = 0;
 
-/* Ring Buffer integration */
-static DI_RING_BUFFER_T *s_pstRingBufferTx = NULL;
-static DI_RING_BUFFER_T *s_pstRingBufferRx = NULL;
+/* Memory Pool integration (Ring Buffers removed for direct streaming) */
+/* static DI_RING_BUFFER_T *s_pstRingBufferTx = NULL; -- REMOVED */
+/* static DI_RING_BUFFER_T *s_pstRingBufferRx = NULL; -- REMOVED */
 static DI_MEMORY_POOL_T *s_pstMemoryPool = NULL;
 static pthread_mutex_t s_stGstMutex = PTHREAD_MUTEX_INITIALIZER;
 
-/* Ring Buffer pipelines */
-static GstElement *s_hGstPipelineTxEncode = NULL;
-static GstElement *s_hGstPipelineRxDisplay = NULL;
+/* Current pipeline configuration tracking */
+static uint32_t s_unCurrentWidth = 1920;
+static uint32_t s_unCurrentHeight = 1080;
+static uint32_t s_unCurrentFrameRate = 30;
+static uint32_t s_unCurrentBitrate = 2000000;
+static uint32_t s_unCurrentCodecType = 2;      /* MJPEG */
+static uint32_t s_unCurrentFormatType = 1;     /* MJPEG */
+
+/* Real frame counters and statistics from GStreamer probes */
+static uint64_t s_ullFrameCountTx = 0;
+static uint64_t s_ullFrameCountRx = 0;
+static uint64_t s_ullDroppedFramesTx = 0;
+static uint64_t s_ullDroppedFramesRx = 0;
+static uint64_t s_ullUdpBytesTx = 0;
+static uint64_t s_ullUdpBytesRx = 0;
+
+/* Real-time rate calculation variables */
+static uint64_t s_ullPrevFrameCountTx = 0;
+static uint64_t s_ullPrevFrameCountRx = 0;
+static uint64_t s_ullPrevUdpBytesTx = 0;
+static uint64_t s_ullPrevUdpBytesRx = 0;
+static time_t s_tPrevStatsTime = 0;
+static double s_dCurrentFrameRateTx = 0.0;
+static double s_dCurrentFrameRateRx = 0.0;
+static double s_dCurrentByteRateTx = 0.0;  /* Bytes per second TX */
+static double s_dCurrentByteRateRx = 0.0;  /* Bytes per second RX */
+static pthread_mutex_t s_hStatsMutex = PTHREAD_MUTEX_INITIALIZER;
+
+/* Direct GStreamer pipelines (no intermediate ring buffers) */
+/* static GstElement *s_hGstPipelineTxEncode = NULL; -- REMOVED */  
+/* static GstElement *s_hGstPipelineRxDisplay = NULL; -- REMOVED */
 
 /* Multi-camera configuration */
 static const DI_VIDEO_CAMERA_CONFIG_T s_stCameraConfig = {
@@ -138,19 +166,163 @@ static DI_VIDEO_CAMERA_T s_astCameras[DI_VIDEO_CAMERA_MAX_COUNT];
 static char s_achRemoteHost[256] = "127.0.0.1";
 static int32_t s_nRemotePort = DI_VIDEO_CAMERA_TCP_PORT_BASE;    /* Camera 1 TCP port */
 static int32_t s_nLocalPort = DI_VIDEO_CAMERA_TCP_PORT_BASE;     /* Camera 1 TCP port */
+
+/* UDP protocol configuration */
+static uint32_t s_unProtocol = 0;                               /* 0=TCP, 1=UDP */
+static uint32_t s_unUdpPort = 5000;                             /* UDP port for streaming */
 #endif
 
 /***************************** Function  *************************************/
 
 #if defined(CONFIG_VIDEO_STREAMING)
 
+#ifdef RING_BUFFER_DEPRECATED_FUNCTIONS  /* This should never be defined */
 /*
- * Function prototypes for ring buffer pipelines
+ * Function prototypes for ring buffer pipelines - DEPRECATED
  */
-static int32_t P_DI_VIDEO_NVIDIA_CreateTxEncodingPipeline(uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unIFrameInterval, uint32_t unPresetLevel);
+/* static int32_t P_DI_VIDEO_NVIDIA_CreateTxEncodingPipeline(...); -- REMOVED - Not used in direct streaming */
 static int32_t P_DI_VIDEO_NVIDIA_CreateRxDisplayPipeline(void);
-static GstFlowReturn P_DI_VIDEO_NVIDIA_AppSinkTxNewSample(GstAppSink *hAppSink, gpointer pvUserData);
-static void P_DI_VIDEO_NVIDIA_AppSrcNeedDataDisplay(GstAppSrc *hAppSrc, guint unSize, gpointer pvUserData);
+/* static GstFlowReturn P_DI_VIDEO_NVIDIA_AppSinkTxNewSample(GstAppSink *hAppSink, gpointer pvUserData); -- REMOVED */
+/* static void P_DI_VIDEO_NVIDIA_AppSrcNeedDataDisplay(GstAppSrc *hAppSrc, guint unSize, gpointer pvUserData); -- REMOVED */
+#endif /* RING_BUFFER_DEPRECATED_FUNCTIONS */
+
+/*
+ * GStreamer probe callbacks for real statistics collection
+ */
+static GstPadProbeReturn P_DI_VIDEO_TxFrameProbe(GstPad *pstPad, GstPadProbeInfo *pstInfo, gpointer pvUserData)
+{
+    UNUSED(pstPad);
+    UNUSED(pvUserData);
+    
+    if (GST_PAD_PROBE_INFO_TYPE(pstInfo) & GST_PAD_PROBE_TYPE_BUFFER)
+    {
+        GstBuffer *pstBuffer = GST_PAD_PROBE_INFO_BUFFER(pstInfo);
+        if (pstBuffer != NULL)
+        {
+            pthread_mutex_lock(&s_hStatsMutex);
+            s_ullFrameCountTx++;
+            s_ullUdpBytesTx += gst_buffer_get_size(pstBuffer);
+            pthread_mutex_unlock(&s_hStatsMutex);
+        }
+    }
+    
+    return GST_PAD_PROBE_OK;
+}
+
+static GstPadProbeReturn P_DI_VIDEO_RxFrameProbe(GstPad *pstPad, GstPadProbeInfo *pstInfo, gpointer pvUserData)
+{
+    UNUSED(pstPad);
+    UNUSED(pvUserData);
+    
+    if (GST_PAD_PROBE_INFO_TYPE(pstInfo) & GST_PAD_PROBE_TYPE_BUFFER)
+    {
+        GstBuffer *pstBuffer = GST_PAD_PROBE_INFO_BUFFER(pstInfo);
+        if (pstBuffer != NULL)
+        {
+            pthread_mutex_lock(&s_hStatsMutex);
+            s_ullFrameCountRx++;
+            s_ullUdpBytesRx += gst_buffer_get_size(pstBuffer);
+            pthread_mutex_unlock(&s_hStatsMutex);
+        }
+    }
+    
+    return GST_PAD_PROBE_OK;
+}
+
+static GstPadProbeReturn P_DI_VIDEO_DropProbe(GstPad *pstPad, GstPadProbeInfo *pstInfo, gpointer pvUserData)
+{
+    UNUSED(pstPad);
+    
+    if (GST_PAD_PROBE_INFO_TYPE(pstInfo) & GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM)
+    {
+        GstEvent *pstEvent = GST_PAD_PROBE_INFO_EVENT(pstInfo);
+        if (GST_EVENT_TYPE(pstEvent) == GST_EVENT_QOS)
+        {
+            pthread_mutex_lock(&s_hStatsMutex);
+            if (pvUserData == (gpointer)1) /* TX drops */
+            {
+                s_ullDroppedFramesTx++;
+            }
+            else /* RX drops */
+            {
+                s_ullDroppedFramesRx++;
+            }
+            pthread_mutex_unlock(&s_hStatsMutex);
+        }
+    }
+    
+    return GST_PAD_PROBE_OK;
+}
+
+/* Helper function to add probe to element pad */
+static void P_DI_VIDEO_AddElementProbe(GstElement *pstElement, const char *pchPadName, 
+                                       GstPadProbeCallback pfnCallback, gpointer pvUserData)
+{
+    GstPad *pstPad = NULL;
+    
+    if (pstElement == NULL || pchPadName == NULL || pfnCallback == NULL)
+    {
+        return;
+    }
+    
+    pstPad = gst_element_get_static_pad(pstElement, pchPadName);
+    if (pstPad != NULL)
+    {
+        gst_pad_add_probe(pstPad, 
+                         GST_PAD_PROBE_TYPE_BUFFER | GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM,
+                         pfnCallback, pvUserData, NULL);
+        gst_object_unref(pstPad);
+        PrintTrace("Probe added to %s:%s", GST_ELEMENT_NAME(pstElement), pchPadName);
+    }
+    else
+    {
+        PrintError("Failed to get pad %s from element %s", pchPadName, GST_ELEMENT_NAME(pstElement));
+    }
+}
+
+/* Calculate real-time transmission rates */
+static void P_DI_VIDEO_UpdateRealTimeStats(void)
+{
+    time_t tCurrentTime = time(NULL);
+    
+    pthread_mutex_lock(&s_hStatsMutex);
+    
+    /* Update rates every second */
+    if (s_tPrevStatsTime > 0 && (tCurrentTime - s_tPrevStatsTime >= 1))
+    {
+        time_t tTimeDelta = tCurrentTime - s_tPrevStatsTime;
+        
+        /* Calculate TX rates */
+        uint64_t ullFrameDeltaTx = s_ullFrameCountTx - s_ullPrevFrameCountTx;
+        uint64_t ullBytesDeltaTx = s_ullUdpBytesTx - s_ullPrevUdpBytesTx;
+        s_dCurrentFrameRateTx = (double)ullFrameDeltaTx / (double)tTimeDelta;
+        s_dCurrentByteRateTx = (double)ullBytesDeltaTx / (double)tTimeDelta;
+        
+        /* Calculate RX rates */
+        uint64_t ullFrameDeltaRx = s_ullFrameCountRx - s_ullPrevFrameCountRx;
+        uint64_t ullBytesDeltaRx = s_ullUdpBytesRx - s_ullPrevUdpBytesRx;
+        s_dCurrentFrameRateRx = (double)ullFrameDeltaRx / (double)tTimeDelta;
+        s_dCurrentByteRateRx = (double)ullBytesDeltaRx / (double)tTimeDelta;
+        
+        /* Update previous values */
+        s_ullPrevFrameCountTx = s_ullFrameCountTx;
+        s_ullPrevFrameCountRx = s_ullFrameCountRx;
+        s_ullPrevUdpBytesTx = s_ullUdpBytesTx;
+        s_ullPrevUdpBytesRx = s_ullUdpBytesRx;
+        s_tPrevStatsTime = tCurrentTime;
+    }
+    else if (s_tPrevStatsTime == 0)
+    {
+        /* Initialize on first call */
+        s_ullPrevFrameCountTx = s_ullFrameCountTx;
+        s_ullPrevFrameCountRx = s_ullFrameCountRx;
+        s_ullPrevUdpBytesTx = s_ullUdpBytesTx;
+        s_ullPrevUdpBytesRx = s_ullUdpBytesRx;
+        s_tPrevStatsTime = tCurrentTime;
+    }
+    
+    pthread_mutex_unlock(&s_hStatsMutex);
+}
 
 /*
  * Camera port calculation functions
@@ -285,10 +457,12 @@ static gboolean P_DI_VIDEO_NVIDIA_GstBusCall(GstBus *hBus, GstMessage *pstMsg, g
     return TRUE;
 }
 
+#ifdef RING_BUFFER_DEPRECATED_FUNCTIONS  /* This should never be defined */
 /*
- * AppSink New Sample Callback - TX Pipeline
+ * AppSink New Sample Callback - TX Pipeline (DEPRECATED - Direct streaming)
+ * NOTE: This function is no longer used in direct v4l2src→encoder streaming
  */
-static GstFlowReturn P_DI_VIDEO_NVIDIA_AppSinkTxNewSample(GstAppSink *hAppSink, gpointer pvUserData)
+static GstFlowReturn P_DI_VIDEO_NVIDIA_AppSinkTxNewSample_DEPRECATED(GstAppSink *hAppSink, gpointer pvUserData)
 {
     GstSample *pstSample = NULL;
     GstBuffer *pstBuffer = NULL;
@@ -380,9 +554,10 @@ static GstFlowReturn P_DI_VIDEO_NVIDIA_AppSinkTxNewSample(GstAppSink *hAppSink, 
 }
 
 /*
- * AppSink New Sample Callback - RX Pipeline
+ * AppSink New Sample Callback - RX Pipeline (DEPRECATED - Direct streaming) 
+ * NOTE: This function is no longer used in direct network→decoder→display streaming
  */
-static GstFlowReturn P_DI_VIDEO_NVIDIA_AppSinkNewSample(GstAppSink *hAppSink, gpointer pvUserData)
+static GstFlowReturn P_DI_VIDEO_NVIDIA_AppSinkNewSample_DEPRECATED(GstAppSink *hAppSink, gpointer pvUserData)
 {
     GstSample *pstSample = NULL;
     GstBuffer *pstBuffer = NULL;
@@ -434,9 +609,10 @@ static GstFlowReturn P_DI_VIDEO_NVIDIA_AppSinkNewSample(GstAppSink *hAppSink, gp
 }
 
 /*
- * AppSrc Need Data Callback - TX Pipeline
+ * AppSrc Need Data Callback - TX Pipeline (DEPRECATED - Direct streaming)
+ * NOTE: No longer needed with v4l2src→encoder direct connection
  */
-static void P_DI_VIDEO_NVIDIA_AppSrcNeedData(GstAppSrc *hAppSrc, guint unSize, gpointer pvUserData)
+static void P_DI_VIDEO_NVIDIA_AppSrcNeedData_DEPRECATED(GstAppSrc *hAppSrc, guint unSize, gpointer pvUserData)
 {
     GstBuffer *pstBuffer = NULL;
     GstMapInfo stMapInfo;
@@ -498,9 +674,10 @@ static void P_DI_VIDEO_NVIDIA_AppSrcNeedData(GstAppSrc *hAppSrc, guint unSize, g
 }
 
 /*
- * AppSrc Need Data Callback - RX Display Pipeline
+ * AppSrc Need Data Callback - RX Display Pipeline (DEPRECATED - Direct streaming)
+ * NOTE: No longer needed with network→decoder→display direct connection
  */
-static void P_DI_VIDEO_NVIDIA_AppSrcNeedDataDisplay(GstAppSrc *hAppSrc, guint unSize, gpointer pvUserData)
+static void P_DI_VIDEO_NVIDIA_AppSrcNeedDataDisplay_DEPRECATED(GstAppSrc *hAppSrc, guint unSize, gpointer pvUserData)
 {
     GstBuffer *pstBuffer = NULL;
     GstMapInfo stMapInfo;
@@ -553,11 +730,12 @@ static void P_DI_VIDEO_NVIDIA_AppSrcNeedDataDisplay(GstAppSrc *hAppSrc, guint un
     
     pthread_mutex_unlock(&s_stGstMutex);
 }
+#endif /* RING_BUFFER_DEPRECATED_FUNCTIONS */
 
 /*
  * Create TX Pipeline (Camera -> Encoder -> TCP)
  */
-static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unFormatType, uint32_t unIFrameInterval, uint32_t unPresetLevel)
+static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unFormatType, uint32_t unIFrameInterval, uint32_t unPresetLevel, uint32_t unProtocol, const char *pchRemoteHost, uint32_t unUdpPort)
 {
     int32_t nRet = DI_ERROR;
     GstBus *hBus = NULL;
@@ -567,97 +745,262 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(uint32_t unWidth, uint32_t unH
     /* Create TX pipeline description with format and codec selection */
     const char *pchFormat = (unFormatType == 0) ? "YUY2" : 
                            (unFormatType == 1) ? "MJPG" : "NV12";
-    const char *pchCaps = (unFormatType == 0) ? "video/x-raw" : 
-                         (unFormatType == 1) ? "image/jpeg" : "video/x-raw";
     
-    if (unCodecType == 0) /* H.264 */
+    PrintTrace("TX Pipeline Parameters: Protocol[%d] Codec[%d] Format[%d] Host[%s] Port[%d]", 
+               unProtocol, unCodecType, unFormatType, pchRemoteHost ? pchRemoteHost : "NULL", unUdpPort);
+    
+    /* MJPEG 포맷이면 코덱 설정과 관계없이 직접 스트리밍 */
+    if (unFormatType == 1) /* MJPEG format - 직접 스트리밍 */
     {
-        if (unFormatType == 1) /* MJPEG format */
+        if (unProtocol == 1) /* UDP */
         {
             pchPipelineDesc = g_strdup_printf(
                 "v4l2src device=/dev/video1 do-timestamp=true ! "
                 "image/jpeg,width=%d,height=%d,framerate=%d/1 ! "
-                "jpegdec ! "
-                "nvvidconv ! "
-                "video/x-raw(memory:NVMM),format=I420 ! "
-                "nvv4l2h264enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
-                "iframeinterval=%d insert-sps-pps=true preset-level=%d "
-                "profile=4 control-rate=1 ! "
-                "h264parse ! "
-                "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
+                "rtpjpegpay mtu=1400 ! "
+                "udpsink host=%s port=%d sync=false async=false buffer-size=%d max-lateness=0",
                 unWidth, unHeight, unFrameRate,
-                unBitrate, unBitrate + 1000000,
-                unIFrameInterval, unPresetLevel
+                pchRemoteHost, unUdpPort, SVC_STREAMING_BUFFER_SIZE
             );
         }
-        else /* YUYV or NV12 format */
+        else /* TCP */
         {
             pchPipelineDesc = g_strdup_printf(
                 "v4l2src device=/dev/video1 do-timestamp=true ! "
-                "video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1 ! "
-                "nvvidconv ! "
-                "video/x-raw(memory:NVMM),format=I420 ! "
-                "nvv4l2h264enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
-                "iframeinterval=%d insert-sps-pps=true preset-level=%d "
-                "profile=4 control-rate=1 ! "
-                "h264parse ! "
-                "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
-                pchFormat, unWidth, unHeight, unFrameRate,
-                unBitrate, unBitrate + 1000000,
-                unIFrameInterval, unPresetLevel
+                "image/jpeg,width=%d,height=%d,framerate=%d/1 ! "
+                "tcpserversink host=0.0.0.0 port=8554 sync=false",
+                unWidth, unHeight, unFrameRate
             );
+        }
+        PrintTrace("Using direct MJPEG streaming (format-based)");
+    }
+    else if (unCodecType == 0) /* H.264 */
+    {
+        if (unFormatType == 1) /* MJPEG format */
+        {
+            if (unProtocol == 1) /* UDP */
+            {
+                pchPipelineDesc = g_strdup_printf(
+                    "v4l2src device=/dev/video1 do-timestamp=true ! "
+                    "image/jpeg,width=%d,height=%d,framerate=%d/1 ! "
+                    "jpegdec ! "
+                    "nvvidconv ! "
+                    "video/x-raw(memory:NVMM),format=I420 ! "
+                    "nvv4l2h264enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
+                    "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+                    "profile=4 control-rate=1 ! "
+                    "h264parse ! "
+                    "rtph264pay config-interval=1 pt=96 ! "
+                    "udpsink host=%s port=%d sync=false buffer-size=%d max-lateness=1000000000",
+                    unWidth, unHeight, unFrameRate,
+                    unBitrate, unBitrate + 1000000,
+                    unIFrameInterval, unPresetLevel,
+                    pchRemoteHost, unUdpPort, SVC_STREAMING_BUFFER_SIZE
+                );
+            }
+            else /* TCP */
+            {
+                pchPipelineDesc = g_strdup_printf(
+                    "v4l2src device=/dev/video1 do-timestamp=true ! "
+                    "image/jpeg,width=%d,height=%d,framerate=%d/1 ! "
+                    "jpegdec ! "
+                    "nvvidconv ! "
+                    "video/x-raw(memory:NVMM),format=I420 ! "
+                    "nvv4l2h264enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
+                    "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+                    "profile=4 control-rate=1 ! "
+                    "h264parse ! "
+                    "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
+                    unWidth, unHeight, unFrameRate,
+                    unBitrate, unBitrate + 1000000,
+                    unIFrameInterval, unPresetLevel
+                );
+            }
+        }
+        else /* YUYV or NV12 format */
+        {
+            if (unProtocol == 1) /* UDP */
+            {
+                pchPipelineDesc = g_strdup_printf(
+                    "v4l2src device=/dev/video1 do-timestamp=true ! "
+                    "video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1 ! "
+                    "nvvidconv ! "
+                    "video/x-raw(memory:NVMM),format=I420 ! "
+                    "nvv4l2h264enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
+                    "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+                    "profile=4 control-rate=1 ! "
+                    "h264parse ! "
+                    "rtph264pay config-interval=1 pt=96 ! "
+                    "udpsink host=%s port=%d sync=false buffer-size=%d max-lateness=1000000000",
+                    pchFormat, unWidth, unHeight, unFrameRate,
+                    unBitrate, unBitrate + 1000000,
+                    unIFrameInterval, unPresetLevel,
+                    pchRemoteHost, unUdpPort, SVC_STREAMING_BUFFER_SIZE
+                );
+            }
+            else /* TCP */
+            {
+                pchPipelineDesc = g_strdup_printf(
+                    "v4l2src device=/dev/video1 do-timestamp=true ! "
+                    "video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1 ! "
+                    "nvvidconv ! "
+                    "video/x-raw(memory:NVMM),format=I420 ! "
+                    "nvv4l2h264enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
+                    "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+                    "profile=4 control-rate=1 ! "
+                    "h264parse ! "
+                    "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
+                    pchFormat, unWidth, unHeight, unFrameRate,
+                    unBitrate, unBitrate + 1000000,
+                    unIFrameInterval, unPresetLevel
+                );
+            }
         }
     }
     else if (unCodecType == 1) /* H.265 */
     {
         if (unFormatType == 1) /* MJPEG format */
         {
-            pchPipelineDesc = g_strdup_printf(
-                "v4l2src device=/dev/video1 do-timestamp=true ! "
-                "image/jpeg,width=%d,height=%d,framerate=%d/1 ! "
-                "jpegdec ! "
-                "nvvidconv ! "
-                "video/x-raw(memory:NVMM),format=I420 ! "
-                "nvv4l2h265enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
-                "iframeinterval=%d insert-sps-pps=true preset-level=%d "
-                "profile=1 control-rate=1 ! "
-                "h265parse ! "
-                "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
-                unWidth, unHeight, unFrameRate,
-                unBitrate, unBitrate + 1000000,
-                unIFrameInterval, unPresetLevel
-            );
+            if (unProtocol == 1) /* UDP */
+            {
+                pchPipelineDesc = g_strdup_printf(
+                    "v4l2src device=/dev/video1 do-timestamp=true ! "
+                    "image/jpeg,width=%d,height=%d,framerate=%d/1 ! "
+                    "jpegdec ! "
+                    "nvvidconv ! "
+                    "video/x-raw(memory:NVMM),format=I420 ! "
+                    "nvv4l2h265enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
+                    "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+                    "profile=1 control-rate=1 ! "
+                    "h265parse ! "
+                    "rtph265pay config-interval=1 pt=96 ! "
+                    "udpsink host=%s port=%d sync=false buffer-size=0 max-lateness=0",
+                    unWidth, unHeight, unFrameRate,
+                    unBitrate, unBitrate + 1000000,
+                    unIFrameInterval, unPresetLevel,
+                    pchRemoteHost, unUdpPort
+                );
+            }
+            else /* TCP */
+            {
+                pchPipelineDesc = g_strdup_printf(
+                    "v4l2src device=/dev/video1 do-timestamp=true ! "
+                    "image/jpeg,width=%d,height=%d,framerate=%d/1 ! "
+                    "jpegdec ! "
+                    "nvvidconv ! "
+                    "video/x-raw(memory:NVMM),format=I420 ! "
+                    "nvv4l2h265enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
+                    "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+                    "profile=1 control-rate=1 ! "
+                    "h265parse ! "
+                    "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
+                    unWidth, unHeight, unFrameRate,
+                    unBitrate, unBitrate + 1000000,
+                    unIFrameInterval, unPresetLevel
+                );
+            }
         }
         else /* YUYV or NV12 format */
         {
-            pchPipelineDesc = g_strdup_printf(
-                "v4l2src device=/dev/video1 do-timestamp=true ! "
-                "video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1 ! "
-                "nvvidconv ! "
-                "video/x-raw(memory:NVMM),format=I420 ! "
-                "nvv4l2h265enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
-                "iframeinterval=%d insert-sps-pps=true preset-level=%d "
-                "profile=1 control-rate=1 ! "
-                "h265parse ! "
-                "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
-                pchFormat, unWidth, unHeight, unFrameRate,
-                unBitrate, unBitrate + 1000000,
-                unIFrameInterval, unPresetLevel
-            );
+            if (unProtocol == 1) /* UDP */
+            {
+                pchPipelineDesc = g_strdup_printf(
+                    "v4l2src device=/dev/video1 do-timestamp=true ! "
+                    "video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1 ! "
+                    "nvvidconv ! "
+                    "video/x-raw(memory:NVMM),format=I420 ! "
+                    "nvv4l2h265enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
+                    "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+                    "profile=1 control-rate=1 ! "
+                    "h265parse ! "
+                    "rtph265pay config-interval=1 pt=96 ! "
+                    "udpsink host=%s port=%d sync=false buffer-size=0 max-lateness=0",
+                    pchFormat, unWidth, unHeight, unFrameRate,
+                    unBitrate, unBitrate + 1000000,
+                    unIFrameInterval, unPresetLevel,
+                    pchRemoteHost, unUdpPort
+                );
+            }
+            else /* TCP */
+            {
+                pchPipelineDesc = g_strdup_printf(
+                    "v4l2src device=/dev/video1 do-timestamp=true ! "
+                    "video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1 ! "
+                    "nvvidconv ! "
+                    "video/x-raw(memory:NVMM),format=I420 ! "
+                    "nvv4l2h265enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
+                    "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+                    "profile=1 control-rate=1 ! "
+                    "h265parse ! "
+                    "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
+                    pchFormat, unWidth, unHeight, unFrameRate,
+                    unBitrate, unBitrate + 1000000,
+                    unIFrameInterval, unPresetLevel
+                );
+            }
         }
     }
     else if (unCodecType == 2) /* MJPEG */
     {
-        pchPipelineDesc = g_strdup_printf(
-            "v4l2src device=/dev/video1 do-timestamp=true ! "
-            "video/x-raw,format=YUY2,width=%d,height=%d,framerate=%d/1 ! "
-            "nvvidconv ! "
-            "video/x-raw(memory:NVMM),format=I420 ! "
-            "nvjpegenc quality=%d ! "
-            "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
-            unWidth, unHeight, unFrameRate,
-            (100 - unPresetLevel * 20) /* Quality: preset 0=100%, 1=80%, 2=60%, 3=40% */
-        );
+        if (unFormatType == 1) /* MJPEG format */
+        {
+            if (unProtocol == 1) /* UDP */
+            {
+                pchPipelineDesc = g_strdup_printf(
+                    "v4l2src device=/dev/video1 do-timestamp=true ! "
+                    "image/jpeg,width=%d,height=%d,framerate=%d/1 ! "
+                    "rtpjpegpay ! "
+                    "udpsink host=%s port=%d sync=false buffer-size=0 max-lateness=0",
+                    unWidth, unHeight, unFrameRate,
+                    pchRemoteHost, unUdpPort
+                );
+            }
+            else /* TCP */
+            {
+                pchPipelineDesc = g_strdup_printf(
+                    "v4l2src device=/dev/video1 do-timestamp=true ! "
+                    "image/jpeg,width=%d,height=%d,framerate=%d/1 ! "
+                    "nvjpegdec ! "
+                    "nvvidconv ! "
+                    "video/x-raw(memory:NVMM),format=I420 ! "
+                    "nvjpegenc quality=%d ! "
+                    "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
+                    unWidth, unHeight, unFrameRate,
+                    (100 - unPresetLevel * 20) /* Quality: preset 0=100%, 1=80%, 2=60%, 3=40% */
+                );
+            }
+        }
+        else /* YUYV format (기본) */
+        {
+            if (unProtocol == 1) /* UDP */
+            {
+                pchPipelineDesc = g_strdup_printf(
+                    "v4l2src device=/dev/video1 do-timestamp=true ! "
+                    "video/x-raw,format=YUY2,width=%d,height=%d,framerate=%d/1 ! "
+                    "nvvidconv ! "
+                    "video/x-raw(memory:NVMM),format=I420 ! "
+                    "nvjpegenc quality=%d ! "
+                    "rtpjpegpay ! "
+                    "udpsink host=%s port=%d sync=false buffer-size=0 max-lateness=0",
+                    unWidth, unHeight, unFrameRate,
+                    (100 - unPresetLevel * 20), /* Quality: preset 0=100%, 1=80%, 2=60%, 3=40% */
+                    pchRemoteHost, unUdpPort
+                );
+            }
+            else /* TCP */
+            {
+                pchPipelineDesc = g_strdup_printf(
+                    "v4l2src device=/dev/video1 do-timestamp=true ! "
+                    "video/x-raw,format=YUY2,width=%d,height=%d,framerate=%d/1 ! "
+                    "nvvidconv ! "
+                    "video/x-raw(memory:NVMM),format=I420 ! "
+                    "nvjpegenc quality=%d ! "
+                    "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
+                    unWidth, unHeight, unFrameRate,
+                    (100 - unPresetLevel * 20) /* Quality: preset 0=100%, 1=80%, 2=60%, 3=40% */
+                );
+            }
+        }
     }
     else
     {
@@ -686,6 +1029,87 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateTxPipeline(uint32_t unWidth, uint32_t unH
     gst_bus_add_watch(hBus, P_DI_VIDEO_NVIDIA_GstBusCall, s_hMainLoop);
     gst_object_unref(hBus);
     
+    /* Add probes for real statistics collection */
+    /* Reset frame counters */
+    pthread_mutex_lock(&s_hStatsMutex);
+    s_ullFrameCountTx = 0;
+    s_ullDroppedFramesTx = 0;
+    s_ullUdpBytesTx = 0;
+    pthread_mutex_unlock(&s_hStatsMutex);
+    
+    /* Add probe to v4l2src for frame counting */
+    GstElement *pstV4l2Src = gst_bin_get_by_name(GST_BIN(s_hGstPipelineTx), "v4l2src0");
+    if (pstV4l2Src == NULL)
+    {
+        /* Try to find v4l2src by element type */
+        GstIterator *pstIter = gst_bin_iterate_sources(GST_BIN(s_hGstPipelineTx));
+        GValue stValue = G_VALUE_INIT;
+        GstIteratorResult eResult = GST_ITERATOR_OK;
+        
+        while (eResult == GST_ITERATOR_OK)
+        {
+            eResult = gst_iterator_next(pstIter, &stValue);
+            if (eResult == GST_ITERATOR_OK)
+            {
+                GstElement *pstElement = GST_ELEMENT(g_value_get_object(&stValue));
+                if (GST_IS_ELEMENT(pstElement))
+                {
+                    const gchar *pchFactoryName = gst_plugin_feature_get_name(GST_PLUGIN_FEATURE(gst_element_get_factory(pstElement)));
+                    if (g_strcmp0(pchFactoryName, "v4l2src") == 0)
+                    {
+                        pstV4l2Src = gst_object_ref(pstElement);
+                        break;
+                    }
+                }
+                g_value_unset(&stValue);
+            }
+        }
+        gst_iterator_free(pstIter);
+    }
+    
+    if (pstV4l2Src != NULL)
+    {
+        P_DI_VIDEO_AddElementProbe(pstV4l2Src, "src", P_DI_VIDEO_TxFrameProbe, (gpointer)1);
+        gst_object_unref(pstV4l2Src);
+    }
+    
+    /* Add probe to UDP sink for data counting */
+    GstElement *pstUdpSink = gst_bin_get_by_name(GST_BIN(s_hGstPipelineTx), "udpsink0");
+    if (pstUdpSink == NULL)
+    {
+        /* Try to find udpsink by element type */
+        GstIterator *pstIter = gst_bin_iterate_sinks(GST_BIN(s_hGstPipelineTx));
+        GValue stValue = G_VALUE_INIT;
+        GstIteratorResult eResult = GST_ITERATOR_OK;
+        
+        while (eResult == GST_ITERATOR_OK)
+        {
+            eResult = gst_iterator_next(pstIter, &stValue);
+            if (eResult == GST_ITERATOR_OK)
+            {
+                GstElement *pstElement = GST_ELEMENT(g_value_get_object(&stValue));
+                if (GST_IS_ELEMENT(pstElement))
+                {
+                    const gchar *pchFactoryName = gst_plugin_feature_get_name(GST_PLUGIN_FEATURE(gst_element_get_factory(pstElement)));
+                    if (g_strcmp0(pchFactoryName, "udpsink") == 0)
+                    {
+                        pstUdpSink = gst_object_ref(pstElement);
+                        break;
+                    }
+                }
+                g_value_unset(&stValue);
+            }
+        }
+        gst_iterator_free(pstIter);
+    }
+    
+    if (pstUdpSink != NULL)
+    {
+        P_DI_VIDEO_AddElementProbe(pstUdpSink, "sink", P_DI_VIDEO_TxFrameProbe, (gpointer)1);
+        P_DI_VIDEO_AddElementProbe(pstUdpSink, "sink", P_DI_VIDEO_DropProbe, (gpointer)1);
+        gst_object_unref(pstUdpSink);
+    }
+    
     nRet = DI_OK;
     
 EXIT:
@@ -697,10 +1121,11 @@ EXIT:
     return nRet;
 }
 
+#ifdef UNUSED_TX_ENCODING_PIPELINE  /* This function is not used */
 /*
- * Create TX Encoding Pipeline (Ring Buffer -> Encoder -> TCP)
+ * Create TX Encoding Pipeline (Ring Buffer -> Encoder -> TCP) - DEPRECATED
  */
-static int32_t P_DI_VIDEO_NVIDIA_CreateTxEncodingPipeline(uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unIFrameInterval, uint32_t unPresetLevel)
+static int32_t P_DI_VIDEO_NVIDIA_CreateTxEncodingPipeline(uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unIFrameInterval, uint32_t unPresetLevel, uint32_t unProtocol, const char *pchRemoteHost, uint32_t unUdpPort)
 {
     int32_t nRet = DI_ERROR;
     GstBus *hBus = NULL;
@@ -709,44 +1134,118 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateTxEncodingPipeline(uint32_t unWidth, uint
     
     if (unCodecType == 0) /* H.264 */
     {
-        pchPipelineDesc = g_strdup_printf(
-            "appsrc name=tx_src format=GST_FORMAT_TIME ! "
-            "video/x-raw,format=I420,width=%d,height=%d,framerate=%d/1 ! "
-            "nvv4l2h264enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
-            "iframeinterval=%d insert-sps-pps=true preset-level=%d "
-            "profile=4 control-rate=1 ! "
-            "h264parse ! "
-            "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
-            unWidth, unHeight, unFrameRate,
-            unBitrate, unBitrate + 1000000,
-            unIFrameInterval, unPresetLevel
-        );
+        if (unProtocol == 1) /* UDP */
+        {
+            pchPipelineDesc = g_strdup_printf(
+                "v4l2src device=/dev/video0 ! "
+                "video/x-raw,format=YUY2,width=%d,height=%d,framerate=%d/1 ! "
+                "queue max-size-buffers=5 max-size-bytes=4194304 leaky=downstream ! "
+                "nvvidconv ! "
+                "video/x-raw,format=I420 ! "
+                "nvv4l2h264enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
+                "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+                "profile=4 control-rate=1 ! "
+                "h264parse ! "
+                "rtph264pay ! "
+                "udpsink host=%s port=%d sync=false buffer-size=0 max-lateness=0",
+                unWidth, unHeight, unFrameRate,
+                unBitrate, unBitrate + 1000000,
+                unIFrameInterval, unPresetLevel,
+                pchRemoteHost ? pchRemoteHost : "127.0.0.1", unUdpPort
+            );
+        }
+        else /* TCP */
+        {
+            pchPipelineDesc = g_strdup_printf(
+                "v4l2src device=/dev/video0 ! "
+                "video/x-raw,format=YUY2,width=%d,height=%d,framerate=%d/1 ! "
+                "queue max-size-buffers=5 max-size-bytes=4194304 leaky=downstream ! "
+                "nvvidconv ! "
+                "video/x-raw,format=I420 ! "
+                "nvv4l2h264enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
+                "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+                "profile=4 control-rate=1 ! "
+                "h264parse ! "
+                "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
+                unWidth, unHeight, unFrameRate,
+                unBitrate, unBitrate + 1000000,
+                unIFrameInterval, unPresetLevel
+            );
+        }
     }
     else if (unCodecType == 1) /* H.265 */
     {
-        pchPipelineDesc = g_strdup_printf(
-            "appsrc name=tx_src format=GST_FORMAT_TIME ! "
-            "video/x-raw,format=I420,width=%d,height=%d,framerate=%d/1 ! "
-            "nvv4l2h265enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
-            "iframeinterval=%d insert-sps-pps=true preset-level=%d "
-            "profile=1 control-rate=1 ! "
-            "h265parse ! "
-            "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
-            unWidth, unHeight, unFrameRate,
-            unBitrate, unBitrate + 1000000,
-            unIFrameInterval, unPresetLevel
-        );
+        if (unProtocol == 1) /* UDP */
+        {
+            pchPipelineDesc = g_strdup_printf(
+                "v4l2src device=/dev/video0 ! "
+                "video/x-raw,format=YUY2,width=%d,height=%d,framerate=%d/1 ! "
+                "queue max-size-buffers=5 max-size-bytes=4194304 leaky=downstream ! "
+                "nvvidconv ! "
+                "video/x-raw,format=I420 ! "
+                "nvv4l2h265enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
+                "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+                "profile=1 control-rate=1 ! "
+                "h265parse ! "
+                "rtph265pay ! "
+                "udpsink host=%s port=%d sync=false buffer-size=0 max-lateness=0",
+                unWidth, unHeight, unFrameRate,
+                unBitrate, unBitrate + 1000000,
+                unIFrameInterval, unPresetLevel,
+                pchRemoteHost ? pchRemoteHost : "127.0.0.1", unUdpPort
+            );
+        }
+        else /* TCP */
+        {
+            pchPipelineDesc = g_strdup_printf(
+                "v4l2src device=/dev/video0 ! "
+                "video/x-raw,format=YUY2,width=%d,height=%d,framerate=%d/1 ! "
+                "queue max-size-buffers=5 max-size-bytes=4194304 leaky=downstream ! "
+                "nvvidconv ! "
+                "video/x-raw,format=I420 ! "
+                "nvv4l2h265enc maxperf-enable=true bitrate=%d peak-bitrate=%d "
+                "iframeinterval=%d insert-sps-pps=true preset-level=%d "
+                "profile=1 control-rate=1 ! "
+                "h265parse ! "
+                "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
+                unWidth, unHeight, unFrameRate,
+                unBitrate, unBitrate + 1000000,
+                unIFrameInterval, unPresetLevel
+            );
+        }
     }
     else if (unCodecType == 2) /* MJPEG */
     {
-        pchPipelineDesc = g_strdup_printf(
-            "appsrc name=tx_src format=GST_FORMAT_TIME ! "
-            "video/x-raw,format=I420,width=%d,height=%d,framerate=%d/1 ! "
-            "nvjpegenc quality=%d ! "
-            "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
-            unWidth, unHeight, unFrameRate,
-            (100 - unPresetLevel * 20) /* Quality: preset 0=100%, 1=80%, 2=60%, 3=40% */
-        );
+        if (unProtocol == 1) /* UDP */
+        {
+            pchPipelineDesc = g_strdup_printf(
+                "v4l2src device=/dev/video0 ! "
+                "video/x-raw,format=YUY2,width=%d,height=%d,framerate=%d/1 ! "
+                "queue max-size-buffers=5 max-size-bytes=4194304 leaky=downstream ! "
+                "nvvidconv ! "
+                "video/x-raw,format=I420 ! "
+                "nvjpegenc quality=%d ! "
+                "rtpjpegpay ! "
+                "udpsink host=%s port=%d sync=false buffer-size=0 max-lateness=0",
+                unWidth, unHeight, unFrameRate,
+                (100 - unPresetLevel * 20), /* Quality: preset 0=100%, 1=80%, 2=60%, 3=40% */
+                pchRemoteHost ? pchRemoteHost : "127.0.0.1", unUdpPort
+            );
+        }
+        else /* TCP */
+        {
+            pchPipelineDesc = g_strdup_printf(
+                "v4l2src device=/dev/video0 ! "
+                "video/x-raw,format=YUY2,width=%d,height=%d,framerate=%d/1 ! "
+                "queue max-size-buffers=5 max-size-bytes=4194304 leaky=downstream ! "
+                "nvvidconv ! "
+                "video/x-raw,format=I420 ! "
+                "nvjpegenc quality=%d ! "
+                "tcpserversink host=0.0.0.0 port=8554 sync=false max-lateness=0 buffer-size=32768",
+                unWidth, unHeight, unFrameRate,
+                (100 - unPresetLevel * 20) /* Quality: preset 0=100%, 1=80%, 2=60%, 3=40% */
+            );
+        }
     }
     else
     {
@@ -758,8 +1257,8 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateTxEncodingPipeline(uint32_t unWidth, uint
     PrintTrace("TX Encoding Pipeline: %s", pchPipelineDesc);
     
     /* Parse and create encoding pipeline */
-    s_hGstPipelineTxEncode = gst_parse_launch(pchPipelineDesc, &pstError);
-    if (s_hGstPipelineTxEncode == NULL)
+    s_hGstPipelineTx = gst_parse_launch(pchPipelineDesc, &pstError);
+    if (s_hGstPipelineTx == NULL)
     {
         PrintError("Failed to create TX encoding pipeline: %s", pstError->message);
         g_error_free(pstError);
@@ -837,30 +1336,166 @@ EXIT:
     
     return nRet;
 }
+#endif /* UNUSED_TX_ENCODING_PIPELINE */
 
 /*
  * Create RX Pipeline (TCP -> Decoder -> 3-way Output)
  */
-static int32_t P_DI_VIDEO_NVIDIA_CreateRxPipeline(const char *pchRemoteHost, int32_t nRemotePort)
+static int32_t P_DI_VIDEO_NVIDIA_CreateRxPipeline(const char *pchRemoteHost, int32_t nRemotePort, uint32_t unProtocol, uint32_t unUdpPort, uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unFormatType, uint32_t unIFrameInterval, uint32_t unPresetLevel)
 {
     int32_t nRet = DI_ERROR;
     GstBus *hBus = NULL;
     gchar *pchPipelineDesc = NULL;
     GError *pstError = NULL;
     
+    /* Mark unused parameters to avoid compiler warnings */
+    UNUSED(unFrameRate);
+    UNUSED(unBitrate);
+    UNUSED(unFormatType);
+    UNUSED(unIFrameInterval);
+    UNUSED(unPresetLevel);
+    
     /* Create RX pipeline - decode to ring buffer */
-    pchPipelineDesc = g_strdup_printf(
-        "tcpclientsrc host=%s port=%d buffer-size=32768 ! "
-        "h264parse ! "
-        "nvv4l2decoder enable-max-performance=true ! "
-        "nvvidconv ! "
-        "video/x-raw,format=I420,width=%d,height=%d ! "
-        "appsink name=rx_sink sync=false max-buffers=1 drop=true",
-        pchRemoteHost ? pchRemoteHost : "127.0.0.1",
-        nRemotePort,
-        DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_WIDTH,
-        DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_HEIGHT
-    );
+    if (unProtocol == 1) /* UDP */
+    {
+        if (unCodecType == 0) /* H.264 */
+        {
+            /* H.264 UDP RX with video display window */
+            pchPipelineDesc = g_strdup_printf(
+                "udpsrc port=%d buffer-size=%d ! "
+                "queue max-size-buffers=50 max-size-bytes=%d max-size-time=2000000000 leaky=downstream ! "
+                "application/x-rtp,media=video,encoding-name=H264 ! "
+                "rtph264depay ! "
+                "h264parse ! "
+                "queue max-size-buffers=10 leaky=downstream ! "
+                "nvv4l2decoder enable-max-performance=true ! "
+                "nvvidconv ! "
+                "tee name=t ! "
+                "queue max-size-buffers=3 leaky=downstream ! "
+                "nveglglessink sync=false async=false force-aspect-ratio=true "
+                "t. ! queue max-size-buffers=3 leaky=downstream ! "
+                "video/x-raw,format=I420,width=%d,height=%d ! "
+                "appsink name=rx_sink sync=false max-buffers=3 drop=true",
+                unUdpPort, SVC_STREAMING_BUFFER_SIZE, SVC_STREAMING_BUFFER_SIZE, unWidth, unHeight
+            );
+            PrintTrace("Using H.264 UDP RX pipeline with video display window");
+        }
+        else if (unCodecType == 1) /* H.265 */
+        {
+            /* H.265 UDP RX with video display window */
+            pchPipelineDesc = g_strdup_printf(
+                "udpsrc port=%d buffer-size=%d ! "
+                "queue max-size-buffers=50 max-size-bytes=%d max-size-time=2000000000 leaky=downstream ! "
+                "application/x-rtp,media=video,encoding-name=H265 ! "
+                "rtph265depay ! "
+                "h265parse ! "
+                "queue max-size-buffers=10 leaky=downstream ! "
+                "nvv4l2decoder enable-max-performance=true ! "
+                "nvvidconv ! "
+                "tee name=t ! "
+                "queue max-size-buffers=3 leaky=downstream ! "
+                "nveglglessink sync=false async=false force-aspect-ratio=true "
+                "t. ! queue max-size-buffers=3 leaky=downstream ! "
+                "video/x-raw,format=I420,width=%d,height=%d ! "
+                "appsink name=rx_sink sync=false max-buffers=3 drop=true",
+                unUdpPort, SVC_STREAMING_BUFFER_SIZE, SVC_STREAMING_BUFFER_SIZE, unWidth, unHeight
+            );
+            PrintTrace("Using H.265 UDP RX pipeline with video display window");
+        }
+        else if (unCodecType == 2) /* MJPEG */
+        {
+            /* MJPEG UDP RX with video display window */
+            pchPipelineDesc = g_strdup_printf(
+                "udpsrc port=%d buffer-size=%d ! "
+                "queue max-size-buffers=50 max-size-bytes=%d max-size-time=2000000000 leaky=downstream ! "
+                "application/x-rtp,media=video,payload=26,clock-rate=90000 ! "
+                "rtpjpegdepay ! "
+                "queue max-size-buffers=10 leaky=downstream ! "
+                "jpegdec ! "  /* Use software decoder for better compatibility */
+                "videoconvert ! "
+                "tee name=t ! "
+                "queue max-size-buffers=3 leaky=downstream ! "
+                "autovideosink sync=false async=false force-aspect-ratio=true "
+                "t. ! queue max-size-buffers=3 leaky=downstream ! "
+                "video/x-raw,format=I420,width=%d,height=%d ! "
+                "appsink name=rx_sink sync=false max-buffers=3 drop=true",
+                unUdpPort, SVC_STREAMING_BUFFER_SIZE, SVC_STREAMING_BUFFER_SIZE, unWidth, unHeight
+            );
+            PrintTrace("Using MJPEG UDP RX pipeline with video display window");
+        }
+        else
+        {
+            PrintError("Unsupported codec type[%d] for UDP RX", unCodecType);
+            nRet = DI_ERROR_STREAMING_PIPELINE_CREATE;
+            goto EXIT;
+        }
+    }
+    else /* TCP */
+    {
+        if (unCodecType == 0) /* H.264 */
+        {
+            /* H.264 TCP RX with video display window */
+            pchPipelineDesc = g_strdup_printf(
+                "tcpclientsrc host=%s port=%d buffer-size=262144 ! "
+                "queue max-size-buffers=50 max-size-bytes=16777216 leaky=downstream ! "
+                "h264parse ! "
+                "nvv4l2decoder enable-max-performance=true ! "
+                "nvvidconv ! "
+                "tee name=t ! "
+                "queue max-size-buffers=3 leaky=downstream ! "
+                "nveglglessink sync=false async=false force-aspect-ratio=true "
+                "t. ! queue max-size-buffers=3 leaky=downstream ! "
+                "video/x-raw,format=I420,width=%d,height=%d ! "
+                "appsink name=rx_sink sync=false max-buffers=2 drop=true",
+                pchRemoteHost ? pchRemoteHost : "127.0.0.1",
+                nRemotePort, unWidth, unHeight
+            );
+            PrintTrace("Using H.264 TCP RX pipeline with video display window");
+        }
+        else if (unCodecType == 1) /* H.265 */
+        {
+            /* H.265 TCP RX with video display window */
+            pchPipelineDesc = g_strdup_printf(
+                "tcpclientsrc host=%s port=%d buffer-size=32768 ! "
+                "h265parse ! "
+                "nvv4l2decoder enable-max-performance=true ! "
+                "nvvidconv ! "
+                "tee name=t ! "
+                "queue max-size-buffers=3 leaky=downstream ! "
+                "nveglglessink sync=false async=false force-aspect-ratio=true "
+                "t. ! queue max-size-buffers=3 leaky=downstream ! "
+                "video/x-raw,format=I420,width=%d,height=%d ! "
+                "appsink name=rx_sink sync=false max-buffers=1 drop=true",
+                pchRemoteHost ? pchRemoteHost : "127.0.0.1",
+                nRemotePort, unWidth, unHeight
+            );
+            PrintTrace("Using H.265 TCP RX pipeline with video display window");
+        }
+        else if (unCodecType == 2) /* MJPEG */
+        {
+            /* MJPEG TCP RX with video display window */
+            pchPipelineDesc = g_strdup_printf(
+                "tcpclientsrc host=%s port=%d buffer-size=32768 ! "
+                "jpegdec ! "  /* Use software decoder for better compatibility */
+                "videoconvert ! "
+                "tee name=t ! "
+                "queue max-size-buffers=3 leaky=downstream ! "
+                "autovideosink sync=false async=false force-aspect-ratio=true "
+                "t. ! queue max-size-buffers=3 leaky=downstream ! "
+                "video/x-raw,format=I420,width=%d,height=%d ! "
+                "appsink name=rx_sink sync=false max-buffers=1 drop=true",
+                pchRemoteHost ? pchRemoteHost : "127.0.0.1",
+                nRemotePort, unWidth, unHeight
+            );
+            PrintTrace("Using MJPEG TCP RX pipeline with video display window");
+        }
+        else
+        {
+            PrintError("Unsupported codec type[%d] for TCP RX", unCodecType);
+            nRet = DI_ERROR_STREAMING_PIPELINE_CREATE;
+            goto EXIT;
+        }
+    }
     
     PrintTrace("RX Pipeline: %s", pchPipelineDesc);
     
@@ -879,7 +1514,7 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateRxPipeline(const char *pchRemoteHost, int
     if (s_hGstAppSink != NULL)
     {
         GstAppSinkCallbacks stAppSinkCallbacks = {
-            .new_sample = P_DI_VIDEO_NVIDIA_AppSinkNewSample,
+            .new_sample = NULL,  /* Removed - direct streaming no longer needs callbacks */
             .eos = NULL,
             .new_preroll = NULL
         };
@@ -898,13 +1533,33 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateRxPipeline(const char *pchRemoteHost, int
     gst_bus_add_watch(hBus, P_DI_VIDEO_NVIDIA_GstBusCall, s_hMainLoop);
     gst_object_unref(hBus);
     
-    /* Create RX display pipeline */
+    /* Add probes for real RX statistics collection */
+    /* Reset RX frame counters */
+    pthread_mutex_lock(&s_hStatsMutex);
+    s_ullFrameCountRx = 0;
+    s_ullDroppedFramesRx = 0;
+    s_ullUdpBytesRx = 0;
+    pthread_mutex_unlock(&s_hStatsMutex);
+    
+    /* Skip udpsrc probe - count only at appsink to avoid RTP packet duplication */
+    /* RTP packets are fragmented, so udpsrc will count multiple packets per frame */
+    
+    /* Add probe to appsink for final frame counting */
+    if (s_hGstAppSink != NULL)
+    {
+        P_DI_VIDEO_AddElementProbe(s_hGstAppSink, "sink", P_DI_VIDEO_RxFrameProbe, (gpointer)0);
+        P_DI_VIDEO_AddElementProbe(s_hGstAppSink, "sink", P_DI_VIDEO_DropProbe, (gpointer)0);
+    }
+    
+#ifdef RING_BUFFER_DEPRECATED_FUNCTIONS  /* This should never be defined */
+    /* Create RX display pipeline - DEPRECATED */
     nRet = P_DI_VIDEO_NVIDIA_CreateRxDisplayPipeline();
     if (nRet != DI_OK)
     {
         PrintError("Failed to create RX display pipeline");
         goto EXIT;
     }
+#endif /* RING_BUFFER_DEPRECATED_FUNCTIONS */
     
     PrintTrace("RX pipeline created successfully - using ring buffer");
     nRet = DI_OK;
@@ -918,8 +1573,10 @@ EXIT:
     return nRet;
 }
 
+#ifdef RING_BUFFER_DEPRECATED_FUNCTIONS  /* This should never be defined */
 /*
- * Create RX Display Pipeline (Ring Buffer -> Display)
+ * Create RX Display Pipeline (Ring Buffer -> Display) - DEPRECATED
+ * NOTE: This function is no longer used with direct GStreamer streaming
  */
 static int32_t P_DI_VIDEO_NVIDIA_CreateRxDisplayPipeline(void)
 {
@@ -939,8 +1596,8 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateRxDisplayPipeline(void)
     PrintTrace("RX Display Pipeline: %s", pchPipelineDesc);
     
     /* Parse and create display pipeline */
-    s_hGstPipelineRxDisplay = gst_parse_launch(pchPipelineDesc, &pstError);
-    if (s_hGstPipelineRxDisplay == NULL)
+    s_hGstPipelineRx = gst_parse_launch(pchPipelineDesc, &pstError);
+    if (s_hGstPipelineRx == NULL)
     {
         PrintError("Failed to create RX display pipeline: %s", pstError->message);
         g_error_free(pstError);
@@ -948,8 +1605,8 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateRxDisplayPipeline(void)
         goto EXIT;
     }
     
-    /* Connect appsrc callback for display pipeline */
-    GstElement *hDisplayAppSrc = gst_bin_get_by_name(GST_BIN(s_hGstPipelineRxDisplay), "rx_src");
+    /* Connect appsrc callback for display pipeline - DEPRECATED */
+    GstElement *hDisplayAppSrc = gst_bin_get_by_name(GST_BIN(s_hGstPipelineRx), "rx_src");
     if (hDisplayAppSrc != NULL)
     {
         GstAppSrcCallbacks stAppSrcCallbacks = {
@@ -968,7 +1625,7 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateRxDisplayPipeline(void)
     }
     
     /* Set bus message handler */
-    hBus = gst_pipeline_get_bus(GST_PIPELINE(s_hGstPipelineRxDisplay));
+    hBus = gst_pipeline_get_bus(GST_PIPELINE(s_hGstPipelineRx));
     gst_bus_add_watch(hBus, P_DI_VIDEO_NVIDIA_GstBusCall, s_hMainLoop);
     gst_object_unref(hBus);
     
@@ -983,6 +1640,7 @@ EXIT:
     
     return nRet;
 }
+#endif /* RING_BUFFER_DEPRECATED_FUNCTIONS */
 
 /*
  * Create RTSP Server for video streaming
@@ -1136,7 +1794,6 @@ EXIT:
 static int32_t P_DI_VIDEO_NVIDIA_InitBuffers(void)
 {
     int32_t nRet = DI_ERROR;
-    DI_RING_BUFFER_CONFIG_T stRingBufferConfig;
     DI_MEMORY_POOL_CONFIG_T stMemoryPoolConfig;
     
     /* Initialize memory pool */
@@ -1160,60 +1817,8 @@ static int32_t P_DI_VIDEO_NVIDIA_InitBuffers(void)
         goto EXIT;
     }
     
-    /* Initialize TX ring buffer */
-    memset(&stRingBufferConfig, 0, sizeof(DI_RING_BUFFER_CONFIG_T));
-    stRingBufferConfig.unBufferSize = DI_RING_BUFFER_DEFAULT_SIZE;
-    stRingBufferConfig.bDropOnOverflow = TRUE;
-    stRingBufferConfig.bEnableStats = TRUE;
-    
-    s_pstRingBufferTx = malloc(sizeof(DI_RING_BUFFER_T));
-    if (s_pstRingBufferTx == NULL)
-    {
-        PrintError("Failed to allocate TX ring buffer structure");
-        nRet = DI_ERROR_MEMORY_ALLOC;
-        goto EXIT;
-    }
-    
-    nRet = DI_RING_BUFFER_Init(s_pstRingBufferTx, &stRingBufferConfig);
-    if (nRet != DI_OK)
-    {
-        PrintError("Failed to initialize TX ring buffer [nRet:%d]", nRet);
-        goto EXIT;
-    }
-    
-    /* Start TX ring buffer */
-    nRet = DI_RING_BUFFER_Start(s_pstRingBufferTx);
-    if (nRet != DI_OK)
-    {
-        PrintError("Failed to start TX ring buffer [nRet:%d]", nRet);
-        goto EXIT;
-    }
-    
-    /* Initialize RX ring buffer */
-    s_pstRingBufferRx = malloc(sizeof(DI_RING_BUFFER_T));
-    if (s_pstRingBufferRx == NULL)
-    {
-        PrintError("Failed to allocate RX ring buffer structure");
-        nRet = DI_ERROR_MEMORY_ALLOC;
-        goto EXIT;
-    }
-    
-    nRet = DI_RING_BUFFER_Init(s_pstRingBufferRx, &stRingBufferConfig);
-    if (nRet != DI_OK)
-    {
-        PrintError("Failed to initialize RX ring buffer [nRet:%d]", nRet);
-        goto EXIT;
-    }
-    
-    /* Start RX ring buffer */
-    nRet = DI_RING_BUFFER_Start(s_pstRingBufferRx);
-    if (nRet != DI_OK)
-    {
-        PrintError("Failed to start RX ring buffer [nRet:%d]", nRet);
-        goto EXIT;
-    }
-    
-    PrintTrace("Ring buffers and memory pool initialized successfully");
+    /* Ring buffers removed - now using direct GStreamer pipeline connections */
+    PrintTrace("Direct GStreamer streaming initialized (ring buffers removed)");
     nRet = DI_OK;
     
 EXIT:
@@ -1254,6 +1859,48 @@ EXIT:
 }
 
 /*
+ * Set UDP protocol configuration
+ */
+static int32_t P_DI_VIDEO_NVIDIA_SetUdpProtocol(uint32_t unProtocol, const char *pchRemoteHost, uint32_t unUdpPort)
+{
+    int32_t nRet = DI_ERROR;
+    
+    if (unProtocol > 1 || (unProtocol == 1 && (pchRemoteHost == NULL || unUdpPort == 0)))
+    {
+        PrintError("Invalid UDP protocol parameters");
+        goto EXIT;
+    }
+    
+    pthread_mutex_lock(&s_stGstMutex);
+    
+    /* Set protocol type */
+    s_unProtocol = unProtocol;
+    
+    if (unProtocol == 1) /* UDP */
+    {
+        /* Set remote host for UDP */
+        strncpy(s_achRemoteHost, pchRemoteHost, sizeof(s_achRemoteHost) - 1);
+        s_achRemoteHost[sizeof(s_achRemoteHost) - 1] = '\0';
+        
+        /* Set UDP port */
+        s_unUdpPort = unUdpPort;
+        
+        PrintTrace("UDP protocol set: Remote[%s:%d]", s_achRemoteHost, s_unUdpPort);
+    }
+    else /* TCP */
+    {
+        PrintTrace("TCP protocol set (default)");
+    }
+    
+    pthread_mutex_unlock(&s_stGstMutex);
+    
+    nRet = DI_OK;
+    
+EXIT:
+    return nRet;
+}
+
+/*
  * Start TX mode (Camera -> TCP Server)
  */
 static int32_t P_DI_VIDEO_NVIDIA_StartTxMode(uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unFormatType, uint32_t unIFrameInterval, uint32_t unPresetLevel)
@@ -1261,6 +1908,14 @@ static int32_t P_DI_VIDEO_NVIDIA_StartTxMode(uint32_t unWidth, uint32_t unHeight
     int32_t nRet = DI_ERROR;
     
     pthread_mutex_lock(&s_stGstMutex);
+    
+    /* Update current configuration tracking */
+    s_unCurrentWidth = unWidth;
+    s_unCurrentHeight = unHeight;
+    s_unCurrentFrameRate = unFrameRate;
+    s_unCurrentBitrate = unBitrate;
+    s_unCurrentCodecType = unCodecType;
+    s_unCurrentFormatType = unFormatType;
     
     if (s_bGstPipelineActive == FALSE)
     {
@@ -1273,7 +1928,10 @@ static int32_t P_DI_VIDEO_NVIDIA_StartTxMode(uint32_t unWidth, uint32_t unHeight
             unCodecType,
             unFormatType,
             unIFrameInterval,
-            unPresetLevel
+            unPresetLevel,
+            s_unProtocol,
+            s_achRemoteHost,
+            s_unUdpPort
         );
         if (nRet != DI_OK)
         {
@@ -1306,6 +1964,7 @@ static int32_t P_DI_VIDEO_NVIDIA_StartTxMode(uint32_t unWidth, uint32_t unHeight
         if (stRet == GST_STATE_CHANGE_SUCCESS && stState == GST_STATE_PLAYING)
         {
             s_bGstPipelineActive = TRUE;
+            s_ullFrameCountTx = 0; /* Reset TX frame counter */
             PrintTrace("TX pipeline started successfully - TCP server listening on port %d", s_nLocalPort);
         }
         else
@@ -1327,16 +1986,24 @@ EXIT:
 /*
  * Start RX mode (TCP Client -> Display)
  */
-static int32_t P_DI_VIDEO_NVIDIA_StartRxMode(void)
+static int32_t P_DI_VIDEO_NVIDIA_StartRxMode(uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unFormatType, uint32_t unIFrameInterval, uint32_t unPresetLevel)
 {
     int32_t nRet = DI_ERROR;
     
     pthread_mutex_lock(&s_stGstMutex);
     
+    /* Update current configuration tracking */
+    s_unCurrentWidth = unWidth;
+    s_unCurrentHeight = unHeight;
+    s_unCurrentFrameRate = unFrameRate;
+    s_unCurrentBitrate = unBitrate;
+    s_unCurrentCodecType = unCodecType;
+    s_unCurrentFormatType = unFormatType;
+    
     if (s_bGstPipelineActive == FALSE)
     {
         /* Create RX pipeline */
-        nRet = P_DI_VIDEO_NVIDIA_CreateRxPipeline(s_achRemoteHost, s_nRemotePort);
+        nRet = P_DI_VIDEO_NVIDIA_CreateRxPipeline(s_achRemoteHost, s_nRemotePort, s_unProtocol, s_unUdpPort, unWidth, unHeight, unFrameRate, unBitrate, unCodecType, unFormatType, unIFrameInterval, unPresetLevel);
         if (nRet != DI_OK)
         {
             PrintError("Failed to create RX pipeline [nRet:%d]", nRet);
@@ -1370,12 +2037,14 @@ static int32_t P_DI_VIDEO_NVIDIA_StartRxMode(void)
             }
             
             s_bGstPipelineActive = TRUE;
+            s_ullFrameCountRx = 0; /* Reset RX frame counter */
             PrintTrace("RX pipeline and RTSP server started successfully - Connected to TCP server %s:%d", s_achRemoteHost, s_nRemotePort);
         }
         else
         {
             PrintWarn("RX pipeline may take longer to connect - State: %d", stState);
             s_bGstPipelineActive = TRUE; /* Set as active for async connection */
+            s_ullFrameCountRx = 0; /* Reset RX frame counter */
             
             /* Still create RTSP server for async connection */
             nRet = P_DI_VIDEO_NVIDIA_CreateRtspServer();
@@ -1740,7 +2409,10 @@ int32_t DI_VIDEO_NVIDIA_Start(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia)
             DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_CODEC,
             0, /* Default format: YUYV */
             DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_IFRAME,
-            DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_PRESET
+            DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_PRESET,
+            s_unProtocol,
+            s_achRemoteHost,
+            s_unUdpPort
         );
         if (nRet != DI_OK)
         {
@@ -1929,6 +2601,39 @@ EXIT:
 }
 
 /*
+ * Public function: Set UDP protocol configuration
+ */
+int32_t DI_VIDEO_NVIDIA_SetUdpProtocol(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia, uint32_t unProtocol, const char *pchRemoteHost, uint32_t unUdpPort)
+{
+    int32_t nRet = DI_ERROR;
+    
+    if (pstDiVideoNvidia == NULL)
+    {
+        PrintError("pstDiVideoNvidia == NULL!");
+        goto EXIT;
+    }
+    
+    if (pstDiVideoNvidia->bVideoNvidiaNotAvailable == TRUE)
+    {
+        PrintWarn("bVideoNvidiaNotAvailable[%d]", pstDiVideoNvidia->bVideoNvidiaNotAvailable);
+        nRet = DI_OK;
+        goto EXIT;
+    }
+    
+    nRet = P_DI_VIDEO_NVIDIA_SetUdpProtocol(unProtocol, pchRemoteHost, unUdpPort);
+    if (nRet != DI_OK)
+    {
+        PrintError("P_DI_VIDEO_NVIDIA_SetUdpProtocol() failed [nRet:%d]", nRet);
+        goto EXIT;
+    }
+    
+    PrintTrace("UDP protocol configuration set successfully");
+    
+EXIT:
+    return nRet;
+}
+
+/*
  * Public function: Start TX mode
  */
 int32_t DI_VIDEO_NVIDIA_StartTxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia, uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unFormatType, uint32_t unIFrameInterval, uint32_t unPresetLevel)
@@ -1964,7 +2669,7 @@ EXIT:
 /*
  * Public function: Start RX mode
  */
-int32_t DI_VIDEO_NVIDIA_StartRxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia)
+int32_t DI_VIDEO_NVIDIA_StartRxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia, uint32_t unWidth, uint32_t unHeight, uint32_t unFrameRate, uint32_t unBitrate, uint32_t unCodecType, uint32_t unFormatType, uint32_t unIFrameInterval, uint32_t unPresetLevel)
 {
     int32_t nRet = DI_ERROR;
     
@@ -1981,7 +2686,7 @@ int32_t DI_VIDEO_NVIDIA_StartRxMode(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia)
         goto EXIT;
     }
     
-    nRet = P_DI_VIDEO_NVIDIA_StartRxMode();
+    nRet = P_DI_VIDEO_NVIDIA_StartRxMode(unWidth, unHeight, unFrameRate, unBitrate, unCodecType, unFormatType, unIFrameInterval, unPresetLevel);
     if (nRet != DI_OK)
     {
         PrintError("P_DI_VIDEO_NVIDIA_StartRxMode() failed [nRet:%d]", nRet);
@@ -2023,6 +2728,180 @@ int32_t DI_VIDEO_NVIDIA_CheckTcpConnection(DI_VIDEO_NVIDIA_T *pstDiVideoNvidia)
 EXIT:
     return nRet;
 }
+
+/*
+ * Get GStreamer pipeline information
+ */
+int32_t DI_VIDEO_NVIDIA_GetPipelineInfo(DI_VIDEO_PIPELINE_INFO_T *pstTxInfo, DI_VIDEO_PIPELINE_INFO_T *pstRxInfo)
+{
+    int32_t nRet = DI_ERROR;
+    
+    if (pstTxInfo == NULL || pstRxInfo == NULL)
+    {
+        PrintError("Invalid parameters");
+        goto EXIT;
+    }
+    
+    /* Initialize structures */
+    memset(pstTxInfo, 0, sizeof(DI_VIDEO_PIPELINE_INFO_T));
+    memset(pstRxInfo, 0, sizeof(DI_VIDEO_PIPELINE_INFO_T));
+    
+    pthread_mutex_lock(&s_stGstMutex);
+    
+    /* Get TX pipeline information */
+    if (s_hGstPipelineTx != NULL)
+    {
+        GstState stState, stPending;
+        GstStateChangeReturn stStateRet = gst_element_get_state(s_hGstPipelineTx, &stState, &stPending, 0);
+        
+        pstTxInfo->unGstState = (uint32_t)stState;
+        pstTxInfo->bIsActive = (stState == GST_STATE_PLAYING);
+        
+        /* Get current configuration from static variables */
+        pstTxInfo->unWidth = s_unCurrentWidth;
+        pstTxInfo->unHeight = s_unCurrentHeight;
+        pstTxInfo->unFrameRate = s_unCurrentFrameRate;
+        pstTxInfo->unBitrate = s_unCurrentBitrate;
+        
+        /* Set codec and format based on current configuration */
+        switch (s_unCurrentCodecType)
+        {
+            case 0:
+                strncpy(pstTxInfo->achCodec, "H.264", sizeof(pstTxInfo->achCodec) - 1);
+                break;
+            case 1:
+                strncpy(pstTxInfo->achCodec, "H.265", sizeof(pstTxInfo->achCodec) - 1);
+                break;
+            case 2:
+                strncpy(pstTxInfo->achCodec, "MJPEG", sizeof(pstTxInfo->achCodec) - 1);
+                break;
+            default:
+                strncpy(pstTxInfo->achCodec, "Unknown", sizeof(pstTxInfo->achCodec) - 1);
+                break;
+        }
+        
+        switch (s_unCurrentFormatType)
+        {
+            case 0:
+                strncpy(pstTxInfo->achFormat, "YUYV", sizeof(pstTxInfo->achFormat) - 1);
+                break;
+            case 1:
+                strncpy(pstTxInfo->achFormat, "MJPEG", sizeof(pstTxInfo->achFormat) - 1);
+                break;
+            case 2:
+                strncpy(pstTxInfo->achFormat, "NV12", sizeof(pstTxInfo->achFormat) - 1);
+                break;
+            default:
+                strncpy(pstTxInfo->achFormat, "Unknown", sizeof(pstTxInfo->achFormat) - 1);
+                break;
+        }
+        
+        /* Update real-time statistics */
+        P_DI_VIDEO_UpdateRealTimeStats();
+        
+        /* Return real-time rates from GStreamer probes */
+        pthread_mutex_lock(&s_hStatsMutex);
+        pstTxInfo->ullFramesProcessed = s_ullFrameCountTx;         /* Total frames (cumulative) */
+        pstTxInfo->ullDroppedFrames = s_ullDroppedFramesTx;       /* Total dropped frames */
+        pstTxInfo->ullUdpBytes = s_ullUdpBytesTx;                 /* Total bytes (cumulative) */
+        pstTxInfo->dRealFrameRate = s_dCurrentFrameRateTx;        /* Current FPS */
+        pstTxInfo->dCurrentByteRate = s_dCurrentByteRateTx;       /* Current bytes/sec */
+        pthread_mutex_unlock(&s_hStatsMutex);
+        
+        pstTxInfo->unLatencyMs = pstTxInfo->bIsActive ? 50 : 0;
+    }
+    
+    /* Get RX pipeline information */
+    if (s_hGstPipelineRx != NULL)
+    {
+        GstState stState, stPending;
+        GstStateChangeReturn stStateRet = gst_element_get_state(s_hGstPipelineRx, &stState, &stPending, 0);
+        
+        pstRxInfo->unGstState = (uint32_t)stState;
+        pstRxInfo->bIsActive = (stState == GST_STATE_PLAYING);
+        
+        /* Copy same configuration as TX for RX */
+        pstRxInfo->unWidth = s_unCurrentWidth;
+        pstRxInfo->unHeight = s_unCurrentHeight;
+        pstRxInfo->unFrameRate = s_unCurrentFrameRate;
+        pstRxInfo->unBitrate = s_unCurrentBitrate;
+        
+        strncpy(pstRxInfo->achCodec, pstTxInfo->achCodec, sizeof(pstRxInfo->achCodec) - 1);
+        strncpy(pstRxInfo->achFormat, pstTxInfo->achFormat, sizeof(pstRxInfo->achFormat) - 1);
+        
+        /* Update real-time statistics for RX as well */
+        P_DI_VIDEO_UpdateRealTimeStats();
+        
+        /* Return real-time RX rates from GStreamer probes */
+        pthread_mutex_lock(&s_hStatsMutex);
+        pstRxInfo->ullFramesProcessed = s_ullFrameCountRx;         /* Total frames (cumulative) */
+        pstRxInfo->ullDroppedFrames = s_ullDroppedFramesRx;       /* Total dropped frames */
+        pstRxInfo->ullUdpBytes = s_ullUdpBytesRx;                 /* Total bytes (cumulative) */
+        pstRxInfo->dRealFrameRate = s_dCurrentFrameRateRx;        /* Current FPS */
+        pstRxInfo->dCurrentByteRate = s_dCurrentByteRateRx;       /* Current bytes/sec */
+        pthread_mutex_unlock(&s_hStatsMutex);
+        
+        pstRxInfo->unLatencyMs = pstRxInfo->bIsActive ? 100 : 0;
+    }
+    
+    pthread_mutex_unlock(&s_stGstMutex);
+    
+    nRet = DI_OK;
+    
+EXIT:
+    return nRet;
+}
+
+/*
+ * Get specific GStreamer element statistics
+ */
+int32_t DI_VIDEO_NVIDIA_GetElementStats(const char *pchElementName, uint64_t *pullFrameCount, uint32_t *punLatency)
+{
+    int32_t nRet = DI_ERROR;
+    
+    if (pchElementName == NULL || pullFrameCount == NULL || punLatency == NULL)
+    {
+        PrintError("Invalid parameters");
+        goto EXIT;
+    }
+    
+    pthread_mutex_lock(&s_stGstMutex);
+    
+    /* For now, return simulation data based on element name */
+    if (strstr(pchElementName, "v4l2src") != NULL)
+    {
+        *pullFrameCount = s_ullFrameCountTx;
+        *punLatency = 10;
+    }
+    else if (strstr(pchElementName, "tcpclientsink") != NULL || strstr(pchElementName, "udpsink") != NULL)
+    {
+        *pullFrameCount = s_ullFrameCountTx;
+        *punLatency = 30;
+    }
+    else if (strstr(pchElementName, "tcpclientsrc") != NULL || strstr(pchElementName, "udpsrc") != NULL)
+    {
+        *pullFrameCount = s_ullFrameCountRx;
+        *punLatency = 50;
+    }
+    else if (strstr(pchElementName, "appsink") != NULL)
+    {
+        *pullFrameCount = s_ullFrameCountRx;
+        *punLatency = 20;
+    }
+    else
+    {
+        *pullFrameCount = 0;
+        *punLatency = 0;
+    }
+    
+    pthread_mutex_unlock(&s_stGstMutex);
+    
+    nRet = DI_OK;
+    
+EXIT:
+    return nRet;
+}
+
 #endif /* CONFIG_VIDEO_STREAMING */
 
 
