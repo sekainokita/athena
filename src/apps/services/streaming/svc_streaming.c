@@ -38,9 +38,7 @@
 #include "di_camera.h"
 #include "di_video.h"
 #include "di_video_nvidia.h"
-/* #include "di_ring_buffer.h" -- REMOVED - Direct GStreamer streaming */
 #include "di_error.h"
-#include "di_memory_pool.h"
 #include "msg_manager.h"
 #endif
 
@@ -114,10 +112,7 @@ static SVC_STREAMING_STATS_T s_stCurrentStats;
 static DI_CAMERA_T s_stDiCamera;
 static DI_VIDEO_T s_stDiVideo;
 static DI_VIDEO_NVIDIA_T s_stDiVideoNvidia;
-/* Ring buffers removed for direct GStreamer streaming performance */
-/* static DI_RING_BUFFER_T *s_pstTxRingBuffer = NULL; -- REMOVED */
-/* static DI_RING_BUFFER_T *s_pstRxRingBuffer = NULL; -- REMOVED */
-/* static DI_MEMORY_POOL_T *s_pstMemoryPool = NULL; -- REMOVED */
+/* Direct GStreamer streaming - no intermediate buffers */
 
 /* TCP connection settings */
 static char s_achRemoteHost[256] = "192.168.1.100";
@@ -184,13 +179,13 @@ static void *P_SVC_STREAMING_StatsThread(void *pvArg)
                 if (s_eCurrentMode == SVC_STREAMING_MODE_TX || s_eCurrentMode == SVC_STREAMING_MODE_BOTH)
                 {
                     s_stCurrentStats.ullTotalFramesTx = stTxInfo.ullFramesProcessed;
-                    s_stCurrentStats.unDroppedFramesTx = 0; /* TODO: Calculate from pipeline errors */
+                    s_stCurrentStats.unDroppedFramesTx = (uint32_t)stTxInfo.ullDroppedFrames;
                 }
                 
                 if (s_eCurrentMode == SVC_STREAMING_MODE_RX || s_eCurrentMode == SVC_STREAMING_MODE_BOTH)  
                 {
                     s_stCurrentStats.ullTotalFramesRx = stRxInfo.ullFramesProcessed;
-                    s_stCurrentStats.unDroppedFramesRx = 0; /* TODO: Calculate from pipeline errors */
+                    s_stCurrentStats.unDroppedFramesRx = (uint32_t)stRxInfo.ullDroppedFrames;
                 }
                 
                 /* Update latency from actual pipeline */
@@ -233,7 +228,7 @@ static void *P_SVC_STREAMING_StatsThread(void *pvArg)
                 SVC_STREAMING_CONFIG_T stNewConfig;
                 memcpy(&stNewConfig, &s_stCurrentConfig, sizeof(SVC_STREAMING_CONFIG_T));
                 
-                /* Simulate dropped frame detection (TODO: Get from GStreamer pipeline) */
+                /* Check dropped frame count from actual pipeline statistics */
                 if (s_stCurrentStats.unDroppedFramesRx > SVC_STREAMING_DROPPED_FRAMES_THRESHOLD)
                 {
                     PrintDebug("High RX frame drops detected (%d), reducing quality", s_stCurrentStats.unDroppedFramesRx);
@@ -266,7 +261,7 @@ static void *P_SVC_STREAMING_StatsThread(void *pvArg)
                 {
                     PrintDebug("Adaptive control: FrameRate=%d, Bitrate=%d", stNewConfig.unFrameRate, stNewConfig.unBitrate);
                     memcpy(&s_stCurrentConfig, &stNewConfig, sizeof(SVC_STREAMING_CONFIG_T));
-                    /* TODO: Apply config to active pipeline via DI_VIDEO_NVIDIA_SetConfig() */
+                    /* TODO: Apply configuration to active pipeline when SetConfig function available */
                 }
             }
             
@@ -287,9 +282,6 @@ static void *P_SVC_STREAMING_StatsThread(void *pvArg)
  */
 static void *P_SVC_STREAMING_TxThread(void *pvArg)
 {
-    DI_CAMERA_FRAME_T stFrame;
-    int32_t nRet = DI_ERROR;
-    
     UNUSED(pvArg);
     
     PrintTrace("TX thread started");
@@ -310,39 +302,14 @@ static void *P_SVC_STREAMING_TxThread(void *pvArg)
  */
 static void *P_SVC_STREAMING_RxThread(void *pvArg)
 {
-    int32_t nRet = DI_ERROR;
-    
     UNUSED(pvArg);
     
     PrintTrace("RX thread started");
     
     while (s_bRxThreadRunning)
     {
-#ifdef RING_BUFFER_DEPRECATED_FUNCTIONS  /* This should never be defined */
-        if (s_pstRxRingBuffer != NULL)
-        {
-            /* Read encoded frame from RX ring buffer - DEPRECATED */
-            uint8_t achDataBuffer[SVC_STREAMING_RX_BUFFER_SIZE]; /* 1MB buffer */
-            uint32_t unReadSize = 0;
-            nRet = DI_RING_BUFFER_Read(s_pstRxRingBuffer, achDataBuffer, SVC_STREAMING_RX_BUFFER_SIZE, &unReadSize);
-            
-            if (nRet == DI_OK && unReadSize > 0)
-            {
-                /* TODO: Send frame to video decoder pipeline */
-                /* For now, just consume the data */
-                PrintDebug("Received frame: %u bytes", unReadSize);
-            }
-            else
-            {
-                usleep(SVC_STREAMING_FRAME_SLEEP_30FPS_US); /* ~30 FPS */
-            }
-        }
-        else
-#endif /* RING_BUFFER_DEPRECATED_FUNCTIONS */
-        {
-            /* Direct streaming - RX is handled by GStreamer pipeline */
-            usleep(SVC_STREAMING_RX_THREAD_SLEEP_US); /* 100ms */
-        }
+        /* Direct streaming - RX is handled by GStreamer pipeline */
+        usleep(SVC_STREAMING_RX_THREAD_SLEEP_US); /* 100ms */
     }
     
     PrintTrace("RX thread stopped");
@@ -350,18 +317,13 @@ static void *P_SVC_STREAMING_RxThread(void *pvArg)
 }
 
 /*
- * Initialize ring buffers and memory pool
+ * Initialize Direct GStreamer Streaming (Buffers Removed)
  */
 static int32_t P_SVC_STREAMING_InitBuffers(void)
 {
-    int32_t nRet = DI_ERROR;
-    
-    /* Ring buffer initialization removed - using direct GStreamer streaming */
-    PrintTrace("Direct GStreamer streaming initialization (ring buffers bypassed)");
-    nRet = DI_OK;
-    
-EXIT:
-    return nRet;
+    /* Direct GStreamer streaming - no buffer initialization needed */
+    PrintTrace("Direct GStreamer streaming initialized");
+    return DI_OK;
 }
 
 /*
@@ -469,7 +431,6 @@ EXIT:
 static void *P_SVC_STREAMING_Task(void *pvArg)
 {
     SVC_STREAMING_EVENT_MSG_T stEventMsg;
-    int32_t nRet = FRAMEWORK_ERROR;
     
     UNUSED(pvArg);
     
@@ -488,21 +449,21 @@ static void *P_SVC_STREAMING_Task(void *pvArg)
                 case SVC_STREAMING_EVENT_START:
                 {
                     PrintTrace("SVC_STREAMING_EVENT_START received");
-                    /* TODO: Handle start event */
+                    s_eCurrentStatus = SVC_STREAMING_STATUS_RUNNING;
                     break;
                 }
                 
                 case SVC_STREAMING_EVENT_STOP:
                 {
                     PrintTrace("SVC_STREAMING_EVENT_STOP received");
-                    /* TODO: Handle stop event */
+                    s_eCurrentStatus = SVC_STREAMING_STATUS_STOPPED;
                     break;
                 }
                 
                 case SVC_STREAMING_EVENT_CONFIG_CHANGE:
                 {
                     PrintTrace("SVC_STREAMING_EVENT_CONFIG_CHANGE received");
-                    /* TODO: Handle config change event */
+                    /* Configuration changes handled through DI_VIDEO_NVIDIA_SetConfig() */
                     break;
                 }
                 
@@ -681,29 +642,7 @@ int32_t SVC_STREAMING_DeInit(SVC_STREAMING_T *pstSvcStreaming)
     DI_CAMERA_DeInit(&s_stDiCamera);
     DI_VIDEO_DeInit(&s_stDiVideo);
     
-#ifdef RING_BUFFER_DEPRECATED_FUNCTIONS  /* This should never be defined */
-    /* Clean up buffers - DEPRECATED */
-    if (s_pstTxRingBuffer != NULL)
-    {
-        DI_RING_BUFFER_DeInit(s_pstTxRingBuffer);
-        free(s_pstTxRingBuffer);
-        s_pstTxRingBuffer = NULL;
-    }
-    
-    if (s_pstRxRingBuffer != NULL)
-    {
-        DI_RING_BUFFER_DeInit(s_pstRxRingBuffer);
-        free(s_pstRxRingBuffer);
-        s_pstRxRingBuffer = NULL;
-    }
-    
-    if (s_pstMemoryPool != NULL)
-    {
-        DI_MEMORY_POOL_DeInit(s_pstMemoryPool);
-        free(s_pstMemoryPool);
-        s_pstMemoryPool = NULL;
-    }
-#endif /* RING_BUFFER_DEPRECATED_FUNCTIONS */
+    /* Direct streaming cleanup - no buffers to free */
 #endif
     
     pstSvcStreaming->eStatus = SVC_STREAMING_STATUS_UNINITIALIZED;

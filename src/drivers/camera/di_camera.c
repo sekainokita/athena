@@ -66,7 +66,6 @@
 #if defined(CONFIG_VIDEO_STREAMING)
 /* #include "di_ring_buffer.h" -- REMOVED - Direct GStreamer streaming */
 #include "di_error.h"
-#include "di_memory_pool.h"
 #endif
 
 /***************************** Definition ************************************/
@@ -91,8 +90,7 @@ static DI_CAMERA_NVIDIA_T s_stDiCameraDev;
 #endif
 
 #if defined(CONFIG_VIDEO_STREAMING)
-/* Video streaming integration - REMOVED (Direct GStreamer streaming) */
-/* static DI_RING_BUFFER_T *s_pstCameraRingBuffer = NULL; -- REMOVED */
+/* Direct GStreamer streaming integration */
 static bool s_bVideoStreamingEnabled = FALSE;
 #endif
 

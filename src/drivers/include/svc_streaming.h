@@ -177,9 +177,7 @@ typedef struct SVC_STREAMING_t {
     SVC_STREAMING_STATUS_E eStatus;           /* Streaming status */
     SVC_STREAMING_STATS_T stStats;            /* Streaming statistics */
     
-    /* Ring buffers removed - now using direct GStreamer pipeline streaming */
-    /* DI_RING_BUFFER_T stTxRingBuffer; -- REMOVED */
-    /* DI_RING_BUFFER_T stRxRingBuffer; -- REMOVED */
+    /* Direct GStreamer pipeline streaming */
     
 #ifdef CONFIG_GSTREAMER
     /* GStreamer pipeline */

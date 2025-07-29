@@ -68,7 +68,6 @@
 #include <gst/rtsp-server/rtsp-server.h>
 /* #include "di_ring_buffer.h" -- REMOVED - Direct GStreamer streaming */
 #include "di_error.h"
-#include "di_memory_pool.h"
 #endif
 
 /***************************** Definition ************************************/
@@ -112,10 +111,8 @@ static GstRTSPMountPoints *s_hRtspMounts = NULL;
 static GstRTSPMediaFactory *s_hRtspFactory = NULL;
 static guint s_unRtspServerId = 0;
 
-/* Memory Pool integration (Ring Buffers removed for direct streaming) */
-/* static DI_RING_BUFFER_T *s_pstRingBufferTx = NULL; -- REMOVED */
-/* static DI_RING_BUFFER_T *s_pstRingBufferRx = NULL; -- REMOVED */
-static DI_MEMORY_POOL_T *s_pstMemoryPool = NULL;
+/* Direct GStreamer streaming - no intermediate memory pools */
+/* Ring buffers and memory pools removed for better performance */
 static pthread_mutex_t s_stGstMutex = PTHREAD_MUTEX_INITIALIZER;
 
 /* Current pipeline configuration tracking */
@@ -146,9 +143,7 @@ static double s_dCurrentByteRateTx = 0.0;  /* Bytes per second TX */
 static double s_dCurrentByteRateRx = 0.0;  /* Bytes per second RX */
 static pthread_mutex_t s_hStatsMutex = PTHREAD_MUTEX_INITIALIZER;
 
-/* Direct GStreamer pipelines (no intermediate ring buffers) */
-/* static GstElement *s_hGstPipelineTxEncode = NULL; -- REMOVED */  
-/* static GstElement *s_hGstPipelineRxDisplay = NULL; -- REMOVED */
+/* Direct GStreamer pipelines - simplified architecture */
 
 /* Multi-camera configuration */
 static const DI_VIDEO_CAMERA_CONFIG_T s_stCameraConfig = {
@@ -176,15 +171,7 @@ static uint32_t s_unUdpPort = 5000;                             /* UDP port for 
 
 #if defined(CONFIG_VIDEO_STREAMING)
 
-#ifdef RING_BUFFER_DEPRECATED_FUNCTIONS  /* This should never be defined */
-/*
- * Function prototypes for ring buffer pipelines - DEPRECATED
- */
-/* static int32_t P_DI_VIDEO_NVIDIA_CreateTxEncodingPipeline(...); -- REMOVED - Not used in direct streaming */
-static int32_t P_DI_VIDEO_NVIDIA_CreateRxDisplayPipeline(void);
-/* static GstFlowReturn P_DI_VIDEO_NVIDIA_AppSinkTxNewSample(GstAppSink *hAppSink, gpointer pvUserData); -- REMOVED */
-/* static void P_DI_VIDEO_NVIDIA_AppSrcNeedDataDisplay(GstAppSrc *hAppSrc, guint unSize, gpointer pvUserData); -- REMOVED */
-#endif /* RING_BUFFER_DEPRECATED_FUNCTIONS */
+/* Deprecated ring buffer functions removed */
 
 /*
  * GStreamer probe callbacks for real statistics collection
@@ -457,280 +444,7 @@ static gboolean P_DI_VIDEO_NVIDIA_GstBusCall(GstBus *hBus, GstMessage *pstMsg, g
     return TRUE;
 }
 
-#ifdef RING_BUFFER_DEPRECATED_FUNCTIONS  /* This should never be defined */
-/*
- * AppSink New Sample Callback - TX Pipeline (DEPRECATED - Direct streaming)
- * NOTE: This function is no longer used in direct v4l2src→encoder streaming
- */
-static GstFlowReturn P_DI_VIDEO_NVIDIA_AppSinkTxNewSample_DEPRECATED(GstAppSink *hAppSink, gpointer pvUserData)
-{
-    GstSample *pstSample = NULL;
-    GstBuffer *pstBuffer = NULL;
-    GstMapInfo stMapInfo;
-    int32_t nRet = DI_ERROR;
-    
-    UNUSED(pvUserData);
-    
-    pstSample = gst_app_sink_pull_sample(hAppSink);
-    if (pstSample == NULL)
-    {
-        PrintError("Failed to pull sample from TX appsink");
-        return GST_FLOW_ERROR;
-    }
-    
-    pstBuffer = gst_sample_get_buffer(pstSample);
-    if (pstBuffer == NULL)
-    {
-        PrintError("Failed to get buffer from TX sample");
-        gst_sample_unref(pstSample);
-        return GST_FLOW_ERROR;
-    }
-    
-    if (gst_buffer_map(pstBuffer, &stMapInfo, GST_MAP_READ) == FALSE)
-    {
-        PrintError("Failed to map TX buffer");
-        gst_sample_unref(pstSample);
-        return GST_FLOW_ERROR;
-    }
-    
-    pthread_mutex_lock(&s_stGstMutex);
-    
-    /* Write raw frame to TX ring buffer */
-    if (s_pstRingBufferTx != NULL)
-    {
-        nRet = DI_RING_BUFFER_Write(s_pstRingBufferTx, stMapInfo.data, stMapInfo.size);
-        if (nRet != DI_OK)
-        {
-            PrintError("Failed to write to TX ring buffer [nRet:%d]", nRet);
-        }
-        else
-        {
-            /* Push data directly to AppSrc if encoding pipeline is ready */
-            if (s_hGstAppSrc != NULL && s_hGstPipelineTxEncode != NULL)
-            {
-                GstState stCurState;
-                gst_element_get_state(s_hGstPipelineTxEncode, &stCurState, NULL, 0);
-                if (stCurState >= GST_STATE_PAUSED)
-                {
-                GstBuffer *pstEncodeBuffer = gst_buffer_new_allocate(NULL, stMapInfo.size, NULL);
-                if (pstEncodeBuffer != NULL)
-                {
-                    GstMapInfo stEncodeMapInfo;
-                    if (gst_buffer_map(pstEncodeBuffer, &stEncodeMapInfo, GST_MAP_WRITE))
-                    {
-                        memcpy(stEncodeMapInfo.data, stMapInfo.data, stMapInfo.size);
-                        gst_buffer_unmap(pstEncodeBuffer, &stEncodeMapInfo);
-                        
-                        /* Set timestamp based on current time */
-                        static GstClockTime s_unTimestamp = 0;
-                        GST_BUFFER_PTS(pstEncodeBuffer) = s_unTimestamp;
-                        GST_BUFFER_DTS(pstEncodeBuffer) = s_unTimestamp;
-                        GST_BUFFER_DURATION(pstEncodeBuffer) = gst_util_uint64_scale(GST_SECOND, 1, 30);
-                        s_unTimestamp += GST_BUFFER_DURATION(pstEncodeBuffer);
-                        
-                        /* Push to AppSrc */
-                        if (gst_app_src_push_buffer(GST_APP_SRC(s_hGstAppSrc), pstEncodeBuffer) != GST_FLOW_OK)
-                        {
-                            PrintError("Failed to push buffer to AppSrc");
-                            gst_buffer_unref(pstEncodeBuffer);
-                        }
-                    }
-                    else
-                    {
-                        gst_buffer_unref(pstEncodeBuffer);
-                    }
-                }
-                }
-            }
-        }
-    }
-    
-    pthread_mutex_unlock(&s_stGstMutex);
-    
-    gst_buffer_unmap(pstBuffer, &stMapInfo);
-    gst_sample_unref(pstSample);
-    
-    return GST_FLOW_OK;
-}
-
-/*
- * AppSink New Sample Callback - RX Pipeline (DEPRECATED - Direct streaming) 
- * NOTE: This function is no longer used in direct network→decoder→display streaming
- */
-static GstFlowReturn P_DI_VIDEO_NVIDIA_AppSinkNewSample_DEPRECATED(GstAppSink *hAppSink, gpointer pvUserData)
-{
-    GstSample *pstSample = NULL;
-    GstBuffer *pstBuffer = NULL;
-    GstMapInfo stMapInfo;
-    int32_t nRet = DI_ERROR;
-    
-    UNUSED(pvUserData);
-    
-    pstSample = gst_app_sink_pull_sample(hAppSink);
-    if (pstSample == NULL)
-    {
-        PrintError("Failed to pull sample from appsink");
-        return GST_FLOW_ERROR;
-    }
-    
-    pstBuffer = gst_sample_get_buffer(pstSample);
-    if (pstBuffer == NULL)
-    {
-        PrintError("Failed to get buffer from sample");
-        gst_sample_unref(pstSample);
-        return GST_FLOW_ERROR;
-    }
-    
-    if (gst_buffer_map(pstBuffer, &stMapInfo, GST_MAP_READ) == FALSE)
-    {
-        PrintError("Failed to map buffer");
-        gst_sample_unref(pstSample);
-        return GST_FLOW_ERROR;
-    }
-    
-    pthread_mutex_lock(&s_stGstMutex);
-    
-    /* Write decoded frame to RX ring buffer */
-    if (s_pstRingBufferRx != NULL)
-    {
-        nRet = DI_RING_BUFFER_Write(s_pstRingBufferRx, stMapInfo.data, stMapInfo.size);
-        if (nRet != DI_OK)
-        {
-            PrintError("Failed to write to RX ring buffer [nRet:%d]", nRet);
-        }
-    }
-    
-    pthread_mutex_unlock(&s_stGstMutex);
-    
-    gst_buffer_unmap(pstBuffer, &stMapInfo);
-    gst_sample_unref(pstSample);
-    
-    return GST_FLOW_OK;
-}
-
-/*
- * AppSrc Need Data Callback - TX Pipeline (DEPRECATED - Direct streaming)
- * NOTE: No longer needed with v4l2src→encoder direct connection
- */
-static void P_DI_VIDEO_NVIDIA_AppSrcNeedData_DEPRECATED(GstAppSrc *hAppSrc, guint unSize, gpointer pvUserData)
-{
-    GstBuffer *pstBuffer = NULL;
-    GstMapInfo stMapInfo;
-    uint8_t achDataBuffer[DI_VIDEO_NVIDIA_GST_BUFFER_SIZE];
-    uint32_t unReadSize = 0;
-    int32_t nRet = DI_ERROR;
-    
-    UNUSED(pvUserData);
-    UNUSED(unSize);
-    
-    pthread_mutex_lock(&s_stGstMutex);
-    
-    /* Read camera frame from TX ring buffer for encoding */
-    if (s_pstRingBufferTx != NULL)
-    {
-        nRet = DI_RING_BUFFER_Read(s_pstRingBufferTx, achDataBuffer, DI_VIDEO_NVIDIA_GST_BUFFER_SIZE, &unReadSize);
-        if (nRet != DI_OK || unReadSize == 0)
-        {
-            /* No data available, wait and retry */
-            pthread_mutex_unlock(&s_stGstMutex);
-            usleep(10000); /* 10ms delay */
-            return;
-        }
-        
-        /* Create GStreamer buffer */
-        pstBuffer = gst_buffer_new_allocate(NULL, unReadSize, NULL);
-        if (pstBuffer == NULL)
-        {
-            PrintError("Failed to allocate GStreamer buffer");
-            pthread_mutex_unlock(&s_stGstMutex);
-            return;
-        }
-        
-        if (gst_buffer_map(pstBuffer, &stMapInfo, GST_MAP_WRITE) == FALSE)
-        {
-            PrintError("Failed to map GStreamer buffer");
-            gst_buffer_unref(pstBuffer);
-            pthread_mutex_unlock(&s_stGstMutex);
-            return;
-        }
-        
-        memcpy(stMapInfo.data, achDataBuffer, unReadSize);
-        gst_buffer_unmap(pstBuffer, &stMapInfo);
-        
-        /* Set timestamp */
-        GST_BUFFER_PTS(pstBuffer) = gst_util_uint64_scale(GST_SECOND, 1, 30); /* 30 FPS */
-        GST_BUFFER_DTS(pstBuffer) = GST_BUFFER_PTS(pstBuffer);
-        GST_BUFFER_DURATION(pstBuffer) = gst_util_uint64_scale(GST_SECOND, 1, 30);
-        
-        /* Push buffer to appsrc */
-        if (gst_app_src_push_buffer(hAppSrc, pstBuffer) != GST_FLOW_OK)
-        {
-            PrintError("Failed to push buffer to appsrc");
-            gst_buffer_unref(pstBuffer);
-        }
-    }
-    
-    pthread_mutex_unlock(&s_stGstMutex);
-}
-
-/*
- * AppSrc Need Data Callback - RX Display Pipeline (DEPRECATED - Direct streaming)
- * NOTE: No longer needed with network→decoder→display direct connection
- */
-static void P_DI_VIDEO_NVIDIA_AppSrcNeedDataDisplay_DEPRECATED(GstAppSrc *hAppSrc, guint unSize, gpointer pvUserData)
-{
-    GstBuffer *pstBuffer = NULL;
-    GstMapInfo stMapInfo;
-    uint8_t achDataBuffer[DI_VIDEO_NVIDIA_GST_BUFFER_SIZE];
-    uint32_t unReadSize = 0;
-    int32_t nRet = DI_ERROR;
-    
-    UNUSED(pvUserData);
-    UNUSED(unSize);
-    
-    pthread_mutex_lock(&s_stGstMutex);
-    
-    /* Read decoded frame from RX ring buffer for display */
-    if (s_pstRingBufferRx != NULL)
-    {
-        nRet = DI_RING_BUFFER_Read(s_pstRingBufferRx, achDataBuffer, DI_VIDEO_NVIDIA_GST_BUFFER_SIZE, &unReadSize);
-        if (nRet != DI_OK || unReadSize == 0)
-        {
-            pthread_mutex_unlock(&s_stGstMutex);
-            return;
-        }
-        
-        /* Create GStreamer buffer */
-        pstBuffer = gst_buffer_new_allocate(NULL, unReadSize, NULL);
-        if (pstBuffer == NULL)
-        {
-            PrintError("Failed to allocate GStreamer buffer for display");
-            pthread_mutex_unlock(&s_stGstMutex);
-            return;
-        }
-        
-        if (gst_buffer_map(pstBuffer, &stMapInfo, GST_MAP_WRITE) == FALSE)
-        {
-            PrintError("Failed to map GStreamer buffer for display");
-            gst_buffer_unref(pstBuffer);
-            pthread_mutex_unlock(&s_stGstMutex);
-            return;
-        }
-        
-        memcpy(stMapInfo.data, achDataBuffer, unReadSize);
-        gst_buffer_unmap(pstBuffer, &stMapInfo);
-        
-        /* Push buffer to appsrc */
-        if (gst_app_src_push_buffer(hAppSrc, pstBuffer) != GST_FLOW_OK)
-        {
-            PrintError("Failed to push buffer to display appsrc");
-            gst_buffer_unref(pstBuffer);
-        }
-    }
-    
-    pthread_mutex_unlock(&s_stGstMutex);
-}
-#endif /* RING_BUFFER_DEPRECATED_FUNCTIONS */
+/* Deprecated ring buffer callback functions removed */
 
 /*
  * Create TX Pipeline (Camera -> Encoder -> TCP)
@@ -1551,17 +1265,7 @@ static int32_t P_DI_VIDEO_NVIDIA_CreateRxPipeline(const char *pchRemoteHost, int
         P_DI_VIDEO_AddElementProbe(s_hGstAppSink, "sink", P_DI_VIDEO_DropProbe, (gpointer)0);
     }
     
-#ifdef RING_BUFFER_DEPRECATED_FUNCTIONS  /* This should never be defined */
-    /* Create RX display pipeline - DEPRECATED */
-    nRet = P_DI_VIDEO_NVIDIA_CreateRxDisplayPipeline();
-    if (nRet != DI_OK)
-    {
-        PrintError("Failed to create RX display pipeline");
-        goto EXIT;
-    }
-#endif /* RING_BUFFER_DEPRECATED_FUNCTIONS */
-    
-    PrintTrace("RX pipeline created successfully - using ring buffer");
+    PrintTrace("RX pipeline created successfully - direct streaming");
     nRet = DI_OK;
     
 EXIT:
@@ -1573,74 +1277,7 @@ EXIT:
     return nRet;
 }
 
-#ifdef RING_BUFFER_DEPRECATED_FUNCTIONS  /* This should never be defined */
-/*
- * Create RX Display Pipeline (Ring Buffer -> Display) - DEPRECATED
- * NOTE: This function is no longer used with direct GStreamer streaming
- */
-static int32_t P_DI_VIDEO_NVIDIA_CreateRxDisplayPipeline(void)
-{
-    int32_t nRet = DI_ERROR;
-    GstBus *hBus = NULL;
-    gchar *pchPipelineDesc = NULL;
-    GError *pstError = NULL;
-    
-    pchPipelineDesc = g_strdup_printf(
-        "appsrc name=rx_src format=GST_FORMAT_TIME ! "
-        "video/x-raw,format=I420,width=%d,height=%d ! "
-        "nveglglessink sync=false async=false max-lateness=0 force-aspect-ratio=true",
-        DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_WIDTH,
-        DI_VIDEO_NVIDIA_GST_PIPELINE_DEFAULT_HEIGHT
-    );
-    
-    PrintTrace("RX Display Pipeline: %s", pchPipelineDesc);
-    
-    /* Parse and create display pipeline */
-    s_hGstPipelineRx = gst_parse_launch(pchPipelineDesc, &pstError);
-    if (s_hGstPipelineRx == NULL)
-    {
-        PrintError("Failed to create RX display pipeline: %s", pstError->message);
-        g_error_free(pstError);
-        nRet = DI_ERROR_STREAMING_PIPELINE_CREATE;
-        goto EXIT;
-    }
-    
-    /* Connect appsrc callback for display pipeline - DEPRECATED */
-    GstElement *hDisplayAppSrc = gst_bin_get_by_name(GST_BIN(s_hGstPipelineRx), "rx_src");
-    if (hDisplayAppSrc != NULL)
-    {
-        GstAppSrcCallbacks stAppSrcCallbacks = {
-            .need_data = P_DI_VIDEO_NVIDIA_AppSrcNeedDataDisplay,
-            .enough_data = NULL,
-            .seek_data = NULL
-        };
-        gst_app_src_set_callbacks(GST_APP_SRC(hDisplayAppSrc), &stAppSrcCallbacks, NULL, NULL);
-        PrintTrace("RX Display AppSrc callback connected successfully");
-    }
-    else
-    {
-        PrintError("Failed to get RX Display AppSrc element");
-        nRet = DI_ERROR_STREAMING_PIPELINE_CREATE;
-        goto EXIT;
-    }
-    
-    /* Set bus message handler */
-    hBus = gst_pipeline_get_bus(GST_PIPELINE(s_hGstPipelineRx));
-    gst_bus_add_watch(hBus, P_DI_VIDEO_NVIDIA_GstBusCall, s_hMainLoop);
-    gst_object_unref(hBus);
-    
-    PrintTrace("RX display pipeline created successfully");
-    nRet = DI_OK;
-    
-EXIT:
-    if (pchPipelineDesc != NULL)
-    {
-        g_free(pchPipelineDesc);
-    }
-    
-    return nRet;
-}
-#endif /* RING_BUFFER_DEPRECATED_FUNCTIONS */
+/* Deprecated RX Display Pipeline function removed */
 
 /*
  * Create RTSP Server for video streaming
@@ -1789,39 +1426,15 @@ EXIT:
 }
 
 /*
- * Initialize Ring Buffers and Memory Pool
+ * Initialize Direct GStreamer Streaming (Memory Pool/Ring Buffers Removed)
  */
 static int32_t P_DI_VIDEO_NVIDIA_InitBuffers(void)
 {
-    int32_t nRet = DI_ERROR;
-    DI_MEMORY_POOL_CONFIG_T stMemoryPoolConfig;
+    int32_t nRet = DI_OK;
     
-    /* Initialize memory pool */
-    memset(&stMemoryPoolConfig, 0, sizeof(DI_MEMORY_POOL_CONFIG_T));
-    stMemoryPoolConfig.unPoolSize = DI_MEMORY_POOL_DEFAULT_SIZE;
-    stMemoryPoolConfig.unBlockSize = DI_MEMORY_POOL_DEFAULT_BLOCK_SIZE;
-    stMemoryPoolConfig.bCorruptionDetection = TRUE;
+    /* Direct GStreamer streaming - no intermediate buffers needed */
+    PrintTrace("Direct GStreamer streaming initialized (memory pools removed)");
     
-    s_pstMemoryPool = malloc(sizeof(DI_MEMORY_POOL_T));
-    if (s_pstMemoryPool == NULL)
-    {
-        PrintError("Failed to allocate memory pool structure");
-        nRet = DI_ERROR_MEMORY_ALLOC;
-        goto EXIT;
-    }
-    
-    nRet = DI_MEMORY_POOL_Init(s_pstMemoryPool, &stMemoryPoolConfig);
-    if (nRet != DI_OK)
-    {
-        PrintError("Failed to initialize memory pool [nRet:%d]", nRet);
-        goto EXIT;
-    }
-    
-    /* Ring buffers removed - now using direct GStreamer pipeline connections */
-    PrintTrace("Direct GStreamer streaming initialized (ring buffers removed)");
-    nRet = DI_OK;
-    
-EXIT:
     return nRet;
 }
 

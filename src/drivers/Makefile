@@ -38,8 +38,8 @@ SRCS = $(wildcard *.c)
 SRCS += $(wildcard $(LIB_DI_GPS_PATH)/*.c)
 SRCS += $(wildcard $(LIB_DI_CAN_PATH)/*.c)
 SRCS += $(wildcard $(LIB_DI_VIDEO_PATH)/*.c)
-# SRCS += $(wildcard $(LIB_DI_RING_BUFFER_PATH)/*.c)  # REMOVED - Direct GStreamer streaming
-SRCS += $(wildcard $(LIB_DI_MEMORY_POOL_PATH)/*.c)
+# SRCS += $(wildcard $(LIB_DI_RING_BUFFER_PATH)/*.c)  # REMOVED - Direct GStreamer streaming  
+# SRCS += $(wildcard $(LIB_DI_MEMORY_POOL_PATH)/*.c)  # REMOVED - Unimplemented memory pool
 SRCS += $(wildcard $(LIB_DI_CAMERA_PATH)/*.c)
 
 TARGET_AR = ar
